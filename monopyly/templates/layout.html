@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{% block title%}{% endblock %} – Monopyly</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		<!-- ****** faviconit.com favicons ****** -->
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}">
+		<link rel="icon" sizes="16x16 32x32 64x64" href="{{ url_for('static', filename='favicon/favicon.ico') }}">
+		<link rel="icon" type="image/png" sizes="196x196" href="{{ url_for('static', filename='favicon/favicon-192.png') }}">
+		<link rel="icon" type="image/png" sizes="160x160" href="{{ url_for('static', filename='favicon/favicon-160.png') }}">
+		<link rel="icon" type="image/png" sizes="96x96" href="{{ url_for('static', filename='favicon/favicon-96.png') }}">
+		<link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='favicon/favicon-64.png') }}">
+		<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/favicon-32.png') }}">
+		<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/favicon-16.png') }}">
+		<link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon/favicon-57.png') }}">
+		<link rel="apple-touch-icon" sizes="114x114" href="{{ url_for('static', filename='favicon/favicon-114.png') }}">
+		<link rel="apple-touch-icon" sizes="72x72" href="{{ url_for('static', filename='favicon/favicon-72.png') }}">
+		<link rel="apple-touch-icon" sizes="144x144" href="{{ url_for('static', filename='favicon/favicon-144.png') }}">
+		<link rel="apple-touch-icon" sizes="60x60" href="{{ url_for('static', filename='favicon/favicon-60.png') }}">
+		<link rel="apple-touch-icon" sizes="120x120" href="{{ url_for('static', filename='favicon/favicon-120.png') }}">
+		<link rel="apple-touch-icon" sizes="76x76" href="{{ url_for('static', filename='favicon/favicon-76.png') }}">
+		<link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='favicon/favicon-152.png') }}">
+		<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon/favicon-180.png') }}">
+		<meta name="msapplication-TileColor" content="#FFFFFF">
+		<meta name="msapplication-TileImage" content="{{ url_for('static', filename='favicon/favicon-144.png') }}">
+		<meta name="msapplication-config" content="{{ url_for('static', filename='favicon/browserconfig.xml') }}">
+		<!-- ****** faviconit.com favicons ****** -->
+	</head>
+	<body>
+
+		<header id="masthead">
+			<div class="container">
+				<h1 class="logo">Monopyly</h1>
+				<nav id="nav-menu">
+					<ul></strong>
+						<li><a href="{{ url_for('index') }}">Home</a></li>
+						<li><a href="{{ url_for('about') }}">About</a></li>
+						{% if g.user %}
+		      		<li><span>{{ g.user['username'] }}</span>
+		      		<li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+						{% else %}
+		      		<li><a href="{{ url_for('auth.register') }}">Register</a>
+		      		<li><a href="{{ url_for('auth.login') }}">Log In</a>
+						{% endif %}
+					</ul></strong>
+				</nav>
+			</div>
+		</header>
+
+		<div id="page">
+			<aside class="sidebar">
+				{% block left_sidebar %}{% endblock %}
+			</aside>
+	
+			<section class="content container">
+				<header id="content-header">
+					{% block header %}{% endblock %}
+				</header>
+				{% for message in get_flashed_messages() %}
+					<div class="flash">{{ message }}</div>
+				{% endfor %}
+				{% block content %}
+				{% endblock %}
+			</section>
+	
+			<aside class="sidebar">
+				{% block right_sidebar %}{% endblock %}
+			</aside>
+		</div>
+
+	</body>
+</html>
