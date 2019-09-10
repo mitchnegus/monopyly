@@ -36,7 +36,14 @@
 {% endblock %}
 
 {% block content %}
-	<a name="top">
+	<a name="top"></a>
+	<div id="card-filter">
+		{% for card in cards %}
+		<a id="{{ card['bank'] }}-{{ card['last_four_digits'] }}" class="card {{ 'active selected' if card['active'] else 'inactive' }}">
+				{{ card['bank'] }} (-{{card['last_four_digits'] }})
+			</a>
+		{% endfor %}
+	</div>
 	<table id="transactions">
 		<tr>
 			<th class="card">Card</th>
@@ -50,7 +57,7 @@
 		{% for transaction in transactions %}
 			<tr>
 				<td class="card">
-					{{ transaction['bank'] }}-{{ transaction['last_four_digits'] }}
+					{{ transaction['bank'] }} (-{{ transaction['last_four_digits'] }})
 				</td>
 				<td class="date">{{ transaction['transaction_date'] }}</td>
 				<td>{{ transaction['vendor'] }}</td>
@@ -67,6 +74,11 @@
 			</tr>
 		{% endfor %}
 	</table>
-	<a name="bottom">
+	<a name="bottom"></a>
 {% endblock %}
 
+{% block javascript %}
+	<script>$FILTER_SCRIPT = "{{ url_for('credit.filter_transactions') }}";</script>
+	<script src="{{ url_for('static', filename='js/filter_cards.js') }}">
+	</script>
+{% endblock %}

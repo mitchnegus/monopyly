@@ -16,7 +16,10 @@
 		<br>
 		<p><b>Card:</b> {{ card['bank'] }} ****-{{ card['last_four_digits'] }}</p>
 		{% for field in transaction %}
-		<p><b>{{ field_names[field] }}:</b> {{ transaction[field] }}</p>
+		<p>
+			<b>{{ field_names[field] }}: </b>
+			{{ '$' + transaction[field] if field == 'price' else transaction[field] }}
+		</p>
 		{% endfor %}
 		{% if g.user %}
 			<br>

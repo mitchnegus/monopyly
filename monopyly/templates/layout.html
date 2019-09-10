@@ -25,6 +25,9 @@
 		<meta name="msapplication-TileImage" content="{{ url_for('static', filename='favicon/favicon-144.png') }}">
 		<meta name="msapplication-config" content="{{ url_for('static', filename='favicon/browserconfig.xml') }}">
 		<!-- ****** faviconit.com favicons ****** -->
+	  <!-- Use Google JQuery CDN -->	
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script>window.jQuery || document.write('<script src="{{ url_for('static', filename='jquery-3.4.1.js') }}"><\/script>')</script>
 	</head>
 	<body>
 
@@ -67,6 +70,8 @@
 				{% block right_sidebar %}{% endblock %}
 			</aside>
 		</div>
+	
+		{% block javascript %}{% endblock %}
 
 	</body>
 </html>

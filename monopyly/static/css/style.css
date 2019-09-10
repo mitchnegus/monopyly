@@ -222,6 +222,41 @@ nav#transactions-menu .button-icon {
 	margin: 0 auto;
 }
 
+div#card-filter {
+	display: flex;
+	justify-content: center;
+}
+
+div#card-filter a.card {
+	margin: 0 3px;
+	padding: 1px 10px;
+	border-radius: 10px;
+	font-size: 8pt;
+}
+
+div#card-filter a.inactive.card {
+	background-color: #EFEFEF;
+	color: #999999;
+}
+
+div#card-filter a.active.card {
+	background-color: #EEEEEE;
+}
+
+div#card-filter a.card:hover {
+	background-color: #CCCCCC;
+}
+
+div#card-filter a.card.selected {
+	background-color: #444444;
+	color: #EFEFEF;
+}
+
+div#card-filter a.card.selected:hover {
+	background-color: #333333;
+	color: #BBBBBB;
+}
+
 table#transactions {
 	width: 100%;
 	margin: 20px auto;
