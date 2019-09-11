@@ -23,20 +23,20 @@ def register():
         # Get username and passwords from the form
         username, password = get_username_and_password(request.form)
         # Get user information from the database
-        db = get_db()
+        db, cursor = get_db()
         id_query = 'SELECT id FROM users WHERE username = ?'
         # Check for errors in the accessed information
         if not username:
             error = 'Username is required.'
         elif not password:
             error = 'Password is required.'
-        elif db.execute(id_query, (username,)).fetchone() is not None:
+        elif cursor.execute(id_query, (username,)).fetchone() is not None:
             error = f'User {username} is already registered.'
         else:
             error = None
         # Add the username and hashed password to the database
         if not error:
-            db.execute(
+            cursor.execute(
                 'INSERT INTO users (username, password) VALUES (?, ?)',
                 (username, generate_password_hash(password))
             )
@@ -54,9 +54,9 @@ def login():
         # Get username and passwords from the form
         username, password = get_username_and_password(request.form)
         # Get user information from the database
-        db = get_db()
+        db, cursor = get_db()
         user_query = 'SELECT * FROM users WHERE username = ?'
-        user = db.execute(user_query, (username,)).fetchone()
+        user = cursor.execute(user_query, (username,)).fetchone()
         # Check for errors in the accessed information
         if user is None:
             error = 'That user is not yet registered.'
@@ -88,7 +88,8 @@ def load_logged_in_user():
         g.user = None
     else:
         user_query = 'SELECT * FROM users WHERE id = ?'
-        g.user = get_db().execute(user_query, (user_id,)).fetchone()
+        db, cursor = get_db()
+        g.user = cursor.execute(user_query, (user_id,)).fetchone()
 
 def login_required(view):
     @functools.wraps(view)

@@ -44,41 +44,14 @@
 			</a>
 		{% endfor %}
 	</div>
-	<table id="transactions">
-		<tr>
-			<th class="card">Card</th>
-			<th class="date">Date</th>
-			<th class="text">Vendor</th>
-			<th class="price">Price</th>
-			<th class="text">Notes</th>
-			<th class="date">Statement Date</th>
-			<th class="edit"></th>
-		</tr>
-		{% for transaction in transactions %}
-			<tr>
-				<td class="card">
-					{{ transaction['bank'] }} (-{{ transaction['last_four_digits'] }})
-				</td>
-				<td class="date">{{ transaction['transaction_date'] }}</td>
-				<td>{{ transaction['vendor'] }}</td>
-				<td class="price">${{ '{0:.2f}'.format(transaction['price']) }}</td>
-				<td class="notes">
-					<div class="notes">{{ transaction['notes'] }}</div>
-				</td>
-				<td class="date">{{ transaction['statement_date'] }}</td>
-				<td>
-					<a class"transaction" href="{{ url_for('credit.show_transaction', transaction_id=transaction['id']) }}">
-						<img class="edit-icon hide" src="{{ url_for('static', filename='img/edit.png') }}" />
-					</a>
-				</td>
-			</tr>
-		{% endfor %}
-	</table>
+	<div id="transaction-table-container">
+		{% include 'credit/transaction_table.html' %}
+	</div>
 	<a name="bottom"></a>
 {% endblock %}
 
 {% block javascript %}
-	<script>$FILTER_SCRIPT = "{{ url_for('credit.filter_transactions') }}";</script>
+	<script>var $FILTER_SCRIPT = "{{ url_for('credit.filter_transactions') }}";</script>
 	<script src="{{ url_for('static', filename='js/filter_cards.js') }}">
 	</script>
 {% endblock %}

@@ -15,7 +15,7 @@ def get_db():
             detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
         )
         g.db.row_factory = sqlite3.Row
-    return g.db
+    return g.db, g.db.cursor()
 
 def close_db(e=None):
     """Close the database if it is open."""
@@ -25,7 +25,7 @@ def close_db(e=None):
 
 def init_db():
     """Execute the SQL schema to clear existing data and create new tables."""
-    db = get_db()
+    db, cursor = get_db()
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
 

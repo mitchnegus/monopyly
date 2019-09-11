@@ -18,13 +18,13 @@ bp = Blueprint('credit', __name__, url_prefix='/credit')
 @login_required
 def show_transactions():
     # Get all transactions from the database
-    db = get_db()
+    db, cursor = get_db()
     cards_query = ('SELECT c.id, bank, last_four_digits, active'
                    '  FROM credit_cards as c'
                    '  JOIN users AS u ON c.user_id = u.id'
                    ' WHERE u.id = ?'
                    ' ORDER BY active')
-    cards = db.execute(cards_query, (g.user['id'],)).fetchall()
+    cards = cursor.execute(cards_query, (g.user['id'],)).fetchall()
     query_fields = list(DISPLAY_FIELDS.keys())
     transactions_query = (f'SELECT t.id, {", ".join(query_fields)}'
                            '  FROM credit_transactions AS t'
@@ -33,7 +33,7 @@ def show_transactions():
                            ' WHERE u.id = ? AND c.active = 1'
                            ' ORDER BY transaction_date')
     placeholders = (g.user['id'],)
-    transactions = db.execute(transactions_query, placeholders).fetchall()
+    transactions = cursor.execute(transactions_query, placeholders).fetchall()
     return render_template('credit/transactions.html',
                            cards=cards,
                            transactions=transactions)
@@ -41,12 +41,10 @@ def show_transactions():
 @bp.route('/_filter_transactions', methods=('POST',))
 @login_required
 def filter_transactions():
-    # *** Route should not be accessible to users outside of Ajax requests ***
     # Determine the card IDs from the arguments of GET method
-    filter_ids = request.get_json()
-    card_ids = get_card_ids_from_filter_ids(filter_ids)
+    card_ids = get_card_ids_from_filters(request.get_json())
     # Filter selected transactions from the database
-    db = get_db()
+    db, cursor = get_db()
     query_fields = list(DISPLAY_FIELDS.keys())
     if card_ids:
         card_id_fields = ['c.id = ?']*len(card_ids)
@@ -59,8 +57,9 @@ def filter_transactions():
                     f' WHERE u.id = ? AND ({" OR ".join(card_id_fields)})'
                      ' ORDER BY transaction_date')
     placeholders = (g.user['id'], *card_ids)
-    transactions = db.execute(filter_query, placeholders).fetchall()
-    print('there are', len(transactions), 'transactions')
+    transactions = cursor.execute(filter_query, placeholders).fetchall()
+    return render_template('credit/transaction_table.html',
+                           transactions=transactions)
 
 @bp.route('/<int:transaction_id>/transaction')
 @login_required
@@ -84,20 +83,21 @@ def new_transaction():
         if not error:
             card, transaction_info = process_transaction(request.form)
             # Insert the new transaction into the database
-            db = get_db()
+            db, cursor = get_db()
             mapping = prepare_db_transaction_mapping(TRANSACTION_FIELDS,
                                                      transaction_info,
                                                      card['id'])
-            print(mapping.values())
-            db.execute(
+            cursor.execute(
                 f'INSERT INTO credit_transactions {tuple(mapping.keys())}'
                  'VALUES (?, ?, ?, ?, ?, ?, ?)',
                 (*mapping.values(),)
             )
             db.commit()
+            transaction_id = cursor.lastrowid
             return render_template('credit/submission.html',
                                    field_names=DISPLAY_FIELDS,
                                    card=card,
+                                   transaction_id=transaction_id,
                                    transaction=transaction_info,
                                    update=False)
         else:
@@ -118,12 +118,12 @@ def update_transaction(transaction_id):
         if not error:
             card, transaction_info = process_transaction(request.form)
             # Update the database with the updated transaction
-            db = get_db()
+            db, cursor = get_db()
             mapping = prepare_db_transaction_mapping(TRANSACTION_FIELDS,
                                                      transaction_info,
                                                      card['id'])
             update_fields = [f'{field} = ?' for field in mapping]
-            db.execute(
+            cursor.execute(
                 'UPDATE credit_transactions'
                f'   SET {", ".join(update_fields)}'
                 ' WHERE id = ?',
@@ -133,6 +133,7 @@ def update_transaction(transaction_id):
             return render_template('credit/submission.html',
                                    field_names=DISPLAY_FIELDS,
                                    card=card,
+                                   transaction_id=transaction_id,
                                    transaction=transaction_info,
                                    update=True)
         else:
@@ -147,8 +148,8 @@ def delete_transaction(transaction_id):
     # Get the transaction (to ensure that it exists)
     get_transaction(transaction_id)
     # Remove the transaction from the database
-    db = get_db()
-    db.execute(
+    db, cursor = get_db()
+    cursor.execute(
         'DELETE FROM credit_transactions WHERE id = ?',
         (transaction_id,)
     )

@@ -27,6 +27,10 @@
 				See transaction history
 			</a>
 			<br>
+			<a href="{{ url_for('credit.update_transaction', transaction_id=transaction_id) }}">
+				Update this transaction
+			</a>
+			<br>
 			<a href="{{ url_for('credit.new_transaction') }}">
 				Create a new transaction
 			</a>

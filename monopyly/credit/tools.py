@@ -14,15 +14,16 @@ from ..db import get_db
 def get_transaction(transaction_id, check_user=True):
     """Given the ID of a transaction, get the transaction from the database."""
     # Get transaction information from the database
-    db = get_db()
-    query_fields = [denote_if_date(field) for field in DISPLAY_FIELDS]
-    transaction_query = ('SELECT t.id, t.user_id, t.card_id,'
-                        f'       {", ".join(query_fields)}'
-                         '  FROM credit_transactions AS t'
-                         '  JOIN credit_cards AS c ON t.card_id = c.id'
-                         '  JOIN users AS u ON t.user_id = u.id'
-                         ' WHERE t.id = ?')
-    transaction = db.execute(transaction_query, (transaction_id,)).fetchone()
+    db, cursor = get_db()
+    query_fields = ['t.id', 't.user_id', 't.card_id']
+    query_fields += [denote_if_date(field) for field in DISPLAY_FIELDS]
+    transaction_query = (f'SELECT {", ".join(query_fields)}'
+                          '  FROM credit_transactions AS t'
+                          '  JOIN credit_cards AS c ON t.card_id = c.id'
+                          '  JOIN users AS u ON t.user_id = u.id'
+                          ' WHERE t.id = ?')
+    placeholders = (transaction_id,)
+    transaction = cursor.execute(transaction_query, placeholders).fetchone()
     # Check that a transaction was found and that it belongs to the user
     if transaction is None:
         abort(404, f'Transaction ID {transaction_id} does not exist.')
@@ -32,14 +33,14 @@ def get_transaction(transaction_id, check_user=True):
 
 def get_card_by_info(bank, last_four_digits, check_user=True):
     """Given the bank and last four digits, get the card from the database."""
-    db = get_db()
+    db, cursor = get_db()
     if not bank:
         card_query = 'SELECT * FROM credit_cards WHERE last_four_digits = ?'
-        card = db.execute(card_query, (last_four_digits,)).fetchone()
+        card = cursor.execute(card_query, (last_four_digits,)).fetchone()
     else:
         card_query = ('SELECT * FROM credit_cards'
                       ' WHERE bank = ? AND last_four_digits = ?')
-        card = db.execute(card_query, (bank, last_four_digits)).fetchone()
+        card = cursor.execute(card_query, (bank, last_four_digits)).fetchone()
     # Check that a card was found and that it belongs to the user
     if card is None:
         bank_name = f'{bank} ' if bank else ''
@@ -51,13 +52,36 @@ def get_card_by_info(bank, last_four_digits, check_user=True):
 
 def get_card_by_id(card_id, check_user=True):
     """Given the card ID in the database, get the card."""
-    db = get_db()
+    db, cursor = get_db()
     card_query = 'SELECT * FROM credit_cards WHERE id = ?'
-    card = db.execute(card_query, (card_id,)).fetchone()
+    card = cursor.execute(card_query, (card_id,)).fetchone()
     # Check that a card belongs to the user
     if check_user and card['user_id'] != g.user['id']:
         abort(403)
     return card
+
+def get_card_ids_from_filters(filter_ids):
+    """
+    Convert a filter ID into a card ID.
+
+    Given a JSON converted POST request of filter IDs, convert the list into a
+    list of corresponding card IDs from the database.
+
+    Parameters
+    ––––––––––
+    filter_ids : list
+        A list of IDs for the filters (of the form BANK-LAST_FOUR_DIGITS).
+
+    Returns
+    –––––––
+    card_ids : list
+        A list of database card IDs corresponding to the input list of filters.
+    """
+    # Split the filter ID into 'bank' and 'last_four_digits' elements
+    filter_info = [filter_id.split('-') for filter_id in filter_ids]
+    # Get the corresponding cards from the database
+    card_ids = [get_card_by_info(*info)['id'] for info in filter_info]
+    return card_ids
 
 def get_expected_statement_date(transaction_date, card):
     """Give the expected statement date given the card and transaction date."""
@@ -78,6 +102,11 @@ def process_transaction(form):
     Collect all transaction information submitted through the form. This
     aggregates all transaction data from the form, fills in defaults when
     necessary, and returns a dictionary of the transaction information.
+
+    Parameters
+    ––––––––––
+    form : werkzeug.datastructures.ImmutableMultiDict
+        A MultiDict containing the submitted form information.
 
     Returns
     –––––––
@@ -161,12 +190,3 @@ def error_unless_all_fields_provided(form, fields):
     else:
         error = None
     return error
-
-def get_card_ids_from_filter_ids(filter_ids):
-    """Convert a filter ID into a card ID."""
-    # Split the filter ID into 'bank' and 'last_four_digits' elements
-    filter_info = [filter_id.split('-') for filter_id in filter_ids]
-    # Get the corresponding cards from the database
-    db = get_db()
-    card_ids = [get_card_by_info(*info)['id'] for info in filter_info]
-    return card_ids

@@ -33,7 +33,9 @@
 
 		<header id="masthead">
 			<div class="container">
-				<h1 class="logo">Monopyly</h1>
+				<a href="{{ url_for('index') }}">
+					<h1 class="logo">Monopyly</h1>
+				</a>
 				<nav id="nav-menu">
 					<ul></strong>
 						<li><a href="{{ url_for('index') }}">Home</a></li>
@@ -62,8 +64,7 @@
 				{% for message in get_flashed_messages() %}
 					<div class="flash">{{ message }}</div>
 				{% endfor %}
-				{% block content %}
-				{% endblock %}
+				{% block content %}{% endblock %}
 			</section>
 	
 			<aside class="sidebar">
