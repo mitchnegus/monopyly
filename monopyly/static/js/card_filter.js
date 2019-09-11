@@ -1,13 +1,31 @@
 /*
  * Filter transactions by selected/unselected credit cards.
  *
- * First, add CSS to indicate which cards are selected or unselected. Then,
- * define a function pointing to a route which executes a database query for
- * only the selected cards.
+ * First, add CSS to indicate which cards are selected or unselected. Set
+ * filters such that inactive cards display their inactive status when hovered
+ * over.Then, define a function pointing to a route which executes a database
+ * query for only the selected cards.
  */
 
-var filterContainer = $("#card-filter");
-var filters = filterContainer.find(".card");
+var filterContainer = $('#card-filter');
+var filters = filterContainer.find('.card');
+var inactive_card_filters = filterContainer.find('.inactive.card');
+var defaultText, defaultWidth;
+
+inactive_card_filters.hover(
+	function () {
+		var $this = $(this);
+		defaultText = $this.text();
+		defaultWidth = $this.width()
+		// Change the text, maintain the width
+		$this.text('Inactive Card');
+		$this.width(defaultWidth);
+	},
+	function() {
+		var $this = $(this);
+		$this.text(defaultText);
+	}
+);
 
 function filterAjaxRequest(filterIDs) {
 	// Return a filtered table for each ID in the set of filterIDs

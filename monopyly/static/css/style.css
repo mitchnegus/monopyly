@@ -228,10 +228,12 @@ div#card-filter {
 }
 
 div#card-filter a.card {
+	position: relative;
 	margin: 0 3px;
 	padding: 1px 10px;
 	border-radius: 10px;
 	font-size: 8pt;
+	text-align: center;
 }
 
 div#card-filter a.inactive.card {
@@ -243,8 +245,9 @@ div#card-filter a.active.card {
 	background-color: #EEEEEE;
 }
 
-div#card-filter a.card:hover {
-	background-color: #CCCCCC;
+div#card-filter a.active.card:hover,
+div#card-filter a.inactive.card:hover {
+	background-color: #CCCCCC; 
 }
 
 div#card-filter a.card.selected {
@@ -303,6 +306,17 @@ table#transactions th.card {
 table#transactions td.card {
 	text-align: right;
 }
+
+table#transactions td.card span.bank {
+	display: inline-block;
+}
+@media screen and (max-width: 1100px) {
+	table#transactions td.card span.bank {
+		display: none;
+	}
+}
+
+
 
 table#transactions th.date,
 table#transactions td.date {

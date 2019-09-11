@@ -11,7 +11,10 @@
 	{% for transaction in transactions %}
 		<tr>
 			<td class="card">
-				{{ transaction['bank'] }} (-{{ transaction['last_four_digits'] }})
+				<span class="bank">
+				{{ transaction['bank'] }}
+				</span>
+				-{{ transaction['last_four_digits'] }}
 			</td>
 			<td class="date">{{ transaction['transaction_date'] }}</td>
 			<td>{{ transaction['vendor'] }}</td>

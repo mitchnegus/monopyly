@@ -23,7 +23,7 @@ def show_transactions():
                    '  FROM credit_cards as c'
                    '  JOIN users AS u ON c.user_id = u.id'
                    ' WHERE u.id = ?'
-                   ' ORDER BY active')
+                   ' ORDER BY active DESC')
     cards = cursor.execute(cards_query, (g.user['id'],)).fetchall()
     query_fields = list(DISPLAY_FIELDS.keys())
     transactions_query = (f'SELECT t.id, {", ".join(query_fields)}'
@@ -47,14 +47,14 @@ def filter_transactions():
     db, cursor = get_db()
     query_fields = list(DISPLAY_FIELDS.keys())
     if card_ids:
-        card_id_fields = ['c.id = ?']*len(card_ids)
+        card_id_fields = ['?']*len(card_ids)
     else:
-        card_id_fields = ['c.id = ""']
+        card_id_fields = ['""']
     filter_query = (f'SELECT t.id, {", ".join(query_fields)}'
                      '  FROM credit_transactions AS t'
                      '  JOIN credit_cards AS c ON t.card_id = c.id'
                      '  JOIN users AS u ON t.user_id = u.id'
-                    f' WHERE u.id = ? AND ({" OR ".join(card_id_fields)})'
+                    f' WHERE u.id = ? AND c.id IN ({", ".join(card_id_fields)})'
                      ' ORDER BY transaction_date')
     placeholders = (g.user['id'], *card_ids)
     transactions = cursor.execute(filter_query, placeholders).fetchall()
