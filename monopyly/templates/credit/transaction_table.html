@@ -1,7 +1,11 @@
 <table id="transactions">
 	<tr>
 		<th class="card">Card</th>
-		<th class="date">Date</th>
+		<th class="date">
+			Date
+			<img class="sort-icon asc{{ ' selected' if sort_order == 'ASC' else '' }}" src="{{ url_for('static', filename='img/sort-asc.png') }}" />
+			<img class="sort-icon desc{{ ' selected' if sort_order == 'DESC' else '' }}" src="{{ url_for('static', filename='img/sort-desc.png') }}" />
+		</th>
 		<th class="text">Vendor</th>
 		<th class="price">Price</th>
 		<th class="text">Notes</th>

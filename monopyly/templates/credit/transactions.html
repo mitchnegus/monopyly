@@ -51,7 +51,7 @@
 {% endblock %}
 
 {% block javascript %}
-	<script>var $FILTER_SCRIPT = "{{ url_for('credit.filter_transactions') }}";</script>
-	<script src="{{ url_for('static', filename='js/card_filter.js') }}">
+	<script>var $TABLE_UPDATE_ENDPOINT = "{{ url_for('credit.update_transaction_table') }}";</script>
+	<script src="{{ url_for('static', filename='js/update_transaction_table.js') }}">
 	</script>
 {% endblock %}

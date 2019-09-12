@@ -36,13 +36,18 @@ def show_transactions():
     transactions = cursor.execute(transactions_query, placeholders).fetchall()
     return render_template('credit/transactions.html',
                            cards=cards,
+                           sort_order='ASC',
                            transactions=transactions)
 
-@bp.route('/_filter_transactions', methods=('POST',))
+@bp.route('/_update_transaction_table', methods=('POST',))
 @login_required
-def filter_transactions():
-    # Determine the card IDs from the arguments of GET method
-    card_ids = get_card_ids_from_filters(request.get_json())
+def update_transaction_table():
+    # Separate the arguments of the POST method
+    post_arguments = request.get_json()
+    filter_ids = post_arguments['filter_ids']
+    sort_order = 'ASC' if post_arguments['sort_order'] == 'asc' else 'DESC'
+    # Determine the card IDs from the arguments of POST method
+    card_ids = get_card_ids_from_filters(post_arguments['filter_ids'])
     # Filter selected transactions from the database
     db, cursor = get_db()
     query_fields = list(DISPLAY_FIELDS.keys())
@@ -55,10 +60,12 @@ def filter_transactions():
                      '  JOIN credit_cards AS c ON t.card_id = c.id'
                      '  JOIN users AS u ON t.user_id = u.id'
                     f' WHERE u.id = ? AND c.id IN ({", ".join(card_id_fields)})'
-                     ' ORDER BY transaction_date')
+                    f' ORDER BY transaction_date {sort_order}')
     placeholders = (g.user['id'], *card_ids)
     transactions = cursor.execute(filter_query, placeholders).fetchall()
+    print(sort_order)
     return render_template('credit/transaction_table.html',
+                           sort_order=sort_order,
                            transactions=transactions)
 
 @bp.route('/<int:transaction_id>/transaction')
