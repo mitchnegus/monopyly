@@ -35,3 +35,4 @@ if __name__ == '__main__':
         db.backup(backup_db)
     backup_db.close()
     db.close()
+    print(f'Backup complete ({timestamp})')
