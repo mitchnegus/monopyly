@@ -35,6 +35,10 @@ header .container {
 	margin: 0 auto;
 }
 
+header a {
+	text-decoration: none;
+}
+
 header h1.logo {
   margin: 0;
   font-size: 1.7em;
@@ -44,7 +48,6 @@ header h1.logo {
 
 header h1.logo:hover {
   color: #FFFFFF;
-  text-decoration: none;
 }
 
 /*
