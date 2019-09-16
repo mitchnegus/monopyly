@@ -1,0 +1,35 @@
+<form action="{{ submission_url }}" method="POST" autocomplete="off">
+	{{ form.hidden_tag() }}
+
+	<div class="card-info">
+		<div class="bank autocomplete">
+			{{ form.bank.label }}
+			{{ form.bank }}
+		</div>
+		<div class="last-four-digits autocomplete">
+			{{ form.last_four_digits.label }}
+			{{ form.last_four_digits }}
+		</div>
+	</div>
+
+	{{ form.transaction_date.label }}
+	{{ form.transaction_date }}
+
+	<div class="autocomplete">
+		{{ form.vendor.label }}
+		{{ form.vendor }}
+	</div>
+
+	{{ form.price.label }}
+	{{ form.price }}
+
+	<div class="autocomplete">
+		{{ form.notes.label }}
+		{{ form.notes }}
+	</div>
+
+	{{ form.statement_date.label }}
+	{{ form.statement_date }}
+
+	{{ form.submit(class_="button") }}
+</form>

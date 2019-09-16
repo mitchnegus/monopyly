@@ -5,35 +5,7 @@
 {% endblock %}
 
 {% block content %}
-	<form action="{{ url_for('credit.update_transaction', transaction_id=transaction_id) }}" method="POST">
-		{{ form.hidden_tag() }}
-
-		<div class="card-info">
-			<div class="bank">
-				{{ form.bank.label }}
-				{{ form.bank }}
-			</div>
-			<div class="last-four-digits">
-				{{ form.last_four_digits.label }}
-				{{ form.last_four_digits }}
-			</div>
-		</div>
-
-		{{ form.transaction_date.label }}
-		{{ form.transaction_date }}
-
-		{{ form.vendor.label }}
-		{{ form.vendor }}
-
-		{{ form.price.label }}
-		{{ form.price }}
-
-		{{ form.notes.label }}
-		{{ form.notes }}
-
-		{{ form.statement_date.label }}
-		{{ form.statement_date }}
-
-		{{ form.submit(class_="button") }}
-	</form>
+	{% with submission_url = url_for('credit.update_transaction') %}
+		{% include 'credit/transaction_form.html' %}
+	{% endwith %}
 {% endblock %}

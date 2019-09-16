@@ -14,53 +14,14 @@
  *	  order.
  */
 
-function updateTable() {
-	// Determine the selected credit cards to use from the filters
-	var selectedFilters = filterContainer.find('.card.selected');
-	var filterIDs = [];
-	selectedFilters.each(function() {filterIDs.push(this.id);});
-	// Determine the table ordering (ascending/descending transaction date)
-	var sortOrder;
-	var sorter = $('.sort-icon.selected');
-	if (sorter.hasClass('asc')) {
-		sortOrder = 'asc';
-	} else {
-		sortOrder = 'desc';
-	}
-	// Update the table with the filters and ordering
-	updateTableAjaxRequest(filterIDs, sortOrder);
-	// Update the sorters since they have been replaced
-	sorters = $('.sort-icon');
-}
-
-function updateTableAjaxRequest(filterIDs, sortOrder) {
-	rawData = {
-		'filter_ids': filterIDs,
-		'sort_order': sortOrder
-	};
-	// Return a filtered table for each ID in the set of filterIDs
-	$.ajax({
-		url: $TABLE_UPDATE_ENDPOINT,
-		type: 'POST',
-		data: JSON.stringify(rawData),
-		contentType: 'application/json; charset=UTF-8',
-		success: function(response) {
-			container.html(response);
-		},
-		error: function(xhr) {
-			console.log('There was an error in the Ajax request.');
-		}
-	});
-}
-
 // Identify the card filters
 var container = $('#transaction-table-container');
 var filterContainer = $('#card-filter');
 
 // Label inactive cards when they are hovered over
-var inactive_card_filters = filterContainer.find('.inactive.card');
+var inactiveCardFilters = filterContainer.find('.inactive.card');
 var defaultText, defaultWidth;
-inactive_card_filters.hover(
+inactiveCardFilters.hover(
 	function () {
 		var $this = $(this);
 		defaultText = $this.text();
@@ -92,3 +53,42 @@ container.on('click', 'img.sort-icon', function() {
 	// Update the table
 	updateTable();
 });
+
+function updateTable() {
+	// Determine the selected credit cards to use from the filters
+	var selectedFilters = filterContainer.find('.card.selected');
+	var filterIDs = [];
+	selectedFilters.each(function() {filterIDs.push(this.id);});
+	// Determine the table ordering (ascending/descending transaction date)
+	var sortOrder;
+	var sorter = $('.sort-icon.selected');
+	if (sorter.hasClass('asc')) {
+		sortOrder = 'asc';
+	} else {
+		sortOrder = 'desc';
+	}
+	// Update the table with the filters and ordering
+	updateTableAjaxRequest(filterIDs, sortOrder);
+	// Update the sorters since they have been replaced
+	sorters = $('.sort-icon');
+}
+
+function updateTableAjaxRequest(filterIDs, sortOrder) {
+	var rawData = {
+		'filter_ids': filterIDs,
+		'sort_order': sortOrder
+	};
+	// Return a filtered table for each ID in the set of filterIDs
+	$.ajax({
+		url: $TABLE_UPDATE_ENDPOINT,
+		type: 'POST',
+		data: JSON.stringify(rawData),
+		contentType: 'application/json; charset=UTF-8',
+		success: function(response) {
+			container.html(response);
+		},
+		error: function(xhr) {
+			console.log('There was an error in the Ajax request.');
+		}
+	});
+}

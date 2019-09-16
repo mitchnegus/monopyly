@@ -18,9 +18,9 @@ header#masthead {
 	position: fixed;
 	top: 0;
 	align-items: center;
-  background-color: #2B2B2B;
+  background-color: #2b2b2b;
 	border-style: solid;
-	border-color: #85BB65;
+	border-color: #85bb65;
 	border-width: 0 0 4px 2px;
   height: 50px;
   width: 100%;
@@ -42,12 +42,12 @@ header a {
 header h1.logo {
   margin: 0;
   font-size: 1.7em;
-  color: #FFFFFF;
+  color: white;
   text-transform: uppercase;
 }
 
 header h1.logo:hover {
-  color: #FFFFFF;
+  color: #white;
 }
 
 /*
@@ -66,7 +66,7 @@ header h1.logo:hover {
 }
 
 #nav-menu li a {
-  color: #BBBBBB;
+  color: #bbbbbb;
   text-decoration: none;
 }
 
@@ -91,9 +91,9 @@ div#page .container {
 }
 
 #content-header h1 {
-  font-size: 2em;
   margin-top: 40px;
   text-align: center;
+  font-size: 2em;
   letter-spacing: -2px;
 }
 
@@ -107,19 +107,50 @@ form {
 
 form label {
   display: block;
-	font-size: 1.2em;
 	padding: 10px 0;
+	font-size: 1.2em;
 }
 
 form input {
   width: 100%;
+  padding: 5px;
+  border: 1px solid #cccccc;
   background-color: #fafafa;
   -webkit-border-radius: 3px;
      -moz-border-radius: 3px;
           border-radius: 3px;
-  border: 1px solid #cccccc;
-  padding: 5px;
   font-size: 1.1em;
+}
+
+form div.autocomplete {
+	position: relative;
+}
+
+form div.autocomplete-box {
+	position: absolute;
+	top: 98%;
+	left: 0;
+	width: 100%;
+	padding-right: 10px;
+  border: 1px solid #cccccc;
+	background-color: white;
+	z-index: 99;
+}
+
+form div.autocomplete-box div.item {
+	width: 100%;
+	padding: 3px 5px;
+	cursor: pointer;
+}
+
+form div.autocomplete-box div.item:hover {
+	background-color: #cccccc;
+}
+
+form div.autocomplete-box div.item.active {
+	font-weight: bold;
+	color: black;
+	background-color: #85bb65;
 }
 
 form input.button {
@@ -127,12 +158,12 @@ form input.button {
   -webkit-border-radius: 3px; 
      -moz-border-radius: 3px;
           border-radius: 3px;
-  border:1px solid #d8d8d8;
 	margin: 10px 0; 
   padding: 10px; 
-  font-weight:bold; 
+  border:1px solid #d8d8d8;
   text-align: center; 
-  color: #000000; 
+  font-weight:bold; 
+  color: black; 
   background-color: #f4f4f4;
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f4f4f4), color-stop(100%, #e5e5e5));
   background-image: -webkit-linear-gradient(top, #f4f4f4, #e5e5e5);
@@ -175,11 +206,11 @@ div#homepage-block.jumbo {
 }
 
 #homepage-block h3 {
-  font-size: 1.7em;
-  font-weight: 100;
   margin-top: 30px;
   text-align: center;
   color: #999;
+  font-size: 1.7em;
+  font-weight: 100;
 }
 
 /*
@@ -192,10 +223,10 @@ div#homepage-block.jumbo {
 }
 
 #about .signature {
+	margin-bottom: 100px;
 	text-align: right;
 	font-weight: bold;
 	font-style: oblique;
-	margin-bottom: 100px;
 }
 
 /*
@@ -236,49 +267,49 @@ div#card-filter a.card {
 	margin: 0 3px;
 	padding: 1px 10px;
 	border-radius: 10px;
-	font-size: 8pt;
 	text-align: center;
+	font-size: 8pt;
 	cursor: pointer;
 }
 
 div#card-filter a.inactive.card {
-	background-color: #EFEFEF;
+	background-color: #efefef;
 	color: #999999;
 }
 
 div#card-filter a.active.card {
-	background-color: #EEEEEE;
+	background-color: #eeeeee;
 }
 
 div#card-filter a.active.card:hover,
 div#card-filter a.inactive.card:hover {
-	background-color: #CCCCCC; 
+	background-color: #cccccc; 
 }
 
 div#card-filter a.card.selected {
 	background-color: #444444;
-	color: #EFEFEF;
+	color: #efefef;
 }
 
 div#card-filter a.card.selected:hover {
 	background-color: #333333;
-	color: #BBBBBB;
+	color: #bbbbbb;
 }
 
 table#transactions {
 	width: 100%;
 	margin: 20px auto;
-	font-size: 9pt;
 	border-collapse: collapse;
+	font-size: 9pt;
 }
 
 table#transactions tr {
-	border: 1pt #EEEEEE;
+	border: 1pt #eeeeee;
 	border-style: solid none;
 }
 
 table#transactions tr:hover td {
-	background-color: #FAFAFA;
+	background-color: #fafafa;
 }
 
 table#transactions tr img.edit-icon {
@@ -318,10 +349,10 @@ table#transactions td.date {
 }
 
 table#transactions th img.sort-icon {
+	display: none;
 	height: 10px;
 	width: 10px;
 	cursor: pointer;
-	display: none;
 }
 
 table#transactions th img.sort-icon.selected {
@@ -376,17 +407,17 @@ table#transaction td {
 /*
  * Customization for the 'New Transaction' & 'Update Transaction' pages
  */
-div.card-info {
+form div.card-info {
 	display: flex;
 	justify-content: space-between;
 }
 
-div.bank {
+form div.bank {
 	flex-basis: 70%;
 	margin-right: 10px;
 }
 
-div.last-four-digits {
+form div.last-four-digits {
 	flex-basis: 30%;
 	min-width: 150px;
 	margin-left: 10px;

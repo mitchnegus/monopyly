@@ -20,7 +20,6 @@ def get_transaction(transaction_id, check_user=True):
     transaction_query = (f'SELECT {", ".join(query_fields)}'
                           '  FROM credit_transactions AS t'
                           '  JOIN credit_cards AS c ON t.card_id = c.id'
-                          '  JOIN users AS u ON t.user_id = u.id'
                           ' WHERE t.id = ?')
     placeholders = (transaction_id,)
     transaction = cursor.execute(transaction_query, placeholders).fetchone()
@@ -31,16 +30,20 @@ def get_transaction(transaction_id, check_user=True):
         abort(403)
     return transaction
 
-def get_card_by_info(bank, last_four_digits, check_user=True):
-    """Given the bank and last four digits, get the card from the database."""
+def get_card_by_info(user_id, bank, last_four_digits, check_user=True):
+    """Given the user, bank and last four digits, get the card from the database."""
     db, cursor = get_db()
     if not bank:
-        card_query = 'SELECT * FROM credit_cards WHERE last_four_digits = ?'
-        card = cursor.execute(card_query, (last_four_digits,)).fetchone()
+        card_query = ('SELECT * FROM credit_cards'
+                      ' WHERE user_id = ?'
+                      '   AND last_four_digits = ?')
+        placeholders = (user_id, last_four_digits)
     else:
         card_query = ('SELECT * FROM credit_cards'
-                      ' WHERE bank = ? AND last_four_digits = ?')
-        card = cursor.execute(card_query, (bank, last_four_digits)).fetchone()
+                      ' WHERE user_id = ?'
+                      '   AND bank = ? AND last_four_digits = ?')
+        placeholders = (user_id, bank, last_four_digits)
+    card = cursor.execute(card_query, placeholders).fetchone()
     # Check that a card was found and that it belongs to the user
     if card is None:
         bank_name = f'{bank} ' if bank else ''
@@ -53,14 +56,15 @@ def get_card_by_info(bank, last_four_digits, check_user=True):
 def get_card_by_id(card_id, check_user=True):
     """Given the card ID in the database, get the card."""
     db, cursor = get_db()
-    card_query = 'SELECT * FROM credit_cards WHERE id = ?'
+    card_query = ('SELECT * FROM credit_cards'
+                 f' WHERE id = ?')
     card = cursor.execute(card_query, (card_id,)).fetchone()
     # Check that a card belongs to the user
     if check_user and card['user_id'] != g.user['id']:
         abort(403)
     return card
 
-def get_card_ids_from_filters(filter_ids):
+def get_card_ids_from_filters(user_id, filter_ids):
     """
     Convert a filter ID into a card ID.
 
@@ -69,6 +73,8 @@ def get_card_ids_from_filters(filter_ids):
 
     Parameters
     ––––––––––
+    user_id : str
+        The unique ID of the user for whom to filter the cards.
     filter_ids : list
         A list of IDs for the filters (of the form BANK-LAST_FOUR_DIGITS).
 
@@ -80,7 +86,7 @@ def get_card_ids_from_filters(filter_ids):
     # Split the filter ID into 'bank' and 'last_four_digits' elements
     filter_info = [filter_id.split('-') for filter_id in filter_ids]
     # Get the corresponding cards from the database
-    card_ids = [get_card_by_info(*info)['id'] for info in filter_info]
+    card_ids = [get_card_by_info(user_id, *info)['id'] for info in filter_info]
     return card_ids
 
 def get_expected_statement_date(transaction_date, card):
@@ -117,7 +123,8 @@ def process_transaction(form):
         from the user submission.
     """
     # Match the transaction to a registered credit card
-    card = get_card_by_info(form['bank'], form['last_four_digits'])
+    user_id = g.user['id']
+    card = get_card_by_info(user_id, form['bank'], form['last_four_digits'])
     # Iterate through the transaction submission and create the dictionary
     transaction_info = {}
     for field in filter_dict(DISPLAY_FIELDS, op.contains, TRANSACTION_FIELDS):
