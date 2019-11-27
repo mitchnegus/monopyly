@@ -14,8 +14,5 @@ class TransactionForm(FlaskForm):
     vendor = TextField('Vendor', [DataRequired()])
     price = DecimalField('Price', [DataRequired()], places=2)
     notes = TextField('Notes', [DataRequired()])
-    statement_date = TextField('Statement Date')
-    submit = SubmitField('Add Transaction')
-
-class UpdateTransactionForm(TransactionForm):
-    submit = SubmitField('Update Transaction')
+    issue_date = TextField('Statement Date')
+    submit = SubmitField('Save Transaction')

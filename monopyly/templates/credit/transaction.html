@@ -44,7 +44,7 @@
 		</tr>
 		<tr>
 			<th scope="row" class="date">Statement Date</th>
-			<td class="date">{{ transaction['statement_date'] }}</td>
+			<td class="date">{{ transaction['issue_date'] }}</td>
 		</tr>
 	</table>
 	<form action="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}" method="get">

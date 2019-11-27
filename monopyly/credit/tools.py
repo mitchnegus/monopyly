@@ -15,11 +15,14 @@ def get_transaction(transaction_id, check_user=True):
     """Given the ID of a transaction, get the transaction from the database."""
     # Get transaction information from the database
     db, cursor = get_db()
-    query_fields = ['t.id', 't.user_id', 't.card_id']
+    query_fields = ['t.id', 'c.user_id', 's.card_id']
     query_fields += [denote_if_date(field) for field in DISPLAY_FIELDS]
     transaction_query = (f'SELECT {", ".join(query_fields)}'
                           '  FROM credit_transactions AS t'
-                          '  JOIN credit_cards AS c ON t.card_id = c.id'
+                          '  JOIN credit_statements AS s '
+                          '    ON t.statement_id = s.id '
+                          '  JOIN credit_cards AS c '
+                          '    ON s.card_id = c.id'
                           ' WHERE t.id = ?')
     placeholders = (transaction_id,)
     transaction = cursor.execute(transaction_query, placeholders).fetchone()
@@ -127,8 +130,9 @@ def process_transaction(form):
     card = get_card_by_info(user_id, form['bank'], form['last_four_digits'])
     # Iterate through the transaction submission and create the dictionary
     transaction_info = {}
-    for field in filter_dict(DISPLAY_FIELDS, op.contains, TRANSACTION_FIELDS):
-        if form[field] and  check_if_date(field):
+    selected_fields = list(TRANSACTION_FIELDS.keys()) + ['issue_date']
+    for field in filter_dict(DISPLAY_FIELDS, op.contains, selected_fields):
+        if form[field] and check_if_date(field):
             # The field should be a date
             transaction_info[field] = parse_date(form[field])
         elif form[field] and field == 'price':
@@ -137,10 +141,10 @@ def process_transaction(form):
         else:
             transaction_info[field] = form[field]
     # Fill in the statement date field if it wasn't provided
-    if not transaction_info['statement_date']:
+    if not transaction_info['issue_date']:
         transaction_date = transaction_info['transaction_date']
         statement_date = get_expected_statement_date(transaction_date, card)
-        transaction_info['statement_date'] = statement_date
+        transaction_info['issue_date'] = statement_date
     return card, transaction_info
 
 def prepare_db_transaction_mapping(fields, values, card_id):

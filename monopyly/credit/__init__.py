@@ -1,5 +1,6 @@
 """
-Flask blueprint for credit card financials.
+Flask bluep
+rint for credit card financials.
 """
 from flask import (
     Blueprint, flash, g, redirect, render_template,
@@ -32,7 +33,10 @@ def show_transactions():
     sort_order = 'DESC'
     transactions_query = (f'SELECT t.id, {", ".join(query_fields)}'
                            '  FROM credit_transactions AS t'
-                           '  JOIN credit_cards AS c ON t.card_id = c.id'
+                           '  JOIN credit_statements AS s '
+                           '    ON t.statement_id = s.id'
+                           '  JOIN credit_cards AS c '
+                           '    ON s.card_id = c.id '
                            ' WHERE c.user_id = ? AND c.active = 1'
                           f' ORDER BY transaction_date {sort_order}')
     placeholders = (g.user['id'],)
@@ -42,9 +46,9 @@ def show_transactions():
                            sort_order=sort_order,
                            transactions=transactions)
 
-@bp.route('/_update_transaction_table', methods=('POST',))
+@bp.route('/_update_transactions_table', methods=('POST',))
 @login_required
-def update_transaction_table():
+def update_transactions_table():
     # Separate the arguments of the POST method
     post_arguments = request.get_json()
     filter_ids = post_arguments['filter_ids']
@@ -61,7 +65,10 @@ def update_transaction_table():
         card_id_fields = ['""']
     filter_query = (f'SELECT t.id, {", ".join(query_fields)}'
                      '  FROM credit_transactions AS t'
-                     '  JOIN credit_cards AS c ON t.card_id = c.id'
+                     '  JOIN credit_statements AS s '
+                     '    ON t.statement_id = s.id'
+                     '  JOIN credit_cards AS c '
+                     '    ON s.card_id = c.id '
                      ' WHERE c.user_id = ?'
                     f'   AND c.id IN ({", ".join(card_id_fields)})'
                     f' ORDER BY transaction_date {sort_order}')
@@ -137,7 +144,7 @@ def update_transaction(transaction_id):
     # Get the transaction information from the database
     transaction = get_transaction(transaction_id)
     # Define a form for a transaction
-    form = UpdateTransactionForm(data=transaction)
+    form = TransactionForm(data=transaction)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
         error = error_unless_all_fields_provided(request.form, REQUIRED_FIELDS)
@@ -149,10 +156,12 @@ def update_transaction(transaction_id):
                                                      transaction_info,
                                                      card['id'])
             update_fields = [f'{field} = ?' for field in mapping]
+            print(update_fields)
+            print(mapping)
             cursor.execute(
                 'UPDATE credit_transactions'
                f'   SET {", ".join(update_fields)}'
-                ' WHERE id = ?',
+                ' WHERE id = ? AND ',
                 (*mapping.values(), transaction_id)
             )
             db.commit()
