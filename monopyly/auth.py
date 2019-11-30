@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import get_db
 
+
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 def get_username_and_password(form):
@@ -23,7 +24,8 @@ def register():
         # Get username and passwords from the form
         username, password = get_username_and_password(request.form)
         # Get user information from the database
-        db, cursor = get_db()
+        db = get_db()
+        cursor = db.cursor()
         id_query = 'SELECT id FROM users WHERE username = ?'
         # Check for errors in the accessed information
         if not username:
@@ -88,7 +90,8 @@ def load_logged_in_user():
         g.user = None
     else:
         user_query = 'SELECT * FROM users WHERE id = ?'
-        db, cursor = get_db()
+        db = get_db()
+        cursor = db.cursor()
         g.user = cursor.execute(user_query, (user_id,)).fetchone()
 
 def login_required(view):
