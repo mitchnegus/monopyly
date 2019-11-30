@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from flask import g
 from werkzeug.exceptions import abort
 
+from .cards import CardHandler
 from .constants import DISPLAY_FIELDS, TRANSACTION_FIELDS
 from ..utils import filter_dict, parse_date
 from ..db import get_db
@@ -14,7 +15,8 @@ from ..db import get_db
 def get_transaction(transaction_id, check_user=True):
     """Given the ID of a transaction, get the transaction from the database."""
     # Get transaction information from the database
-    db, cursor = get_db()
+    db = get_db()
+    cursor = db.cursor()
     query_fields = ['t.id', 'c.user_id', 's.card_id']
     query_fields += [denote_if_date(field) for field in DISPLAY_FIELDS]
     transaction_query = (f'SELECT {", ".join(query_fields)}'
@@ -35,7 +37,8 @@ def get_transaction(transaction_id, check_user=True):
 
 def get_card_by_info(user_id, bank, last_four_digits, check_user=True):
     """Given the user, bank and last four digits, get the card from the database."""
-    db, cursor = get_db()
+    db = get_db()
+    cursor = db.cursor()
     if not bank:
         card_query = ('SELECT * FROM credit_cards'
                       ' WHERE user_id = ?'
@@ -58,14 +61,7 @@ def get_card_by_info(user_id, bank, last_four_digits, check_user=True):
 
 def get_card_by_id(card_id, check_user=True):
     """Given the card ID in the database, get the card."""
-    db, cursor = get_db()
-    card_query = ('SELECT * FROM credit_cards'
-                 f' WHERE id = ?')
-    card = cursor.execute(card_query, (card_id,)).fetchone()
-    # Check that a card belongs to the user
-    if check_user and card['user_id'] != g.user['id']:
-        abort(403)
-    return card
+    return CardHandler().get_card(card_id)
 
 def get_card_ids_from_filters(user_id, filter_ids):
     """

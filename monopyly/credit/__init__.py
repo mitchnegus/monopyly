@@ -1,6 +1,5 @@
 """
-Flask bluep
-rint for credit card financials.
+Flask blueprint for credit card financials.
 """
 from flask import (
     Blueprint, flash, g, redirect, render_template,
@@ -14,6 +13,8 @@ from .constants import (
     CARD_FIELDS, TRANSACTION_FIELDS, REQUIRED_FIELDS, DISPLAY_FIELDS
 )
 from .tools import *
+from .cards import CardHandler
+
 
 # Define the blueprint
 bp = Blueprint('credit', __name__, url_prefix='/credit')
@@ -21,13 +22,10 @@ bp = Blueprint('credit', __name__, url_prefix='/credit')
 @bp.route('/transactions')
 @login_required
 def show_transactions():
-    db, cursor = get_db()
+    db = get_db()
+    cursor = db.cursor()
     # Get all of the user's credit cards from the database
-    cards_query = ('SELECT id, bank, last_four_digits, active'
-                   '  FROM credit_cards'
-                   ' WHERE user_id = ?'
-                   ' ORDER BY active DESC')
-    cards = cursor.execute(cards_query, (g.user['id'],)).fetchall()
+    cards = CardHandler().get_cards()
     # Get all of the user's transactions from the database
     query_fields = list(DISPLAY_FIELDS.keys())
     sort_order = 'DESC'
@@ -57,7 +55,8 @@ def update_transactions_table():
     card_ids = get_card_ids_from_filters(g.user['id'],
                                          post_arguments['filter_ids'])
     # Filter selected transactions from the database
-    db, cursor = get_db()
+    db = get_db()
+    cursor = db.cursor()
     query_fields = list(DISPLAY_FIELDS.keys())
     if card_ids:
         card_id_fields = ['?']*len(card_ids)
@@ -100,7 +99,8 @@ def new_transaction():
         if not error:
             card, transaction_info = process_transaction(request.form)
             # Insert the new transaction into the database
-            db, cursor = get_db()
+            db = get_db()
+            cursor = db.cursor()
             mapping = prepare_db_transaction_mapping(TRANSACTION_FIELDS,
                                                      transaction_info,
                                                      card['id'])
@@ -129,7 +129,8 @@ def get_autocomplete_info():
     if field not in DISPLAY_FIELDS.keys():
         raise ValueError(f"'{field}' is not an available autocompletion field.")
     # Get information from the database to use for autocompletion
-    db, cursor = get_db()
+    db = get_db()
+    cursor = db.cursor()
     autocomplete_query = (f'SELECT {field}'
                            '  FROM credit_transactions AS t'
                            '  JOIN credit_cards AS c ON t.card_id = c.id'
@@ -151,7 +152,8 @@ def update_transaction(transaction_id):
         if not error:
             card, transaction_info = process_transaction(request.form)
             # Update the database with the updated transaction
-            db, cursor = get_db()
+            db = get_db()
+            cursor = db.cursor()
             mapping = prepare_db_transaction_mapping(TRANSACTION_FIELDS,
                                                      transaction_info,
                                                      card['id'])
@@ -183,7 +185,8 @@ def delete_transaction(transaction_id):
     # Get the transaction (to ensure that it exists)
     get_transaction(transaction_id)
     # Remove the transaction from the database
-    db, cursor = get_db()
+    db = get_db()
+    cursor = db.cursor()
     cursor.execute(
         'DELETE FROM credit_transactions WHERE id = ?',
         (transaction_id,)
