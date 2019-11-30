@@ -12,28 +12,6 @@ from .constants import DISPLAY_FIELDS, TRANSACTION_FIELDS
 from ..utils import filter_dict, parse_date
 from ..db import get_db
 
-def get_transaction(transaction_id, check_user=True):
-    """Given the ID of a transaction, get the transaction from the database."""
-    # Get transaction information from the database
-    db = get_db()
-    cursor = db.cursor()
-    query_fields = ['t.id', 'c.user_id', 's.card_id']
-    query_fields += [denote_if_date(field) for field in DISPLAY_FIELDS]
-    transaction_query = (f'SELECT {", ".join(query_fields)}'
-                          '  FROM credit_transactions AS t'
-                          '  JOIN credit_statements AS s '
-                          '    ON t.statement_id = s.id '
-                          '  JOIN credit_cards AS c '
-                          '    ON s.card_id = c.id'
-                          ' WHERE t.id = ?')
-    placeholders = (transaction_id,)
-    transaction = cursor.execute(transaction_query, placeholders).fetchone()
-    # Check that a transaction was found and that it belongs to the user
-    if transaction is None:
-        abort(404, f'Transaction ID {transaction_id} does not exist.')
-    if check_user and transaction['user_id'] != g.user['id']:
-        abort(403)
-    return transaction
 
 def get_card_by_info(user_id, bank, last_four_digits, check_user=True):
     """Given the user, bank and last four digits, get the card from the database."""
@@ -58,10 +36,6 @@ def get_card_by_info(user_id, bank, last_four_digits, check_user=True):
     if check_user and card['user_id'] != g.user['id']:
         abort(403)
     return card
-
-def get_card_by_id(card_id, check_user=True):
-    """Given the card ID in the database, get the card."""
-    return CardHandler().get_card(card_id)
 
 def get_card_ids_from_filters(user_id, filter_ids):
     """

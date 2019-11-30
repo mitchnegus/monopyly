@@ -1,13 +1,12 @@
 """
-...
+Tools for interacting with the credit cards database.
 """
-from flask import g
+from ..utils import DatabaseHandler, reserve_places, fill_places
+from .filters import *
 
-from ..db import get_db, reserve_places
-
-class _DatabaseHandler:
+class CardHandler(DatabaseHandler):
     """
-    A generic handler for database access.
+    A database handler for accessing the credit cards database.
 
     Parameters
     ––––––––––
@@ -31,47 +30,47 @@ class _DatabaseHandler:
     """
 
     def __init__(self, db=None, user_id=None, check_user=True):
-        self.db = db if db else get_db()
-        self.cursor = self.db.cursor()
-        self.user_id = user_id if user_id else g.user['id']
-        if check_user and self.user_id != g.user['id']:
-            abort(403)
-
-
-class CardHandler(_DatabaseHandler):
-    """A database handler for accessing the credit cards database."""
-
-    def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_cards(self, banks=(), active=False):
+    def get_cards(self, fields=None, banks=None, active=False):
         """
         Get credit cards from the database.
 
-        Query the database to select credit cards. Cards can be
-        filtered by the issuing bank, or by active status. All cards
-        (regardless of active status) are shown by default.
+        Query the database to select credit card fields. Cards can be
+        filtered by the issuing bank or by active status. All fields for
+        all cards (regardless of active status) are shown by default.
 
         Parameters
         ––––––––––
+        fields : tuple of str, None
+            A sequence of fields to select from the database (if `None`,
+            all fields will be selected).
         banks : tuple of str
-            A sequence of banks for which cards will be selected.
+            A sequence of banks for which cards will be selected (if
+            `None`, all banks will be selected).
         active : bool
             A flag indicating whether only active cards will be
             returned. The default is `False` (all cards are returned).
+
+        Returns
+        –––––––
+        cards : list of sqlite3.Row
+            A list of credit cards matching the criteria.
         """
-        bank_filter = f"AND bank IN ({reserve_places(banks)})" if banks else ""
+        bank_filter = filter_banks(banks, 'AND')
         active_filter = "AND active = 1" if active else ""
-        query = ("SELECT * FROM credit_cards"
-                f" WHERE user_id = ? {bank_filter} {active_filter}"
-                 " ORDER BY active DESC")
-        placeholders = (self.user_id, *banks)
+        query = (f"SELECT {select_fields(fields)} "
+                  "  FROM credit_cards "
+                 f" WHERE user_id = ? {bank_filter} {active_filter} "
+                  " ORDER BY active DESC")
+        placeholders = (self.user_id, *fill_places(banks))
         cards = self.cursor.execute(query, placeholders).fetchall()
         return cards
 
     def get_card(self, card_id):
         """Get a credit card from the database given its card ID."""
-        query = "SELECT * FROM credit_cards WHERE id = ?"
-        placeholders = (card_id,)
+        query = ("SELECT * FROM credit_cards "
+                 "WHERE id = ? AND user_id = ?")
+        placeholders = (card_id, self.user_id)
         card = self.cursor.execute(query, placeholders).fetchone()
         return card

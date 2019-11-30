@@ -14,6 +14,7 @@ from .constants import (
 )
 from .tools import *
 from .cards import CardHandler
+from .transactions import TransactionHandler
 
 
 # Define the blueprint
@@ -22,23 +23,16 @@ bp = Blueprint('credit', __name__, url_prefix='/credit')
 @bp.route('/transactions')
 @login_required
 def show_transactions():
-    db = get_db()
-    cursor = db.cursor()
+    ch, th = CardHandler(), TransactionHandler()
     # Get all of the user's credit cards from the database
-    cards = CardHandler().get_cards()
+    cards = ch.get_cards()
+    active_cards = ch.get_cards(active=True)
     # Get all of the user's transactions from the database
-    query_fields = list(DISPLAY_FIELDS.keys())
+    fields = ['t.id'] + list(DISPLAY_FIELDS.keys())
+    card_ids = [card['id'] for card in active_cards]
     sort_order = 'DESC'
-    transactions_query = (f'SELECT t.id, {", ".join(query_fields)}'
-                           '  FROM credit_transactions AS t'
-                           '  JOIN credit_statements AS s '
-                           '    ON t.statement_id = s.id'
-                           '  JOIN credit_cards AS c '
-                           '    ON s.card_id = c.id '
-                           ' WHERE c.user_id = ? AND c.active = 1'
-                          f' ORDER BY transaction_date {sort_order}')
-    placeholders = (g.user['id'],)
-    transactions = cursor.execute(transactions_query, placeholders).fetchall()
+    transactions = th.get_transactions(fields=fields, card_ids=card_ids,
+                                       sort_order=sort_order)
     return render_template('credit/transactions.html',
                            cards=cards,
                            sort_order=sort_order,
@@ -55,24 +49,10 @@ def update_transactions_table():
     card_ids = get_card_ids_from_filters(g.user['id'],
                                          post_arguments['filter_ids'])
     # Filter selected transactions from the database
-    db = get_db()
-    cursor = db.cursor()
-    query_fields = list(DISPLAY_FIELDS.keys())
-    if card_ids:
-        card_id_fields = ['?']*len(card_ids)
-    else:
-        card_id_fields = ['""']
-    filter_query = (f'SELECT t.id, {", ".join(query_fields)}'
-                     '  FROM credit_transactions AS t'
-                     '  JOIN credit_statements AS s '
-                     '    ON t.statement_id = s.id'
-                     '  JOIN credit_cards AS c '
-                     '    ON s.card_id = c.id '
-                     ' WHERE c.user_id = ?'
-                    f'   AND c.id IN ({", ".join(card_id_fields)})'
-                    f' ORDER BY transaction_date {sort_order}')
-    placeholders = (g.user['id'], *card_ids)
-    transactions = cursor.execute(filter_query, placeholders).fetchall()
+    th = TransactionHandler()
+    fields = ['t.id'] + list(DISPLAY_FIELDS.keys())
+    transactions = th.get_transactions(fields=fields, card_ids=card_ids,
+                                       sort_order=sort_order)
     return render_template('credit/transaction_table.html',
                            sort_order=sort_order,
                            transactions=transactions)
@@ -80,10 +60,11 @@ def update_transactions_table():
 @bp.route('/<int:transaction_id>/transaction')
 @login_required
 def show_transaction(transaction_id):
+    ch, th = CardHandler(), TransactionHandler()
     # Get the transaction information from the database
-    transaction = get_transaction(transaction_id)
+    transaction = th.get_transaction(transaction_id)
     # Match the transaction to a registered credit card
-    card = get_card_by_id(transaction['card_id'])
+    card = ch.get_card(transaction['card_id'])
     return render_template('credit/transaction.html',
                            transaction=transaction,
                            card=card)
@@ -143,7 +124,8 @@ def get_autocomplete_info():
 @login_required
 def update_transaction(transaction_id):
     # Get the transaction information from the database
-    transaction = get_transaction(transaction_id)
+    th = TransactionHandler()
+    transaction = th.get_transaction(transaction_id)
     # Define a form for a transaction
     form = TransactionForm(data=transaction)
     # Check if a transaction was updated and update it in the database
@@ -158,8 +140,6 @@ def update_transaction(transaction_id):
                                                      transaction_info,
                                                      card['id'])
             update_fields = [f'{field} = ?' for field in mapping]
-            print(update_fields)
-            print(mapping)
             cursor.execute(
                 'UPDATE credit_transactions'
                f'   SET {", ".join(update_fields)}'
@@ -183,7 +163,8 @@ def update_transaction(transaction_id):
 @login_required
 def delete_transaction(transaction_id):
     # Get the transaction (to ensure that it exists)
-    get_transaction(transaction_id)
+    th = TransactionHandler()
+    th.get_transaction(transaction_id)
     # Remove the transaction from the database
     db = get_db()
     cursor = db.cursor()

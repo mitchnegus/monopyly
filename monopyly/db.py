@@ -7,6 +7,7 @@ import click
 from flask import current_app, g
 from flask.cli import with_appcontext
 
+
 def get_db():
     """Connect to the database (and don't reconnect if already connected)."""
     if 'db' not in g:
@@ -40,7 +41,3 @@ def init_app(app):
     """Registers the database initialization command with an app."""
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
-
-def reserve_places(placeholders):
-    """Reserve a set of places matching the placeholders input."""
-    return ', '.join(['?']*len(placeholders))

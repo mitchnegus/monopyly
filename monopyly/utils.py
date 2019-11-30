@@ -1,6 +1,51 @@
 """General utility functions."""
+import itertools as it
 import operator as op
 from datetime import datetime
+
+from flask import g
+
+from .db import get_db
+
+
+class DatabaseHandler:
+    """
+    A generic handler for database access.
+
+    Database handlers simplify commonly used database interactions.
+    Complicated queries can be reformulated as class methods, taking
+    variable arguments. The handler also performs user authentication
+    upon creation so that user authentication is not required for each
+    query.
+
+    Parameters
+    ––––––––––
+    db : sqlite3.Connection
+        A connection to the database for interfacing.
+    user_id : int
+        The ID of the user who is the subject of database access. If not
+        given, the handler defaults to using the logged-in user.
+    check_user : bool
+        A flag indicating whether the handler should check that the
+        provided user ID matches the logged-in user.
+
+    Attributes
+    ––––––––––
+    db : sqlite3.Connection
+        A connection to the database for interfacing.
+    cursor : sqlite.Cursor
+        A cursor for executing database interactions.
+    user_id : int
+        The ID of the user who is the subject of database access.
+    """
+
+    def __init__(self, db=None, user_id=None, check_user=True):
+        self.db = db if db else get_db()
+        self.cursor = self.db.cursor()
+        self.user_id = user_id if user_id else g.user['id']
+        if check_user and self.user_id != g.user['id']:
+            abort(403)
+
 
 def filter_dict(dictionary, operator, condition, by_value=False):
     """Filter a dictionary by key using the given operator and condition."""
@@ -11,6 +56,7 @@ def filter_dict(dictionary, operator, condition, by_value=False):
         return {k: v for k, v in dictionary.items() if operator(k, condition)}
     else:
         return {k: v for k, v in dictionary.items() if operator(v, condition)}
+
 
 def parse_date(given_date):
     """
@@ -64,3 +110,18 @@ def parse_date(given_date):
         except ValueError:
             pass
     raise ValueError(err_msg)
+
+def reserve_places(placeholders):
+    """Reserve a set of places matching the placeholders input."""
+    return ', '.join(['?']*len(placeholders))
+
+def fill_places(placeholders):
+    """Generate a tuple of placeholders from a sequence of placeholders."""
+    if placeholders is None:
+        return ()
+    return tuple(placeholders)
+
+def check_sort_order(sort_order):
+    """Ensure that a valid sort order was provided."""
+    if sort_order not in ('ASC', 'DESC'):
+        raise ValueError('Provide a valid sort order.')
