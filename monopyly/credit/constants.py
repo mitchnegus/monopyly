@@ -5,6 +5,7 @@ import operator as op
 
 from ..utils import filter_dict
 
+
 # Define database fields for credit cards
 CARD_FIELDS = {'id': None,
                'user_id': None,
@@ -22,7 +23,6 @@ STATEMENT_FIELDS = {'id': None,
                     'payment_date': None}
 # Define database fields for credit card transactions
 TRANSACTION_FIELDS = {'id': None,
-                      'user_id': None,
                       'statement_id': None,
                       'transaction_date': 'Date',
                       'vendor': 'Vendor',
@@ -32,7 +32,10 @@ TRANSACTION_FIELDS = {'id': None,
 ALL_FIELDS = {**CARD_FIELDS, **STATEMENT_FIELDS, **TRANSACTION_FIELDS}
 # Create a dictionary with all fields that are displayed to a user
 DISPLAY_FIELDS = filter_dict(ALL_FIELDS, op.is_not, None, by_value=True)
-# Create a dictionary with all fields that a user is required to provide
+# Create a tuple with all fields requested in a transaction form
+FORM_FIELDS = ('bank', 'last_four_digits', 'transaction_date', 'vendor',
+               'price', 'notes', 'issue_date')
+# Create a tuple with all fields that a user is required to provide
 REQUIRED_CATEGORIES = ('transaction_date', 'vendor', 'price',
                        'notes', 'last_four_digits')
 REQUIRED_FIELDS = filter_dict(DISPLAY_FIELDS, op.contains, REQUIRED_CATEGORIES)

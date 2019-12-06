@@ -10,11 +10,12 @@ from ..db import get_db
 from ..auth import login_required
 from ..forms import *
 from .constants import (
-    CARD_FIELDS, TRANSACTION_FIELDS, REQUIRED_FIELDS, DISPLAY_FIELDS
+    TRANSACTION_FIELDS, REQUIRED_FIELDS, DISPLAY_FIELDS
 )
-from .tools import *
 from .cards import CardHandler
-from .transactions import TransactionHandler
+from .transactions import (
+    TransactionHandler, process_transaction, prepare_db_transaction_mapping
+)
 
 
 # Define the blueprint
@@ -46,8 +47,8 @@ def update_transactions_table():
     filter_ids = post_arguments['filter_ids']
     sort_order = 'ASC' if post_arguments['sort_order'] == 'asc' else 'DESC'
     # Determine the card IDs from the arguments of POST method
-    card_ids = get_card_ids_from_filters(g.user['id'],
-                                         post_arguments['filter_ids'])
+    ch = CardHandler()
+    card_ids = [ch.find_card(*tag.split('-'))['id'] for tag in filter_ids]
     # Filter selected transactions from the database
     th = TransactionHandler()
     fields = ['t.id'] + list(DISPLAY_FIELDS.keys())
@@ -80,18 +81,11 @@ def new_transaction():
         if not error:
             card, transaction_info = process_transaction(request.form)
             # Insert the new transaction into the database
-            db = get_db()
-            cursor = db.cursor()
             mapping = prepare_db_transaction_mapping(TRANSACTION_FIELDS,
                                                      transaction_info,
                                                      card['id'])
-            cursor.execute(
-                f'INSERT INTO credit_transactions {tuple(mapping.keys())}'
-                 'VALUES (?, ?, ?, ?, ?, ?, ?)',
-                (*mapping.values(),)
-            )
-            db.commit()
-            transaction_id = cursor.lastrowid
+            th = TransactionHandler()
+            transaction_id = th.new_transaction(mapping)
             return render_template('credit/submission.html',
                                    field_names=DISPLAY_FIELDS,
                                    card=card,

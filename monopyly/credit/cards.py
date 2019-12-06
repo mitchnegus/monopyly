@@ -1,8 +1,8 @@
 """
 Tools for interacting with the credit cards database.
 """
-from ..utils import DatabaseHandler, reserve_places, fill_places
-from .filters import *
+from ..utils import DatabaseHandler, reserve_places, fill_place, fill_places
+from .tools import select_fields, filter_item, filter_items
 
 class CardHandler(DatabaseHandler):
     """
@@ -57,7 +57,7 @@ class CardHandler(DatabaseHandler):
         cards : list of sqlite3.Row
             A list of credit cards matching the criteria.
         """
-        bank_filter = filter_banks(banks, 'AND')
+        bank_filter = filter_items(banks, 'bank', 'AND')
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields)} "
                   "  FROM credit_cards "
@@ -73,4 +73,45 @@ class CardHandler(DatabaseHandler):
                  "WHERE id = ? AND user_id = ?")
         placeholders = (card_id, self.user_id)
         card = self.cursor.execute(query, placeholders).fetchone()
+        # Check that a card was found
+        if card is None:
+            abort(404, f'Card ID {card_id} does not exist.')
+        return card
+
+    def find_card(self, bank=None, last_four_digits=None):
+        """
+        Find a credit card using uniquely identifying characteristics.
+
+        Credit cards in the database can almost always be identified
+        uniquely when given the user's ID and the last four digits of
+        the card number. In rare cases where a user has two cards with
+        the same last four digits, the issuing bank can be used to help
+        determine the card. (It is expected to be exceptionally rare
+        that a user has two cards with the same last four digits from
+        the same bank.
+
+        Parameters
+        ––––––––––
+        bank : str
+            The bank of the card to find.
+        last_four_digits : int
+            The last four digits of the card to find.
+
+        Returns
+        –––––––
+        card_id : int
+            The ID of the card matching the given information.
+        """
+        bank_filter = filter_item(bank, 'bank', 'AND')
+        digits_filter = filter_item(last_four_digits, 'last_four_digits','AND')
+        query = ('SELECT * FROM credit_cards'
+                f' WHERE user_id = ? {bank_filter} {digits_filter}')
+        placeholders = (self.user_id, *fill_place(bank),
+                        *fill_place(last_four_digits))
+        print(query)
+        print(placeholders)
+        card = self.cursor.execute(query, placeholders).fetchone()
+        # Check that a card was found and that it belongs to the user
+        if card is None:
+            abort(404, 'A card matching the information was not found.')
         return card

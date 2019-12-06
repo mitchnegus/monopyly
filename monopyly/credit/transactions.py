@@ -7,7 +7,10 @@ from ..db import get_db
 from ..utils import (
     DatabaseHandler, reserve_places, fill_places, check_sort_order
 )
-from .filters import *
+from .constants import FORM_FIELDS
+from .tools import select_fields, filter_items, check_if_date, parse_date
+from .cards import CardHandler
+
 
 class TransactionHandler(DatabaseHandler):
     """
@@ -71,8 +74,8 @@ class TransactionHandler(DatabaseHandler):
             A list of credit card transactions matching the criteria.
         """
         check_sort_order(sort_order)
-        card_filter = filter_cards(card_ids, 'AND')
-        statement_filter = filter_statements(statement_ids, 'AND')
+        card_filter = filter_items(card_ids, 'card_id', 'AND')
+        statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
         query = (f"SELECT {select_fields(fields)} "
                   "  FROM credit_transactions AS t "
                   "  JOIN credit_statements AS s ON s.id = t.statement_id "
@@ -93,6 +96,108 @@ class TransactionHandler(DatabaseHandler):
                  "WHERE t.id = ? AND c.user_id = ?")
         placeholders = (transaction_id, self.user_id)
         transaction = self.cursor.execute(query, placeholders).fetchone()
+        # Check that a transaction was found
         if transaction is None:
             abort(404, f'Transaction ID {transaction_id} does not exist.')
         return transaction
+
+    def new_transaction(self, mapping):
+        """
+        Create a new transaction in the database from the mapping.
+
+        Returns
+        –––––––
+        transaction_id : int
+            The ID of the newly created transaction in the database.
+        """
+        self.cursor.execute(
+            f'INSERT INTO credit_transactions {tuple(mapping.keys())} '
+            f'VALUES ({reserve_places(mapping.values())})',
+            (*mapping.values(),)
+        )
+        self.db.commit()
+        return cursor.lastrowid
+
+
+def process_transaction(form):
+    """
+    Collect submitted transaction information.
+
+    Collect all transaction information submitted through the form. This
+    aggregates all transaction data from the form, fills in defaults when
+    necessary, and returns a dictionary of the transaction information.
+
+    Parameters
+    ––––––––––
+    form : werkzeug.datastructures.ImmutableMultiDict
+        A MultiDict containing the submitted form information.
+
+    Returns
+    –––––––
+    card : sqlite3.Row
+        A row in the database matching the card used in the transaction.
+    transaction_info : dict
+        A dictionary of transaction information collected (and/or extrapolated)
+        from the user submission.
+    """
+    # Match the transaction to a registered credit card
+    ch = CardHandler()
+    card = ch.find_card(form['bank'], form['last_four_digits'])
+    # Iterate through the transaction submission and create the dictionary
+    transaction_info = {}
+    for field in FORM_FIELDS:
+        if form[field] and check_if_date(field):
+            # The field should be a date
+            transaction_info[field] = parse_date(form[field])
+        elif form[field] and field == 'price':
+            # Prices should be shown to 2 digits
+            transaction_info[field] = f'{float(form[field]):.2f}'
+        elif form[field] and field == 'last_four_digits':
+            transaction_info[field] = int(form[field])
+        else:
+            transaction_info[field] = form[field]
+    # Fill in the statement date field if it wasn't provided
+    if not transaction_info['issue_date']:
+        transaction_date = transaction_info['transaction_date']
+        statement_date = get_expected_statement_date(transaction_date, card)
+        transaction_info['issue_date'] = statement_date
+    print(transaction_info)
+    return card, transaction_info
+
+def prepare_db_transaction_mapping(fields, values, card_id):
+    """
+    Prepare a field-value mapping for use with a database insertion/update.
+
+    Given a set of database fields and a set of values, return a mapping of
+    all the fields and values. For fields that do not have a corresponding
+    value, do not include them in the mapping unless a value is otherwise
+    explicitly defined.
+
+    Parameters
+    ––––––––––
+    fields : iterable
+        A set of fields corresponding to fields in the database.
+    values : dict
+        A mapping of fields and values (entered by a user for a transaction).
+    card_id : int
+        The ID of the card to be associated with the transaction.
+
+    Returns
+    –––––––
+    mapping : dict
+        A mapping between all fields to be entered into the database and the
+        corresponding values.
+    """
+    mapping = {}
+    for field in fields:
+        if field != 'id':
+            if field[-3:] != '_id':
+                mapping[field] = values[field]
+            elif field == 'user_id':
+                mapping[field] = g.user['id']
+            elif field == 'card_id':
+                mapping[field] = card_id
+    print(mapping)
+    return mapping
+
+

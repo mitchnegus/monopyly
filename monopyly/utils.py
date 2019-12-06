@@ -111,15 +111,25 @@ def parse_date(given_date):
             pass
     raise ValueError(err_msg)
 
+
 def reserve_places(placeholders):
     """Reserve a set of places matching the placeholders input."""
     return ', '.join(['?']*len(placeholders))
 
+
+def fill_place(placeholder):
+    """Generate a singular tuple for a placeholder (if it is given)."""
+    if placeholder is None:
+        return ()
+    return (placeholder,)
+
+
 def fill_places(placeholders):
-    """Generate a tuple of placeholders from a sequence of placeholders."""
+    """Generate a tuple for a sequence of placeholders (if it is given)."""
     if placeholders is None:
         return ()
     return tuple(placeholders)
+
 
 def check_sort_order(sort_order):
     """Ensure that a valid sort order was provided."""
