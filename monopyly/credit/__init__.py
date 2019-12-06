@@ -27,13 +27,11 @@ def show_transactions():
     ch, th = CardHandler(), TransactionHandler()
     # Get all of the user's credit cards from the database
     cards = ch.get_cards()
-    active_cards = ch.get_cards(active=True)
     # Get all of the user's transactions from the database
     fields = ['t.id'] + list(DISPLAY_FIELDS.keys())
-    card_ids = [card['id'] for card in active_cards]
     sort_order = 'DESC'
-    transactions = th.get_transactions(fields=fields, card_ids=card_ids,
-                                       sort_order=sort_order)
+    transactions = th.get_transactions(fields=fields, sort_order=sort_order,
+                                       active=True)
     return render_template('credit/transactions.html',
                            cards=cards,
                            sort_order=sort_order,

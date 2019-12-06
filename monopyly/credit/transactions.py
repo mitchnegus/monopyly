@@ -41,7 +41,7 @@ class TransactionHandler(DatabaseHandler):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_transactions(self, fields=None, card_ids=None, statement_ids=None,
-                         sort_order='DESC'):
+                         sort_order='DESC', active=False):
         """
         Get credit card transactions from the database.
 
@@ -57,16 +57,20 @@ class TransactionHandler(DatabaseHandler):
         fields : tuple of str, None
             A sequence of fields to select from the database (if `None`,
             all fields will be selected).
-        card_ids : tuple of str
+        card_ids : tuple of str, None
             A sequence of card IDs with which to filter transactions (if
             `None`, all card IDs will be shown).
-        statement_ids : tuple of str
+        statement_ids : tuple of str, None
             A sequence of statement IDs with which to filter
             transactions (if `None`, all statement IDs will be shown).
         sort_order : str
             An indicator of whether the transactions should be ordered
             in ascending ('ASC'; oldest at top) or descending ('DESC';
             newest at top) order.
+        active : bool
+            A flag indicating whether only transactions for active cards
+            will be returned. The default is `False` (all transactions
+            are returned).
 
         Returns
         –––––––
@@ -76,11 +80,13 @@ class TransactionHandler(DatabaseHandler):
         check_sort_order(sort_order)
         card_filter = filter_items(card_ids, 'card_id', 'AND')
         statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
+        active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields)} "
                   "  FROM credit_transactions AS t "
                   "  JOIN credit_statements AS s ON s.id = t.statement_id "
                   "  JOIN credit_cards AS c ON c.id = s.card_id "
-                 f" WHERE user_id = ? {card_filter} {statement_filter} "
+                  " WHERE user_id = ? "
+                 f"       {card_filter} {statement_filter} {active_filter}"
                  f" ORDER BY transaction_date {sort_order}")
         placeholders = (self.user_id, *fill_places(card_ids),
                         *fill_places(statement_ids))

@@ -45,7 +45,7 @@ class CardHandler(DatabaseHandler):
         fields : tuple of str, None
             A sequence of fields to select from the database (if `None`,
             all fields will be selected).
-        banks : tuple of str
+        banks : tuple of str, None
             A sequence of banks for which cards will be selected (if
             `None`, all banks will be selected).
         active : bool
@@ -61,7 +61,8 @@ class CardHandler(DatabaseHandler):
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields)} "
                   "  FROM credit_cards "
-                 f" WHERE user_id = ? {bank_filter} {active_filter} "
+                  " WHERE user_id = ? "
+                 f"       {bank_filter} {active_filter} "
                   " ORDER BY active DESC")
         placeholders = (self.user_id, *fill_places(banks))
         cards = self.cursor.execute(query, placeholders).fetchall()
