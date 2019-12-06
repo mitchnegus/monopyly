@@ -56,7 +56,8 @@ def login():
         # Get username and passwords from the form
         username, password = get_username_and_password(request.form)
         # Get user information from the database
-        db, cursor = get_db()
+        db = get_db()
+        cursor = db.cursor()
         user_query = 'SELECT * FROM users WHERE username = ?'
         user = cursor.execute(user_query, (username,)).fetchone()
         # Check for errors in the accessed information
