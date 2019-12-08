@@ -111,9 +111,10 @@ class StatementHandler(DatabaseHandler):
         ––––––––––
         card_id : int
             The ID of the credit card for the statement to be found.
-        issue_date : str, optional
-            The issue date for the statement to be found (if `None`, the
-            most recent statement will be found).
+        issue_date : date, optional
+            A Python `date` object giving the issue date for the
+            statement to be found (if `None`, the most recent statement
+            will be found).
 
         Returns
         –––––––

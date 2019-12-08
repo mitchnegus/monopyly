@@ -211,19 +211,20 @@ def process_transaction(form):
         A dictionary of transaction information collected (and/or extrapolated)
         from the user submission.
     """
-    # Match the transaction to a registered credit card and statement
-    ch, sh = CardHandler(), StatementHandler()
-    card = ch.find_card(form['bank'], form['last_four_digits'])
-    if not form['issue_date']:
-        statement_date = get_expected_statement_date(form['transaction_date'],
-                                                     card)
-    else:
-        statement_date = form['issue_date']
-    statement = sh.find_statement(card['id'], statement_date)
     # Iterate through the transaction submission and create the dictionary
     transaction_info = {}
     for field in TRANSACTION_FIELDS:
         if field == 'statement_id':
+            # Match the transaction to a registered credit card and statement
+            ch, sh = CardHandler(), StatementHandler()
+            card = ch.find_card(form['bank'], form['last_four_digits'])
+            if not form['issue_date']:
+                transaction_date = parse_date(form['transaction_date'])
+                statement_date = get_expected_statement_date(transaction_date,
+                                                                 card)
+            else:
+                statement_date = parse_date(form['issue_date'])
+            statement = sh.find_statement(card['id'], statement_date)
             transaction_info[field] = statement['id']
         elif field == 'transaction_date':
             # The field should be a date
