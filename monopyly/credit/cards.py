@@ -2,6 +2,7 @@
 Tools for interacting with the credit cards database.
 """
 from ..utils import DatabaseHandler, reserve_places, fill_place, fill_places
+from .constants import CARD_FIELDS
 from .tools import select_fields, filter_item, filter_items
 
 class CardHandler(DatabaseHandler):
@@ -32,7 +33,7 @@ class CardHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_cards(self, fields=None, banks=None, active=False):
+    def get_cards(self, fields=CARD_FIELDS.keys(), banks=None, active=False):
         """
         Get credit cards from the database.
 
@@ -42,13 +43,14 @@ class CardHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        fields : tuple of str, None
+        fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
-            all fields will be selected).
-        banks : tuple of str, None
+            all fields will be selected). Can be any field in the
+            'credit_cards' table.
+        banks : tuple of str, optional
             A sequence of banks for which cards will be selected (if
             `None`, all banks will be selected).
-        active : bool
+        active : bool, optional
             A flag indicating whether only active cards will be
             returned. The default is `False` (all cards are returned).
 
@@ -59,7 +61,7 @@ class CardHandler(DatabaseHandler):
         """
         bank_filter = filter_items(banks, 'bank', 'AND')
         active_filter = "AND active = 1" if active else ""
-        query = (f"SELECT {select_fields(fields)} "
+        query = (f"SELECT {select_fields(fields, 'id')} "
                   "  FROM credit_cards "
                   " WHERE user_id = ? "
                  f"       {bank_filter} {active_filter} "
@@ -68,10 +70,11 @@ class CardHandler(DatabaseHandler):
         cards = self.cursor.execute(query, placeholders).fetchall()
         return cards
 
-    def get_card(self, card_id):
+    def get_card(self, card_id, fields=None):
         """Get a credit card from the database given its card ID."""
-        query = ("SELECT * FROM credit_cards "
-                 "WHERE id = ? AND user_id = ?")
+        query = (f"SELECT {select_fields(fields, 'id')} "
+                  "  FROM credit_cards "
+                  " WHERE id = ? AND user_id = ?")
         placeholders = (card_id, self.user_id)
         card = self.cursor.execute(query, placeholders).fetchone()
         # Check that a card was found
@@ -83,13 +86,15 @@ class CardHandler(DatabaseHandler):
         """
         Find a credit card using uniquely identifying characteristics.
 
-        Credit cards in the database can almost always be identified
-        uniquely when given the user's ID and the last four digits of
-        the card number. In rare cases where a user has two cards with
-        the same last four digits, the issuing bank can be used to help
-        determine the card. (It is expected to be exceptionally rare
-        that a user has two cards with the same last four digits from
-        the same bank.
+        Queries the database to find a credit card based on the provided
+        criteria. Credit cards in the database can almost always be
+        identified uniquely given the user's ID and the last four digits
+        of the card number. In rare cases where a user has two cards
+        with the same last four digits, the issuing bank can be used to
+        help determine the card. (It is expected to be exceptionally
+        rare that a user has two cards with the same last four digits
+        from the same bank.) If multiple cards do match the criteria,
+        only the first one found is returned.
 
         Parameters
         ––––––––––
@@ -105,12 +110,12 @@ class CardHandler(DatabaseHandler):
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
         digits_filter = filter_item(last_four_digits, 'last_four_digits','AND')
-        query = ('SELECT * FROM credit_cards'
-                f' WHERE user_id = ? {bank_filter} {digits_filter}')
+        query = (f"SELECT {select_fields(CARD_FIELDS.keys(), 'id')} "
+                  "  FROM credit_cards "
+                  " WHERE user_id = ? "
+                 f"       {bank_filter} {digits_filter}")
         placeholders = (self.user_id, *fill_place(bank),
                         *fill_place(last_four_digits))
-        print(query)
-        print(placeholders)
         card = self.cursor.execute(query, placeholders).fetchone()
         # Check that a card was found and that it belongs to the user
         if card is None:

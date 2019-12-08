@@ -60,19 +60,21 @@ def filter_dict(dictionary, operator, condition, by_value=False):
 
 def parse_date(given_date):
     """
-    Given a date string in an accepted format, return a Python date object.
+    Given a string in an accepted format, return a Python date object.
 
-    All dates should be stored in the database as YYYY-MM-DD. This function
-    takes a date that is given as any of the acceptable formats and returns a
-    date object (which can be added into the database). The following are
-    acceptable date formats (in order of parsing precedence):
+    All dates should be stored in the database as YYYY-MM-DD, but can be
+    added to the database directly from Python date objects. This
+    function takes a date that is given as any of the acceptable formats
+    and returns a date object (which can be added into the database).
+    The following are acceptable date formats (in order of parsing
+    precedence):
         - YYYYMMDD
         - YYYY/[M]M/[D]
         - [M]M/[D]D/[YY]YY
-    Dates with a delimiter between time categories (day, month, year) are not
-    required to have two digit values (e.g. 'August' could be indicated by '08'
-    or just '8'). For dates that are given with a delimiter, it may be either
-    "/", ".", or "-".
+    Dates with a delimiter between time categories (day, month, year)
+    are not required to have two digit values (e.g. 'August' could be
+    indicated by '08' or just '8'). For dates that are given with a
+    delimiter, it may be either "/", ".", or "-".
 
     Parameters
     ––––––––––
