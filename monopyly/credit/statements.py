@@ -136,3 +136,19 @@ class StatementHandler(DatabaseHandler):
         if statement is None:
             abort(404, 'A statement matching the information was not found.')
         return statement
+
+
+def determine_statement(card, transaction_date):
+    """Find the statement for a transaction given the card and date."""
+    statement_day = card['statement_issue_day']
+    curr_month_statement_date = transaction_date.replace(day=statement_day)
+    if transaction_date.day < statement_day:
+        # The transaction will be on the statement later in the month
+        statement_date = curr_month_statement_date
+    else:
+        # The transaction will be on the next month's statement
+        statement_date = curr_month_statement_date + relativedelta(months=+1)
+    statement = StatementHandler().find_statement(card['id'], statement_date)
+    return statement
+
+

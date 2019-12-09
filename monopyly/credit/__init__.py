@@ -1,6 +1,8 @@
 """
 Flask blueprint for credit card financials.
 """
+from collections import Counter
+
 from flask import (
     Blueprint, flash, g, redirect, render_template,
     request, session, url_for, jsonify
@@ -13,7 +15,7 @@ from .constants import (
     TRANSACTION_FIELDS, REQUIRED_FIELDS, DISPLAY_FIELDS, FORM_FIELDS
 )
 from .cards import CardHandler
-from .transactions import TransactionHandler, process_transaction
+from .transactions import TransactionHandler
 from .statements import StatementHandler
 
 
@@ -119,18 +121,25 @@ def update_transaction(transaction_id):
 @login_required
 def get_autocomplete_info():
     field = request.get_json()
-    if field not in DISPLAY_FIELDS.keys():
-        raise ValueError(f"'{field}' is not an available autocompletion field.")
+    if field not in ('bank', 'last_four_digits', 'vendor', 'notes'):
+        raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
     db = get_db()
     cursor = db.cursor()
-    autocomplete_query = (f'SELECT {field}'
-                           '  FROM credit_transactions AS t'
-                           '  JOIN credit_cards AS c ON t.card_id = c.id'
-                           ' WHERE c.user_id = ?')
-    column = cursor.execute(autocomplete_query, (g.user['id'],)).fetchall()
-    unique_column = {row[field] for row in column}
-    return jsonify(tuple(unique_column))
+    query = (
+        f"SELECT {field}"
+         "  FROM credit_transactions AS t"
+         "  JOIN credit_statements AS s ON s.id = t.statement_id"
+         "  JOIN credit_cards AS c ON c.id = s.card_id"
+         " WHERE c.user_id = ?"
+    )
+    db_column = cursor.execute(query,(g.user['id'],)).fetchall()
+    column = [row[field] for row in db_column]
+    # Order the returned values by their frequency in the database
+    item_counts = Counter(column)
+    unique_items = set(column)
+    suggestions = sorted(unique_items, key=item_counts.get, reverse=True)
+    return jsonify(suggestions)
 
 
 @bp.route('/<int:transaction_id>/delete_transaction', methods=('POST',))

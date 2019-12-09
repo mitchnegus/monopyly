@@ -8,9 +8,9 @@ from ..utils import (
     DatabaseHandler, parse_date, reserve_places, fill_places, check_sort_order
 )
 from .constants import TRANSACTION_FIELDS
-from .tools import select_fields, filter_items, get_expected_statement_date
+from .tools import select_fields, filter_items
 from .cards import CardHandler
-from .statements import StatementHandler
+from .statements import StatementHandler, determine_statement
 
 
 class TransactionHandler(DatabaseHandler):
@@ -220,11 +220,10 @@ def process_transaction(form):
             card = ch.find_card(form['bank'], form['last_four_digits'])
             if not form['issue_date']:
                 transaction_date = parse_date(form['transaction_date'])
-                statement_date = get_expected_statement_date(transaction_date,
-                                                                 card)
+                statement = determine_statement(card, transaction_date)
             else:
                 statement_date = parse_date(form['issue_date'])
-            statement = sh.find_statement(card['id'], statement_date)
+                statement = sh.find_statement(card['id'], statement_date)
             transaction_info[field] = statement['id']
         elif field == 'transaction_date':
             # The field should be a date

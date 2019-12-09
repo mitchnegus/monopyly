@@ -6,6 +6,8 @@
  * the database.
  */
 var matches;
+var displayStart, displayCount;
+var currentFocus;
 
 // Set get possible values for fields with autocomplete
 $('div.autocomplete input').on('focus', function() {
@@ -104,10 +106,12 @@ function showAutocomplete(inputElement) {
 	var autocompleteBox = '<div class="autocomplete-box"></div>';
 	$(inputElement).parent().append(autocompleteBox);
 	// Define each item within the autocomplete box
-	var displayStart = 0;
-	var displayCount = 3;
-	populateAutocompleteItems(displayStart, displayCount);
-	bindNavigation(inputElement, displayStart, displayCount);
+	var displayStartDefault = 0;
+	var displayCountDefault = 10;
+	displayStart = displayStartDefault;
+	displayCount = displayCountDefault;
+	populateAutocompleteItems(inputElement);
+	bindNavigation(inputElement);
 }
 
 function clearAutocompleteItems() {
@@ -115,16 +119,16 @@ function clearAutocompleteItems() {
 	$('div.autocomplete-box div.item').remove();
 }
 
-function populateAutocompleteItems(displayStart, displayCount) {
+function populateAutocompleteItems(inputElement) {
 	clearAutocompleteItems();
 	// Populate the autocomplete list with suggestions
 	var autocompleteItem;	
+	var $suggestions;
 	if (matches.length < displayCount) {
 		// Show all suggestions available
-		displayStart = 0
 		displayCount = matches.length;
-	} else if ( matches.length < displayStart + displayCount) {
-		// Reset the start so that the "window" doesn't overflow
+	} else if (matches.length < displayStart + displayCount) {
+		// Reset the starting point to the fixed number of suggestions above bottom
 		displayStart = matches.length - displayCount;
 	}
 	var displayEnd = displayStart + displayCount;
@@ -132,68 +136,105 @@ function populateAutocompleteItems(displayStart, displayCount) {
 		autocompleteItem = '<div class="item">' + matches[i] + '</div>';
 		$('div.autocomplete-box').append(autocompleteItem);
 	}
+	$suggestions = $('div.autocomplete-box div.item');
+	$suggestions.on('mousedown', function(e) {
+		// Prevent "premature" blurring
+		e.preventDefault();
+	});
+	$suggestions.on('click', function() {
+		$suggestion = $(this)
+		autofillReplacement($suggestion, inputElement);
+		$(inputElement).next().focus();
+	});
 }
 
 function unbindNavigation (inputElement) {
 	$(inputElement).off('keydown');
 }
 
-function bindNavigation(inputElement, displayStart, displayCount) {
+function bindNavigation(inputElement) {
 	// Bind keyboard directions to autocomplete navigation
-	var currentFocus = -1;
+	currentFocus = -1;
 	$(inputElement).on('keydown', function(event) {
 		switch (event.which) {
-			case 13:
+			case 13: 		// ENTER
 				event.preventDefault();
-				console.log('enter');
-				if (currentFocus > -1) {
-					// Simulate a click on the active item
-					$('div.autocomplete-box div.item.active').click();
+				selectItem(inputElement);
+				break;
+			case 9: 		// TAB
+				event.preventDefault();
+				if (event.shiftKey) {
+					moveUp(inputElement);
+				} else {
+					moveDown(inputElement);
 				}
 				break;
-			case 40:
-				// Change the current focus 
-				if (currentFocus < displayCount) {
-					currentFocus++;
-				}
-				// Keep the display within the limits of the number of matches
-				var displayEnd = displayStart + displayCount
-				if (currentFocus == displayCount) {
-					currentFocus--;
-					if (displayEnd < matches.length) {
-						displayStart++;
-					}
-				}
-				populateAutocompleteItems(displayStart,	displayCount);
-				makeActive(inputElement, currentFocus);
+			case 40: 		// DOWN
+				event.preventDefault();
+				moveDown(inputElement);
 				break;
-			case 38:
-				// Change the current focus
-				if (currentFocus > -1) {
-					currentFocus--;
-				} 
-				// Keep the display within the limits of the number of matches
-				if (currentFocus == -1 && displayStart > 0) {
-					currentFocus++;
-					displayStart--;
-				}
-				populateAutocompleteItems(displayStart, displayCount);
-				makeActive(inputElement, currentFocus);
+			case 38: 		// UP
+				event.preventDefault();
+				moveUp(inputElement);
 				break;
 		}
 	});
 }
 
-function makeActive(inputElement, currentFocus) {
-	suggestions = $('div.autocomplete-box div.item');
-	suggestions.removeClass('active');
-	if (currentFocus >= 0) {
-		activeSuggestion = suggestions[currentFocus];
-		$(activeSuggestion).addClass('active');
-		$(activeSuggestion).on('click', function() {
-			var text = $(this).text();
-			$(inputElement).val(text);
-			closeAutocomplete(inputElement);
-		});
+function selectItem(inputElement) {
+	if (currentFocus > -1) {
+		// Simulate a click on the active item
+		$suggestion = $('div.autocomplete-box div.item.active');
+		autofillReplacement($suggestion, inputElement);
 	}
+	closeAutocomplete(inputElement);
+	$(inputElement).closest('div').next().find('input').focus();
+}
+
+function moveDown(inputElement) {
+	// Change the current focus 
+	if (currentFocus < displayCount - 1) {
+		currentFocus++;
+	}
+	// Keep the display within the limits of the number of matches
+	if (currentFocus == displayCount - 1) {
+		var displayEnd = displayStart + displayCount
+		if (displayEnd < matches.length) {
+			displayStart++;
+		}
+	}
+	populateAutocompleteItems(inputElement);
+	makeActive(currentFocus);
+}
+
+function moveUp(inputElement) {
+	// Change the current focus
+	if (currentFocus > -1) {
+		// Keep the display within the limits of the number of matches
+		if (currentFocus == 0 && displayStart > 0) {
+			displayStart--;
+		} else {
+			currentFocus--;
+		}
+	} else if (currentFocus == -1) {
+
+	} 
+	populateAutocompleteItems(inputElement);
+	makeActive(currentFocus);
+}
+
+function makeActive(currentFocus) {
+	var $suggestions, activeSuggestion
+	$suggestions = $('div.autocomplete-box div.item');
+	$suggestions.removeClass('active');
+	if (currentFocus >= 0) {
+		activeSuggestion = $suggestions[currentFocus];
+		$(activeSuggestion).addClass('active');
+	}
+}
+
+function autofillReplacement($suggestion, inputElement) {
+	var text = $suggestion.text();
+	$(inputElement).val(text);
+	closeAutocomplete(inputElement);
 }

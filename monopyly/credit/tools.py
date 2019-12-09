@@ -12,19 +12,6 @@ from ..utils import parse_date, reserve_places
 from .constants import ALL_FIELDS
 
 
-def get_expected_statement_date(transaction_date, card):
-    """Give the expected statement date given the card and transaction date."""
-    statement_day = card['statement_issue_day']
-    curr_month_statement_date = transaction_date.replace(day=statement_day)
-    if transaction_date.day < statement_day:
-        # The transaction will be on the statement later in the month
-        statement_date = curr_month_statement_date
-    else:
-        # The transaction will be on the next month's statement
-        statement_date = curr_month_statement_date + relativedelta(months=+1)
-    return statement_date
-
-
 def select_fields(fields, id_field=None):
     """
     Create a list of a given set of fields.
