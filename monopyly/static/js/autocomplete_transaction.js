@@ -8,6 +8,8 @@
  * current input text after the input field is changed.
  */
 
+// Identify all input elements in the form
+var $inputElements = $('form input');
 // Set global variables for selection movement
 var matches;
 var displayStart, displayCount;
@@ -148,7 +150,7 @@ function populateAutocompleteItems(inputElement) {
 	$suggestions.on('click', function() {
 		$suggestion = $(this);
 		autofillReplacement($suggestion, inputElement);
-		$(inputElement).next().focus();
+		$inputElements.eq($inputElements.index(inputElement)+1).focus();
 	});
 }
 
@@ -192,7 +194,7 @@ function selectItem(inputElement) {
 		autofillReplacement($suggestion, inputElement);
 	}
 	closeAutocomplete(inputElement);
-	$(inputElement).closest('div').next().find('input').focus();
+	$inputElements.eq($inputElements.index(inputElement)+1).focus();
 }
 
 function moveDown(inputElement) {
