@@ -33,7 +33,8 @@ class CardHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_cards(self, fields=CARD_FIELDS.keys(), banks=None, active=False):
+    def get_cards(self, fields=CARD_FIELDS.keys(), banks=None,
+                  last_four_digits=None, active=False):
         """
         Get credit cards from the database.
 
@@ -50,6 +51,10 @@ class CardHandler(DatabaseHandler):
         banks : tuple of str, optional
             A sequence of banks for which cards will be selected (if
             `None`, all banks will be selected).
+        last_four_digits : tuple of int, optional
+            A sequence of final 4 digits for which cards will be
+            selected (if `None`, cards with any last 4 digits will be
+            selected).
         active : bool, optional
             A flag indicating whether only active cards will be
             returned. The default is `False` (all cards are returned).
@@ -60,13 +65,16 @@ class CardHandler(DatabaseHandler):
             A list of credit cards matching the criteria.
         """
         bank_filter = filter_items(banks, 'bank', 'AND')
+        digit_filter = filter_items(last_four_digits,
+                                    'last_four_digits', 'AND')
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 'id')} "
                   "  FROM credit_cards "
                   " WHERE user_id = ? "
-                 f"       {bank_filter} {active_filter} "
+                 f"       {bank_filter} {digit_filter} {active_filter} "
                   " ORDER BY active DESC")
-        placeholders = (self.user_id, *fill_places(banks))
+        placeholders = (self.user_id, *fill_places(banks),
+                        *fill_places(last_four_digits))
         cards = self.cursor.execute(query, placeholders).fetchall()
         return cards
 
@@ -105,15 +113,15 @@ class CardHandler(DatabaseHandler):
 
         Returns
         –––––––
-        card_id : int
-            The ID of the card matching the given information.
+        cards : sqlite3.Row
+            A credit card matching the criteria.
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
-        digits_filter = filter_item(last_four_digits, 'last_four_digits','AND')
+        digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
         query = (f"SELECT {select_fields(CARD_FIELDS.keys(), 'id')} "
                   "  FROM credit_cards "
                   " WHERE user_id = ? "
-                 f"       {bank_filter} {digits_filter}")
+                 f"       {bank_filter} {digit_filter}")
         placeholders = (self.user_id, *fill_place(bank),
                         *fill_place(last_four_digits))
         card = self.cursor.execute(query, placeholders).fetchone()

@@ -45,9 +45,9 @@ def show_transactions():
 def update_transactions_table():
     ch, th = CardHandler(), TransactionHandler()
     # Separate the arguments of the POST method
-    post_arguments = request.get_json()
-    filter_ids = post_arguments['filter_ids']
-    sort_order = 'ASC' if post_arguments['sort_order'] == 'asc' else 'DESC'
+    post_args = request.get_json()
+    filter_ids = post_args['filter_ids']
+    sort_order = 'ASC' if post_args['sort_order'] == 'asc' else 'DESC'
     # Determine the card IDs from the arguments of POST method
     card_ids = [ch.find_card(*tag.split('-'))['id'] for tag in filter_ids]
     # Filter selected transactions from the database
@@ -62,8 +62,8 @@ def update_transactions_table():
 @bp.route('/<int:transaction_id>/transaction')
 @login_required
 def show_transaction(transaction_id):
-    # Get the transaction information from the database
     th = TransactionHandler()
+    # Get the transaction information from the database
     transaction = th.get_transaction(transaction_id)
     # Match the transaction to a registered credit card
     return render_template('credit/transaction.html',
@@ -79,8 +79,8 @@ def new_transaction():
     if request.method == 'POST' and form.validate():
         error = error_unless_all_fields_provided(request.form, REQUIRED_FIELDS)
         if not error:
-            # Insert the new transaction into the database
             th = TransactionHandler()
+            # Insert the new transaction into the database
             transaction = th.new_transaction(request.form)
             return render_template('credit/submission.html',
                                    field_names=DISPLAY_FIELDS,
@@ -95,8 +95,8 @@ def new_transaction():
 @bp.route('/<int:transaction_id>/update_transaction', methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    # Get the transaction information from the database
     th = TransactionHandler()
+    # Get the transaction information from the database
     transaction = th.get_transaction(transaction_id)
     # Define a form for a transaction
     form = TransactionForm(data=transaction)
@@ -117,23 +117,16 @@ def update_transaction(transaction_id):
                            transaction_id=transaction_id, form=form)
 
 
-@bp.route('/_get_autocomplete_info', methods=('POST',))
+@bp.route('/_suggest_autocomplete', methods=('POST',))
 @login_required
-def get_autocomplete_info():
+def suggest_autocomplete():
+    th = TransactionHandler()
+    # Get the autocomplete field from the AJAX request
     field = request.get_json()
     if field not in ('bank', 'last_four_digits', 'vendor', 'notes'):
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
-    db = get_db()
-    cursor = db.cursor()
-    query = (
-        f"SELECT {field}"
-         "  FROM credit_transactions AS t"
-         "  JOIN credit_statements AS s ON s.id = t.statement_id"
-         "  JOIN credit_cards AS c ON c.id = s.card_id"
-         " WHERE c.user_id = ?"
-    )
-    db_column = cursor.execute(query,(g.user['id'],)).fetchall()
+    db_column = th.get_transactions(fields=(field,))
     column = [row[field] for row in db_column]
     # Order the returned values by their frequency in the database
     item_counts = Counter(column)
@@ -142,10 +135,45 @@ def get_autocomplete_info():
     return jsonify(suggestions)
 
 
+@bp.route('/_infer_card', methods=('POST',))
+@login_required
+def infer_card():
+    ch = CardHandler()
+    # Separate the arguments of the POST method
+    post_args = request.get_json()
+    if 'digits' in post_args:
+        # Try to infer card from digits alone
+        cards = ch.get_cards(last_four_digits=(post_args['digits'],),
+                             active=True)
+        if len(cards) != 1:
+            # Infer card from digits and bank if necessary
+            cards = ch.get_cards(banks=(post_args['bank'],),
+                                 last_four_digits=(post_args['digits'],),
+                                 active=True)
+    elif 'bank' in post_args:
+        # Try to infer card from bank alone
+        cards = ch.get_cards(banks=(post_args['bank'],), active=True)
+    # Return an inferred card if a single card is identified
+    if len(cards) == 1:
+        # Return the card info if its is found
+        card = cards[0]
+        response = {'bank': card['bank'],
+                    'digits': card['last_four_digits']}
+        return jsonify(response)
+    else:
+        return ''
+
+
+@bp.route('/_infer_statement', methods=('POST',))
+@login_required
+def infer_statement():
+    return
+
+
 @bp.route('/<int:transaction_id>/delete_transaction', methods=('POST',))
 @login_required
 def delete_transaction(transaction_id):
-    # Remove the transaction from the database
     th = TransactionHandler()
+    # Remove the transaction from the database
     th.delete_transaction(transaction_id)
     return redirect(url_for('credit.show_transactions'))
