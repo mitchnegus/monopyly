@@ -1,17 +1,21 @@
 /*
- * Provide autocomplete assistance when entering (or update) a transaction.
+ * Provide autocomplete suggestions when filling out a transaction form.
  *
- * When entering a transaction, provide various autocomplete functionalities
- * for the different types of entries. Autocomplete information is pulled from
- * the database.
+ * When entering a transaction, provide autocomplete suggestions to the
+ * user. The suggestions are pulled from the database for the field
+ * being input using an AJAX request. They are ordered (on the server
+ * side) by their occurrence frequecy and then filtered here by the
+ * current input text after the input field is changed.
  */
+
+// Set global variables for selection movement
 var matches;
 var displayStart, displayCount;
 var currentFocus;
 
-// Set get possible values for fields with autocomplete
+// Get possible values for fields with autocomplete
 $('div.autocomplete input').on('focus', function() {
-	var inputElement = this
+	var inputElement = this;
 	autocompleteAjaxRequest(inputElement);
 });
 
@@ -22,7 +26,7 @@ $('div.autocomplete input').on('blur', function() {
 });
 
 function autocompleteAjaxRequest(inputElement) {
-	// Return a filtered table for each ID in the set of filterIDs
+	// Return a set of autocomplete suggestions from the database
 	$.ajax({
 		url: $AUTOCOMPLETE_ENDPOINT,
 		type: 'POST',
@@ -75,7 +79,7 @@ function refreshMatches(userInput, response) {
 	for (var i = 0; i < response.length; i++) {
 		responseItem = response[i] 
 		var lowerResponseItem = responseItem.toLowerCase();
-		var userInputMatches = lowerResponseItem.includes(userInput)
+		var userInputMatches = lowerResponseItem.includes(userInput);
 		var responseItemIncluded = matches.includes(responseItem);
 		if (userInputMatches && !responseItemIncluded) {
 			matches.push(responseItem);
@@ -142,7 +146,7 @@ function populateAutocompleteItems(inputElement) {
 		e.preventDefault();
 	});
 	$suggestions.on('click', function() {
-		$suggestion = $(this)
+		$suggestion = $(this);
 		autofillReplacement($suggestion, inputElement);
 		$(inputElement).next().focus();
 	});
@@ -198,7 +202,7 @@ function moveDown(inputElement) {
 	}
 	// Keep the display within the limits of the number of matches
 	if (currentFocus == displayCount - 1) {
-		var displayEnd = displayStart + displayCount
+		var displayEnd = displayStart + displayCount;
 		if (displayEnd < matches.length) {
 			displayStart++;
 		}

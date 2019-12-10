@@ -1,17 +1,17 @@
 /*
  * Update the table of credit card transactions.
  *
- * Update credit card transaction table. The table update uses an Ajax request
- * to the server to query the database based on the user's selection. The Ajax
- * request is defined in its own function.
+ * Update credit card transaction table. The table update uses an Ajax
+ * request to the server to query the database based on the user's
+ * selection. The Ajax request is defined in its own function.
  *
  * Updates can be triggered by the following actions:
  * 	- Changing the card filters: a user can click on any of the card
- * 	  filters to show or hide transactions from that card (inactive filters
- * 	  also display a label indicating their inactive status).
- * 	- Sorting the table by transaction date: a user can click on the 'Date'
- * 	  column header to sort the transaction date in ascending or descending
- *	  order.
+ * 	  filters to show or hide transactions from that card (inactive
+ * 	  filters also display a label indicating their inactive status).
+ * 	- Sorting the table by transaction date: a user can click on the
+ * 		'Date' column header to sort the transaction date in ascending or
+ * 		descending order.
  */
 
 // Identify the card filters
@@ -40,7 +40,7 @@ inactiveCardFilters.hover(
 var filters = filterContainer.find('.card');
 filters.on('click', function() {
 	// Add or remove the selected tag when clicked
-	$(this).toggleClass('selected')
+	$(this).toggleClass('selected');
 	updateTable();
 });
 
