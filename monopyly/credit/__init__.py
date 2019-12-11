@@ -11,12 +11,13 @@ from flask import (
 from ..db import get_db
 from ..auth import login_required
 from ..forms import *
+from ..utils import parse_date
 from .constants import (
     TRANSACTION_FIELDS, REQUIRED_FIELDS, DISPLAY_FIELDS, FORM_FIELDS
 )
 from .cards import CardHandler
-from .transactions import TransactionHandler
 from .statements import StatementHandler
+from .transactions import TransactionHandler, determine_statement
 
 
 # Define the blueprint
@@ -143,7 +144,7 @@ def infer_card():
     post_args = request.get_json()
     bank = (post_args['bank'],)
     if 'digits' in post_args:
-        last_four_digits = (post_args['last_four_digits'],)
+        last_four_digits = (post_args['digits'],)
         # Try to infer card from digits alone
         cards = ch.get_cards(last_four_digits=last_four_digits, active=True)
         if len(cards) != 1:
@@ -167,7 +168,21 @@ def infer_card():
 @bp.route('/_infer_statement', methods=('POST',))
 @login_required
 def infer_statement():
-    return
+    ch, sh = CardHandler(), StatementHandler()
+    # Separate the arguments of the POST method
+    post_args = request.get_json()
+    bank = (post_args['bank'],)
+    last_four_digits = (post_args['digits'],)
+    transaction_date = parse_date(post_args['transaction_date'])
+    # Determine the card used for the transaction from the given info
+    cards = ch.get_cards(banks=bank, last_four_digits=last_four_digits,
+                         active=True)
+    if len(cards) == 1:
+        # Determine the statement corresponding to the card and date
+        card = cards[0]
+        statement = determine_statement(card, transaction_date)
+        return statement['issue_date']
+    return ''
 
 
 @bp.route('/<int:transaction_id>/delete_transaction', methods=('POST',))

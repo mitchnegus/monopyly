@@ -12,22 +12,24 @@
 // Identify all input elements in the form
 var $inputElements = $('form input');
 // Identify inputs for card information
-var $bankInput = $inputElements.filter('div.bank input');
-var $digitsInput = $inputElements.filter('div.last-four-digits input');
+var $bankInput = $inputElements.filter('input#bank');
+var $digitsInput = $inputElements.filter('input#last_four_digits');
 
-// Check if a card can be inferred
+// Set triggers for checking about inferences
 $bankInput.on('blur', function() {
 	var rawData = {'bank': $(this).val()};
 	inferCardAjaxRequest(rawData);
 });
 $digitsInput.on('blur', function() {
-	var rawData = {'bank': $bankInput.val(),
-								 'digits': $(this).val()};
+	var rawData = {
+		'bank': $bankInput.val(),
+		'digits': $(this).val()
+	};
 	inferCardAjaxRequest(rawData);
 });
 
 function inferCardAjaxRequest(rawData) {
-	// Return a filtered table for each ID in the set of filterIDs
+	// Return a single card matching the criteria of the raw data
 	$.ajax({
 		url: $INFER_CARD_ENDPOINT,
 		type: 'POST',
@@ -38,9 +40,8 @@ function inferCardAjaxRequest(rawData) {
 				// A card can be inferred, so populate the fields with its info
 				$bankInput.val(response['bank']);
 				$digitsInput.val(response['digits']);
-				console.log(response['bank']);
-				console.log(response['digits']);
-				$inputElements.eq($inputElements.index($digitsInput[0])+1).focus();
+				var nextInputIndex = $inputElements.index($digitsInput[0])+1;
+				$inputElements.eq(nextInputIndex).focus();
 			}
 		},
 		error: function(xhr) {

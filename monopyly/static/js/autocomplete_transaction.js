@@ -150,7 +150,8 @@ function populateAutocompleteItems(inputElement) {
 	$suggestions.on('click', function() {
 		$suggestion = $(this);
 		autofillReplacement($suggestion, inputElement);
-		$inputElements.eq($inputElements.index(inputElement)+1).focus();
+		var nextInputIndex = $inputElements.index(inputElement)+1;
+		$inputElements.eq(nextInputIndex).focus();
 	});
 }
 
@@ -194,7 +195,8 @@ function selectItem(inputElement) {
 		autofillReplacement($suggestion, inputElement);
 	}
 	closeAutocomplete(inputElement);
-	$inputElements.eq($inputElements.index(inputElement)+1).focus();
+	var nextInputIndex = $inputElements.index(inputElement)+1;
+	$inputElements.eq(nextInputIndex).focus();
 }
 
 function moveDown(inputElement) {

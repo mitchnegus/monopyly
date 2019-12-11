@@ -10,7 +10,7 @@ from ..utils import (
 from .constants import TRANSACTION_FIELDS
 from .tools import select_fields, filter_items
 from .cards import CardHandler
-from .statements import StatementHandler, determine_statement
+from .statements import StatementHandler
 
 
 class TransactionHandler(DatabaseHandler):
@@ -234,3 +234,19 @@ def process_transaction(form):
         else:
             transaction_info[field] = form[field]
     return transaction_info
+
+
+def determine_statement(card, transaction_date):
+    """Find the statement for a transaction given the card and date."""
+    statement_day = card['statement_issue_day']
+    curr_month_statement_date = transaction_date.replace(day=statement_day)
+    if transaction_date.day < statement_day:
+        # The transaction will be on the statement later in the month
+        statement_date = curr_month_statement_date
+    else:
+        # The transaction will be on the next month's statement
+        statement_date = curr_month_statement_date + relativedelta(months=+1)
+    statement = StatementHandler().find_statement(card['id'], statement_date)
+    return statement
+
+
