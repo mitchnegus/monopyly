@@ -28,7 +28,7 @@
 		</p>
 		<p>
 			<b>{{ field_names['price'] }}: </b>
-			${{ transaction['price'] }}
+			{{ '${:.2f}'.format(transaction['price']) }}
 		</p>
 		<p>
 			<b>{{ field_names['notes'] }}: </b>
