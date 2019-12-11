@@ -93,11 +93,16 @@ function updateAutocomplete(inputElement, userInput) {
 	// Define conditions for showing/closing the autocomplete box
 	var matchCount = matches.length;
 	if (userInput && matchCount) {
+		// There is user input and some matches, so show the autocomplete box
 		var lowerFirstMatch = matches[0].toLowerCase();
 		var onlyUserInput = (matchCount == 1 && userInput == lowerFirstMatch);
 		if (!onlyUserInput) {
+			// Don't show a suggestion if the given input matches the only suggestion
 			showAutocomplete(inputElement);
 		}
+	} else {
+		// There is either no input or no matches, so close the autocomplete box
+		closeAutocomplete(inputElement);
 	}
 }
 
