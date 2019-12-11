@@ -199,16 +199,16 @@ div#homepage-block.jumbo {
 }
 
 #homepage-block h2 {
-  font-size: 3em;
   margin-top: 40px;
   text-align: center;
+  font-size: 3em;
   letter-spacing: -2px;
 }
 
 #homepage-block h3 {
   margin-top: 30px;
   text-align: center;
-  color: #999;
+  color: #999999;
   font-size: 1.7em;
   font-weight: 100;
 }
