@@ -2,7 +2,6 @@
 Tools for dealing with the credit blueprint.
 """
 import operator as op
-from dateutil.relativedelta import relativedelta
 
 from flask import g
 from werkzeug.exceptions import abort

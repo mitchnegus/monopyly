@@ -1,6 +1,8 @@
 """
 Tools for interacting with the credit transactions database.
 """
+from dateutil.relativedelta import relativedelta
+
 from flask import g
 
 from ..db import get_db
