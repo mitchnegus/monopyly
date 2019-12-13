@@ -32,6 +32,7 @@ def manage_cards():
     cards = ch.get_cards()
     return render_template('credit/cards_page.html', cards=cards)
 
+
 @bp.route('/transactions')
 @login_required
 def show_transactions():
@@ -77,6 +78,13 @@ def show_transaction(transaction_id):
     # Match the transaction to a registered credit card
     return render_template('credit/transaction_page.html',
                            transaction=transaction)
+
+
+@bp.route('/new_card', methods=('GET', 'POST'))
+@login_required
+def new_card():
+    # Define a form for a card
+    return render_template('credit/card_form_page_new.html')
 
 
 @bp.route('/new_transaction', methods=('GET', 'POST'))

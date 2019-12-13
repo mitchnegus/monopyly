@@ -5,5 +5,7 @@
 		</div>
 	{% endfor %}
 	<div class="credit-card-block">
-		<img class="credit-card" src="{{ url_for('static', filename='img/new-card.png') }}">
+		<a href="{{ url_for('credit.new_card') }}">
+			<img class="credit-card" src="{{ url_for('static', filename='img/new-card.png') }}">
+		</a>
 	</div>
