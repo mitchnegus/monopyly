@@ -1,15 +1,5 @@
 {% extends "layout.html" %}
 
-{% block header %}
-	<h1>{% block title %}New Transaction{% endblock %}</h1>
-{% endblock %}
-
-{% block content %}
-	{% with submission_url = url_for('credit.new_transaction') %}
-		{% include 'credit/transaction_form.html' %}
-	{% endwith %}
-{% endblock %}
-
 {% block javascript %}
 	<script>
 		var $AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_autocomplete') }}";

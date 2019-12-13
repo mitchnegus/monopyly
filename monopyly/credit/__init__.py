@@ -35,7 +35,7 @@ def show_transactions():
     transactions = th.get_transactions(fields=FORM_FIELDS,
                                        sort_order=sort_order,
                                        active=True)
-    return render_template('credit/transactions.html',
+    return render_template('credit/transactions_page.html',
                            cards=cards,
                            sort_order=sort_order,
                            transactions=transactions)
@@ -55,7 +55,7 @@ def update_transactions_table():
     transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
                                        card_ids=card_ids,
                                        sort_order=sort_order)
-    return render_template('credit/transaction_table.html',
+    return render_template('credit/transactions_table.html',
                            sort_order=sort_order,
                            transactions=transactions)
 
@@ -67,7 +67,7 @@ def show_transaction(transaction_id):
     # Get the transaction information from the database
     transaction = th.get_transaction(transaction_id)
     # Match the transaction to a registered credit card
-    return render_template('credit/transaction.html',
+    return render_template('credit/transaction_page.html',
                            transaction=transaction)
 
 
@@ -83,14 +83,14 @@ def new_transaction():
             th = TransactionHandler()
             # Insert the new transaction into the database
             transaction = th.new_transaction(request.form)
-            return render_template('credit/submission.html',
+            return render_template('credit/submission_page.html',
                                    field_names=DISPLAY_FIELDS,
                                    transaction=transaction,
                                    update=False)
         else:
             flash(error)
     # Display the form for accepting user input
-    return render_template('credit/new_transaction.html', form=form)
+    return render_template('credit/transaction_form_page_new.html', form=form)
 
 
 @bp.route('/<int:transaction_id>/update_transaction', methods=('GET', 'POST'))
@@ -107,14 +107,14 @@ def update_transaction(transaction_id):
         if not error:
             # Update the database with the updated transaction
             transaction = th.update_transaction(transaction_id, request.form)
-            return render_template('credit/submission.html',
+            return render_template('credit/submission_page.html',
                                    field_names=DISPLAY_FIELDS,
                                    transaction=transaction,
                                    update=True)
         else:
             flash(error)
     # Display the form for accepting user input
-    return render_template('credit/update_transaction.html',
+    return render_template('credit/transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
 
 
