@@ -15,7 +15,7 @@
  */
 
 // Identify the card filters
-var container = $('#transaction-table-container');
+var container = $('#transactions-table-container');
 var filterContainer = $('#card-filter');
 
 // Label inactive cards when they are hovered over

@@ -24,6 +24,14 @@ from .transactions import TransactionHandler, determine_statement
 bp = Blueprint('credit', __name__, url_prefix='/credit')
 
 
+@bp.route('/cards')
+@login_required
+def manage_cards():
+    ch = CardHandler()
+    # Get all of the user's credit cards from the database
+    cards = ch.get_cards()
+    return render_template('credit/cards_page.html', cards=cards)
+
 @bp.route('/transactions')
 @login_required
 def show_transactions():

@@ -230,6 +230,49 @@ div#homepage-block.jumbo {
 }
 
 /*
+ * Customization for the 'Cards' page
+ */
+div#cards-container {
+	display: flex;
+	flex-wrap: wrap;
+	width: 420px;
+	margin: auto;
+}
+@media screen and (min-width: 1040px) {
+	div#cards-container {
+		width: 840px;
+	}
+}
+@media screen and (min-width: 1460px) {
+	div#cards-container {
+		width: 1260px;
+	}
+}
+@media screen and (min-width: 1880px) {
+	div#cards-container {
+		width: 1680px;
+	}
+}
+
+div.credit-card-block {
+	position: relative;
+	margin: 10px;
+}
+
+div.credit-card-block img.credit-card {
+	width: 400px;
+}
+
+div.credit-card-block div.last-four-digits {
+	position: absolute;
+	top: 150px;
+	left: 50px;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 20pt;
+}
+
+
+/*
  * Customization for the 'Transactions' page
  */
 nav#transactions-menu {

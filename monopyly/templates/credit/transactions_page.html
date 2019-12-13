@@ -39,12 +39,12 @@
 	<a name="top"></a>
 	<div id="card-filter">
 		{% for card in cards %}
-		<a id="{{ card['bank'] }}-{{ card['last_four_digits'] }}" class="card {{ 'active selected' if card['active'] else 'inactive' }}">
+			<a id="{{ card['bank'] }}-{{ card['last_four_digits'] }}" class="card {{ 'active selected' if card['active'] else 'inactive' }}">
 				{{ card['bank'] }} (-{{card['last_four_digits'] }})
 			</a>
 		{% endfor %}
 	</div>
-	<div id="transaction-table-container">
+	<div id="transactions-table-container">
 		{% include 'credit/transactions_table.html' %}
 	</div>
 	<a name="bottom"></a>
