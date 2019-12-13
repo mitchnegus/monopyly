@@ -12,24 +12,30 @@
 		</div>
 	</div>
 
-	{{ form.transaction_date.label }}
-	{{ form.transaction_date }}
+	<div>
+		{{ form.transaction_date.label }}
+		{{ form.transaction_date }}
+	</div>
 
 	<div class="autocomplete">
 		{{ form.vendor.label }}
 		{{ form.vendor }}
 	</div>
 
-	{{ form.price.label }}
-	{{ form.price }}
+	<div>
+		{{ form.price.label }}
+		{{ form.price }}
+	</div>
 
 	<div class="autocomplete">
 		{{ form.notes.label }}
 		{{ form.notes }}
 	</div>
 
-	{{ form.statement_date.label }}
-	{{ form.statement_date }}
+	<div>
+		{{ form.issue_date.label }}
+		{{ form.issue_date }}
+	</div>
 
 	{{ form.submit(class_="button") }}
 </form>

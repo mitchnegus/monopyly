@@ -26,7 +26,7 @@
 			<td class="notes">
 				<div class="notes">{{ transaction['notes'] }}</div>
 			</td>
-			<td class="date">{{ transaction['statement_date'] }}</td>
+			<td class="date">{{ transaction['issue_date'] }}</td>
 			<td>
 				<a class"transaction" href="{{ url_for('credit.show_transaction', transaction_id=transaction['id']) }}">
 					<img class="edit-icon hide" src="{{ url_for('static', filename='img/edit.png') }}" />

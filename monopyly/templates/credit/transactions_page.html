@@ -45,13 +45,13 @@
 		{% endfor %}
 	</div>
 	<div id="transaction-table-container">
-		{% include 'credit/transaction_table.html' %}
+		{% include 'credit/transactions_table.html' %}
 	</div>
 	<a name="bottom"></a>
 {% endblock %}
 
 {% block javascript %}
-	<script>var $TABLE_UPDATE_ENDPOINT = "{{ url_for('credit.update_transaction_table') }}";</script>
-	<script src="{{ url_for('static', filename='js/update_transaction_table.js') }}">
+	<script>var $TABLE_UPDATE_ENDPOINT = "{{ url_for('credit.update_transactions_table') }}";</script>
+	<script src="{{ url_for('static', filename='js/update_transactions_table.js') }}">
 	</script>
 {% endblock %}

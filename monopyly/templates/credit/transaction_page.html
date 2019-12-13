@@ -23,7 +23,7 @@
 		<tr>
 			<th scope="row" class="card">Card</th>
 			<td class="card">
-				{{ card['bank'] }} ****-{{ card['last_four_digits'] }}
+				{{ transaction['bank'] }} ****-{{ transaction['last_four_digits'] }}
 			</td>
 		</tr>
 		<tr>
@@ -36,7 +36,7 @@
 		</tr>
 		<tr>
 			<th scope="row" class="price">Price</th>
-			<td class="price">{{ '{:.2f}'.format(transaction['price']) }}</td>
+			<td class="price">{{ '${:.2f}'.format(transaction['price']) }}</td>
 		</tr>
 		<tr>
 			<th scope="row" class="text">Notes</th>
@@ -44,7 +44,7 @@
 		</tr>
 		<tr>
 			<th scope="row" class="date">Statement Date</th>
-			<td class="date">{{ transaction['statement_date'] }}</td>
+			<td class="date">{{ transaction['issue_date'] }}</td>
 		</tr>
 	</table>
 	<form action="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}" method="get">

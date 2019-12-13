@@ -14,8 +14,14 @@ class TransactionForm(FlaskForm):
     vendor = TextField('Vendor', [DataRequired()])
     price = DecimalField('Price', [DataRequired()], places=2)
     notes = TextField('Notes', [DataRequired()])
-    statement_date = TextField('Statement Date')
-    submit = SubmitField('Add Transaction')
+    issue_date = TextField('Statement Date')
+    submit = SubmitField('Save Transaction')
 
-class UpdateTransactionForm(TransactionForm):
-    submit = SubmitField('Update Transaction')
+
+def error_unless_all_fields_provided(form, fields):
+    """Check that all fields have been given on a submitted form."""
+    if not all(form[field] for field in fields):
+        error = 'All fields are required.'
+    else:
+        error = None
+    return error
