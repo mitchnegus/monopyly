@@ -33,11 +33,14 @@
 
 		<header id="masthead">
 			<div class="container">
+
 				<a href="{{ url_for('index') }}">
 					<h1 class="logo">Monopyly</h1>
 				</a>
+
 				<nav id="nav-menu">
 					<ul></strong>
+
 						<li><a href="{{ url_for('index') }}">Home</a></li>
 						<li><a href="{{ url_for('about') }}">About</a></li>
 						{% if g.user %}
@@ -47,23 +50,29 @@
 		      		<li><a href="{{ url_for('auth.register') }}">Register</a>
 		      		<li><a href="{{ url_for('auth.login') }}">Log In</a>
 						{% endif %}
+
 					</ul></strong>
 				</nav>
+
 			</div>
 		</header>
 
 		<div id="page">
+
 			<aside class="sidebar">
 				{% block left_sidebar %}{% endblock %}
 			</aside>
 	
 			<section class="content container">
+
 				<header id="content-header">
 					{% block header %}{% endblock %}
 				</header>
+
 				{% for message in get_flashed_messages() %}
 					<div class="flash">{{ message }}</div>
 				{% endfor %}
+
 				{% block content %}{% endblock %}
 			</section>
 	

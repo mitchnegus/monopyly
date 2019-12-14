@@ -1,11 +1,15 @@
 {% extends "credit/transaction_form_page.html" %}
 
-{% block header %}
-	<h1>{% block title %}Update Transaction{% endblock %}</h1>
+
+{% block title %}
+	Update Transaction
 {% endblock %}
 
+
 {% block content %}
+
 	{% with submission_url = url_for('credit.update_transaction', transaction_id=transaction_id) %}
 		{% include 'credit/transaction_form.html' %}
 	{% endwith %}
+
 {% endblock %}

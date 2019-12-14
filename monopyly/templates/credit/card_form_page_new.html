@@ -1,11 +1,15 @@
 {% extends "credit/card_form_page.html" %}
 
-{% block header %}
-	<h1>{% block title %}New Card{% endblock %}</h1>
+
+{% block title %}
+	New Card
 {% endblock %}
 
+
 {% block content %}
+
 	{% with submission_url = url_for('credit.new_card') %}
 		{% include 'credit/card_form.html' %}
 	{% endwith %}
+
 {% endblock %}

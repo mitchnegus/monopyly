@@ -12,9 +12,7 @@ from ..db import get_db
 from ..auth import login_required
 from ..forms import *
 from ..utils import parse_date
-from .constants import (
-    TRANSACTION_FIELDS, REQUIRED_FIELDS, DISPLAY_FIELDS, FORM_FIELDS
-)
+from .constants import DISPLAY_FIELDS
 from .cards import CardHandler
 from .statements import StatementHandler
 from .transactions import TransactionHandler, determine_statement
@@ -41,7 +39,7 @@ def show_transactions():
     cards = ch.get_cards()
     # Get all of the user's transactions for active cards from the database
     sort_order = 'DESC'
-    transactions = th.get_transactions(fields=FORM_FIELDS,
+    transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
                                        sort_order=sort_order,
                                        active=True)
     return render_template('credit/transactions_page.html',
@@ -83,8 +81,17 @@ def show_transaction(transaction_id):
 @bp.route('/new_card', methods=('GET', 'POST'))
 @login_required
 def new_card():
+    # Define a form for a credit card
+    form = CardForm()
+    # Check if a card was submitted and add it to the database
+    if request.method == 'POST' and form.validate():
+        ch = CardHandler()
+        # Insert the new credit card into the database
+        card = ch.new_card(form)
+        return render_template('credit/card_submission_page.html',
+                               update=False)
     # Define a form for a card
-    return render_template('credit/card_form_page_new.html')
+    return render_template('credit/card_form_page_new.html', form=form)
 
 
 @bp.route('/new_transaction', methods=('GET', 'POST'))
@@ -94,17 +101,13 @@ def new_transaction():
     form = TransactionForm()
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST' and form.validate():
-        error = error_unless_all_fields_provided(request.form, REQUIRED_FIELDS)
-        if not error:
-            th = TransactionHandler()
-            # Insert the new transaction into the database
-            transaction = th.new_transaction(request.form)
-            return render_template('credit/submission_page.html',
-                                   field_names=DISPLAY_FIELDS,
-                                   transaction=transaction,
-                                   update=False)
-        else:
-            flash(error)
+        th = TransactionHandler()
+        # Insert the new transaction into the database
+        transaction = th.new_transaction(form)
+        return render_template('credit/transaction_submission_page.html',
+                               field_names=DISPLAY_FIELDS,
+                               transaction=transaction,
+                               update=False)
     # Display the form for accepting user input
     return render_template('credit/transaction_form_page_new.html', form=form)
 
@@ -119,16 +122,12 @@ def update_transaction(transaction_id):
     form = TransactionForm(data=transaction)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
-        error = error_unless_all_fields_provided(request.form, REQUIRED_FIELDS)
-        if not error:
-            # Update the database with the updated transaction
-            transaction = th.update_transaction(transaction_id, request.form)
-            return render_template('credit/submission_page.html',
-                                   field_names=DISPLAY_FIELDS,
-                                   transaction=transaction,
-                                   update=True)
-        else:
-            flash(error)
+        # Update the database with the updated transaction
+        transaction = th.update_transaction(transaction_id, form)
+        return render_template('credit/transaction_submission_page.html',
+                               field_names=DISPLAY_FIELDS,
+                               transaction=transaction,
+                               update=True)
     # Display the form for accepting user input
     return render_template('credit/transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)

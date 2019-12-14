@@ -87,6 +87,8 @@ def parse_date(given_date):
     date : date
         A Python `date` object based on the given date string.
     """
+    if given_date is None:
+        return None
     alt_delimiters = ('.', '/')
     date_formats = ('%Y-%m-%d', '%m-%d-%Y', '%m-%d-%y')
     err_msg = (f"The given date ('{given_date}') was not in an acceptable "
@@ -108,7 +110,7 @@ def parse_date(given_date):
     for fmt in date_formats:
         try:
             date = datetime.strptime(parseable_date, fmt).date()
-            return (date)
+            return date
         except ValueError:
             pass
     raise ValueError(err_msg)

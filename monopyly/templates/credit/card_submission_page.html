@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+
+	<h1>
+		{% block title %}
+			Card {{ 'Updated' if update else 'Added' }}
+		{% endblock %}
+	</h1>
+
+{% endblock %}
+
+<p>The card was added successfully.</p>

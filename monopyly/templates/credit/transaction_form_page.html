@@ -1,6 +1,13 @@
 {% extends "layout.html" %}
 
+
+{% block header %}
+	<h1>{% block title %}{% endblock %}</h1>
+{% endblock %}
+
+
 {% block javascript %}
+
 	<script>
 		var $AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_autocomplete') }}";
 		var $INFER_CARD_ENDPOINT = "{{ url_for('credit.infer_card') }}";
@@ -12,4 +19,5 @@
 	</script>
 	<script src="{{ url_for('static', filename='js/infer_statement.js') }}">
 	</script>
+
 {% endblock %}

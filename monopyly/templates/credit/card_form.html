@@ -1,1 +1,36 @@
-...
+<form action="{{ submission_url }}" method="POST" autocomplete="off">
+
+	{{ form.hidden_tag() }}
+	
+	<div class="card-info">
+
+		<div class="bank autocomplete">
+			{{ form.bank.label }}
+			{{ form.bank }}
+		</div>
+
+		<div class="last-four-digits">
+			{{ form.last_four_digits.label }}
+			{{ form.last_four_digits }}
+		</div>
+		
+		<div>
+			{{ form.statement_issue_day.label }}
+			{{ form.statement_issue_day }}
+		</div>
+
+		<div>
+			{{ form.statement_due_day.label }}
+			{{ form.statement_due_day }}
+		</div>
+
+		<div>
+			{{ form.active.label }}
+			{{ form.active }}
+		</div>
+
+	</div>
+
+	{{ form.submit(class_="button") }}
+
+</form>

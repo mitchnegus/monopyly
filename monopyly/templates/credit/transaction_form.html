@@ -1,4 +1,5 @@
 <form action="{{ submission_url }}" method="POST" autocomplete="off">
+
 	{{ form.hidden_tag() }}
 
 	<div class="card-info">
@@ -6,10 +7,12 @@
 			{{ form.bank.label }}
 			{{ form.bank }}
 		</div>
+
 		<div class="last-four-digits autocomplete">
 			{{ form.last_four_digits.label }}
 			{{ form.last_four_digits }}
 		</div>
+
 	</div>
 
 	<div>
@@ -38,4 +41,5 @@
 	</div>
 
 	{{ form.submit(class_="button") }}
+
 </form>

@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 
+
 {% block header %}
 	<h1>
 		{% block title %}
@@ -8,36 +9,46 @@
 	</h1>
 {% endblock %}
 
-{% block content %}
+
+{% block content %} 
+
 	<div id="receipt">
+
 		<p id="receipt-title">
 			The transaction was saved successfully.
 		</p>
 		<br>
+		
 		<p>
 			<b>Card:</b>
 			{{ transaction['bank'] }} ****-{{ transaction['last_four_digits'] }}
 		</p>
+
 		<p>
 			<b>{{ field_names['transaction_date'] }}: </b>
 			{{ transaction['transaction_date'] }}
 		</p>
+
 		<p>
 			<b>{{ field_names['vendor'] }}: </b>
 			{{ transaction['vendor'] }}
 		</p>
+
 		<p>
 			<b>{{ field_names['price'] }}: </b>
 			{{ '${:.2f}'.format(transaction['price']) }}
 		</p>
+
 		<p>
 			<b>{{ field_names['notes'] }}: </b>
 			{{ transaction['notes'] }}
 		</p>
+
 		<p>
 			<b>{{ field_names['issue_date'] }}: </b>
 			{{ transaction['issue_date'] }}
 		</p>
+
 		{% if g.user %}
 			<br>
 			<a href="{{ url_for('credit.show_transactions') }}">
@@ -52,5 +63,7 @@
 				Create a new transaction
 			</a>
 		{% endif %}
+
 	</div>
+
 {% endblock %}

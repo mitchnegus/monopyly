@@ -129,3 +129,64 @@ class CardHandler(DatabaseHandler):
         if card is None:
             abort(404, 'A card matching the information was not found.')
         return card
+
+    def new_card(self, form):
+        """
+        Create a new credit card in the database from a submitted form.
+
+        Accept a new credit card from a user provided form, and insert
+        the information into the database. All fields are processed and
+        sanitized using the database handler.
+
+        Parameters
+        ––––––––––
+        form : CardForm
+            An object containing the submitted form information.
+
+        Returns
+        –––––––
+        card : sqlite3.Row
+            The newly added card.
+        """
+        mapping = self.process_card_form(form)
+        if CARD_FIELDS.keys() != mapping.keys():
+            raise ValueError('The mapping does not match the database. Fields '
+                            f'({", ".join(CARD_FIELDS.keys())}) must be '
+                             'provided.')
+        self.cursor.execute(
+            f"INSERT INTO credit_cards {tuple(mapping.keys())} "
+            f"VALUES ({reserve_places(mapping.values())})",
+            (*mapping.values(),)
+        )
+        self.db.commit()
+        card = self.get_card(self.cursor.lastrowid)
+        return card
+
+    def process_card_form(self, form):
+        """
+        Process credit card information submitted on a form.
+
+        Collect all credit card information submitted through the form.
+        This aggregates all credit card data from the form, fills in
+        defaults and makes inferrals when necessary, and then returns a
+        dictionary mapping of the card information.
+
+        Parameters
+        ––––––––––
+        form : CardForm
+            An object containing the submitted form information.
+
+        Returns
+        –––––––
+        mapping : dict
+            A dictionary of credit card information collected from the
+            user submission.
+        """
+        # Iterate through the transaction submission and create the dictionary
+        mapping = {}
+        for field in CARD_FIELDS:
+            if field == 'user_id':
+                mapping[field] = self.user_id
+            else:
+                mapping[field] = form[field].data
+        return mapping
