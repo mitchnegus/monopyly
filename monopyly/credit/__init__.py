@@ -21,6 +21,8 @@ from .transactions import TransactionHandler, determine_statement
 # Define the blueprint
 bp = Blueprint('credit', __name__, url_prefix='/credit')
 
+# Define a custom form error messaage
+form_err_msg = 'There was an improper value in your form. Please try again.'
 
 @bp.route('/cards')
 @login_required
@@ -84,12 +86,15 @@ def new_card():
     # Define a form for a credit card
     form = CardForm()
     # Check if a card was submitted and add it to the database
-    if request.method == 'POST' and form.validate():
-        ch = CardHandler()
-        # Insert the new credit card into the database
-        card = ch.new_card(form)
-        return render_template('credit/card_submission_page.html',
-                               update=False)
+    if request.method == 'POST':
+        if form.validate():
+            ch = CardHandler()
+            # Insert the new credit card into the database
+            card = ch.new_card(form)
+            return render_template('credit/card_submission_page.html',
+                                   update=False)
+        else:
+            flash(form_err_msg)
     # Define a form for a card
     return render_template('credit/card_form_page_new.html', form=form)
 
@@ -100,14 +105,17 @@ def new_transaction():
     # Define a form for a transaction
     form = TransactionForm()
     # Check if a transaction was submitted and add it to the database
-    if request.method == 'POST' and form.validate():
-        th = TransactionHandler()
-        # Insert the new transaction into the database
-        transaction = th.new_transaction(form)
-        return render_template('credit/transaction_submission_page.html',
-                               field_names=DISPLAY_FIELDS,
-                               transaction=transaction,
-                               update=False)
+    if request.method == 'POST':
+        if form.validate():
+            th = TransactionHandler()
+            # Insert the new transaction into the database
+            transaction = th.new_transaction(form)
+            return render_template('credit/transaction_submission_page.html',
+                                   field_names=DISPLAY_FIELDS,
+                                   transaction=transaction,
+                                   update=False)
+        else:
+            flash(form_err_msg)
     # Display the form for accepting user input
     return render_template('credit/transaction_form_page_new.html', form=form)
 
@@ -122,12 +130,15 @@ def update_transaction(transaction_id):
     form = TransactionForm(data=transaction)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
-        # Update the database with the updated transaction
-        transaction = th.update_transaction(transaction_id, form)
-        return render_template('credit/transaction_submission_page.html',
-                               field_names=DISPLAY_FIELDS,
-                               transaction=transaction,
-                               update=True)
+        if form.validate():
+            # Update the database with the updated transaction
+            transaction = th.update_transaction(transaction_id, form)
+            return render_template('credit/transaction_submission_page.html',
+                                   field_names=DISPLAY_FIELDS,
+                                   transaction=transaction,
+                                   update=True)
+        else:
+            flash(form_err_msg)
     # Display the form for accepting user input
     return render_template('credit/transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
