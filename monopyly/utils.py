@@ -51,7 +51,7 @@ def filter_dict(dictionary, operator, condition, by_value=False):
     """Filter a dictionary by key using the given operator and condition."""
     if operator is op.contains:
         # `contains` method has reversed operands
-        operator = lambda x, y: op.contains(y, x)
+        def operator(x, y): return op.contains(y, x)
     if not by_value:
         return {k: v for k, v in dictionary.items() if operator(k, condition)}
     else:
