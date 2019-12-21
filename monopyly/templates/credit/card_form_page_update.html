@@ -1,0 +1,15 @@
+{% extends "credit/card_form_page.html" %}
+
+
+{% block title %}
+	Update Transaction
+{% endblock %}
+
+
+{% block content %}
+
+	{% with submission_url = url_for('credit.update_card', card_id=card_id) %}
+		{% include 'credit/card_form.html' %}
+	{% endwith %}
+
+{% endblock %}

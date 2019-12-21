@@ -29,6 +29,8 @@ class TransactionHandler(DatabaseHandler):
 
     Attributes
     ––––––––––
+    table_name : str
+        The name of the database table that this handler manages.
     db : sqlite3.Connection
         A connection to the database for interfacing.
     cursor : sqlite.Cursor
@@ -36,6 +38,7 @@ class TransactionHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+    table_name = 'credit_transactions'
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
@@ -106,7 +109,9 @@ class TransactionHandler(DatabaseHandler):
         transaction = self.cursor.execute(query, placeholders).fetchone()
         # Check that a transaction was found
         if transaction is None:
-            abort(404, f'Transaction ID {transaction_id} does not exist.')
+            abort_msg = (f'Transaction ID {transaction_id} does not exist for '
+                          'the user.')
+            abort(404, abort_msg)
         return transaction
 
     def new_transaction(self, form):
@@ -132,12 +137,7 @@ class TransactionHandler(DatabaseHandler):
             raise ValueError('The mapping does not match the database. Fields '
                             f'({", ".join(TRANSACTION_FIELDS.keys())}) must '
                              'be provided.')
-        self.cursor.execute(
-            f"INSERT INTO credit_transactions {tuple(mapping.keys())} "
-            f"VALUES ({reserve_places(mapping.values())})",
-            (*mapping.values(),)
-        )
-        self.db.commit()
+        super().new_entry(mapping)
         transaction = self.get_transaction(self.cursor.lastrowid)
         return transaction
 
@@ -166,14 +166,7 @@ class TransactionHandler(DatabaseHandler):
             raise ValueError('The mapping does not match the database. Fields '
                             f'({", ".join(TRANSACTION_FIELDS.keys())}) must '
                              'be provided.')
-        update_fields = ', '.join([f'{field} = ?' for field in mapping])
-        self.cursor.execute(
-            "UPDATE credit_transactions "
-           f"   SET {update_fields} "
-            " WHERE id = ?",
-            (*mapping.values(), transaction_id)
-        )
-        self.db.commit()
+        super().update_entry(transaction_id, mapping)
         transaction = self.get_transaction(transaction_id)
         return transaction
 
@@ -218,13 +211,9 @@ class TransactionHandler(DatabaseHandler):
 
     def delete_transaction(self, transaction_id):
         """Delete a transaction from the database given its transaction ID."""
-        # Check that the transaction actually exists in the database
+        # Check that the transaction exists and belongs to the user
         self.get_transaction(transaction_id)
-        self.cursor.execute(
-            "DELETE FROM credit_transactions WHERE id = ?",
-            (transaction_id,)
-        )
-        self.db.commit()
+        super().delete_entry
 
 
 def determine_statement(card, transaction_date):

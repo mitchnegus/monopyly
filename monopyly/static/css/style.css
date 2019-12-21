@@ -10,6 +10,7 @@ body {
 	color: #444444;
 }
 
+
 /*
  * Create dark grey header with a white logo
  */
@@ -50,6 +51,7 @@ header h1.logo:hover {
   color: #white;
 }
 
+
 /*
  * Display navigation links inline
  */
@@ -69,6 +71,7 @@ header h1.logo:hover {
   color: #bbbbbb;
   text-decoration: none;
 }
+
 
 /*
  * Handle the main body content area for pages
@@ -96,6 +99,7 @@ div#page .container {
   font-size: 2em;
   letter-spacing: -2px;
 }
+
 
 /*
  * General object characteristics
@@ -199,6 +203,32 @@ form div.autocomplete-box div.item.active {
 	background-color: #85bb65;
 }
 
+nav#sidebar-nav-menu {
+	position: fixed;
+	top: 50px;
+	left: 4%;
+	width: 5%;
+}
+
+nav#sidebar-nav-menu ul {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0;
+}
+
+nav#sidebar-nav-menu li {
+	display: block;
+	margin: 1px 0;
+}
+
+nav#sidebar-nav-menu .button-icon {
+	height: 25px;
+	width: 25px;
+	margin: 0 auto;
+}
+
+
 /*
  * Customization for the 'Home' page
  */
@@ -225,6 +255,7 @@ div#homepage-block.jumbo {
   font-weight: 100;
 }
 
+
 /*
  * Customization for the 'About' page
  */
@@ -240,6 +271,7 @@ div#homepage-block.jumbo {
 	font-weight: bold;
 	font-style: oblique;
 }
+
 
 /*
  * Customization for the 'Cards' page
@@ -271,6 +303,10 @@ div.credit-card-block {
 	margin: 10px;
 }
 
+div.credit-card-block a.credit-card {
+	color: inherit;
+}
+
 div.credit-card-block img.credit-card {
 	width: 400px;
 }
@@ -285,33 +321,65 @@ div.credit-card-block div.card-number {
 
 
 /*
+ * Customization for the 'Card Details' page
+ */
+table#card {
+	width: 70%;
+	margin: 20px auto;
+	border-collapse: collapse;
+}
+
+table#card th,
+table#card td {
+	padding: 5px 10px;
+	vertical-align: top;
+}
+
+table#card th {
+	text-align: right;
+}
+
+table#card td {
+	text-align: left;
+}
+
+
+/*
+ * Customization for the 'New Card' & 'Update Card' pages
+ */
+form#card div#bank {
+	flex-basis: 70%;
+	min-width: 320px;
+}
+
+form#card div#last-four-digits {
+	flex-basis: 30%;
+	min-width: 160px;
+}
+
+form#card div#statement-issue-day {
+	flex-basis: 40%;
+	min-width: 180px;
+}
+
+form#card div#statement-due-day {
+	flex-basis: 40%;
+	min-width: 180px;
+}
+
+form#card div#active {
+	flex-basis: 20%;
+	min-width: 100px;
+}
+
+form#card input#submit {
+	min-width: 490px;
+}
+
+
+/*
  * Customization for the 'Transactions' page
  */
-nav#transactions-menu {
-	position: fixed;
-	top: 50px;
-	left: 4%;
-	width: 5%;
-}
-
-nav#transactions-menu ul {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 0;
-}
-
-nav#transactions-menu li {
-	display: block;
-	margin: 1px 0;
-}
-
-nav#transactions-menu .button-icon {
-	height: 25px;
-	width: 25px;
-	margin: 0 auto;
-}
-
 div#card-filter {
 	display: flex;
 	justify-content: center;
@@ -436,8 +504,9 @@ table#transactions td div.notes{
 	overflow: auto;
 }
 
+
 /*
- * Customization for the 'Transaction' page
+ * Customization for the 'Transaction Details' page
  */
 table#transaction {
 	width: 70%;
@@ -459,37 +528,6 @@ table#transaction td {
 	text-align: left;
 }
 
-/*
- * Customization for the 'New Card' & 'Update Card' pages
- */
-form#card div#bank {
-	flex-basis: 70%;
-	min-width: 320px;
-}
-
-form#card div#last-four-digits {
-	flex-basis: 30%;
-	min-width: 160px;
-}
-
-form#card div#statement-issue-day {
-	flex-basis: 40%;
-	min-width: 180px;
-}
-
-form#card div#statement-due-day {
-	flex-basis: 40%;
-	min-width: 180px;
-}
-
-form#card div#active {
-	flex-basis: 20%;
-	min-width: 100px;
-}
-
-form#card input#submit {
-	min-width: 49px;
-}
 
 /*
  * Customization for the 'New Transaction' & 'Update Transaction' pages
@@ -502,6 +540,7 @@ form#transaction div#last-four-digits {
 	flex-basis: 30%;
 	min-width: 150px;
 }
+
 
 /*
  * Customization for the transaction submission page
