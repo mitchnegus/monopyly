@@ -114,59 +114,38 @@ class TransactionHandler(DatabaseHandler):
             abort(404, abort_msg)
         return transaction
 
-    def new_transaction(self, form):
+    def save_transaction(self, form, transaction_id=None):
         """
-        Create a new transaction in the database from a submitted form.
+        Save a transaction in the database from a submitted form.
 
-        Accept a new transaction from a user provided form, and insert
-        the information into the database. All fields are processed and
-        sanitized using the database handler.
+        Accept a user provided form and either insert the information
+        into the database as a new transaction or update the transaction
+        with matching ID. All fields are processed and sanitized using
+        the database handler.
 
         Parameters
         ––––––––––
         form : TransactionForm
             An object containing the submitted form information.
+        transaction_id : int, optional
+            If given, the ID of the transaction to be updated. If left
+            as `None`, a new transaction is created.
 
         Returns
         –––––––
         transaction : sqlite3.Row
-            The newly added transaction.
+            The saved transaction.
         """
         mapping = self.process_transaction_form(form)
         if TRANSACTION_FIELDS.keys() != mapping.keys():
             raise ValueError('The mapping does not match the database. Fields '
                             f'({", ".join(TRANSACTION_FIELDS.keys())}) must '
                              'be provided.')
-        super().new_entry(mapping)
-        transaction = self.get_transaction(self.cursor.lastrowid)
-        return transaction
-
-    def update_transaction(self, transaction_id, form):
-        """
-        Update a transaction in the database from a submitted form.
-
-        Accept a modified transaction from a user provied form, and update
-        the corresponding information in the database. All fields are
-        processed and sanitized using the database handler.
-
-        Parameters
-        ––––––––––
-        transaction_id : int
-            The ID of the transaction to be updated.
-        form : TransactionForm
-            An object containing the submitted form information.
-
-        Returns
-        –––––––
-        transaction : sqlite3.Row
-            The newly updated transaction.
-        """
-        mapping = self.process_transaction_form(form)
-        if TRANSACTION_FIELDS.keys() != mapping.keys():
-            raise ValueError('The mapping does not match the database. Fields '
-                            f'({", ".join(TRANSACTION_FIELDS.keys())}) must '
-                             'be provided.')
-        super().update_entry(transaction_id, mapping)
+        if not transaction_id:
+            self.new_entry(mapping)
+            transaction_id = self.cursor.lastrowid
+        else:
+            self.update_entry(transaction_id, mapping)
         transaction = self.get_transaction(transaction_id)
         return transaction
 
@@ -200,10 +179,11 @@ class TransactionHandler(DatabaseHandler):
                                     form['last_four_digits'].data)
                 if not form['issue_date']:
                     transaction_date = form['transaction_date'].data
-                    statement = determine_statement(card, transaction_date)
+                    issue_date = determine_statement_date(card,
+                                                          transaction_date)
                 else:
                     statement_date = form['issue_date'].data
-                    statement = sh.find_statement(card['id'], statement_date)
+                statement = sh.find_statement(card['id'], issue_date)
                 mapping[field] = statement['id']
             else:
                 mapping[field] = form[field].data
@@ -216,7 +196,7 @@ class TransactionHandler(DatabaseHandler):
         super().delete_entry
 
 
-def determine_statement(card, transaction_date):
+def determine_statement_date(card, transaction_date):
     """Find the statement for a transaction given the card and date."""
     statement_day = card['statement_issue_day']
     curr_month_statement_date = transaction_date.replace(day=statement_day)
@@ -226,5 +206,4 @@ def determine_statement(card, transaction_date):
     else:
         # The transaction will be on the next month's statement
         statement_date = curr_month_statement_date + relativedelta(months=+1)
-    statement = StatementHandler().find_statement(card['id'], statement_date)
-    return statement
+    return statement_date

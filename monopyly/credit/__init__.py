@@ -149,7 +149,7 @@ def new_transaction():
         if form.validate():
             th = TransactionHandler()
             # Insert the new transaction into the database
-            transaction = th.new_transaction(form)
+            transaction = th.save_transaction(form)
             return render_template('credit/transaction_submission_page.html',
                                    field_names=DISPLAY_FIELDS,
                                    transaction=transaction,
@@ -172,7 +172,7 @@ def update_transaction(transaction_id):
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated transaction
-            transaction = th.update_transaction(transaction_id, form)
+            transaction = th.save_transaction(form, transaction_id)
             return render_template('credit/transaction_submission_page.html',
                                    field_names=DISPLAY_FIELDS,
                                    transaction=transaction,
