@@ -136,7 +136,7 @@ def parse_date(given_date):
 
     Returns
     –––––––
-    date : date
+    date : datetime.date
         A Python `date` object based on the given date string.
     """
     if given_date is None:
