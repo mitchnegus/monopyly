@@ -1,6 +1,8 @@
 """
 Tools for interacting with the credit statements database.
 """
+from dateutil.relativedelta import relativedelta
+
 from ..utils import DatabaseHandler, fill_place, fill_places, check_sort_order
 from .constants import STATEMENT_FIELDS
 from .tools import select_fields, filter_item, filter_items
@@ -22,6 +24,8 @@ class StatementHandler(DatabaseHandler):
 
     Attributes
     ––––––––––
+    table_name : str
+        The name of the database table that this handler manages.
     db : sqlite3.Connection
         A connection to the database for interfacing.
     cursor : sqlite.Cursor
@@ -29,6 +33,7 @@ class StatementHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+    table_name = 'credit_statements'
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
@@ -94,7 +99,9 @@ class StatementHandler(DatabaseHandler):
         statement = self.cursor.execute(query, placeholders).fetchone()
         # Check that a statement was found
         if statement is None:
-            abort(404, f'Statement ID {statement_id} does not exist.')
+            abort_msg = (f'Statement ID {statement_id} does not exist for the '
+                          'user.')
+            abort(404, abort_msg)
         return statement
 
     def find_statement(self, card_id, issue_date=None):
@@ -111,7 +118,7 @@ class StatementHandler(DatabaseHandler):
         ––––––––––
         card_id : int
             The ID of the credit card for the statement to be found.
-        issue_date : date, optional
+        issue_date : datetime.date, optional
             A Python `date` object giving the issue date for the
             statement to be found (if `None`, the most recent statement
             will be found).
@@ -136,3 +143,53 @@ class StatementHandler(DatabaseHandler):
         if statement is None:
             abort(404, 'A statement matching the information was not found.')
         return statement
+
+    def new_statement(self, card, issue_date, payment_date=''):
+        """
+        Create a new credit card statement in the database.
+
+        Accept a credit card and statement issue date and insert a new
+        entry in the database for the corresponding credit card
+        statement.
+
+        Parameters
+        ––––––––––
+        card : sqlite3.Row
+            A credit card entry from the database.
+        issue_date : datetime.date
+            The date the new statement was issued.
+        payment_date : datetime.date, optional
+            The date the new statement was paid.
+
+        Returns
+        –––––––
+        statement : sqlite3.Row
+            The newly added statement.
+        """
+        mapping = {'card_id': card['id'],
+                   'issue_date': issue_date,
+                   'due_date': determine_due_date(card, issue_date),
+                   'paid': 1 if payment_date else 0,
+                   'payment_date': payment_date}
+        self.new_entry(mapping)
+        statement = self.get_statement(self.cursor.lastrowid)
+        return statement
+
+    def delete_statement(self, statement_id):
+        """Delete a statement from the database given its statement ID."""
+        # Check that the statement exists and belongs to the user
+        self.get_statement(statement_id)
+        super().delete_entry()
+
+
+def determine_due_date(card, issue_date):
+    """Find the due date for a statement given the card and date issued."""
+    due_day = card['statement_due_day']
+    curr_month_due_date = issue_date.replace(day=due_day)
+    if issue_date.day < due_day:
+        # The statement is due on the due date later this month
+        due_date = curr_month_due_date
+    else:
+        # The statement is due on the due date next month
+        due_date = curr_month_due_date + relativedelta(months=+1)
+    return due_date
