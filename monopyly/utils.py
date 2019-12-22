@@ -1,4 +1,5 @@
 """General utility functions."""
+from abc import ABC, abstractmethod
 import itertools as it
 import operator as op
 from datetime import datetime
@@ -8,7 +9,7 @@ from flask import g
 from .db import get_db
 
 
-class DatabaseHandler:
+class DatabaseHandler(ABC):
     """
     A generic handler for database access.
 
@@ -46,12 +47,63 @@ class DatabaseHandler:
         if check_user and self.user_id != g.user['id']:
             abort(403)
 
+    def new_entry(self, mapping):
+        """
+        Create a new entry in the database given a mapping for fields.
+
+        Accept a mapping relating given inputs to database fields. This
+        mapping is used to insert a new entry into the database.
+
+        Parameters
+        ––––––––––
+        mapping : dict
+            A mapping between database fields and the value to be
+            entered into that field for the entry.
+        """
+        self.cursor.execute(
+            f"INSERT INTO {self.table_name} {tuple(mapping.keys())} "
+            f"VALUES ({reserve_places(mapping.values())})",
+            (*mapping.values(),)
+        )
+        self.db.commit()
+
+    def update_entry(self, entry_id, mapping):
+        """
+        Update an entry in the database given a mapping for fields.
+
+        Accept a mapping relating given inputs to database fields. This
+        mapping is used to update an existing entry in the database.
+
+        Parameters
+        ––––––––––
+        entry_id : int
+            The ID of the entry to be updated.
+        mapping : dict
+            A mapping between database fields and the values to be
+            updated in that field for the entry.
+        """
+        update_fields = ', '.join([f'{field} = ?' for field in mapping])
+        self.cursor.execute(
+            f"UPDATE {self.table_name} "
+            f"   SET {update_fields} "
+             " WHERE id = ?",
+            (*mapping.values(), entry_id)
+        )
+        self.db.commit()
+
+    def delete_entry(self, entry_id):
+        """Delete an entry in the database."""
+        self.cursor.execute(
+            f"DELETE FROM {self.table_name} WHERE id = ?",
+            (entry_id,)
+        )
+        self.db.commit()
 
 def filter_dict(dictionary, operator, condition, by_value=False):
     """Filter a dictionary by key using the given operator and condition."""
     if operator is op.contains:
         # `contains` method has reversed operands
-        operator = lambda x, y: op.contains(y, x)
+        def operator(x, y): return op.contains(y, x)
     if not by_value:
         return {k: v for k, v in dictionary.items() if operator(k, condition)}
     else:
@@ -87,6 +139,8 @@ def parse_date(given_date):
     date : date
         A Python `date` object based on the given date string.
     """
+    if given_date is None:
+        return None
     alt_delimiters = ('.', '/')
     date_formats = ('%Y-%m-%d', '%m-%d-%Y', '%m-%d-%y')
     err_msg = (f"The given date ('{given_date}') was not in an acceptable "
@@ -108,7 +162,7 @@ def parse_date(given_date):
     for fmt in date_formats:
         try:
             date = datetime.strptime(parseable_date, fmt).date()
-            return (date)
+            return date
         except ValueError:
             pass
     raise ValueError(err_msg)

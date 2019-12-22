@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+
+{% block header %}
+
+	<h1>
+		{% block title %}
+			Credit Cards
+		{% endblock %}
+	</h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+	<div id="cards-container">
+		{% include 'credit/cards.html' %}
+	</div>
+
+{% endblock %}

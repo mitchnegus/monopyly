@@ -1,0 +1,44 @@
+<form id="card" action="{{ submission_url }}" method="POST" autocomplete="off">
+
+	{{ form.hidden_tag() }}
+	
+	<div id="primary-info" class="form-line">
+
+		<div id="bank" class="form-field autocomplete">
+			{{ form.bank.label }}
+			{{ form.bank }}
+		</div>
+
+		<div id="last-four-digits" class="form-field">
+			{{ form.last_four_digits.label }}
+			{{ form.last_four_digits }}
+		</div>
+	
+	</div>
+
+	<div id="secondary-info" class="form-line">
+		
+		<div id="statement-issue-day" class="form-field">
+			{{ form.statement_issue_day.label }}
+			{{ form.statement_issue_day }}
+		</div>
+
+
+		<div id="statement-due-day" class="form-field">
+			{{ form.statement_due_day.label }}
+			{{ form.statement_due_day }}
+		</div>
+
+		<div id="active" class="form-field">
+			{{ form.active.label }}
+			{{ form.active }}
+		</div>
+
+	</div>
+
+	<div class="form-field">
+		{{ form.submit(class_="button") }}
+	</div>
+
+
+</form>

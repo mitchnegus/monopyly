@@ -12,9 +12,7 @@ from ..db import get_db
 from ..auth import login_required
 from ..forms import *
 from ..utils import parse_date
-from .constants import (
-    TRANSACTION_FIELDS, REQUIRED_FIELDS, DISPLAY_FIELDS, FORM_FIELDS
-)
+from .constants import DISPLAY_FIELDS
 from .cards import CardHandler
 from .statements import StatementHandler
 from .transactions import TransactionHandler, determine_statement
@@ -22,6 +20,77 @@ from .transactions import TransactionHandler, determine_statement
 
 # Define the blueprint
 bp = Blueprint('credit', __name__, url_prefix='/credit')
+
+# Define a custom form error messaage
+form_err_msg = 'There was an improper value in your form. Please try again.'
+
+@bp.route('/cards')
+@login_required
+def manage_cards():
+    ch = CardHandler()
+    # Get all of the user's credit cards from the database
+    cards = ch.get_cards()
+    return render_template('credit/cards_page.html', cards=cards)
+
+
+@bp.route('/<int:card_id>/card')
+@login_required
+def manage_card(card_id):
+    ch = CardHandler()
+    # Get the credit card information from the database
+    card = ch.get_card(card_id)
+    return render_template('credit/card_page.html',
+                           card=card)
+
+
+@bp.route('/new_card', methods=('GET', 'POST'))
+@login_required
+def new_card():
+    # Define a form for a credit card
+    form = CardForm()
+    # Check if a card was submitted and add it to the database
+    if request.method == 'POST':
+        if form.validate():
+            ch = CardHandler()
+            # Insert the new credit card into the database
+            card = ch.new_card(form)
+            return render_template('credit/card_submission_page.html',
+                                   update=False)
+        else:
+            flash(form_err_msg)
+    # Define a form for a card
+    return render_template('credit/card_form_page_new.html', form=form)
+
+
+@bp.route('/<int:card_id>/update_card', methods=('GET', 'POST'))
+@login_required
+def update_card(card_id):
+    ch = CardHandler()
+    # Get the credit card information from the database
+    card = ch.get_card(card_id)
+    # Define a form for a card
+    form = CardForm(data=card)
+    # Check if a card was updated and update it in the database
+    if request.method == 'POST':
+        if form.validate():
+            # Update the database with the updated credit card
+            card = ch.update_card(card_id, form)
+            return render_template('credit/card_submission_page.html',
+                                   update=True)
+        else:
+            flash(form_err_msg)
+    # Display the form for accepting user input
+    return render_template('credit/card_form_page_update.html',
+                           card_id=card_id, form=form)
+
+
+@bp.route('/<int:card_id>/delete_card', methods=('POST',))
+@login_required
+def delete_card(card_id):
+    ch = CardHandler()
+    # Remove the credit card from the database
+    ch.delete_card(card_id)
+    return redirect(url_for('credit.manage_cards'))
 
 
 @bp.route('/transactions')
@@ -32,7 +101,7 @@ def show_transactions():
     cards = ch.get_cards()
     # Get all of the user's transactions for active cards from the database
     sort_order = 'DESC'
-    transactions = th.get_transactions(fields=FORM_FIELDS,
+    transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
                                        sort_order=sort_order,
                                        active=True)
     return render_template('credit/transactions_page.html',
@@ -66,7 +135,6 @@ def show_transaction(transaction_id):
     th = TransactionHandler()
     # Get the transaction information from the database
     transaction = th.get_transaction(transaction_id)
-    # Match the transaction to a registered credit card
     return render_template('credit/transaction_page.html',
                            transaction=transaction)
 
@@ -77,18 +145,17 @@ def new_transaction():
     # Define a form for a transaction
     form = TransactionForm()
     # Check if a transaction was submitted and add it to the database
-    if request.method == 'POST' and form.validate():
-        error = error_unless_all_fields_provided(request.form, REQUIRED_FIELDS)
-        if not error:
+    if request.method == 'POST':
+        if form.validate():
             th = TransactionHandler()
             # Insert the new transaction into the database
-            transaction = th.new_transaction(request.form)
-            return render_template('credit/submission_page.html',
+            transaction = th.new_transaction(form)
+            return render_template('credit/transaction_submission_page.html',
                                    field_names=DISPLAY_FIELDS,
                                    transaction=transaction,
                                    update=False)
         else:
-            flash(error)
+            flash(form_err_msg)
     # Display the form for accepting user input
     return render_template('credit/transaction_form_page_new.html', form=form)
 
@@ -103,19 +170,27 @@ def update_transaction(transaction_id):
     form = TransactionForm(data=transaction)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
-        error = error_unless_all_fields_provided(request.form, REQUIRED_FIELDS)
-        if not error:
+        if form.validate():
             # Update the database with the updated transaction
-            transaction = th.update_transaction(transaction_id, request.form)
-            return render_template('credit/submission_page.html',
+            transaction = th.update_transaction(transaction_id, form)
+            return render_template('credit/transaction_submission_page.html',
                                    field_names=DISPLAY_FIELDS,
                                    transaction=transaction,
                                    update=True)
         else:
-            flash(error)
+            flash(form_err_msg)
     # Display the form for accepting user input
     return render_template('credit/transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
+
+
+@bp.route('/<int:transaction_id>/delete_transaction', methods=('POST',))
+@login_required
+def delete_transaction(transaction_id):
+    th = TransactionHandler()
+    # Remove the transaction from the database
+    th.delete_transaction(transaction_id)
+    return redirect(url_for('credit.show_transactions'))
 
 
 @bp.route('/_suggest_autocomplete', methods=('POST',))
@@ -183,12 +258,3 @@ def infer_statement():
         statement = determine_statement(card, transaction_date)
         return statement['issue_date']
     return ''
-
-
-@bp.route('/<int:transaction_id>/delete_transaction', methods=('POST',))
-@login_required
-def delete_transaction(transaction_id):
-    th = TransactionHandler()
-    # Remove the transaction from the database
-    th.delete_transaction(transaction_id)
-    return redirect(url_for('credit.show_transactions'))

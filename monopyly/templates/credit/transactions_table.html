@@ -1,4 +1,5 @@
 <table id="transactions">
+
 	<tr>
 		<th class="card">Card</th>
 		<th class="date">
@@ -12,12 +13,12 @@
 		<th class="date">Statement Date</th>
 		<th class="edit"></th>
 	</tr>
+
 	{% for transaction in transactions %}
+
 		<tr>
 			<td class="card">
-				<span class="bank">
-				{{ transaction['bank'] }}
-				</span>
+				<span class="bank">{{ transaction['bank'] }}</span>
 				-{{ transaction['last_four_digits'] }}
 			</td>
 			<td class="date">{{ transaction['transaction_date'] }}</td>
@@ -33,5 +34,7 @@
 				</a>
 			</td>
 		</tr>
+
 	{% endfor %}
+
 </table>
