@@ -15,7 +15,7 @@ from ..utils import parse_date
 from .constants import DISPLAY_FIELDS
 from .cards import CardHandler
 from .statements import StatementHandler
-from .transactions import TransactionHandler, determine_statement
+from .transactions import TransactionHandler, determine_statement_date
 
 
 # Define the blueprint
@@ -255,6 +255,6 @@ def infer_statement():
     if len(cards) == 1:
         # Determine the statement corresponding to the card and date
         card = cards[0]
-        statement = determine_statement(card, transaction_date)
+        statement = determine_statement_date(card, transaction_date)
         return statement['issue_date']
     return ''
