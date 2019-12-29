@@ -3,6 +3,8 @@ Tools for interacting with the credit statements database.
 """
 from dateutil.relativedelta import relativedelta
 
+from werkzeug.exceptions import abort
+
 from ..utils import DatabaseHandler, fill_place, fill_places, check_sort_order
 from .constants import STATEMENT_FIELDS
 from .tools import select_fields, filter_item, filter_items
@@ -125,8 +127,8 @@ class StatementHandler(DatabaseHandler):
 
         Returns
         –––––––
-        statement_id : int
-            The ID of the card matching the given information.
+        statement : int
+            The statement entry matching the given information.
         """
         card_filter = filter_item(card_id, 'card_id', 'AND')
         date_filter = filter_item(issue_date, 'issue_date', 'AND')

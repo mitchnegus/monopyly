@@ -3,6 +3,8 @@ Tools for interacting with the credit transactions database.
 """
 from dateutil.relativedelta import relativedelta
 
+from werkzeug.exceptions import abort
+
 from ..utils import (
     DatabaseHandler, parse_date, reserve_places, fill_places, check_sort_order
 )
@@ -182,7 +184,7 @@ class TransactionHandler(DatabaseHandler):
                     issue_date = determine_statement_date(card,
                                                           transaction_date)
                 else:
-                    statement_date = form['issue_date'].data
+                    issue_date = form['issue_date'].data
                 statement = sh.find_statement(card['id'], issue_date)
                 mapping[field] = statement['id']
             else:

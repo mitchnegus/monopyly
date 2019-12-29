@@ -1,6 +1,8 @@
 """
 Tools for interacting with the credit cards database.
 """
+from werkzeug.exceptions import abort
+
 from ..utils import DatabaseHandler, reserve_places, fill_place, fill_places
 from .constants import CARD_FIELDS
 from .tools import select_fields, filter_item, filter_items
@@ -117,7 +119,7 @@ class CardHandler(DatabaseHandler):
 
         Returns
         –––––––
-        cards : sqlite3.Row
+        card : sqlite3.Row
             A credit card matching the criteria.
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
