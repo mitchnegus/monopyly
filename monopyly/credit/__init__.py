@@ -53,7 +53,7 @@ def new_card():
         if form.validate():
             ch = CardHandler()
             # Insert the new credit card into the database
-            card = ch.new_card(form)
+            card = ch.save_card(form)
             return render_template('credit/card_submission_page.html',
                                    update=False)
         else:
@@ -74,7 +74,7 @@ def update_card(card_id):
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated credit card
-            card = ch.update_card(card_id, form)
+            card = ch.save_card(form, card_id)
             return render_template('credit/card_submission_page.html',
                                    update=True)
         else:
