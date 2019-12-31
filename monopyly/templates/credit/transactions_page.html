@@ -60,7 +60,7 @@
 	</div>
 
 	<div id="transactions-table-container">
-		{% include 'credit/transactions_table.html' %}
+		{% include 'credit/transactions.html' %}
 	</div>
 
 	<a name="bottom"></a>
@@ -70,8 +70,10 @@
 
 {% block javascript %}
 
-	<script>var $TABLE_UPDATE_ENDPOINT = "{{ url_for('credit.update_transactions_table') }}";</script>
-	<script src="{{ url_for('static', filename='js/update_transactions_table.js') }}">
+	<script src="{{ url_for('static', filename='js/define_filter.js') }}">
+	</script>
+	<script>var $FILTER_ENDPOINT = "{{ url_for('credit.update_transactions') }}";</script>
+	<script src="{{ url_for('static', filename='js/update_transactions.js') }}">
 	</script>
 
 {% endblock %}

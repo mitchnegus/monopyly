@@ -14,8 +14,29 @@
 
 {% block content %}
 
+	<div id="card-filter">
+		{% for card in cards %}
+
+			<a id="{{ card['bank'] }}-{{ card['last_four_digits'] }}" class="card {{ 'active selected' if card['active'] else 'inactive' }}">
+				{{ card['bank'] }} (-{{card['last_four_digits'] }})
+			</a>
+
+		{% endfor %}
+	</div>
+
 	<div id="statements-container">
 		{% include 'credit/statements.html' %}
 	</div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+	<script src="{{ url_for('static', filename='js/define_filter.js') }}">
+	</script>
+	<script>var $FILTER_ENDPOINT = "{{ url_for('credit.update_statements') }}";</script>
+	<script src="{{ url_for('static', filename='js/update_statements.js') }}">
+	</script>
 
 {% endblock %}

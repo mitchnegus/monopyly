@@ -96,14 +96,35 @@ def delete_card(card_id):
 @bp.route('/statements')
 @login_required
 def show_statements():
-    sh = StatementHandler()
-    # Get all of the user's statements from the database
+    ch, sh = CardHandler(), StatementHandler()
+    # Get all of the user's credit cards from the database
+    cards = ch.get_cards()
+    # Get all of the user's statements for active cards from the database
     statements = sh.get_statements()
     # Get all of the user's statements for active cards from the database
     fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
               'SUM(price)')
     statements = sh.get_statements(fields=fields, active=True)
     return render_template('credit/statements_page.html',
+                           cards=cards,
+                           statements=statements)
+
+
+@bp.route('/_update_statements', methods=('POST',))
+@login_required
+def update_statements():
+    ch, sh = CardHandler(), StatementHandler()
+    # Separate the arguments of the POST method
+    post_args = request.get_json()
+    filter_ids = post_args['filter_ids']
+    # Determine the card IDs from the arguments of POST method
+    card_ids = [ch.find_card(*tag.split('-'))['id'] for tag in filter_ids]
+    # Filter selected statements from the database
+    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
+              'SUM(price)')
+    statements = sh.get_statements(fields=fields, card_ids=card_ids)
+    print(f'update called for cards {card_ids}')
+    return render_template('credit/statements.html',
                            statements=statements)
 
 
@@ -124,9 +145,9 @@ def show_transactions():
                            transactions=transactions)
 
 
-@bp.route('/_update_transactions_table', methods=('POST',))
+@bp.route('/_update_transactions', methods=('POST',))
 @login_required
-def update_transactions_table():
+def update_transactions():
     ch, th = CardHandler(), TransactionHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
@@ -138,7 +159,7 @@ def update_transactions_table():
     transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
                                        card_ids=card_ids,
                                        sort_order=sort_order)
-    return render_template('credit/transactions_table.html',
+    return render_template('credit/transactions.html',
                            sort_order=sort_order,
                            transactions=transactions)
 
