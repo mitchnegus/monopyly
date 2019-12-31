@@ -7,8 +7,16 @@ from flask import g
 from werkzeug.exceptions import abort
 
 from ..db import get_db
-from ..utils import parse_date, reserve_places
+from ..utils import parse_date, reserve_places, strip_function
 from .constants import ALL_FIELDS
+
+
+def check_field(field):
+    """Check that a field matches a credit card database field."""
+    field = strip_function(field)
+    if not field.split('.', 1)[-1] in ALL_FIELDS:
+        raise ValueError(f"The field '{field}' does not exist in the "
+                          "database.")
 
 
 def select_fields(fields, id_field=None):
@@ -26,35 +34,22 @@ def select_fields(fields, id_field=None):
     fields : tuple of str, None
         A list of fields to arrrange as a string for database querying.
     id_field : str, optional
-        A field that will always be returned, regardless of the fields
+        A field that will always be returned, regardless of the other fields
         provided.
     """
     if fields is None:
         return "*"
-    elif not all(field.split('.')[-1] in ALL_FIELDS for field in fields):
-        raise ValueError('The given field does not exist in the database.')
-    id_field_prefix = f'{id_field}, ' if id_field else ''
-    return f"{id_field_prefix}{', '.join(fields)}"
+    query_fields = [id_field] if id_field else []
+    for field in fields:
+        check_field(field)
+        if field[-5:] == '_date':
+            query_fields.append(query_date(field))
+        else:
+            query_fields.append(field)
+    return f"{', '.join(query_fields)}"
 
 
-def filter_item(item, db_item_name, prefix=""):
-    """Create a filter based on a given item."""
-    if item is None:
-        return ""
-    return f"{prefix} {db_item_name} = ?"
-
-
-def filter_items(items, db_item_name, prefix=""):
-    """Create a filter based on a set of items."""
-    if items is None:
-        return ""
-    return f"{prefix} {db_item_name} IN ({reserve_places(items)})"
-
-
-def denote_if_date(field):
+def query_date(field):
     """Return a query string specifically indicating date types."""
-    if len(field) >= 5 and field[-5:] == '_date':
-        query_string = f'{field} "{field} [date]"'
-    else:
-        query_string = field
-    return query_string
+    # Use sqlite3 converters to get the field as a date
+    return f'{field} "{field} [date]"'

@@ -5,9 +5,12 @@ from dateutil.relativedelta import relativedelta
 
 from werkzeug.exceptions import abort
 
-from ..utils import DatabaseHandler, fill_place, fill_places, check_sort_order
+from ..utils import (
+    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
+    check_sort_order
+)
 from .constants import STATEMENT_FIELDS
-from .tools import select_fields, filter_item, filter_items
+from .tools import select_fields
 
 class StatementHandler(DatabaseHandler):
     """
@@ -55,7 +58,9 @@ class StatementHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
-            the 'credit_statements' or 'credit_cards' tables.
+            the 'credit_statements' or 'credit_cards' tables, or a
+            summation over the price column in the `credit_transactions`
+            table.
         card_ids : tuple of str, optional
             A sequence of card IDs for which statements will be selected
             (if `None`, all cards will be selected).
@@ -80,12 +85,14 @@ class StatementHandler(DatabaseHandler):
         card_filter = filter_items(card_ids, 'card_id', 'AND')
         bank_filter = filter_items(banks, 'bank', 'AND')
         active_filter = "AND active = 1" if active else ""
-        query = (f"SELECT {select_fields(fields, s.id)} "
+        query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements AS s "
+                  "  JOIN credit_transactions AS t ON t.statement_id = s.id "
                   "  JOIN credit_cards AS c ON c.id = s.card_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {bank_filter} {active_filter} "
-                  " ORDER BY active DESC")
+                  " GROUP BY s.id "
+                 f" ORDER BY issue_date {sort_order}, active DESC")
         placeholders = (self.user_id, *fill_places(card_ids),
                        *fill_places(banks))
         statements = self.cursor.execute(query, placeholders).fetchall()

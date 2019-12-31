@@ -1,0 +1,16 @@
+{% for statement in statements %}
+
+	<div class="statement-block">
+		<div class="statement-card">
+			{{ statement['bank'] }} <span class="digits">{{ statement['last_four_digits'] }}</span>
+		</div>
+		<div class="statement-info">
+			<div class="statement-date">
+				<div class="month">{{ statement['issue_date'].strftime('%b') }}</div>
+				<div class="year">{{ statement['issue_date'].year }}</div>
+			</div>
+			<div class="statement-total">{{ '${:,.2f}'.format(statement['SUM(price)']) }}<a class="statement" href=""></a></div>
+		</div>
+	</div>
+
+{% endfor %}

@@ -3,9 +3,13 @@ Tools for interacting with the credit cards database.
 """
 from werkzeug.exceptions import abort
 
-from ..utils import DatabaseHandler, reserve_places, fill_place, fill_places
+from ..utils import (
+    DatabaseHandler, reserve_places, fill_place, fill_places, filter_item,
+    filter_items
+)
 from .constants import CARD_FIELDS
-from .tools import select_fields, filter_item, filter_items
+from .tools import select_fields
+
 
 class CardHandler(DatabaseHandler):
     """

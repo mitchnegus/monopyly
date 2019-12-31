@@ -6,10 +6,11 @@ from dateutil.relativedelta import relativedelta
 from werkzeug.exceptions import abort
 
 from ..utils import (
-    DatabaseHandler, parse_date, reserve_places, fill_places, check_sort_order
+    DatabaseHandler, parse_date, reserve_places, fill_places, filter_items,
+    check_sort_order
 )
 from .constants import TRANSACTION_FIELDS
-from .tools import select_fields, filter_items
+from .tools import select_fields
 from .cards import CardHandler
 from .statements import StatementHandler
 

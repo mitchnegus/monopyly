@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+
+{% block header %}
+
+	<h1>
+		{% block title %}
+			Statements 
+		{% endblock %}
+	</h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+	<div id="statements-container">
+		{% include 'credit/statements.html' %}
+	</div>
+
+{% endblock %}

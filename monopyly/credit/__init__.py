@@ -26,7 +26,7 @@ form_err_msg = 'There was an improper value in your form. Please try again.'
 
 @bp.route('/cards')
 @login_required
-def manage_cards():
+def show_cards():
     ch = CardHandler()
     # Get all of the user's credit cards from the database
     cards = ch.get_cards()
@@ -35,7 +35,7 @@ def manage_cards():
 
 @bp.route('/<int:card_id>/card')
 @login_required
-def manage_card(card_id):
+def show_card(card_id):
     ch = CardHandler()
     # Get the credit card information from the database
     card = ch.get_card(card_id)
@@ -90,7 +90,21 @@ def delete_card(card_id):
     ch = CardHandler()
     # Remove the credit card from the database
     ch.delete_card(card_id)
-    return redirect(url_for('credit.manage_cards'))
+    return redirect(url_for('credit.show_cards'))
+
+
+@bp.route('/statements')
+@login_required
+def show_statements():
+    sh = StatementHandler()
+    # Get all of the user's statements from the database
+    statements = sh.get_statements()
+    # Get all of the user's statements for active cards from the database
+    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
+              'SUM(price)')
+    statements = sh.get_statements(fields=fields, active=True)
+    return render_template('credit/statements_page.html',
+                           statements=statements)
 
 
 @bp.route('/transactions')
