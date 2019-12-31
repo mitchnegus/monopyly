@@ -1,16 +1,16 @@
 {% for card in cards %}
 
-	<div class="credit-card-block">
-		<a class="credit-card" href="{{ url_for('credit.show_card', card_id=card['id']) }}">
+	<a class="credit-card-block" href="{{ url_for('credit.show_card', card_id=card['id']) }}">
+		<div class="credit-card-block">
 			<img class="credit-card" src="{{ url_for('static', filename='img/') }}{{ card['bank'].lower() }}-card.png">
 			<div class="card-number">▐▐▐▐ ▐▐▐▐ ▐▐▐▐ {{ card['last_four_digits'] }}</div>
-		</a>
-	</div>
+		</div>
+	</a>
 
 {% endfor %}
 
-<div class="credit-card-block">
-	<a href="{{ url_for('credit.new_card') }}">
+<a class="credit-card-block" href="{{ url_for('credit.new_card') }}">
+	<div class="credit-card-block">
 		<img class="credit-card" src="{{ url_for('static', filename='img/new-card.png') }}">
-	</a>
-</div>
+	</div>
+</a>

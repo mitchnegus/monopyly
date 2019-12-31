@@ -103,7 +103,8 @@ class StatementHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements AS s "
                   "  JOIN credit_cards AS c ON c.id = s.card_id "
-                  " WHERE id = ? AND user_id = ?")
+                  "  JOIN credit_transactions AS t ON t.statement_id = s.id "
+                  " WHERE s.id = ? AND user_id = ?")
         placeholders = (statement_id, self.user_id)
         statement = self.cursor.execute(query, placeholders).fetchone()
         # Check that a statement was found

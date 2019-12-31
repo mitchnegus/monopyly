@@ -129,6 +129,24 @@ def update_statements():
                            statements=statements)
 
 
+@bp.route('/<int:statement_id>/statement')
+@login_required
+def show_statement(statement_id):
+    sh, th = StatementHandler(), TransactionHandler()
+    # Get the statement information from the database
+    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
+              'SUM(price)')
+    statement = sh.get_statement(statement_id, fields=fields)
+    # Get all of the transactions for the statement from the database
+    sort_order = 'DESC'
+    transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
+                                       sort_order=sort_order,
+                                       statement_ids=(statement['id'],))
+    return render_template('credit/statement_page.html',
+                           statement=statement,
+                           statement_transactions=transactions)
+
+
 @bp.route('/transactions')
 @login_required
 def show_transactions():

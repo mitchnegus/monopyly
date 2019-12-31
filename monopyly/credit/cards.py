@@ -90,7 +90,7 @@ class CardHandler(DatabaseHandler):
     def get_card(self, card_id, fields=None):
         """Get a credit card from the database given its card ID."""
         query = (f"SELECT {select_fields(fields, 'id')} "
-                  "  FROM credit_cards "
+                  "  FROM credit_cards"
                   " WHERE id = ? AND user_id = ?")
         placeholders = (card_id, self.user_id)
         card = self.cursor.execute(query, placeholders).fetchone()
