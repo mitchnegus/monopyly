@@ -1,16 +1,32 @@
-{% for statement in statements %}
+{% for card in selected_cards %}
 
-	<div class="statement-block">
+	<div class="card-column">
+
 		<div class="statement-card">
-			{{ statement['bank'] }} <span class="digits">{{ statement['last_four_digits'] }}</span>
+			<b>{{ card['bank'] }}</b> <span class="digits">{{ card['last_four_digits'] }}</span>
 		</div>
-		<div class="statement-info">
-			<div class="statement-date">
-				<div class="month">{{ statement['issue_date'].strftime('%b') }}</div>
-				<div class="year">{{ statement['issue_date'].year }}</div>
-			</div>
-			<div class="statement-total">{{ '${:,.2f}'.format(statement['SUM(price)']) }}<a class="statement" href=""></a></div>
-		</div>
+
+		{% for statement in statements %}
+			{% if statement['card_id'] == card['id'] %}		
+
+				<div class="statement-block">
+					<div class="statement-date">
+						<div class="month">{{ statement['issue_date'].strftime('%b').upper() }}</div>
+						<div class="year">{{ statement['issue_date'].year }}</div>
+					</div>
+					<div class="statement-payment">
+						<div class="total">
+						{{ '${:,.2f}'.format(statement['SUM(price)']) }}<a class="statement" href=""></a>
+						</div>
+						<div class="paid">
+							{{ 'PAID' if statement['paid'] else '' }}
+						</div>
+					</div>
+				</div>
+	
+			{% endif %}
+		{% endfor %}
+	
 	</div>
 
 {% endfor %}

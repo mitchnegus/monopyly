@@ -22,7 +22,7 @@ header#masthead {
   background-color: #2b2b2b;
 	border-style: solid;
 	border-color: #85bb65;
-	border-width: 0 0 4px 2px;
+	border-width: 0 0 4px 3px;
   height: 50px;
   width: 100%;
   opacity: 0.9;
@@ -228,6 +228,48 @@ nav#sidebar-nav-menu .button-icon {
 	margin: 0 auto;
 }
 
+/* 
+ * Style the card filter
+ */
+div#card-filter {
+	display: flex;
+	justify-content: center;
+}
+
+div#card-filter a.card {
+	position: relative;
+	margin: 0 3px;
+	padding: 1px 10px;
+	border-radius: 10px;
+	text-align: center;
+	font-size: 8pt;
+	cursor: pointer;
+}
+
+div#card-filter a.inactive.card {
+	background-color: #eeeeee;
+	color: #999999;
+}
+
+div#card-filter a.active.card {
+	background-color: #eeeeee;
+}
+
+div#card-filter a.active.card:hover,
+div#card-filter a.inactive.card:hover {
+	background-color: #cccccc; 
+}
+
+div#card-filter a.card.selected {
+	background-color: #444444;
+	color: #efefef;
+}
+
+div#card-filter a.card.selected:hover {
+	background-color: #333333;
+	color: #bbbbbb;
+}
+
 
 /*
  * Customization for the 'Home' page
@@ -382,14 +424,32 @@ form#card input#submit {
  */
 div#statements-container {
 	display: flex;
-	flex-direction: column;
-	align-items: center;
+	justify-content: space-around;
+}
+
+div#statements-container div.card-column {
+  display: flex;
+  flex-direction: column;
+	margin: 15px 0;
+	padding: 20px;
+	text-align: center;
+  background-color: #e5fbd8;
+  -webkit-border-radius: 15px;
+     -moz-border-radius: 15px;
+          border-radius: 15px;
+}
+
+div#statements-container div.card-column span.digits{
+	color: #888888;
 }
 
 div.statement-block {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	width: 275px;
 	margin: 10px;
-	padding: 15px 50px;
+	padding: 45px 50px;
   background-color: #eeeeee;
 	border: 2px solid #dddddd;
   -webkit-border-radius: 10px;
@@ -397,80 +457,38 @@ div.statement-block {
           border-radius: 10px;
 }
 
-div.statement-block span.digits {
-	color: #999999;
-}
-
-div.statement-info {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 30px 0;
-}
-	
-
-div.statement-block div.statement-date {
+div.statement-block div.statement-date,
+div.statement-block div.statement-payment {
   display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 
 div.statement-block div.statement-date div.month {
-	font-size: 24pt;
+	font-size: 22pt;
+  letter-spacing: -1px;
 }
 
 div.statement-block div.statement-date div.year {
 	font-size: 16pt;
+  letter-spacing: 1px;
 }
 
-div.statement-block div.statement-total {
+div.statement-block div.statement-payment div.total {
 	font-size: 30pt;
 	font-weight: bold;
 }
+
+div.statement-block div.statement-payment div.paid {
+	color: #888888;
+	font-size: 8pt;
+	letter-spacing: 1px;
+}	
 
 
 /*
  * Customization for the 'Transactions' page
  */
-div#card-filter {
-	display: flex;
-	justify-content: center;
-}
-
-div#card-filter a.card {
-	position: relative;
-	margin: 0 3px;
-	padding: 1px 10px;
-	border-radius: 10px;
-	text-align: center;
-	font-size: 8pt;
-	cursor: pointer;
-}
-
-div#card-filter a.inactive.card {
-	background-color: #eeeeee;
-	color: #999999;
-}
-
-div#card-filter a.active.card {
-	background-color: #eeeeee;
-}
-
-div#card-filter a.active.card:hover,
-div#card-filter a.inactive.card:hover {
-	background-color: #cccccc; 
-}
-
-div#card-filter a.card.selected {
-	background-color: #444444;
-	color: #efefef;
-}
-
-div#card-filter a.card.selected:hover {
-	background-color: #333333;
-	color: #bbbbbb;
-}
-
 table#transactions {
 	width: 100%;
 	margin: 20px auto;

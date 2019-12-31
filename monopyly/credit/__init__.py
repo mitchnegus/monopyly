@@ -4,8 +4,8 @@ Flask blueprint for credit card financials.
 from collections import Counter
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template,
-    request, session, url_for, jsonify
+    Blueprint, redirect, render_template,
+    flash, request, url_for, jsonify
 )
 
 from ..db import get_db
@@ -99,14 +99,15 @@ def show_statements():
     ch, sh = CardHandler(), StatementHandler()
     # Get all of the user's credit cards from the database
     cards = ch.get_cards()
+    active_cards = ch.get_cards(active=True)
     # Get all of the user's statements for active cards from the database
     statements = sh.get_statements()
     # Get all of the user's statements for active cards from the database
-    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'SUM(price)')
+    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'SUM(price)')
     statements = sh.get_statements(fields=fields, active=True)
     return render_template('credit/statements_page.html',
-                           cards=cards,
+                           filter_cards=cards,
+                           selected_cards=active_cards,
                            statements=statements)
 
 
@@ -118,13 +119,13 @@ def update_statements():
     post_args = request.get_json()
     filter_ids = post_args['filter_ids']
     # Determine the card IDs from the arguments of POST method
-    card_ids = [ch.find_card(*tag.split('-'))['id'] for tag in filter_ids]
+    cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
-    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'SUM(price)')
-    statements = sh.get_statements(fields=fields, card_ids=card_ids)
-    print(f'update called for cards {card_ids}')
+    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'SUM(price)')
+    statements = sh.get_statements(fields=fields,
+                                   card_ids=[card['id'] for card in cards])
     return render_template('credit/statements.html',
+                           selected_cards=cards,
                            statements=statements)
 
 
@@ -140,7 +141,7 @@ def show_transactions():
                                        sort_order=sort_order,
                                        active=True)
     return render_template('credit/transactions_page.html',
-                           cards=cards,
+                           filter_cards=cards,
                            sort_order=sort_order,
                            transactions=transactions)
 
@@ -154,10 +155,10 @@ def update_transactions():
     filter_ids = post_args['filter_ids']
     sort_order = 'ASC' if post_args['sort_order'] == 'asc' else 'DESC'
     # Determine the card IDs from the arguments of POST method
-    card_ids = [ch.find_card(*tag.split('-'))['id'] for tag in filter_ids]
+    cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected transactions from the database
     transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
-                                       card_ids=card_ids,
+                                       card_ids=[card['id'] for card in cards],
                                        sort_order=sort_order)
     return render_template('credit/transactions.html',
                            sort_order=sort_order,
