@@ -11,6 +11,8 @@ from ..utils import (
 )
 from .constants import STATEMENT_FIELDS
 from .tools import select_fields
+from .cards import CardHandler
+
 
 class StatementHandler(DatabaseHandler):
     """
@@ -136,7 +138,8 @@ class StatementHandler(DatabaseHandler):
         Returns
         –––––––
         statement : int
-            The statement entry matching the given information.
+            The statement entry matching the given criteria. If no
+            matching statement is found, returns `None`.
         """
         card_filter = filter_item(card_id, 'card_id', 'AND')
         date_filter = filter_item(issue_date, 'issue_date', 'AND')
@@ -149,12 +152,9 @@ class StatementHandler(DatabaseHandler):
         placeholders = (self.user_id, *fill_place(card_id),
                         *fill_place(issue_date))
         statement = self.cursor.execute(query, placeholders).fetchone()
-        # Check that a statement was found and that it belongs to the user
-        if statement is None:
-            abort(404, 'A statement matching the information was not found.')
         return statement
 
-    def new_statement(self, card, issue_date, payment_date=''):
+    def new_statement(self, card_id, issue_date, payment_date=''):
         """
         Create a new credit card statement in the database.
 
@@ -176,9 +176,12 @@ class StatementHandler(DatabaseHandler):
         statement : sqlite3.Row
             The newly added statement.
         """
-        mapping = {'card_id': card['id'],
+        ch = CardHandler()
+        card = ch.get_card(card_id)
+        mapping = {'card_id': card_id,
                    'issue_date': issue_date,
-                   'due_date': determine_due_date(card, issue_date),
+                   'due_date': determine_due_date(card['statement_due_day'],
+                                                  issue_date),
                    'paid': 1 if payment_date else 0,
                    'payment_date': payment_date}
         self.new_entry(mapping)
@@ -192,11 +195,27 @@ class StatementHandler(DatabaseHandler):
         super().delete_entry()
 
 
-def determine_due_date(card, issue_date):
-    """Find the due date for a statement given the card and date issued."""
-    due_day = card['statement_due_day']
-    curr_month_due_date = issue_date.replace(day=due_day)
-    if issue_date.day < due_day:
+def determine_due_date(statement_due_day, issue_date):
+    """
+    Determine the due date for a statement.
+
+    Given the day of the month on which statements are due and the date
+    a statement was issued, determine the statement's due date.
+
+    Parameters
+    ––––––––––
+    statement_due_day : int
+        The day of the month on which statements are due.
+    issue_date : datetime.date
+        The date the statement was issued.
+
+    Returns
+    –––––––
+    due_date : datetime.date
+        The date on which the statement is determined to be due.
+    """
+    curr_month_due_date = issue_date.replace(day=card_due_day)
+    if issue_date.day < statement_due_day:
         # The statement is due on the due date later this month
         due_date = curr_month_due_date
     else:

@@ -19,7 +19,7 @@
 							<div class="total">
 							{{ '${:,.2f}'.format(statement['SUM(price)']) }}
 							</div>
-							<div class="paid">
+							<div id="paid">
 								{{ 'PAID' if statement['paid'] else '' }}
 							</div>
 						</div>

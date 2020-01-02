@@ -51,6 +51,10 @@
 
 		{% if g.user %}
 			<br>
+			<a href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+				See the statement for this transaction
+			</a>
+			<br>
 			<a href="{{ url_for('credit.show_transactions') }}">
 				See transaction history
 			</a>

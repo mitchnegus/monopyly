@@ -144,6 +144,7 @@ class TransactionHandler(DatabaseHandler):
             raise ValueError('The mapping does not match the database. Fields '
                             f'({", ".join(TRANSACTION_FIELDS.keys())}) must '
                              'be provided.')
+        # Either create a new entry or update an existing entry
         if not transaction_id:
             self.new_entry(mapping)
             transaction_id = self.cursor.lastrowid
@@ -180,13 +181,20 @@ class TransactionHandler(DatabaseHandler):
                 ch, sh = CardHandler(), StatementHandler()
                 card = ch.find_card(form['bank'].data,
                                     form['last_four_digits'].data)
+                # Check that a card was found and that it belongs to the user
+                if not card:
+                    abort(404, 'A card matching the criteria was not found.')
                 if not form['issue_date']:
+                    statement_issue_day = card['statement_issue_day']
                     transaction_date = form['transaction_date'].data
-                    issue_date = determine_statement_date(card,
+                    issue_date = determine_statement_date(statement_issue_day,
                                                           transaction_date)
                 else:
                     issue_date = form['issue_date'].data
                 statement = sh.find_statement(card['id'], issue_date)
+                # If a matching statement does not exist, create a statement
+                if not statement:
+                    statement = sh.new_statement(card['id'], issue_date)
                 mapping[field] = statement['id']
             else:
                 mapping[field] = form[field].data
@@ -199,9 +207,27 @@ class TransactionHandler(DatabaseHandler):
         super().delete_entry
 
 
-def determine_statement_date(card, transaction_date):
-    """Find the statement for a transaction given the card and date."""
-    statement_day = card['statement_issue_day']
+def determine_statement_date(statement_day, transaction_date):
+    """
+    Determine the date for the statement belonging to a transaction.
+
+    Given the day of them month on which statements are issued and the
+    date a transaction occurred, determine the date the transaction's
+    statement was issued.
+
+    Parameters
+    ––––––––––
+    statement_day : int
+        The day of the month on which statements are issued.
+    transaction_date : datetime.date
+        The date the transaction took place.
+
+    Returns
+    –––––––
+    statement_date : datetime.date
+        The date on which the statement corresponding to the transaction
+        date was issued.
+    """
     curr_month_statement_date = transaction_date.replace(day=statement_day)
     if transaction_date.day < statement_day:
         # The transaction will be on the statement later in the month

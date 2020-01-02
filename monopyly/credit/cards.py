@@ -124,7 +124,8 @@ class CardHandler(DatabaseHandler):
         Returns
         –––––––
         card : sqlite3.Row
-            A credit card matching the criteria.
+            A credit card entry matching the given criteria. If no
+            matching statement is found, returns `None`.
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
@@ -135,9 +136,6 @@ class CardHandler(DatabaseHandler):
         placeholders = (self.user_id, *fill_place(bank),
                         *fill_place(last_four_digits))
         card = self.cursor.execute(query, placeholders).fetchone()
-        # Check that a card was found and that it belongs to the user
-        if card is None:
-            abort(404, 'A card matching the information was not found.')
         return card
 
     def save_card(self, form, card_id=None):
@@ -167,6 +165,7 @@ class CardHandler(DatabaseHandler):
             raise ValueError('The mapping does not match the database. Fields '
                             f'({", ".join(CARD_FIELDS.keys())}) must be '
                              'provided.')
+        # Either create a new entry or update an existing entry
         if not card_id:
             self.new_entry(mapping)
             card_id = self.cursor.lastrowid

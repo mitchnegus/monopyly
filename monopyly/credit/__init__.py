@@ -309,7 +309,11 @@ def infer_statement():
     if len(cards) == 1:
         # Determine the statement corresponding to the card and date
         card = cards[0]
-        statement_date = determine_statement_date(card, transaction_date)
+        statement_date = determine_statement_date(card['statement_issue_day'],
+                                                  transaction_date)
         statement = sh.find_statement(card['id'], issue_date=statement_date)
-        return statement['issue_date']
+        # Check that a statement was found and that it belongs to the user
+        if not statement:
+            abort(404, 'A statement matching the criteria was not found.')
+        return str(statement['issue_date'])
     return ''
