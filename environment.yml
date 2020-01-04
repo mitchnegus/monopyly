@@ -2,6 +2,7 @@ name: monopyly
 dependencies:
   - coverage=4.5.3
   - flask=1.0.2
+  - flask-wtf=0.14.2
   - ipython=7.3.0
   - jupyter=1.0.0
   - matplotlib=3.0.3

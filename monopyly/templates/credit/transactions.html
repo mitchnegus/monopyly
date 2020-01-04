@@ -1,4 +1,4 @@
-<table id="transactions">
+<table id="transactions" class="transactions">
 
 	<tr>
 		<th class="card">Card</th>
@@ -23,7 +23,7 @@
 			</td>
 			<td class="date">{{ transaction['transaction_date'] }}</td>
 			<td>{{ transaction['vendor'] }}</td>
-			<td class="price">${{ '{0:.2f}'.format(transaction['price']) }}</td>
+			<td class="price">{{ '${:,.2f}'.format(transaction['price']) }}</td>
 			<td class="notes">
 				<div class="notes">{{ transaction['notes'] }}</div>
 			</td>

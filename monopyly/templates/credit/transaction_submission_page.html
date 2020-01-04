@@ -36,7 +36,7 @@
 
 		<p>
 			<b>{{ field_names['price'] }}: </b>
-			{{ '${:.2f}'.format(transaction['price']) }}
+			{{ '${:,.2f}'.format(transaction['price']) }}
 		</p>
 
 		<p>
@@ -50,6 +50,10 @@
 		</p>
 
 		{% if g.user %}
+			<br>
+			<a href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+				See the statement for this transaction
+			</a>
 			<br>
 			<a href="{{ url_for('credit.show_transactions') }}">
 				See transaction history

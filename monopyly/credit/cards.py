@@ -1,9 +1,15 @@
 """
 Tools for interacting with the credit cards database.
 """
-from ..utils import DatabaseHandler, reserve_places, fill_place, fill_places
+from werkzeug.exceptions import abort
+
+from ..utils import (
+    DatabaseHandler, reserve_places, fill_place, fill_places, filter_item,
+    filter_items
+)
 from .constants import CARD_FIELDS
-from .tools import select_fields, filter_item, filter_items
+from .tools import select_fields
+
 
 class CardHandler(DatabaseHandler):
     """
@@ -84,7 +90,7 @@ class CardHandler(DatabaseHandler):
     def get_card(self, card_id, fields=None):
         """Get a credit card from the database given its card ID."""
         query = (f"SELECT {select_fields(fields, 'id')} "
-                  "  FROM credit_cards "
+                  "  FROM credit_cards"
                   " WHERE id = ? AND user_id = ?")
         placeholders = (card_id, self.user_id)
         card = self.cursor.execute(query, placeholders).fetchone()
@@ -117,8 +123,9 @@ class CardHandler(DatabaseHandler):
 
         Returns
         –––––––
-        cards : sqlite3.Row
-            A credit card matching the criteria.
+        card : sqlite3.Row
+            A credit card entry matching the given criteria. If no
+            matching statement is found, returns `None`.
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
@@ -129,64 +136,41 @@ class CardHandler(DatabaseHandler):
         placeholders = (self.user_id, *fill_place(bank),
                         *fill_place(last_four_digits))
         card = self.cursor.execute(query, placeholders).fetchone()
-        # Check that a card was found and that it belongs to the user
-        if card is None:
-            abort(404, 'A card matching the information was not found.')
         return card
 
-    def new_card(self, form):
+    def save_card(self, form, card_id=None):
         """
-        Create a new credit card in the database from a submitted form.
+        Save a new credit card in the database from a submitted form.
 
-        Accept a new credit card from a user provided form, and insert
-        the information into the database. All fields are processed and
-        sanitized using the database handler.
+        Accept a user provided form and either insert the information
+        into the database as a new credit card or update the credit card
+        with matching ID. All fields are processed and sanitized using
+        the database handler.
 
         Parameters
         ––––––––––
         form : CardForm
             An object containing the submitted form information.
+        card_id : int, optional
+            If given, the ID of the card to be updated. If left as
+            `None`, a new credit card is created.
 
         Returns
         –––––––
         card : sqlite3.Row
-            The newly added card.
+            The saved credit card.
         """
         mapping = self.process_card_form(form)
         if CARD_FIELDS.keys() != mapping.keys():
             raise ValueError('The mapping does not match the database. Fields '
                             f'({", ".join(CARD_FIELDS.keys())}) must be '
                              'provided.')
-        super().new_entry(mapping)
-        card = self.get_card(self.cursor.lastrowid)
-        return card
-
-    def update_card(self, card_id, form):
-        """
-        Update a credit card in the database from a submitted form.
-
-        Accept a modified credit card from a user provied form, and
-        update the corresponding information in the database. All fields
-        are processed and sanitized using the database handler.
-
-        Parameters
-        ––––––––––
-        card_id : int
-            The ID of the credit card to be updated.
-        form : TransactionForm
-            An object containing the submitted form information.
-
-        Returns
-        –––––––
-        card : sqlite3.Row
-            The newly updated credit card.
-        """
-        mapping = self.process_card_form(form)
-        if CARD_FIELDS.keys() != mapping.keys():
-            raise ValueError('The mapping does not match the database. Fields '
-                            f'({", ".join(CARD_FIELDS.keys())}) must be '
-                             'provided.')
-        super().update_entry(card_id, mapping)
+        # Either create a new entry or update an existing entry
+        if not card_id:
+            self.new_entry(mapping)
+            card_id = self.cursor.lastrowid
+        else:
+            self.update_entry(card_id, mapping)
         card = self.get_card(card_id)
         return card
 

@@ -4,8 +4,8 @@ Flask blueprint for credit card financials.
 from collections import Counter
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template,
-    request, session, url_for, jsonify
+    Blueprint, redirect, render_template,
+    flash, request, url_for, jsonify
 )
 
 from ..db import get_db
@@ -15,7 +15,7 @@ from ..utils import parse_date
 from .constants import DISPLAY_FIELDS
 from .cards import CardHandler
 from .statements import StatementHandler
-from .transactions import TransactionHandler, determine_statement
+from .transactions import TransactionHandler, determine_statement_date
 
 
 # Define the blueprint
@@ -26,7 +26,7 @@ form_err_msg = 'There was an improper value in your form. Please try again.'
 
 @bp.route('/cards')
 @login_required
-def manage_cards():
+def show_cards():
     ch = CardHandler()
     # Get all of the user's credit cards from the database
     cards = ch.get_cards()
@@ -35,7 +35,7 @@ def manage_cards():
 
 @bp.route('/<int:card_id>/card')
 @login_required
-def manage_card(card_id):
+def show_card(card_id):
     ch = CardHandler()
     # Get the credit card information from the database
     card = ch.get_card(card_id)
@@ -53,7 +53,7 @@ def new_card():
         if form.validate():
             ch = CardHandler()
             # Insert the new credit card into the database
-            card = ch.new_card(form)
+            card = ch.save_card(form)
             return render_template('credit/card_submission_page.html',
                                    update=False)
         else:
@@ -74,7 +74,7 @@ def update_card(card_id):
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated credit card
-            card = ch.update_card(card_id, form)
+            card = ch.save_card(form, card_id)
             return render_template('credit/card_submission_page.html',
                                    update=True)
         else:
@@ -90,7 +90,61 @@ def delete_card(card_id):
     ch = CardHandler()
     # Remove the credit card from the database
     ch.delete_card(card_id)
-    return redirect(url_for('credit.manage_cards'))
+    return redirect(url_for('credit.show_cards'))
+
+
+@bp.route('/statements')
+@login_required
+def show_statements():
+    ch, sh = CardHandler(), StatementHandler()
+    # Get all of the user's credit cards from the database
+    cards = ch.get_cards()
+    active_cards = ch.get_cards(active=True)
+    # Get all of the user's statements for active cards from the database
+    statements = sh.get_statements()
+    # Get all of the user's statements for active cards from the database
+    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'SUM(price)')
+    statements = sh.get_statements(fields=fields, active=True)
+    return render_template('credit/statements_page.html',
+                           filter_cards=cards,
+                           selected_cards=active_cards,
+                           statements=statements)
+
+
+@bp.route('/_update_statements', methods=('POST',))
+@login_required
+def update_statements():
+    ch, sh = CardHandler(), StatementHandler()
+    # Separate the arguments of the POST method
+    post_args = request.get_json()
+    filter_ids = post_args['filter_ids']
+    # Determine the card IDs from the arguments of POST method
+    cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
+    # Filter selected statements from the database
+    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'SUM(price)')
+    statements = sh.get_statements(fields=fields,
+                                   card_ids=[card['id'] for card in cards])
+    return render_template('credit/statements.html',
+                           selected_cards=cards,
+                           statements=statements)
+
+
+@bp.route('/<int:statement_id>/statement')
+@login_required
+def show_statement(statement_id):
+    sh, th = StatementHandler(), TransactionHandler()
+    # Get the statement information from the database
+    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
+              'SUM(price)')
+    statement = sh.get_statement(statement_id, fields=fields)
+    # Get all of the transactions for the statement from the database
+    sort_order = 'DESC'
+    transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
+                                       sort_order=sort_order,
+                                       statement_ids=(statement['id'],))
+    return render_template('credit/statement_page.html',
+                           statement=statement,
+                           statement_transactions=transactions)
 
 
 @bp.route('/transactions')
@@ -105,26 +159,26 @@ def show_transactions():
                                        sort_order=sort_order,
                                        active=True)
     return render_template('credit/transactions_page.html',
-                           cards=cards,
+                           filter_cards=cards,
                            sort_order=sort_order,
                            transactions=transactions)
 
 
-@bp.route('/_update_transactions_table', methods=('POST',))
+@bp.route('/_update_transactions', methods=('POST',))
 @login_required
-def update_transactions_table():
+def update_transactions():
     ch, th = CardHandler(), TransactionHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     filter_ids = post_args['filter_ids']
     sort_order = 'ASC' if post_args['sort_order'] == 'asc' else 'DESC'
     # Determine the card IDs from the arguments of POST method
-    card_ids = [ch.find_card(*tag.split('-'))['id'] for tag in filter_ids]
+    cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected transactions from the database
     transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
-                                       card_ids=card_ids,
+                                       card_ids=[card['id'] for card in cards],
                                        sort_order=sort_order)
-    return render_template('credit/transactions_table.html',
+    return render_template('credit/transactions.html',
                            sort_order=sort_order,
                            transactions=transactions)
 
@@ -149,7 +203,7 @@ def new_transaction():
         if form.validate():
             th = TransactionHandler()
             # Insert the new transaction into the database
-            transaction = th.new_transaction(form)
+            transaction = th.save_transaction(form)
             return render_template('credit/transaction_submission_page.html',
                                    field_names=DISPLAY_FIELDS,
                                    transaction=transaction,
@@ -172,7 +226,7 @@ def update_transaction(transaction_id):
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated transaction
-            transaction = th.update_transaction(transaction_id, form)
+            transaction = th.save_transaction(form, transaction_id)
             return render_template('credit/transaction_submission_page.html',
                                    field_names=DISPLAY_FIELDS,
                                    transaction=transaction,
@@ -255,6 +309,11 @@ def infer_statement():
     if len(cards) == 1:
         # Determine the statement corresponding to the card and date
         card = cards[0]
-        statement = determine_statement(card, transaction_date)
-        return statement['issue_date']
+        statement_date = determine_statement_date(card['statement_issue_day'],
+                                                  transaction_date)
+        statement = sh.find_statement(card['id'], issue_date=statement_date)
+        # Check that a statement was found and that it belongs to the user
+        if not statement:
+            abort(404, 'A statement matching the criteria was not found.')
+        return str(statement['issue_date'])
     return ''

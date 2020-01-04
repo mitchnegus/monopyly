@@ -1,0 +1,34 @@
+{% for card in selected_cards %}
+
+	<div class="card-column">
+
+		<div>
+			<b>{{ card['bank'] }}</b> <span class="digits">{{ card['last_four_digits'] }}</span>
+		</div>
+
+		{% for statement in statements %}
+			{% if statement['card_id'] == card['id'] %}		
+
+				<a class="statement-block" href="{{ url_for('credit.show_statement', statement_id=statement['id']) }}">
+					<div class="statement-block">
+						<div class="date">
+							<div class="month">{{ statement['issue_date'].strftime('%b').upper() }}</div>
+							<div class="year">{{ statement['issue_date'].year }}</div>
+						</div>
+						<div class="payment">
+							<div class="total">
+							{{ '${:,.2f}'.format(statement['SUM(price)']) }}
+							</div>
+							<div id="paid">
+								{{ 'PAID' if statement['paid'] else '' }}
+							</div>
+						</div>
+					</div>
+				</a>
+	
+			{% endif %}
+		{% endfor %}
+	
+	</div>
+
+{% endfor %}

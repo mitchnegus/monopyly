@@ -136,7 +136,7 @@ def parse_date(given_date):
 
     Returns
     –––––––
-    date : date
+    date : datetime.date
         A Python `date` object based on the given date string.
     """
     if given_date is None:
@@ -168,6 +168,15 @@ def parse_date(given_date):
     raise ValueError(err_msg)
 
 
+def strip_function(field):
+    """Return a database field name, even if it's a function argument."""
+    functions = ('SUM', 'MAX', 'MIN')
+    while any(field.upper().startswith(function) for function in functions):
+        # A function was given, and the column name should be isolated
+        field = field.split('(', 1)[-1].rsplit(')', 1)[0]
+    return field
+
+
 def reserve_places(placeholders):
     """Reserve a set of places matching the placeholders input."""
     return ', '.join(['?']*len(placeholders))
@@ -185,6 +194,20 @@ def fill_places(placeholders):
     if placeholders is None:
         return ()
     return tuple(placeholders)
+
+
+def filter_item(item, db_item_name, prefix=""):
+    """Create a filter based on a given item."""
+    if item is None:
+        return ""
+    return f"{prefix} {db_item_name} = ?"
+
+
+def filter_items(items, db_item_name, prefix=""):
+    """Create a filter based on a set of items."""
+    if items is None:
+        return ""
+    return f"{prefix} {db_item_name} IN ({reserve_places(items)})"
 
 
 def check_sort_order(sort_order):

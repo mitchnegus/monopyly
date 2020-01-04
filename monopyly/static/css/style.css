@@ -22,7 +22,7 @@ header#masthead {
   background-color: #2b2b2b;
 	border-style: solid;
 	border-color: #85bb65;
-	border-width: 0 0 4px 2px;
+	border-width: 0 0 4px 3px;
   height: 50px;
   width: 100%;
   opacity: 0.9;
@@ -80,6 +80,7 @@ div#page {
 	display: flex;
 	justify-content: space-between;
 	padding-top: 60px;
+	padding-bottom: 30px;
 }
 
 aside.sidebar {
@@ -228,6 +229,136 @@ nav#sidebar-nav-menu .button-icon {
 	margin: 0 auto;
 }
 
+/* 
+ * Style the card filter
+ */
+div#card-filter {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+div#card-filter a.card {
+	position: relative;
+	margin: 0 3px;
+	padding: 1px 10px;
+	border-radius: 10px;
+	text-align: center;
+	font-size: 8pt;
+	cursor: pointer;
+}
+
+div#card-filter a.inactive.card {
+	background-color: #eeeeee;
+	color: #999999;
+}
+
+div#card-filter a.active.card {
+	background-color: #eeeeee;
+}
+
+div#card-filter a.active.card:hover,
+div#card-filter a.inactive.card:hover {
+	background-color: #cccccc; 
+}
+
+div#card-filter a.card.selected {
+	background-color: #444444;
+	color: #efefef;
+}
+
+div#card-filter a.card.selected:hover {
+	background-color: #333333;
+	color: #bbbbbb;
+}
+
+
+/*
+ * Style tables for presenting transaction details
+ */
+table.transactions {
+	border-collapse: collapse;
+	font-size: 9pt;
+}
+
+table.transactions tr {
+	border: 1pt #eeeeee;
+	border-style: solid none;
+}
+
+table.transactions tr:hover td {
+	background-color: #fafafa;
+}
+
+table.transactions tr img.edit-icon {
+	visibility: hidden;
+	width: 16px;
+}
+
+table.transactions tr:hover img.edit-icon {
+	visibility: visible;
+}
+
+table.transactions th,
+table.transactions td {
+	padding: 5px 10px;
+}
+
+table.transactions th.card {
+	text-align: center;
+}
+
+table.transactions td.card {
+	text-align: right;
+}
+
+table.transactions td.card span.bank {
+	display: inline-block;
+}
+@media screen and (max-width: 1200px) {
+	table.transactions td.card span.bank {
+		display: none;
+	}
+}
+
+table.transactions th.date,
+table.transactions td.date {
+	text-align: center;
+}
+
+table.transactions th img.sort-icon {
+	display: none;
+	height: 10px;
+	width: 10px;
+	cursor: pointer;
+}
+
+table.transactions th img.sort-icon.selected {
+	display: inline;
+}
+
+table.transactions th.text,
+table.transactions td.text {
+	text-align: left;
+}
+
+table.transactions th.price,
+table.transactions td.price {
+	text-align: right;
+}
+
+table.transactions td.notes{
+	max-width: 250px;	
+	text-align: left;
+}
+
+table.transactions td div.notes{
+	width: 100%;
+	text-align: left;
+	white-space: nowrap;
+	overflow: auto;
+}
+
 
 /*
  * Customization for the 'Home' page
@@ -298,13 +429,13 @@ div#cards-container {
 	}
 }
 
+a.credit-card-block {
+	color: inherit;
+}
+
 div.credit-card-block {
 	position: relative;
 	margin: 10px;
-}
-
-div.credit-card-block a.credit-card {
-	color: inherit;
 }
 
 div.credit-card-block img.credit-card {
@@ -378,130 +509,140 @@ form#card input#submit {
 
 
 /*
+ * Customization for the 'Statements' page
+ */
+div#statements-container {
+	display: flex;
+	justify-content: space-around;
+}
+
+div#statements-container div.card-column {
+  display: flex;
+  flex-direction: column;
+	margin: 15px 0;
+	padding: 20px;
+	text-align: center;
+  background-color: #e5fbd8;
+  -webkit-border-radius: 15px;
+     -moz-border-radius: 15px;
+          border-radius: 15px;
+}
+
+div#statements-container div.card-column span.digits{
+	color: #888888;
+}
+
+a.statement-block {
+	color: inherit;
+	text-decoration: none;
+}
+
+div.statement-block {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 275px;
+	margin: 10px;
+	padding: 45px 50px;
+  background-color: #eeeeee;
+	border: 2px solid #dddddd;
+  -webkit-border-radius: 10px;
+     -moz-border-radius: 10px;
+          border-radius: 10px;
+}
+
+div.statement-block div.date,
+div.statement-block div.payment {
+  display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+div.statement-block div.date div.month {
+	font-size: 22pt;
+  letter-spacing: -1px;
+}
+
+div.statement-block div.date div.year {
+	font-size: 16pt;
+  letter-spacing: 1px;
+}
+
+div.statement-block div.payment div.total {
+	font-size: 30pt;
+	font-weight: bold;
+}
+
+div.statement-block div.payment div#paid {
+  color: #85bb65;
+	font-size: 8pt;
+	font-weight: bold;
+	letter-spacing: 1px;
+}	
+
+
+/*
+ * Customization for the 'Statement Details' page
+ */
+div#statement {
+	display: flex;
+	justify-content: space-around;
+	padding-top: 10px;
+}
+
+div#statement div#statement-info {
+	display: flex;
+	flex-direction: column;
+	padding: 0 50px;
+}
+
+div#statement div#statement-info div#card {
+	margin-bottom: 10px;
+	color: #888888;
+}
+
+div#statement div#statement-info div#issue-date {
+	font-size: 20pt;
+}
+
+div#statement div#statement-info div#total {
+	margin: 20px 0;
+	font-size: 40pt;
+	font-weight: bold;
+}
+
+div#statement table#statement-transactions {
+	width: 50%;
+}
+
+div#statement div#statement-info div#due-date {
+	font-size: 10pt;
+}
+
+div#statement div#statement-info div#due {
+  display: flex;
+	justify-content: space-between;
+}
+
+div#statement div#statement-info div#due div#due-date span#date {
+	margin-left: 5px;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+
+div#statement div#statement-info div#due div#paid {
+  color: #85bb65;
+	font-size: 10pt;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+
+/*
  * Customization for the 'Transactions' page
  */
-div#card-filter {
-	display: flex;
-	justify-content: center;
-}
-
-div#card-filter a.card {
-	position: relative;
-	margin: 0 3px;
-	padding: 1px 10px;
-	border-radius: 10px;
-	text-align: center;
-	font-size: 8pt;
-	cursor: pointer;
-}
-
-div#card-filter a.inactive.card {
-	background-color: #efefef;
-	color: #999999;
-}
-
-div#card-filter a.active.card {
-	background-color: #eeeeee;
-}
-
-div#card-filter a.active.card:hover,
-div#card-filter a.inactive.card:hover {
-	background-color: #cccccc; 
-}
-
-div#card-filter a.card.selected {
-	background-color: #444444;
-	color: #efefef;
-}
-
-div#card-filter a.card.selected:hover {
-	background-color: #333333;
-	color: #bbbbbb;
-}
-
 table#transactions {
 	width: 100%;
-	margin: 20px auto;
-	border-collapse: collapse;
-	font-size: 9pt;
-}
-
-table#transactions tr {
-	border: 1pt #eeeeee;
-	border-style: solid none;
-}
-
-table#transactions tr:hover td {
-	background-color: #fafafa;
-}
-
-table#transactions tr img.edit-icon {
-	visibility: hidden;
-	width: 16px;
-}
-
-table#transactions tr:hover img.edit-icon {
-	visibility: visible;
-}
-
-table#transactions th,
-table#transactions td {
-	padding: 5px 10px;
-}
-
-table#transactions th.card {
-	text-align: center;
-}
-
-table#transactions td.card {
-	text-align: right;
-}
-
-table#transactions td.card span.bank {
-	display: inline-block;
-}
-@media screen and (max-width: 1200px) {
-	table#transactions td.card span.bank {
-		display: none;
-	}
-}
-
-table#transactions th.date,
-table#transactions td.date {
-	text-align: center;
-}
-
-table#transactions th img.sort-icon {
-	display: none;
-	height: 10px;
-	width: 10px;
-	cursor: pointer;
-}
-
-table#transactions th img.sort-icon.selected {
-	display: inline;
-}
-
-table#transactions th.text,
-table#transactions td.text {
-	text-align: left;
-}
-
-table#transactions th.price,
-table#transactions td.price {
-	text-align: right;
-}
-
-table#transactions td.notes{
-	max-width: 250px;	
-	text-align: left;
-}
-
-table#transactions td div.notes{
-	width: 100%;
-	text-align: left;
-	white-space: nowrap;
-	overflow: auto;
+	margin: 0 auto;
 }
 
 

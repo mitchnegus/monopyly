@@ -1,46 +1,25 @@
 /*
  * Update the table of credit card transactions.
  *
- * Update credit card transaction table. The table update uses an Ajax
- * request to the server to query the database based on the user's
+ * Update the credit card transaction table. The table update issues an
+ * Ajax request to the server to query the database based on the user's
  * selection. The Ajax request is defined in its own function.
  *
  * Updates can be triggered by the following actions:
  * 	- Changing the card filters: a user can click on any of the card
- * 	  filters to show or hide transactions from that card (inactive
- * 	  filters also display a label indicating their inactive status).
+ * 	  filters to show or hide transactions from that card.
  * 	- Sorting the table by transaction date: a user can click on the
- * 		'Date' column header to sort the transaction date in ascending or
- * 		descending order.
+ * 	  'Date' column header to sort the transaction date in ascending
+ * 	  or descending order.
  */
 
 // Identify the card filters
 var container = $('#transactions-table-container');
 var filterContainer = $('#card-filter');
 
-// Label inactive cards when they are hovered over
-var inactiveCardFilters = filterContainer.find('.inactive.card');
-var defaultText, defaultWidth;
-inactiveCardFilters.hover(
-	function () {
-		var $this = $(this);
-		defaultText = $this.text();
-		defaultWidth = $this.width();
-		// Change the text, maintain the width
-		$this.text('Inactive Card');
-		$this.width(defaultWidth);
-	},
-	function() {
-		var $this = $(this);
-		$this.text(defaultText);
-	}
-);
-
-// Change the filter status and send the Ajax request on click
+// Send the Ajax request on click
 var filters = filterContainer.find('.card');
 filters.on('click', function() {
-	// Add or remove the selected tag when clicked
-	$(this).toggleClass('selected');
 	updateTable();
 });
 
@@ -80,7 +59,7 @@ function updateTableAjaxRequest(filterIDs, sortOrder) {
 	};
 	// Return a filtered table for each ID in the set of filterIDs
 	$.ajax({
-		url: $TABLE_UPDATE_ENDPOINT,
+		url: $FILTER_ENDPOINT,
 		type: 'POST',
 		data: JSON.stringify(rawData),
 		contentType: 'application/json; charset=UTF-8',
