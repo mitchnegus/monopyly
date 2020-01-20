@@ -17,7 +17,7 @@
 						</div>
 						<div class="payment">
 							<div class="total">
-							{{ '${:,.2f}'.format(statement['SUM(price)']) }}
+							{{ '${:,.2f}'.format(statement['total']) }}
 							</div>
 							<div id="paid">
 								{{ 'PAID' if statement['paid'] else '' }}

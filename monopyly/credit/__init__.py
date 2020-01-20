@@ -3,6 +3,7 @@ Flask blueprint for credit card financials.
 """
 from collections import Counter
 
+from werkzeug.exceptions import abort
 from flask import (
     Blueprint, redirect, render_template,
     flash, request, url_for, jsonify
@@ -101,9 +102,8 @@ def show_statements():
     cards = ch.get_cards()
     active_cards = ch.get_cards(active=True)
     # Get all of the user's statements for active cards from the database
-    statements = sh.get_statements()
-    # Get all of the user's statements for active cards from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'SUM(price)')
+    fields = ('card_id', 'issue_date', 'due_date', 'paid',
+              'COALESCE(SUM(price), 0) total')
     statements = sh.get_statements(fields=fields, active=True)
     return render_template('credit/statements_page.html',
                            filter_cards=cards,
@@ -121,7 +121,8 @@ def update_statements():
     # Determine the card IDs from the arguments of POST method
     cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'SUM(price)')
+    fields = ('card_id', 'issue_date', 'due_date', 'paid',
+              'COALESCE(SUM(price), 0) total')
     statements = sh.get_statements(fields=fields,
                                    card_ids=[card['id'] for card in cards])
     return render_template('credit/statements.html',
@@ -135,7 +136,7 @@ def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
     # Get the statement information from the database
     fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'SUM(price)')
+              'COALESCE(SUM(price), 0) total')
     statement = sh.get_statement(statement_id, fields=fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
@@ -209,7 +210,9 @@ def new_transaction():
                                    transaction=transaction,
                                    update=False)
         else:
+            # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
+            print(form.errors)
     # Display the form for accepting user input
     return render_template('credit/transaction_form_page_new.html', form=form)
 
@@ -232,7 +235,9 @@ def update_transaction(transaction_id):
                                    transaction=transaction,
                                    update=True)
         else:
+            # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
+            print(form.errors)
     # Display the form for accepting user input
     return render_template('credit/transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
@@ -316,4 +321,5 @@ def infer_statement():
         if not statement:
             abort(404, 'A statement matching the criteria was not found.')
         return str(statement['issue_date'])
-    return ''
+    else:
+        return ''
