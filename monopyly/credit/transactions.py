@@ -204,7 +204,7 @@ class TransactionHandler(DatabaseHandler):
         """Delete a transaction from the database given its transaction ID."""
         # Check that the transaction exists and belongs to the user
         self.get_transaction(transaction_id)
-        super().delete_entry
+        super().delete_entry(transaction_id)
 
 
 def determine_statement_date(statement_day, transaction_date):

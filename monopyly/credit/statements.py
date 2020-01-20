@@ -192,7 +192,7 @@ class StatementHandler(DatabaseHandler):
         """Delete a statement from the database given its statement ID."""
         # Check that the statement exists and belongs to the user
         self.get_statement(statement_id)
-        super().delete_entry()
+        super().delete_entry(statement_id)
 
 
 def determine_due_date(statement_due_day, issue_date):
