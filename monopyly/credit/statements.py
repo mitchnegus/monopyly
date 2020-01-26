@@ -89,8 +89,10 @@ class StatementHandler(DatabaseHandler):
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements AS s "
-                  "  JOIN credit_transactions AS t ON t.statement_id = s.id "
-                  "  JOIN credit_cards AS c ON c.id = s.card_id "
+                  "       INNER JOIN credit_cards AS c "
+                  "       ON c.id = s.card_id "
+                  "       LEFT OUTER JOIN credit_transactions AS t "
+                  "       ON t.statement_id = s.id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {bank_filter} {active_filter} "
                   " GROUP BY s.id "
@@ -104,8 +106,10 @@ class StatementHandler(DatabaseHandler):
         """Get a credit statement from the database given its statement ID."""
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements AS s "
-                  "  JOIN credit_cards AS c ON c.id = s.card_id "
-                  "  JOIN credit_transactions AS t ON t.statement_id = s.id "
+                  "       INNER JOIN credit_cards AS c "
+                  "       ON c.id = s.card_id "
+                  "       LEFT OUTER JOIN credit_transactions AS t "
+                  "       ON t.statement_id = s.id "
                   " WHERE s.id = ? AND user_id = ?")
         placeholders = (statement_id, self.user_id)
         statement = self.cursor.execute(query, placeholders).fetchone()
@@ -145,7 +149,8 @@ class StatementHandler(DatabaseHandler):
         date_filter = filter_item(issue_date, 'issue_date', 'AND')
         query = (f"SELECT {select_fields(STATEMENT_FIELDS.keys(), 's.id')} "
                   "  FROM credit_statements AS s "
-                  "  JOIN credit_cards AS c on c.id = s.card_id "
+                  "       INNER JOIN credit_cards AS c "
+                  "       ON c.id = s.card_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {date_filter} "
                   " ORDER BY issue_date DESC")
@@ -192,7 +197,7 @@ class StatementHandler(DatabaseHandler):
         """Delete a statement from the database given its statement ID."""
         # Check that the statement exists and belongs to the user
         self.get_statement(statement_id)
-        super().delete_entry()
+        super().delete_entry(statement_id)
 
 
 def determine_due_date(statement_due_day, issue_date):
@@ -214,7 +219,7 @@ def determine_due_date(statement_due_day, issue_date):
     due_date : datetime.date
         The date on which the statement is determined to be due.
     """
-    curr_month_due_date = issue_date.replace(day=card_due_day)
+    curr_month_due_date = issue_date.replace(day=statement_due_day)
     if issue_date.day < statement_due_day:
         # The statement is due on the due date later this month
         due_date = curr_month_due_date

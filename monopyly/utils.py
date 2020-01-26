@@ -139,7 +139,7 @@ def parse_date(given_date):
     date : datetime.date
         A Python `date` object based on the given date string.
     """
-    if given_date is None:
+    if not given_date:
         return None
     alt_delimiters = ('.', '/')
     date_formats = ('%Y-%m-%d', '%m-%d-%Y', '%m-%d-%y')
@@ -170,7 +170,7 @@ def parse_date(given_date):
 
 def strip_function(field):
     """Return a database field name, even if it's a function argument."""
-    functions = ('SUM', 'MAX', 'MIN')
+    functions = ('COALESCE', 'SUM', 'MAX', 'MIN')
     while any(field.upper().startswith(function) for function in functions):
         # A function was given, and the column name should be isolated
         field = field.split('(', 1)[-1].rsplit(')', 1)[0]

@@ -41,7 +41,7 @@
 				{{ statement['issue_date'].strftime('%B %Y') }}
 			</div>
 			<div id="total">
-				{{ '${:,.2f}'.format(statement['SUM(price)']) }}
+				{{ '${:,.2f}'.format(statement['total']) }}
 			</div>
 			<div id="due">
 				<div id="due-date">

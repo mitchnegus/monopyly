@@ -91,8 +91,10 @@ class TransactionHandler(DatabaseHandler):
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 't.id')} "
                   "  FROM credit_transactions AS t "
-                  "  JOIN credit_statements AS s ON s.id = t.statement_id "
-                  "  JOIN credit_cards AS c ON c.id = s.card_id "
+                  "      INNER JOIN credit_statements AS s "
+                  "      ON s.id = t.statement_id "
+                  "      INNER JOIN credit_cards AS c "
+                  "      ON c.id = s.card_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {statement_filter} {active_filter}"
                  f" ORDER BY transaction_date {sort_order}")
@@ -105,8 +107,10 @@ class TransactionHandler(DatabaseHandler):
         """Get a transaction from the database given its transaction ID."""
         query = (f"SELECT {select_fields(fields, 't.id')} "
                   "  FROM credit_transactions AS t "
-                  "  JOIN credit_statements AS s ON s.id = t.statement_id "
-                  "  JOIN credit_cards AS c ON c.id = s.card_id "
+                  "       INNER JOIN credit_statements AS s "
+                  "       ON s.id = t.statement_id "
+                  "       INNER JOIN credit_cards AS c "
+                  "       ON c.id = s.card_id "
                   " WHERE t.id = ? AND c.user_id = ?")
         placeholders = (transaction_id, self.user_id)
         transaction = self.cursor.execute(query, placeholders).fetchone()
@@ -184,7 +188,7 @@ class TransactionHandler(DatabaseHandler):
                 # Check that a card was found and that it belongs to the user
                 if not card:
                     abort(404, 'A card matching the criteria was not found.')
-                if not form['issue_date']:
+                if not form['issue_date'].data:
                     statement_issue_day = card['statement_issue_day']
                     transaction_date = form['transaction_date'].data
                     issue_date = determine_statement_date(statement_issue_day,
@@ -204,7 +208,7 @@ class TransactionHandler(DatabaseHandler):
         """Delete a transaction from the database given its transaction ID."""
         # Check that the transaction exists and belongs to the user
         self.get_transaction(transaction_id)
-        super().delete_entry
+        super().delete_entry(transaction_id)
 
 
 def determine_statement_date(statement_day, transaction_date):
