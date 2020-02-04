@@ -14,7 +14,7 @@ body {
 /*
  * Create dark grey header with a white logo
  */
-header#masthead {
+#masthead {
 	display: flex;
 	position: fixed;
 	top: 0;
@@ -29,26 +29,26 @@ header#masthead {
 	z-index: 99;
 }
 
-header .container {
+#masthead .container {
 	display: flex;
 	align-items: center;
 	width: 90%;
 	margin: 0 auto;
 }
 
-header a {
+#masthead a {
 	text-decoration: none;
 }
 
-header h1.logo {
+.monopyly-logo {
   margin: 0;
   font-size: 1.7em;
   color: white;
   text-transform: uppercase;
 }
 
-header h1.logo:hover {
-  color: #white;
+.monopyly-logo:hover {
+  color: #f5f5f5;
 }
 
 
@@ -72,11 +72,15 @@ header h1.logo:hover {
   text-decoration: none;
 }
 
+#nav-menu li a:hover {
+  color: #cdcdcd;
+}
+
 
 /*
  * Handle the main body content area for pages
  */
-div#page {
+#page {
 	display: flex;
 	justify-content: space-between;
 	padding-top: 60px;
@@ -90,7 +94,7 @@ aside.sidebar {
 	padding: 0 10px;
 }
 
-div#page .container {
+#page .container {
 	width: 80%;
 }
 
@@ -110,7 +114,12 @@ form {
 	margin: auto;
 }
 
-form div.form-field {
+form .form-line {
+	display: flex;
+	justify-content: space-between;
+}
+
+form .form-field {
 	margin: 0 5px;
 }
 
@@ -120,59 +129,67 @@ form label {
 	font-size: 1.2em;
 }
 
+form button,
+form input {
+	font-size: 1.1em;
+}
+
 form input {
   width: 100%;
-  padding: 5px;
 	box-sizing: border-box;
-  border: 1px solid #cccccc;
+  padding: 5px;
   background-color: #fafafa;
-  -webkit-border-radius: 3px;
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-  font-size: 1.1em;
+}
+
+form input[type="text"] {
+  border: 1px solid #cccccc;
+  border-radius: 3px;
 }
 
 form input[type="checkbox"] {
 	cursor: pointer;
 }
 
-form div.form-line {
-	display: flex;
-	justify-content: space-between;
-}
-
+form button,
 form input.button {
-  display: block;
-  -webkit-border-radius: 3px; 
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-	margin: 10px 0; 
-  padding: 10px; 
+  display: flex;
+	align-items: center;
+	width: 100%;
+	box-sizing: border-box;
+	margin: 10px auto; 
+	padding: 10px;
   border:1px solid #d8d8d8;
+  border-radius: 3px;
   text-align: center; 
+  color: #333333;
   font-weight:bold; 
-  color: black; 
-  background-color: #f4f4f4;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f4f4f4), color-stop(100%, #e5e5e5));
-  background-image: -webkit-linear-gradient(top, #f4f4f4, #e5e5e5);
-  background-image: -moz-linear-gradient(top, #f4f4f4, #e5e5e5);
-  background-image: -ms-linear-gradient(top, #f4f4f4, #e5e5e5);
-  background-image: -o-linear-gradient(top, #f4f4f4, #e5e5e5);
-  background-image: linear-gradient(top, #f4f4f4, #e5e5e5);
-	filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#f4f4f4, endColorstr=#e5e5e5);
+  background-color: #fbfbfb;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fbfbfb), color-stop(100%, #efefef));
+  background-image: -webkit-linear-gradient(top, #fbfbfb, #efefef);
+  background-image: -moz-linear-gradient(top, #fbfbfb, #efefef);
+  background-image: -ms-linear-gradient(top, #fbfbfb, #efefef);
+  background-image: -o-linear-gradient(top, #fbfbfb, #efefef);
+  background-image: linear-gradient(top, #fbfbfb, #efefef);
 }
 
+form button:hover,
 form input.button:hover {
+  color: #444444;
+  background-color: #f7f7f7;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f7f7f7), color-stop(100%, #e7e7e7));
+  background-image: -webkit-linear-gradient(top, #f7f7f7, #e7e7e7);
+  background-image: -moz-linear-gradient(top, #f7f7f7, #e7e7e7);
+  background-image: -ms-linear-gradient(top, #f7f7f7, #e7e7e7);
+  background-image: -o-linear-gradient(top, #f7f7f7, #e7e7e7);
+  background-image: linear-gradient(top, #f7f7f7, #e7e7e7);
   cursor: pointer;
-  border:1px solid #c1c1c1;
-  background-color: #dbdbdb;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#dbdbdb), color-stop(100%, #cccccc));
-  background-image: -webkit-linear-gradient(top, #dbdbdb, #cccccc);
-  background-image: -moz-linear-gradient(top, #dbdbdb, #cccccc);
-  background-image: -ms-linear-gradient(top, #dbdbdb, #cccccc);
-  background-image: -o-linear-gradient(top, #dbdbdb, #cccccc);
-  background-image: linear-gradient(top, #dbdbdb, #cccccc);
-	filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#dbdbdb, endColorstr=#cccccc);
+}
+
+form button .button-icon {
+	height: 40px;
+	width: 40px;
+	margin: 5px 10px; 
+	filter: brightness(0.8);
 }
 
 form div.autocomplete {
@@ -204,29 +221,29 @@ form div.autocomplete-box div.item.active {
 	background-color: #85bb65;
 }
 
-nav#sidebar-nav-menu {
+#sidebar-nav-menu {
 	position: fixed;
 	top: 50px;
 	left: 4%;
 	width: 5%;
 }
 
-nav#sidebar-nav-menu ul {
+#sidebar-nav-menu ul {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	padding: 0;
 }
 
-nav#sidebar-nav-menu li {
+#sidebar-nav-menu li {
 	display: block;
 	margin: 1px 0;
 }
 
-nav#sidebar-nav-menu .button-icon {
-	height: 30px;
-	width: 30px;
-	margin: 0 auto;
+#sidebar-nav-menu .button-icon {
+	height: 35px;
+	width: 35px;
+	margin: 3px auto;
 }
 
 /* 
@@ -365,10 +382,8 @@ table.transactions td div.notes{
  */
 div#homepage-block.jumbo {
   padding: 10px 0 30px 0;
+  border-radius: 6px;
   background-color: #eeeeee;
-  -webkit-border-radius: 6px;
-     -moz-border-radius: 6px;
-          border-radius: 6px;
 }
 
 #homepage-block h2 {
@@ -521,11 +536,9 @@ div#statements-container div.card-column {
   flex-direction: column;
 	margin: 15px 0;
 	padding: 20px;
+  border-radius: 15px;
 	text-align: center;
   background-color: #e5fbd8;
-  -webkit-border-radius: 15px;
-     -moz-border-radius: 15px;
-          border-radius: 15px;
 }
 
 div#statements-container div.card-column span.digits{
@@ -544,11 +557,9 @@ div.statement-block {
 	width: 275px;
 	margin: 10px;
 	padding: 45px 50px;
-  background-color: #eeeeee;
 	border: 2px solid #dddddd;
-  -webkit-border-radius: 10px;
-     -moz-border-radius: 10px;
-          border-radius: 10px;
+  border-radius: 10px;
+  background-color: #eeeeee;
 }
 
 div.statement-block div.date,
