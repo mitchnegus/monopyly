@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>{% block title%}{% endblock %} – Monopyly</title>
+		<title>
+			{% block title%}
+			{% endblock %}
+			{% if request.path != '/' %} – {% endif %}
+			Monopyly
+		</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 		<!-- ****** faviconit.com favicons ****** -->
 		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}">
@@ -79,6 +84,7 @@
 			<aside class="sidebar">
 				{% block right_sidebar %}{% endblock %}
 			</aside>
+
 		</div>
 	
 		{% block javascript %}{% endblock %}
