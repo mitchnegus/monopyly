@@ -25,6 +25,7 @@ bp = Blueprint('credit', __name__, url_prefix='/credit')
 # Define a custom form error messaage
 form_err_msg = 'There was an improper value in your form. Please try again.'
 
+
 @bp.route('/cards')
 @login_required
 def show_cards():
@@ -59,7 +60,6 @@ def new_card():
                                    update=False)
         else:
             flash(form_err_msg)
-    # Define a form for a card
     return render_template('credit/card_form_page_new.html', form=form)
 
 
