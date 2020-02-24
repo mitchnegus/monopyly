@@ -14,7 +14,7 @@ body {
 /*
  * Create dark grey header with a white logo
  */
-header#masthead {
+#masthead {
 	display: flex;
 	position: fixed;
 	top: 0;
@@ -29,26 +29,26 @@ header#masthead {
 	z-index: 99;
 }
 
-header .container {
+#masthead .container {
 	display: flex;
 	align-items: center;
 	width: 90%;
 	margin: 0 auto;
 }
 
-header a {
+#masthead a {
 	text-decoration: none;
 }
 
-header h1.logo {
+.monopyly-logo {
   margin: 0;
   font-size: 1.7em;
   color: white;
   text-transform: uppercase;
 }
 
-header h1.logo:hover {
-  color: #white;
+.monopyly-logo:hover {
+  color: #f5f5f5;
 }
 
 
@@ -72,15 +72,23 @@ header h1.logo:hover {
   text-decoration: none;
 }
 
+#nav-menu li a:hover {
+  color: #cdcdcd;
+}
+
 
 /*
  * Handle the main body content area for pages
  */
-div#page {
+#page {
 	display: flex;
 	justify-content: space-between;
 	padding-top: 60px;
 	padding-bottom: 30px;
+}
+
+#page .container {
+	width: 80%;
 }
 
 aside.sidebar {
@@ -88,10 +96,6 @@ aside.sidebar {
 	width: 10%;
 	min-width: 25px;
 	padding: 0 10px;
-}
-
-div#page .container {
-	width: 80%;
 }
 
 #content-header h1 {
@@ -110,7 +114,12 @@ form {
 	margin: auto;
 }
 
-form div.form-field {
+form .form-line {
+	display: flex;
+	justify-content: space-between;
+}
+
+form .form-field {
 	margin: 0 5px;
 }
 
@@ -120,66 +129,73 @@ form label {
 	font-size: 1.2em;
 }
 
+form button,
 form input {
-  width: 100%;
-  padding: 5px;
+	width: 100%;
 	box-sizing: border-box;
-  border: 1px solid #cccccc;
+	font-size: 1.1em;
+}
+
+form input {
+  padding: 5px;
   background-color: #fafafa;
-  -webkit-border-radius: 3px;
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-  font-size: 1.1em;
+}
+
+form input[type="text"] {
+  border: 1px solid #cccccc;
+  border-radius: 3px;
 }
 
 form input[type="checkbox"] {
 	cursor: pointer;
 }
 
-form div.form-line {
-	display: flex;
-	justify-content: space-between;
-}
-
+form button,
 form input.button {
-  display: block;
-  -webkit-border-radius: 3px; 
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-	margin: 10px 0; 
-  padding: 10px; 
+  display: flex;
+	align-items: center;
+	margin: 10px auto; 
+	padding: 10px;
   border:1px solid #d8d8d8;
+  border-radius: 3px;
   text-align: center; 
+  color: #333333;
   font-weight:bold; 
-  color: black; 
-  background-color: #f4f4f4;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f4f4f4), color-stop(100%, #e5e5e5));
-  background-image: -webkit-linear-gradient(top, #f4f4f4, #e5e5e5);
-  background-image: -moz-linear-gradient(top, #f4f4f4, #e5e5e5);
-  background-image: -ms-linear-gradient(top, #f4f4f4, #e5e5e5);
-  background-image: -o-linear-gradient(top, #f4f4f4, #e5e5e5);
-  background-image: linear-gradient(top, #f4f4f4, #e5e5e5);
-	filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#f4f4f4, endColorstr=#e5e5e5);
+  background-color: #fbfbfb;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fbfbfb), color-stop(100%, #efefef));
+  background-image: -webkit-linear-gradient(top, #fbfbfb, #efefef);
+  background-image: -moz-linear-gradient(top, #fbfbfb, #efefef);
+  background-image: -ms-linear-gradient(top, #fbfbfb, #efefef);
+  background-image: -o-linear-gradient(top, #fbfbfb, #efefef);
+  background-image: linear-gradient(top, #fbfbfb, #efefef);
 }
 
+form button:hover,
 form input.button:hover {
+  color: #444444;
+  background-color: #f7f7f7;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f7f7f7), color-stop(100%, #e7e7e7));
+  background-image: -webkit-linear-gradient(top, #f7f7f7, #e7e7e7);
+  background-image: -moz-linear-gradient(top, #f7f7f7, #e7e7e7);
+  background-image: -ms-linear-gradient(top, #f7f7f7, #e7e7e7);
+  background-image: -o-linear-gradient(top, #f7f7f7, #e7e7e7);
+  background-image: linear-gradient(top, #f7f7f7, #e7e7e7);
   cursor: pointer;
-  border:1px solid #c1c1c1;
-  background-color: #dbdbdb;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#dbdbdb), color-stop(100%, #cccccc));
-  background-image: -webkit-linear-gradient(top, #dbdbdb, #cccccc);
-  background-image: -moz-linear-gradient(top, #dbdbdb, #cccccc);
-  background-image: -ms-linear-gradient(top, #dbdbdb, #cccccc);
-  background-image: -o-linear-gradient(top, #dbdbdb, #cccccc);
-  background-image: linear-gradient(top, #dbdbdb, #cccccc);
-	filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#dbdbdb, endColorstr=#cccccc);
 }
 
-form div.autocomplete {
+form button .button-icon {
+	height: 40px;
+	width: 40px;
+	margin: 5px 10px; 
+	filter: brightness(0.8);
+}
+
+form .autocomplete {
 	position: relative;
 }
 
-form div.autocomplete-box { position: absolute; top: 98%;
+form .autocomplete-box {
+	position: absolute; top: 98%;
 	left: 0;
 	width: 100%;
 	padding-right: 10px;
@@ -188,57 +204,57 @@ form div.autocomplete-box { position: absolute; top: 98%;
 	z-index: 99;
 }
 
-form div.autocomplete-box div.item {
+form .autocomplete-box .item {
 	width: 100%;
 	padding: 3px 5px;
 	cursor: pointer;
 }
 
-form div.autocomplete-box div.item:hover {
+form .autocomplete-box .item:hover {
 	background-color: #cccccc;
 }
 
-form div.autocomplete-box div.item.active {
+form .autocomplete-box .item.active {
 	font-weight: bold;
 	color: black;
 	background-color: #85bb65;
 }
 
-nav#sidebar-nav-menu {
+#sidebar-nav-menu {
 	position: fixed;
 	top: 50px;
 	left: 4%;
 	width: 5%;
 }
 
-nav#sidebar-nav-menu ul {
+#sidebar-nav-menu ul {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	padding: 0;
 }
 
-nav#sidebar-nav-menu li {
+#sidebar-nav-menu li {
 	display: block;
 	margin: 1px 0;
 }
 
-nav#sidebar-nav-menu .button-icon {
-	height: 30px;
-	width: 30px;
-	margin: 0 auto;
+#sidebar-nav-menu .button-icon {
+	height: 35px;
+	width: 35px;
+	margin: 3px auto;
 }
 
 /* 
  * Style the card filter
  */
-div#card-filter {
+#card-filter {
 	display: flex;
 	justify-content: center;
 	margin-bottom: 20px;
 }
 
-div#card-filter a.card {
+#card-filter .card {
 	position: relative;
 	margin: 0 3px;
 	padding: 1px 10px;
@@ -248,26 +264,26 @@ div#card-filter a.card {
 	cursor: pointer;
 }
 
-div#card-filter a.inactive.card {
+#card-filter .inactive.card {
 	background-color: #eeeeee;
 	color: #999999;
 }
 
-div#card-filter a.active.card {
+#card-filter .active.card {
 	background-color: #eeeeee;
 }
 
-div#card-filter a.active.card:hover,
-div#card-filter a.inactive.card:hover {
+#card-filter .active.card:hover,
+#card-filter .inactive.card:hover {
 	background-color: #cccccc; 
 }
 
-div#card-filter a.card.selected {
+#card-filter .card.selected {
 	background-color: #444444;
 	color: #efefef;
 }
 
-div#card-filter a.card.selected:hover {
+#card-filter .card.selected:hover {
 	background-color: #333333;
 	color: #bbbbbb;
 }
@@ -363,12 +379,10 @@ table.transactions td div.notes{
 /*
  * Customization for the 'Home' page
  */
-div#homepage-block.jumbo {
+#homepage-block.jumbo {
   padding: 10px 0 30px 0;
+  border-radius: 6px;
   background-color: #eeeeee;
-  -webkit-border-radius: 6px;
-     -moz-border-radius: 6px;
-          border-radius: 6px;
 }
 
 #homepage-block h2 {
@@ -407,24 +421,24 @@ div#homepage-block.jumbo {
 /*
  * Customization for the 'Cards' page
  */
-div#cards-container {
+#cards-container {
 	display: flex;
 	flex-wrap: wrap;
 	width: 420px;
 	margin: auto;
 }
 @media screen and (min-width: 1040px) {
-	div#cards-container {
+	#cards-container {
 		width: 840px;
 	}
 }
 @media screen and (min-width: 1460px) {
-	div#cards-container {
+	#cards-container {
 		width: 1260px;
 	}
 }
 @media screen and (min-width: 1880px) {
-	div#cards-container {
+	#cards-container {
 		width: 1680px;
 	}
 }
@@ -521,11 +535,9 @@ div#statements-container div.card-column {
   flex-direction: column;
 	margin: 15px 0;
 	padding: 20px;
+  border-radius: 15px;
 	text-align: center;
   background-color: #e5fbd8;
-  -webkit-border-radius: 15px;
-     -moz-border-radius: 15px;
-          border-radius: 15px;
 }
 
 div#statements-container div.card-column span.digits{
@@ -544,11 +556,9 @@ div.statement-block {
 	width: 275px;
 	margin: 10px;
 	padding: 45px 50px;
-  background-color: #eeeeee;
 	border: 2px solid #dddddd;
-  -webkit-border-radius: 10px;
-     -moz-border-radius: 10px;
-          border-radius: 10px;
+  border-radius: 10px;
+  background-color: #eeeeee;
 }
 
 div.statement-block div.date,

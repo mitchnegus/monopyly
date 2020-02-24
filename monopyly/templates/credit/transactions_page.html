@@ -72,8 +72,8 @@
 
 	<script src="{{ url_for('static', filename='js/define_filter.js') }}">
 	</script>
-	<script>var $FILTER_ENDPOINT = "{{ url_for('credit.update_transactions') }}";</script>
-	<script src="{{ url_for('static', filename='js/update_transactions.js') }}">
+	<script>var $FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";</script>
+	<script src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
 	</script>
 
 {% endblock %}

@@ -1,9 +1,9 @@
 """
-Generate a form for the user to fill out with new transactions.
+Generate forms for the user to fill out.
 """
 from flask_wtf import FlaskForm
 from wtforms.fields import (
-    DateField, DecimalField, IntegerField, TextField, BooleanField, SubmitField
+    DecimalField, IntegerField, TextField, BooleanField, SubmitField
 )
 from wtforms.validators import ValidationError, DataRequired, Length
 

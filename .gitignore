@@ -1,5 +1,4 @@
 *.swp
-*.ai
 .ipynb_checkpoints
 
 # Byte-compiled / optimized / DLL files
@@ -72,6 +71,8 @@ target/
 
 # Image creation files
 monopyly/static/img/*.pptx
+monopyly/static/img/*.xcf
+monopyly/static/favicon/*.ai
 
 # Flask instance files/data
 instance/
