@@ -111,9 +111,9 @@ def show_statements():
                            statements=statements)
 
 
-@bp.route('/_update_statements', methods=('POST',))
+@bp.route('/_update_statements_display', methods=('POST',))
 @login_required
-def update_statements():
+def update_statements_display():
     ch, sh = CardHandler(), StatementHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
@@ -165,9 +165,9 @@ def show_transactions():
                            transactions=transactions)
 
 
-@bp.route('/_update_transactions', methods=('POST',))
+@bp.route('/_update_transactions_display', methods=('POST',))
 @login_required
-def update_transactions():
+def update_transactions_display():
     ch, th = CardHandler(), TransactionHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
