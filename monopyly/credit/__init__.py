@@ -35,7 +35,7 @@ def show_cards():
     return render_template('credit/cards_page.html', cards=cards)
 
 
-@bp.route('/<int:card_id>/card')
+@bp.route('/card/<int:card_id>')
 @login_required
 def show_card(card_id):
     ch = CardHandler()
@@ -63,7 +63,7 @@ def new_card():
     return render_template('credit/card_form_page_new.html', form=form)
 
 
-@bp.route('/<int:card_id>/update_card', methods=('GET', 'POST'))
+@bp.route('/update_card/<int:card_id>', methods=('GET', 'POST'))
 @login_required
 def update_card(card_id):
     ch = CardHandler()
@@ -85,7 +85,7 @@ def update_card(card_id):
                            card_id=card_id, form=form)
 
 
-@bp.route('/<int:card_id>/delete_card', methods=('POST',))
+@bp.route('/delete_card/<int:card_id>', methods=('POST',))
 @login_required
 def delete_card(card_id):
     ch = CardHandler()
@@ -130,7 +130,7 @@ def update_statements_display():
                            statements=statements)
 
 
-@bp.route('/<int:statement_id>/statement')
+@bp.route('/statement/<int:statement_id>')
 @login_required
 def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
@@ -184,7 +184,7 @@ def update_transactions_display():
                            transactions=transactions)
 
 
-@bp.route('/<int:transaction_id>/transaction')
+@bp.route('/transaction/<int:transaction_id>')
 @login_required
 def show_transaction(transaction_id):
     th = TransactionHandler()
@@ -194,11 +194,22 @@ def show_transaction(transaction_id):
                            transaction=transaction)
 
 
-@bp.route('/new_transaction', methods=('GET', 'POST'))
+@bp.route('/new_transaction', defaults={'statement_id': None},
+          methods=('GET', 'POST'))
+@bp.route('/new_transaction/<int:statement_id>', methods=('GET', 'POST'))
 @login_required
-def new_transaction():
+def new_transaction(statement_id):
     # Define a form for a transaction
     form = TransactionForm()
+    # Load statement parameters if the request came from a specific statement
+    if statement_id:
+        sh = StatementHandler()
+        # Get the necessary fields from the database
+        fields = ('bank', 'last_four_digits', 'issue_date')
+        statement = sh.get_statement(statement_id, fields=fields)
+        form.bank.data = statement['bank']
+        form.last_four_digits.data = statement['last_four_digits']
+        form.issue_date.data = statement['issue_date']
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
@@ -217,7 +228,7 @@ def new_transaction():
     return render_template('credit/transaction_form_page_new.html', form=form)
 
 
-@bp.route('/<int:transaction_id>/update_transaction', methods=('GET', 'POST'))
+@bp.route('/update_transaction/<int:transaction_id>', methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
     th = TransactionHandler()
@@ -243,7 +254,7 @@ def update_transaction(transaction_id):
                            transaction_id=transaction_id, form=form)
 
 
-@bp.route('/<int:transaction_id>/delete_transaction', methods=('POST',))
+@bp.route('/delete_transaction/<int:transaction_id>', methods=('POST',))
 @login_required
 def delete_transaction(transaction_id):
     th = TransactionHandler()
