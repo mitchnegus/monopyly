@@ -10,6 +10,11 @@ body {
 	color: #444444;
 }
 
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
 
 /*
  * Create dark grey header with a white logo
@@ -34,10 +39,6 @@ body {
 	align-items: center;
 	width: 90%;
 	margin: 0 auto;
-}
-
-#masthead a {
-	text-decoration: none;
 }
 
 .monopyly-logo {
@@ -69,7 +70,6 @@ body {
 
 #nav-menu li a {
   color: #bbbbbb;
-  text-decoration: none;
 }
 
 #nav-menu li a:hover {
@@ -262,20 +262,15 @@ form .autocomplete-box .item.active {
 	text-align: center;
 	font-size: 8pt;
 	cursor: pointer;
+	background-color: #eeeeee;
+}
+
+#card-filter .card:hover {
+	background-color: #cccccc; 
 }
 
 #card-filter .inactive.card {
-	background-color: #eeeeee;
 	color: #999999;
-}
-
-#card-filter .active.card {
-	background-color: #eeeeee;
-}
-
-#card-filter .active.card:hover,
-#card-filter .inactive.card:hover {
-	background-color: #cccccc; 
 }
 
 #card-filter .card.selected {
@@ -311,7 +306,7 @@ table.transactions tr img.edit-icon {
 	width: 16px;
 }
 
-table.transactions tr:hover img.edit-icon {
+table.transactions tr:hover .edit-icon {
 	visibility: visible;
 }
 
@@ -320,19 +315,20 @@ table.transactions td {
 	padding: 5px 10px;
 }
 
-table.transactions th.card {
-	text-align: center;
-}
-
+table.transactions th.card,
 table.transactions td.card {
 	text-align: right;
 }
 
-table.transactions td.card span.bank {
+table.transactions th.card {
+	padding-right: 30px;
+}
+
+table.transactions td.card .bank {
 	display: inline-block;
 }
 @media screen and (max-width: 1200px) {
-	table.transactions td.card span.bank {
+	table.transactions td.card .bank {
 		display: none;
 	}
 }
@@ -342,14 +338,14 @@ table.transactions td.date {
 	text-align: center;
 }
 
-table.transactions th img.sort-icon {
+table.transactions th .sort-icon {
 	display: none;
 	height: 10px;
 	width: 10px;
 	cursor: pointer;
 }
 
-table.transactions th img.sort-icon.selected {
+table.transactions th .sort-icon.selected {
 	display: inline;
 }
 
@@ -443,20 +439,17 @@ table.transactions td div.notes{
 	}
 }
 
-a.credit-card-block {
-	color: inherit;
-}
-
-div.credit-card-block {
+.credit-card-block {
 	position: relative;
+	width: 400px;
 	margin: 10px;
 }
 
-div.credit-card-block img.credit-card {
-	width: 400px;
+.credit-card-block .card-background {
+	width: 100%;
 }
 
-div.credit-card-block div.card-number {
+.credit-card-block .card-number {
 	position: absolute;
 	top: 160px;
 	left: 50px;
@@ -468,23 +461,23 @@ div.credit-card-block div.card-number {
 /*
  * Customization for the 'Card Details' page
  */
-table#card {
+#card-details {
 	width: 70%;
 	margin: 20px auto;
 	border-collapse: collapse;
 }
 
-table#card th,
-table#card td {
+#card-details th,
+#card-details td {
 	padding: 5px 10px;
 	vertical-align: top;
 }
 
-table#card th {
+#card-details th {
 	text-align: right;
 }
 
-table#card td {
+#card-details td {
 	text-align: left;
 }
 
@@ -492,32 +485,32 @@ table#card td {
 /*
  * Customization for the 'New Card' & 'Update Card' pages
  */
-form#card div#bank {
+form#card #bank {
 	flex-basis: 70%;
 	min-width: 320px;
 }
 
-form#card div#last-four-digits {
+form#card #last-four-digits {
 	flex-basis: 30%;
 	min-width: 160px;
 }
 
-form#card div#statement-issue-day {
+form#card #statement-issue-day {
 	flex-basis: 40%;
 	min-width: 180px;
 }
 
-form#card div#statement-due-day {
+form#card #statement-due-day {
 	flex-basis: 40%;
 	min-width: 180px;
 }
 
-form#card div#active {
+form#card #active {
 	flex-basis: 20%;
 	min-width: 100px;
 }
 
-form#card input#submit {
+form#card #submit {
 	min-width: 490px;
 }
 
@@ -525,12 +518,12 @@ form#card input#submit {
 /*
  * Customization for the 'Statements' page
  */
-div#statements-container {
+#statements-container {
 	display: flex;
 	justify-content: space-around;
 }
 
-div#statements-container div.card-column {
+#statements-container .card-column {
   display: flex;
   flex-direction: column;
 	margin: 15px 0;
@@ -540,16 +533,11 @@ div#statements-container div.card-column {
   background-color: #e5fbd8;
 }
 
-div#statements-container div.card-column span.digits{
+#statements-container .card-column .digits {
 	color: #888888;
 }
 
-a.statement-block {
-	color: inherit;
-	text-decoration: none;
-}
-
-div.statement-block {
+.statement-block {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -561,29 +549,29 @@ div.statement-block {
   background-color: #eeeeee;
 }
 
-div.statement-block div.date,
-div.statement-block div.payment {
+.statement-block .date,
+.statement-block .payment {
   display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 
-div.statement-block div.date div.month {
+.statement-block .date .month {
 	font-size: 22pt;
   letter-spacing: -1px;
 }
 
-div.statement-block div.date div.year {
+.statement-block .date .year {
 	font-size: 16pt;
   letter-spacing: 1px;
 }
 
-div.statement-block div.payment div.total {
+.statement-block .payment .total {
 	font-size: 30pt;
 	font-weight: bold;
 }
 
-div.statement-block div.payment div#paid {
+.statement-block .payment .paid {
   color: #85bb65;
 	font-size: 8pt;
 	font-weight: bold;
@@ -594,58 +582,59 @@ div.statement-block div.payment div#paid {
 /*
  * Customization for the 'Statement Details' page
  */
-div#statement {
+#statement-details {
 	display: flex;
 	justify-content: space-around;
 	padding-top: 10px;
 }
 
-div#statement div#statement-info {
+#statement-details #statement-info {
 	display: flex;
 	flex-direction: column;
 	padding: 0 50px;
 }
 
-div#statement div#statement-info div#card {
+#statement-details #statement-info #card {
 	margin-bottom: 10px;
 	color: #888888;
 }
 
-div#statement div#statement-info div#issue-date {
+#statement-details #statement-info #issue-date {
 	font-size: 20pt;
 }
 
-div#statement div#statement-info div#total {
+#statement-details #statement-info #total {
 	margin: 20px 0;
 	font-size: 40pt;
 	font-weight: bold;
 }
 
-div#statement table#statement-transactions {
-	width: 50%;
-}
-
-div#statement div#statement-info div#due-date {
+#statement-details #statement-info #due-date {
 	font-size: 10pt;
 }
 
-div#statement div#statement-info div#due {
+#statement-details #statement-info #due {
   display: flex;
 	justify-content: space-between;
 }
 
-div#statement div#statement-info div#due div#due-date span#date {
+#statement-details #statement-info #due #due-date #date {
 	margin-left: 5px;
 	font-weight: bold;
 	letter-spacing: 1px;
 }
 
-div#statement div#statement-info div#due div#paid {
+#statement-details #statement-info #due #paid {
   color: #85bb65;
 	font-size: 10pt;
 	font-weight: bold;
 	letter-spacing: 1px;
 }
+
+#statement-details table#statement-transactions {
+	width: 50%;
+}
+
 
 /*
  * Customization for the 'Transactions' page
@@ -659,23 +648,23 @@ table#transactions {
 /*
  * Customization for the 'Transaction Details' page
  */
-table#transaction {
+#transaction-details {
 	width: 70%;
 	margin: 20px auto;
 	border-collapse: collapse;
 }
 
-table#transaction th,
-table#transaction td {
+#transaction-details th,
+#transaction-details td {
 	padding: 5px 10px;
 	vertical-align: top;
 }
 
-table#transaction th {
+#transaction-details th {
 	text-align: right;
 }
 
-table#transaction td {
+#transaction-details td {
 	text-align: left;
 }
 
@@ -683,11 +672,11 @@ table#transaction td {
 /*
  * Customization for the 'New Transaction' & 'Update Transaction' pages
  */
-form#transaction div#bank {
+form#transaction #bank {
 	flex-basis: 70%;
 }
 
-form#transaction div#last-four-digits {
+form#transaction #last-four-digits {
 	flex-basis: 30%;
 	min-width: 150px;
 }
@@ -701,6 +690,6 @@ form#transaction div#last-four-digits {
 	margin: auto;
 }
 
-p#receipt-title {
+#receipt-title {
 	text-align: center;
 }
