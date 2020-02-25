@@ -134,6 +134,7 @@ form input {
 	width: 100%;
 	box-sizing: border-box;
 	font-size: 1.1em;
+	filter: none; /*removes FireFox autofill background*/
 }
 
 form input {
@@ -255,13 +256,45 @@ form .autocomplete-box .item.active {
 
 
 /*
+ * Style the gadget to reveal text (sideways slide) on hover
+ */
+.slide-text {
+	position: relative;
+	height: 1.2em;
+	width: 150px;
+	overflow: hidden;
+}
+
+.slide-text .sleeve {
+	position: relative;
+	right: -100%;
+	width: min-content;
+	transition: 0.4s;
+} 
+
+.slide-text:hover .sleeve {
+	transform: translateX(-100%);
+}
+
+.slide-text .sleeve .main {
+	position: absolute;
+	transform: translateX(-100%);
+	transition: 0.2s;
+}
+
+.slide-text:hover .sleeve .main {
+	padding-right: 5px;
+}
+
+
+/*
  * Style the gadget to flip text on hover
  */
 .flip-text {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	min-height: 15px;
+	height: 1.2em;
 	width: 100px;
 }
 
@@ -576,7 +609,7 @@ form#card #submit {
 #statements-container .card-column {
   display: flex;
   flex-direction: column;
-	margin: 15px 0;
+	margin: 15px 10px;
 	padding: 20px;
   border-radius: 15px;
 	text-align: center;
@@ -647,8 +680,11 @@ form#card #submit {
 }
 
 #statement-details #statement-info #total {
+	display: flex;
+	justify-content: space-between;
 	margin: 20px 0;
-	font-size: 50pt;
+	text-align: center;
+	font-size: 60pt;
 	font-weight: bold;
 	letter-spacing: 1px;
 }

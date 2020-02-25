@@ -41,23 +41,26 @@
 				{{ statement['issue_date'].strftime('%B %Y') }}
 			</div>
 			<div id="total">
-				{{ '${:,.2f}'.format(statement['total']) }}
+				<div>$</div>
+				<div>{{ '{:,.2f}'.format(statement['total']) }}</div>
 			</div>
 			<div id="due">
 				<div id="due-date">
 					DUE <span id="date">{{ statement['due_date'] }}</span>
 				</div>
 				{% if statement['paid'] %}
-					<div class="paid-notice flip-text">
-						<div class="flip-text-inner">
-							<div class="front">
-								PAID
-							</div>
-							<div class="back">
-								{{ statement['payment_date'] }}
+					{% if statement['payment_date'] %}
+						<div class="paid-notice slide-text">
+							<div class="sleeve">
+								<div class="main">PAID</div>
+								<div class="reveal">{{ statement['payment_date'] }}</div>
 							</div>
 						</div>
-					</div>
+					{% else %}
+						<div class="paid-notice">
+							PAID
+						</div>
+					{% endif %}
 				{% endif %}
 			</div>
 		</div>
