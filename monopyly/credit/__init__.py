@@ -102,7 +102,7 @@ def show_statements():
     cards = ch.get_cards()
     active_cards = ch.get_cards(active=True)
     # Get all of the user's statements for active cards from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'paid',
+    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
               'COALESCE(SUM(price), 0) total')
     statements = sh.get_statements(fields=fields, active=True)
     return render_template('credit/statements_page.html',
@@ -136,7 +136,7 @@ def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
     # Get the statement information from the database
     fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'COALESCE(SUM(price), 0) total')
+              'payment_date', 'COALESCE(SUM(price), 0) total')
     statement = sh.get_statement(statement_id, fields=fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'

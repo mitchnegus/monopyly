@@ -18,9 +18,18 @@
 						<div class="total">
 						{{ '${:,.2f}'.format(statement['total']) }}
 						</div>
-						<div class="paid">
-							{{ 'PAID' if statement['paid'] else '' }}
-						</div>
+						{% if statement['paid'] %}
+							<div class="paid-notice flip-text">
+								<div class="flip-text-inner">
+									<div class="front">
+										PAID
+									</div>
+									<div class="back">
+										{{ statement['payment_date'] }}
+									</div>
+								</div>
+							</div>
+						{% endif %}
 					</div>
 				</a>
 	

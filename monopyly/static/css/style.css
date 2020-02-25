@@ -245,6 +245,56 @@ form .autocomplete-box .item.active {
 	margin: 3px auto;
 }
 
+
+.paid-notice {
+  color: #85bb65;
+	font-size: 10pt;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+
+
+/*
+ * Style the gadget to flip text on hover
+ */
+.flip-text {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 15px;
+	width: 100px;
+}
+
+.flip-text .flip-text-inner {
+	position: relative;
+	height: 100%;
+	width: 100%;
+	text-align: center;
+}
+
+.flip-text .front,
+.flip-text .back {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+	transition: transform 0.4s;
+}
+
+.flip-text:hover .front {
+	transform: rotateX(180deg);
+}
+
+.flip-text .back {
+	transform: rotateX(180deg);
+}
+
+.flip-text:hover .back {
+	transform: rotateX(0deg);
+}
+
+
 /* 
  * Style the card filter
  */
@@ -571,13 +621,6 @@ form#card #submit {
 	font-weight: bold;
 }
 
-.statement-block .payment .paid {
-  color: #85bb65;
-	font-size: 8pt;
-	font-weight: bold;
-	letter-spacing: 1px;
-}	
-
 
 /*
  * Customization for the 'Statement Details' page
@@ -600,13 +643,14 @@ form#card #submit {
 }
 
 #statement-details #statement-info #issue-date {
-	font-size: 20pt;
+	font-size: 24pt;
 }
 
 #statement-details #statement-info #total {
 	margin: 20px 0;
-	font-size: 40pt;
+	font-size: 50pt;
 	font-weight: bold;
+	letter-spacing: 1px;
 }
 
 #statement-details #statement-info #due-date {
@@ -620,13 +664,6 @@ form#card #submit {
 
 #statement-details #statement-info #due #due-date #date {
 	margin-left: 5px;
-	font-weight: bold;
-	letter-spacing: 1px;
-}
-
-#statement-details #statement-info #due #paid {
-  color: #85bb65;
-	font-size: 10pt;
 	font-weight: bold;
 	letter-spacing: 1px;
 }

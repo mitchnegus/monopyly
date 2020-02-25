@@ -47,9 +47,18 @@
 				<div id="due-date">
 					DUE <span id="date">{{ statement['due_date'] }}</span>
 				</div>
-				<div id="paid">
-					{{ 'PAID' if statement['paid'] else '' }}
-				</div>
+				{% if statement['paid'] %}
+					<div class="paid-notice flip-text">
+						<div class="flip-text-inner">
+							<div class="front">
+								PAID
+							</div>
+							<div class="back">
+								{{ statement['payment_date'] }}
+							</div>
+						</div>
+					</div>
+				{% endif %}
 			</div>
 		</div>
 		
