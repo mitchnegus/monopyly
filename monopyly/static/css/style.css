@@ -123,6 +123,10 @@ form .form-field {
 	margin: 0 5px;
 }
 
+form .form-line .form-field {
+	flex-grow: 1;
+}
+
 form label {
   display: block;
 	padding: 10px 0;
@@ -154,8 +158,9 @@ form input[type="checkbox"] {
 form button,
 form input.button {
   display: flex;
+	justify-content: center;
 	align-items: center;
-	margin: 10px auto; 
+	margin-top: 20px; 
 	padding: 10px;
   border:1px solid #d8d8d8;
   border-radius: 3px;
@@ -187,7 +192,7 @@ form input.button:hover {
 form button .button-icon {
 	height: 40px;
 	width: 40px;
-	margin: 5px 10px; 
+	margin-right: 10px; 
 	filter: brightness(0.8);
 }
 
