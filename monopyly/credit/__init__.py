@@ -121,7 +121,7 @@ def update_statements_display():
     # Determine the card IDs from the arguments of POST method
     cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'paid',
+    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
               'COALESCE(SUM(price), 0) total')
     statements = sh.get_statements(fields=fields,
                                    card_ids=[card['id'] for card in cards])
