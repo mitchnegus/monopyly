@@ -609,6 +609,7 @@ form#card #submit {
 #statements-container .card-column {
   display: flex;
   flex-direction: column;
+	height: min-content;
 	margin: 15px 10px;
 	padding: 20px;
   border-radius: 15px;
