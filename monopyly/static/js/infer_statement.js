@@ -24,13 +24,13 @@ $transactionDateInput.on('blur', function() {
 
 function inferStatementAjaxRequest() {
 	// Return a single statement matching the criteria of the raw data
-	rawData = {
+	var rawData = {
 		'bank': $bankInput.val(),
 		'digits': $digitsInput.val(),
 		'transaction_date': $transactionDateInput.val()
 	};
 	$.ajax({
-		url: $INFER_STATEMENT_ENDPOINT,
+		url: INFER_STATEMENT_ENDPOINT,
 		type: 'POST',
 		data: JSON.stringify(rawData),
 		contentType: 'application/json; charset=UTF-8',

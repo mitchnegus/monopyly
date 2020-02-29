@@ -31,7 +31,7 @@ $digitsInput.on('blur', function() {
 function inferCardAjaxRequest(rawData) {
 	// Return a single card matching the criteria of the raw data
 	$.ajax({
-		url: $INFER_CARD_ENDPOINT,
+		url: INFER_CARD_ENDPOINT,
 		type: 'POST',
 		data: JSON.stringify(rawData),
 		contentType: 'application/json; charset=UTF-8',

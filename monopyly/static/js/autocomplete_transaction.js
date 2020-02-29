@@ -30,7 +30,7 @@ $('div.autocomplete input').on('blur', function() {
 function autocompleteAjaxRequest(inputElement) {
 	// Return a set of autocomplete suggestions from the database
 	$.ajax({
-		url: $AUTOCOMPLETE_ENDPOINT,
+		url: AUTOCOMPLETE_ENDPOINT,
 		type: 'POST',
 		data: JSON.stringify(inputElement.id),
 		contentType: 'application/json; charset=UTF-8',

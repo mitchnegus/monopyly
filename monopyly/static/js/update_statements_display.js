@@ -33,7 +33,7 @@ function updateDisplayAjaxRequest(filterIDs) {
 	var rawData = {'filter_ids': filterIDs}
 	// Return a filtered display for each ID in the set of filterIDs
 	$.ajax({
-		url: $FILTER_ENDPOINT,
+		url: FILTER_ENDPOINT,
 		type: 'POST',
 		data: JSON.stringify(rawData),
 		contentType: 'application/json; charset=UTF-8',

@@ -35,7 +35,9 @@
 
 	<script src="{{ url_for('static', filename='js/define_filter.js') }}">
 	</script>
-	<script>var $FILTER_ENDPOINT = "{{ url_for('credit.update_statements_display') }}";</script>
+	<script>
+		const FILTER_ENDPOINT = "{{ url_for('credit.update_statements_display') }}";
+	</script>
 	<script src="{{ url_for('static', filename='js/update_statements_display.js') }}">
 	</script>
 

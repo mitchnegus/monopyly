@@ -59,7 +59,7 @@ function updateTableAjaxRequest(filterIDs, sortOrder) {
 	};
 	// Return a filtered table for each ID in the set of filterIDs
 	$.ajax({
-		url: $FILTER_ENDPOINT,
+		url: FILTER_ENDPOINT,
 		type: 'POST',
 		data: JSON.stringify(rawData),
 		contentType: 'application/json; charset=UTF-8',
