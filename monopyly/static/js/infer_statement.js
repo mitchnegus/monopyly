@@ -2,7 +2,7 @@
  * Infer credit card statement if enough identifying info is provided.
  *
  * When entering a transaction, infer the statement on which the 
- * transaction belongs based on the current set of provided infromation.
+ * transaction belongs based on the current set of provided information.
  * After a user finishes entering the transaction date, that date and
  * the two card information field values are used to identify matching
  * statements in the database using an AJAX request. If only one
