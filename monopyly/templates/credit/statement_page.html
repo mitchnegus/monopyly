@@ -44,9 +44,13 @@
 				<div>$</div>
 				<div>{{ '{:,.2f}'.format(statement['total']) }}</div>
 			</div>
-			<div id="due">
-				<div id="due-date">
-					DUE <span id="date">{{ statement['due_date'] }}</span>
+			<div id="payment">
+				<div id="due">
+					<div>DUE</div>
+					<div id="due-date" class="date">{{ statement['due_date'] }}</div>
+					<input type="text" name="due_date" id="edit-due-date" class="date" value="{{ statement['due_date'] }}" size="10" />
+					<img id="edit" class="due-date-icon" src="{{ url_for('static', filename='img/edit-icon.png') }}" />
+					<img id="save" class="due-date-icon" src="{{ url_for('static', filename='img/save-icon.png') }}" />
 				</div>
 				{% if statement['paid'] %}
 					{% if statement['payment_date'] %}
@@ -92,5 +96,16 @@
 		</table>
 
 	</div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+	<script src="{{ url_for('static', filename='js/update_statement_due_date.js') }}">
+	</script>
+	<script>
+		const UPDATE_STATEMENT_DUE_DATE_ENDPOINT = "{{ url_for('credit.update_statement_due_date', statement_id=statement['id']) }}";
+	</script>
 
 {% endblock %}
