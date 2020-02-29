@@ -4,8 +4,8 @@ Tools for interacting with the credit cards database.
 from werkzeug.exceptions import abort
 
 from ..utils import (
-    DatabaseHandler, reserve_places, fill_place, fill_places, filter_item,
-    filter_items
+    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
+    reserve_places
 )
 from .constants import CARD_FIELDS
 from .tools import select_fields
@@ -204,7 +204,7 @@ class CardHandler(DatabaseHandler):
         return mapping
 
     def delete_card(self, card_id):
-        """Delete a credit card from the database given its card ID."""
+        """Delete a credit card from the database given its ID."""
         # Check that the card exists and belongs to the user
         self.get_card(card_id)
         super().delete_entry(card_id)

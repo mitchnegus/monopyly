@@ -99,6 +99,7 @@ class DatabaseHandler(ABC):
         )
         self.db.commit()
 
+
 def filter_dict(dictionary, operator, condition, by_value=False):
     """Filter a dictionary by key using the given operator and condition."""
     if operator is op.contains:

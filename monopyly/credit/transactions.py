@@ -6,8 +6,8 @@ from dateutil.relativedelta import relativedelta
 from werkzeug.exceptions import abort
 
 from ..utils import (
-    DatabaseHandler, parse_date, reserve_places, fill_places, filter_items,
-    check_sort_order
+    DatabaseHandler, fill_places, filter_items, check_sort_order,
+    reserve_places, parse_date
 )
 from .constants import TRANSACTION_FIELDS
 from .tools import select_fields
@@ -205,7 +205,7 @@ class TransactionHandler(DatabaseHandler):
         return mapping
 
     def delete_transaction(self, transaction_id):
-        """Delete a transaction from the database given its transaction ID."""
+        """Delete a transaction from the database given its ID."""
         # Check that the transaction exists and belongs to the user
         self.get_transaction(transaction_id)
         super().delete_entry(transaction_id)

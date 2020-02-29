@@ -7,7 +7,7 @@ from werkzeug.exceptions import abort
 
 from ..utils import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
-    check_sort_order
+    check_sort_order, parse_date
 )
 from .constants import STATEMENT_FIELDS
 from .tools import select_fields
@@ -193,8 +193,22 @@ class StatementHandler(DatabaseHandler):
         statement = self.get_statement(self.cursor.lastrowid)
         return statement
 
+    def update_statement_due_date(self, statement_id, new_due_date):
+        """
+        Update a statement's due date given its ID and new due date.
+
+        Parameters
+        ––––––––––
+        statement_id : int
+            The ID of the statement to be updated.
+        new_due_date : str
+            The date to set as the new statement due date.
+        """
+        due_date = parse_date(new_due_date)
+        self.update_entry(statement_id, {'due_date': due_date})
+
     def delete_statement(self, statement_id):
-        """Delete a statement from the database given its statement ID."""
+        """Delete a statement from the database given its ID."""
         # Check that the statement exists and belongs to the user
         self.get_statement(statement_id)
         super().delete_entry(statement_id)
