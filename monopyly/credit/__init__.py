@@ -60,6 +60,7 @@ def new_card():
                                    update=False)
         else:
             flash(form_err_msg)
+            print(form.errors)
     return render_template('credit/card_form_page_new.html', form=form)
 
 
@@ -80,6 +81,7 @@ def update_card(card_id):
                                    update=True)
         else:
             flash(form_err_msg)
+            print(form.errors)
     # Display the form for accepting user input
     return render_template('credit/card_form_page_update.html',
                            card_id=card_id, form=form)
@@ -146,6 +148,18 @@ def show_statement(statement_id):
     return render_template('credit/statement_page.html',
                            statement=statement,
                            statement_transactions=transactions)
+
+
+@bp.route('/_update_statement_due_date/<int:statement_id>', methods=('POST',))
+@login_required
+def update_statement_due_date(statement_id):
+    sh = StatementHandler()
+    # Get the autocomplete field from the AJAX request
+    new_due_date = request.get_json()
+    # Update the statement in the database
+    sh.update_statement_due_date(statement_id, new_due_date)
+    statement = sh.get_statement(statement_id, fields=('due_date',))
+    return str(statement['due_date'])
 
 
 @bp.route('/transactions')
