@@ -394,12 +394,12 @@ table.transactions tr:hover td {
 	background-color: #fafafa;
 }
 
-table.transactions tr .plus-symbol {
+table.transactions tr .more {
 	visibility: hidden;
 	width: 16px;
 }
 
-table.transactions tr:hover .plus-symbol {
+table.transactions tr:hover .more {
 	visibility: visible;
 }
 
@@ -690,7 +690,7 @@ form#card #submit {
 }
 
 #statement-details #statement-info #issue-date {
-	font-size: 24pt;
+	font-size: 28pt;
 }
 
 #statement-details #statement-info #total {
@@ -698,7 +698,7 @@ form#card #submit {
 	justify-content: space-between;
 	margin: 20px 0;
 	text-align: center;
-	font-size: 60pt;
+	font-size: 72pt;
 	font-weight: bold;
 	letter-spacing: 1px;
 }
@@ -715,6 +715,7 @@ form#card #submit {
 	display: flex;
 	align-items: center;
 	height: 100%;
+	width: 175px;
 }
 
 #statement-details #statement-info #due .date {
@@ -734,23 +735,16 @@ form#card #submit {
 	display: none;
 }
 
-#statement-details #statement-info #due .due-date-icon {
+#statement-details #statement-info #due #edit-due-date-icon {
 	height: 20px;
 	width: 20px;
 	margin-left: 10px;
 	cursor: pointer;
-}
-
-#statement-details #statement-info #due #edit.due-date-icon {
 	visibility: hidden;
 }
 
-#statement-details #statement-info #due:hover #edit.due-date-icon {
+#statement-details #statement-info #due:hover #edit-due-date-icon {
 	visibility: visible;
-}
-
-#statement-details #statement-info #due #save.due-date-icon {
-	display: none;
 }
 
 #statement-details table#statement-transactions {

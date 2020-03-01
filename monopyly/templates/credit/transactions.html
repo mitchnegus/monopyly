@@ -30,7 +30,7 @@
 			<td class="date">{{ transaction['issue_date'] }}</td>
 			<td>
 				<a href="{{ url_for('credit.show_transaction', transaction_id=transaction['id']) }}">
-					<img class="plus-symbol" src="{{ url_for('static', filename='img/plus-symbol.png') }}" />
+					<img class="more" src="{{ url_for('static', filename='img/plus-symbol.png') }}" />
 				</a>
 			</td>
 		</tr>

@@ -49,8 +49,7 @@
 					<div>DUE</div>
 					<div id="due-date" class="date">{{ statement['due_date'] }}</div>
 					<input type="text" name="due_date" id="edit-due-date" class="date" value="{{ statement['due_date'] }}" size="10" />
-					<img id="edit" class="due-date-icon" src="{{ url_for('static', filename='img/edit-icon.png') }}" />
-					<img id="save" class="due-date-icon" src="{{ url_for('static', filename='img/save-icon.png') }}" />
+					<img id="edit-due-date-icon" src="{{ url_for('static', filename='img/edit-icon.png') }}" />
 				</div>
 				{% if statement['paid'] %}
 					{% if statement['payment_date'] %}
@@ -86,7 +85,7 @@
 					<td class="price">{{ '${:,.2f}'.format(transaction['price']) }}</td>
 					<td>
 						<a href="{{ url_for('credit.show_transaction', transaction_id=transaction['id']) }}">
-							<img class="plus-symbol" src="{{ url_for('static', filename='img/plus-symbol.png') }}" />
+							<img class="more" src="{{ url_for('static', filename='img/plus-symbol.png') }}" />
 						</a>
 					</td>
 				</tr>
