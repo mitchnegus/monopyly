@@ -17,8 +17,10 @@ var currentFocus;
 
 // Get possible values for fields with autocomplete
 $('div.autocomplete input').on('focus', function() {
-	var inputElement = this;
-	autocompleteAjaxRequest(inputElement);
+	let inputElement = this;
+	// Smart autocomplete factors in the transaction vendor
+	let extraInfo = $('form input#vendor').val();
+	autocompleteAjaxRequest(inputElement, extraInfo);
 });
 
 $('div.autocomplete input').on('blur', function() {
@@ -27,12 +29,16 @@ $('div.autocomplete input').on('blur', function() {
 	closeAutocomplete(inputElement);
 });
 
-function autocompleteAjaxRequest(inputElement) {
+function autocompleteAjaxRequest(inputElement, extraInfo = null) {
+	let rawData = {
+		'field': inputElement.id,
+		'extra': extraInfo
+	};
 	// Return a set of autocomplete suggestions from the database
 	$.ajax({
 		url: AUTOCOMPLETE_ENDPOINT,
 		type: 'POST',
-		data: JSON.stringify(inputElement.id),
+		data: JSON.stringify(rawData),
 		contentType: 'application/json; charset=UTF-8',
 		success: function(response) {
 			// Define variables for the user input and its database matches

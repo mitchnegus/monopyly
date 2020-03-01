@@ -282,12 +282,14 @@ def delete_transaction(transaction_id):
 def suggest_autocomplete():
     th = TransactionHandler()
     # Get the autocomplete field from the AJAX request
-    field = request.get_json()
+    post_args = request.get_json()
+    field = post_args['field']
+    extra = post_args['extra']
     if field not in ('bank', 'last_four_digits', 'vendor', 'notes'):
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
-    db_column = th.get_transactions(fields=(field,))
-    column = [row[field] for row in db_column]
+    transactions = th.get_transactions(fields=(field,))
+    column = [row[field] for row in transactions]
     # Order the returned values by their frequency in the database
     item_counts = Counter(column)
     unique_items = set(column)
@@ -301,18 +303,19 @@ def infer_card():
     ch = CardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    bank = (post_args['bank'],)
+    bank = post_args['bank']
     if 'digits' in post_args:
-        last_four_digits = (post_args['digits'],)
+        last_four_digits = post_args['digits']
         # Try to infer card from digits alone
-        cards = ch.get_cards(last_four_digits=last_four_digits, active=True)
+        cards = ch.get_cards(last_four_digits=(last_four_digits,), active=True)
         if len(cards) != 1:
             # Infer card from digits and bank if necessary
-            cards = ch.get_cards(banks=bank, last_four_digits=last_four_digits,
+            cards = ch.get_cards(banks=(bank,),
+                                 last_four_digits=(last_four_digits,),
                                  active=True)
     elif 'bank' in post_args:
         # Try to infer card from bank alone
-        cards = ch.get_cards(banks=bank, active=True)
+        cards = ch.get_cards(banks=(bank,), active=True)
     # Return an inferred card if a single card is identified
     if len(cards) == 1:
         # Return the card info if its is found
@@ -330,11 +333,12 @@ def infer_statement():
     ch, sh = CardHandler(), StatementHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    bank = (post_args['bank'],)
-    last_four_digits = (post_args['digits'],)
+    bank = post_args['bank']
+    last_four_digits = post_args['digits']
     transaction_date = parse_date(post_args['transaction_date'])
     # Determine the card used for the transaction from the given info
-    cards = ch.get_cards(banks=bank, last_four_digits=last_four_digits,
+    cards = ch.get_cards(banks=(bank,),
+                         last_four_digits=(last_four_digits,),
                          active=True)
     if len(cards) == 1:
         # Determine the statement corresponding to the card and date
