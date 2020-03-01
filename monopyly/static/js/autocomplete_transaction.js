@@ -10,6 +10,8 @@
 
 // Identify all input elements in the form
 var $inputElements = $('form input');
+// Identify the vendor input box (used when suggesting notes)
+let $vendor = $('form input#vendor');
 // Set global variables for selection movement
 var matches;
 var displayStart, displayCount;
@@ -19,8 +21,7 @@ var currentFocus;
 $('div.autocomplete input').on('focus', function() {
 	let inputElement = this;
 	// Smart autocomplete factors in the transaction vendor
-	let extraInfo = $('form input#vendor').val();
-	autocompleteAjaxRequest(inputElement, extraInfo);
+	autocompleteAjaxRequest(inputElement, vendor);
 });
 
 $('div.autocomplete input').on('blur', function() {
@@ -29,10 +30,10 @@ $('div.autocomplete input').on('blur', function() {
 	closeAutocomplete(inputElement);
 });
 
-function autocompleteAjaxRequest(inputElement, extraInfo = null) {
+function autocompleteAjaxRequest(inputElement, vendor = null) {
 	let rawData = {
 		'field': inputElement.id,
-		'extra': extraInfo
+		'vendor': $vendor.val()
 	};
 	// Return a set of autocomplete suggestions from the database
 	$.ajax({

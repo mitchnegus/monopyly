@@ -284,16 +284,28 @@ def suggest_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
-    extra = post_args['extra']
+    vendor = post_args['vendor']
     if field not in ('bank', 'last_four_digits', 'vendor', 'notes'):
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
-    transactions = th.get_transactions(fields=(field,))
-    column = [row[field] for row in transactions]
+    if field != 'notes':
+        transactions = th.get_transactions(fields=(field,))
+    else:
+        transactions = th.get_transactions(fields=('vendor', 'notes'))
+        # Generate a map of notes for the current vendor
+        note_by_vendor = {}
+        for transaction in transactions:
+            note = transaction['notes']
+            if not note_by_vendor.get(note):
+                note_by_vendor[note] = (transaction['vendor'] == vendor)
+    items = [row[field] for row in transactions]
     # Order the returned values by their frequency in the database
-    item_counts = Counter(column)
-    unique_items = set(column)
+    item_counts = Counter(items)
+    unique_items = set(items)
     suggestions = sorted(unique_items, key=item_counts.get, reverse=True)
+    # Also sort note fields by vendor
+    if field == 'notes':
+        suggestions.sort(key=note_by_vendor.get, reverse=True)
     return jsonify(suggestions)
 
 
