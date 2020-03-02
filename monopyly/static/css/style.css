@@ -120,7 +120,7 @@ aside.sidebar {
 /*
  * General object characteristics
  */
-form {
+form.database-entry {
 	width: 50%;
 	margin: auto;
 }
@@ -168,38 +168,31 @@ form input.button {
 	align-items: center;
 	margin-top: 20px; 
 	padding: 10px;
+  background-color: #fbfbfb;
+  background-image: linear-gradient(#fbfbfb, #efefef);
   border:1px solid #d8d8d8;
   border-radius: 3px;
   text-align: center; 
   color: #333333;
   font-weight:bold; 
-  background-color: #fbfbfb;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fbfbfb), color-stop(100%, #efefef));
-  background-image: -webkit-linear-gradient(top, #fbfbfb, #efefef);
-  background-image: -moz-linear-gradient(top, #fbfbfb, #efefef);
-  background-image: -ms-linear-gradient(top, #fbfbfb, #efefef);
-  background-image: -o-linear-gradient(top, #fbfbfb, #efefef);
-  background-image: linear-gradient(top, #fbfbfb, #efefef);
 }
 
 form button:hover,
 form input.button:hover {
-  color: #444444;
-  background-color: #f7f7f7;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f7f7f7), color-stop(100%, #e7e7e7));
-  background-image: -webkit-linear-gradient(top, #f7f7f7, #e7e7e7);
-  background-image: -moz-linear-gradient(top, #f7f7f7, #e7e7e7);
-  background-image: -ms-linear-gradient(top, #f7f7f7, #e7e7e7);
-  background-image: -o-linear-gradient(top, #f7f7f7, #e7e7e7);
-  background-image: linear-gradient(top, #f7f7f7, #e7e7e7);
+	filter: brightness(0.95);
   cursor: pointer;
 }
 
 form button .button-icon {
 	height: 40px;
 	width: 40px;
-	margin-right: 10px; 
+	margin: 0 10px;
 	filter: brightness(0.8);
+}
+
+form button.dark-background .button-icon {
+	filter: brightness(1.2);
+	opacity: 0.5;
 }
 
 form .autocomplete {
@@ -211,8 +204,8 @@ form .autocomplete-box {
 	left: 0;
 	width: 100%;
 	padding-right: 10px;
-  border: 1px solid #cccccc;
 	background-color: white;
+  border: 1px solid #cccccc;
 	z-index: 99;
 }
 
@@ -227,9 +220,9 @@ form .autocomplete-box .item:hover {
 }
 
 form .autocomplete-box .item.active {
-	font-weight: bold;
-	color: black;
 	background-color: #85bb65;
+	color: black;
+	font-weight: bold;
 }
 
 #sidebar-nav-menu {
@@ -351,11 +344,11 @@ form .autocomplete-box .item.active {
 	position: relative;
 	margin: 0 3px;
 	padding: 1px 10px;
+	background-color: #eeeeee;
 	border-radius: 10px;
 	text-align: center;
 	font-size: 8pt;
 	cursor: pointer;
-	background-color: #eeeeee;
 }
 
 #card-filter .card:hover {
@@ -470,8 +463,8 @@ table.transactions td div.notes{
  */
 #homepage-block.jumbo {
   padding: 10px 0 30px 0;
-  border-radius: 6px;
   background-color: #eeeeee;
+  border-radius: 6px;
 }
 
 #homepage-block h2 {
@@ -555,8 +548,12 @@ table.transactions td div.notes{
  * Customization for the 'Card Details' page
  */
 #card-details {
-	width: 70%;
+	width: 50%;
 	margin: 20px auto;
+}
+
+#card-info {
+	width: 100%;
 	border-collapse: collapse;
 }
 
@@ -622,9 +619,9 @@ form#card #submit {
 	height: min-content;
 	margin: 15px 10px;
 	padding: 20px;
+  background-color: #e5fbd8;
   border-radius: 15px;
 	text-align: center;
-  background-color: #e5fbd8;
 }
 
 #statements-container .card-column .digits {
@@ -638,9 +635,9 @@ form#card #submit {
 	width: 275px;
 	margin: 10px;
 	padding: 45px 50px;
+  background-color: #eeeeee;
 	border: 2px solid #dddddd;
   border-radius: 10px;
-  background-color: #eeeeee;
 }
 
 .statement-block .date,
@@ -704,35 +701,31 @@ form#card #submit {
 }
 
 #statement-details #statement-info #payment {
-  display: flex;
-	justify-content: space-between;
-	align-items: center;
-	height: 1.5em;
+	width: 100%;
 	font-size: 12pt;
 }
 
 #statement-details #statement-info #due {
+	float: left;
 	display: flex;
-	align-items: center;
-	height: 100%;
 	width: 175px;
 }
 
 #statement-details #statement-info #due .date {
 	width: 100px;
-	box-sizing: border-box;
-	margin-left: 10px;
-	padding-left: 1px;
+	margin-left: 5px;
+	margin-top: -1px;
+	padding-left: 5px;
+	border: 1px solid transparent;
 	font-weight: bold;
 	letter-spacing: 1px;
 }
 
-#statement-details #statement-info #due #due-date {
-	border: 1px solid transparent;
-}
-
 #statement-details #statement-info #due #edit-due-date {
 	display: none;
+	margin-top: -2px;
+	margin-bottom: -1px;
+	border: 1px solid #cccccc;
 }
 
 #statement-details #statement-info #due #edit-due-date-icon {
@@ -745,6 +738,58 @@ form#card #submit {
 
 #statement-details #statement-info #due:hover #edit-due-date-icon {
 	visibility: visible;
+}
+
+#statement-details #statement-info #paid {
+	float: right;
+}
+
+form#pay {
+	clear: left;
+	position: relative;
+	width: 80%;
+	margin: 100px auto;
+}
+
+form#pay button,
+form#pay input {
+	height: 50px;
+	margin: 0;
+	border: none;
+	border-radius: 5px;
+}
+
+form#pay #make-payment {
+	position: absolute;
+	left: 0;
+	background-color: green;
+	background-image: linear-gradient(90deg, #85bb65, #73a457);
+	color: white;
+	transition: 0.1s;
+}
+
+form#pay #make-payment[type="submit"] {
+	left: 80%;
+	width: 20%;
+	padding: 0;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+form#pay #make-payment[type="submit"] #prompt {
+	display: none;
+}
+
+form#pay #make-payment[type="button"] .button-icon {
+	display: none;
+}
+
+form#pay #pay-date {
+	width: 80%;
+	box-sizing: border-box;
+	border: 1px solid #cccccc;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
 }
 
 #statement-details table#statement-transactions {
@@ -765,22 +810,26 @@ table#transactions {
  * Customization for the 'Transaction Details' page
  */
 #transaction-details {
-	width: 70%;
+	width: 50%;
 	margin: 20px auto;
+}
+
+#transaction-info {
+	width: 100%;
 	border-collapse: collapse;
 }
 
-#transaction-details th,
-#transaction-details td {
+#transaction-info th,
+#transaction-info td {
 	padding: 5px 10px;
 	vertical-align: top;
 }
 
-#transaction-details th {
+#transaction-info th {
 	text-align: right;
 }
 
-#transaction-details td {
+#transaction-info td {
 	text-align: left;
 }
 
