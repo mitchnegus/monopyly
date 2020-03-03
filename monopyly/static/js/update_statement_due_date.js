@@ -46,7 +46,7 @@ $inputDueDate.on('blur', function() {
 });
 
 function updateStatementDueDateAjaxRequest() {
-	// Return the newly updated statement date
+	// Return the newly updated statement due date
 	$.ajax({
 		url: UPDATE_STATEMENT_DUE_DATE_ENDPOINT,
 		type: 'POST',

@@ -162,6 +162,22 @@ def update_statement_due_date(statement_id):
     return str(statement['due_date'])
 
 
+@bp.route('/_update_statement_payment/<int:statement_id>', methods=('POST',))
+@login_required
+def update_statement_payment(statement_id):
+    sh = StatementHandler()
+    # Get the autocomplete field from the AJAX request
+    payment_date = request.get_json()
+    # Update the statement in the database
+    sh.update_statement_payment(statement_id, payment_date)
+    # Get the statement information from the database
+    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
+              'payment_date', 'COALESCE(SUM(price), 0) total')
+    statement = sh.get_statement(statement_id, fields=fields)
+    return render_template('credit/statement_info.html',
+                           statement=statement)
+
+
 @bp.route('/transactions')
 @login_required
 def show_transactions():

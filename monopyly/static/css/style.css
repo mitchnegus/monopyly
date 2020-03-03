@@ -15,6 +15,11 @@ a {
 	text-decoration: none;
 }
 
+form {
+	width: 50%;
+	margin: auto;
+}
+
 input {
 	color: inherit;
 	font-family: inherit;
@@ -120,11 +125,6 @@ aside.sidebar {
 /*
  * General object characteristics
  */
-form.database-entry {
-	width: 50%;
-	margin: auto;
-}
-
 form .form-line {
 	display: flex;
 	justify-content: space-between;

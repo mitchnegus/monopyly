@@ -204,8 +204,23 @@ class StatementHandler(DatabaseHandler):
         new_due_date : str
             The date to set as the new statement due date.
         """
-        due_date = parse_date(new_due_date)
-        self.update_entry(statement_id, {'due_date': due_date})
+        mapping = {'due_date': parse_date(new_due_date)}
+        self.update_entry(statement_id, mapping)
+
+    def update_statement_payment(self, statement_id, payment_date):
+        """
+        Update a statement's pay status given its ID and a payment date.
+
+        Parameters
+        ––––––––––
+        statement_id : int
+            The ID of the statement to be updated.
+        payment_date : str
+            The date to set as the statement payment date.
+        """
+        mapping = {'paid': 1,
+                   'payment_date': parse_date(payment_date)}
+        self.update_entry(statement_id, mapping)
 
     def delete_statement(self, statement_id):
         """Delete a statement from the database given its ID."""
