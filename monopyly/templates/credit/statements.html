@@ -10,19 +10,32 @@
 			{% if statement['card_id'] == card['id'] %}		
 
 				<a class="statement-block" href="{{ url_for('credit.show_statement', statement_id=statement['id']) }}">
-					<div class="statement-block">
-						<div class="date">
-							<div class="month">{{ statement['issue_date'].strftime('%b').upper() }}</div>
-							<div class="year">{{ statement['issue_date'].year }}</div>
+					<div class="date">
+						<div class="month">{{ statement['issue_date'].strftime('%b').upper() }}</div>
+						<div class="year">{{ statement['issue_date'].year }}</div>
+					</div>
+					<div class="payment">
+						<div class="total">
+						{{ '${:,.2f}'.format(statement['total']) }}
 						</div>
-						<div class="payment">
-							<div class="total">
-							{{ '${:,.2f}'.format(statement['total']) }}
-							</div>
-							<div id="paid">
-								{{ 'PAID' if statement['paid'] else '' }}
-							</div>
-						</div>
+						{% if statement['paid'] %}
+							{% if statement['payment_date'] %}
+								<div class="paid-notice flip-text">
+									<div class="flip-text-inner">
+										<div class="front">
+											PAID
+										</div>
+										<div class="back">
+											{{ statement['payment_date'] }}
+										</div>
+									</div>
+								</div>
+							{% else %}
+								<div class="paid-notice">
+									PAID
+								</div>
+							{% endif %}
+						{% endif %}
 					</div>
 				</a>
 	

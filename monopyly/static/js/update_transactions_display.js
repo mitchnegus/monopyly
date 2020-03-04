@@ -13,61 +13,65 @@
  * 	  or descending order.
  */
 
-// Identify the card filters
-var container = $('#transactions-table-container');
-var filterContainer = $('#card-filter');
+(function() {
 
-// Send the Ajax request on click
-var filters = filterContainer.find('.card');
-filters.on('click', function() {
-	updateTable();
-});
-
-// Change the table ordering and send the Ajax request on click
-var sorters;
-container.on('click', 'img.sort-icon', function() {
-	sorters = $('img.sort-icon');
-	// Swap the sorter icons
-	sorters.toggleClass('selected');
-	// Update the table
-	updateTable();
-});
-
-function updateTable() {
-	// Determine the selected credit cards to use from the filters
-	var selectedFilters = filterContainer.find('.card.selected');
-	var filterIDs = [];
-	selectedFilters.each(function() {filterIDs.push(this.id);});
-	// Determine the table ordering (ascending/descending transaction date)
-	var sortOrder;
-	var sorter = $('.sort-icon.selected');
-	if (sorter.hasClass('asc')) {
-		sortOrder = 'asc';
-	} else {
-		sortOrder = 'desc';
-	}
-	// Update the table with the filters and ordering
-	updateTableAjaxRequest(filterIDs, sortOrder);
-	// Update the sorters since they have been replaced
-	sorters = $('.sort-icon');
-}
-
-function updateTableAjaxRequest(filterIDs, sortOrder) {
-	var rawData = {
-		'filter_ids': filterIDs,
-		'sort_order': sortOrder
-	};
-	// Return a filtered table for each ID in the set of filterIDs
-	$.ajax({
-		url: $FILTER_ENDPOINT,
-		type: 'POST',
-		data: JSON.stringify(rawData),
-		contentType: 'application/json; charset=UTF-8',
-		success: function(response) {
-			container.html(response);
-		},
-		error: function(xhr) {
-			console.log('There was an error in the Ajax request.');
-		}
+	// Identify the card filters
+	var container = $('#transactions-table-container');
+	var filterContainer = $('#card-filter');
+	
+	// Send the Ajax request on click
+	var filters = filterContainer.find('.card');
+	filters.on('click', function() {
+		updateTable();
 	});
-}
+	
+	// Change the table ordering and send the Ajax request on click
+	var sorters;
+	container.on('click', 'img.sort-icon', function() {
+		sorters = $('img.sort-icon');
+		// Swap the sorter icons
+		sorters.toggleClass('selected');
+		// Update the table
+		updateTable();
+	});
+	
+	function updateTable() {
+		// Determine the selected credit cards to use from the filters
+		var selectedFilters = filterContainer.find('.card.selected');
+		var filterIDs = [];
+		selectedFilters.each(function() {filterIDs.push(this.id);});
+		// Determine the table ordering (ascending/descending transaction date)
+		var sortOrder;
+		var sorter = $('.sort-icon.selected');
+		if (sorter.hasClass('asc')) {
+			sortOrder = 'asc';
+		} else {
+			sortOrder = 'desc';
+		}
+		// Update the table with the filters and ordering
+		updateTableAjaxRequest(filterIDs, sortOrder);
+		// Update the sorters since they have been replaced
+		sorters = $('.sort-icon');
+	}
+	
+	function updateTableAjaxRequest(filterIDs, sortOrder) {
+		var rawData = {
+			'filter_ids': filterIDs,
+			'sort_order': sortOrder
+		};
+		// Return a filtered table for each ID in the set of filterIDs
+		$.ajax({
+			url: FILTER_ENDPOINT,
+			type: 'POST',
+			data: JSON.stringify(rawData),
+			contentType: 'application/json; charset=UTF-8',
+			success: function(response) {
+				container.html(response);
+			},
+			error: function(xhr) {
+				console.log('There was an error in the Ajax request.');
+			}
+		});
+	}
+
+})();

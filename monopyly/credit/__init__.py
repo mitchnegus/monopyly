@@ -60,6 +60,7 @@ def new_card():
                                    update=False)
         else:
             flash(form_err_msg)
+            print(form.errors)
     return render_template('credit/card_form_page_new.html', form=form)
 
 
@@ -80,6 +81,7 @@ def update_card(card_id):
                                    update=True)
         else:
             flash(form_err_msg)
+            print(form.errors)
     # Display the form for accepting user input
     return render_template('credit/card_form_page_update.html',
                            card_id=card_id, form=form)
@@ -102,7 +104,7 @@ def show_statements():
     cards = ch.get_cards()
     active_cards = ch.get_cards(active=True)
     # Get all of the user's statements for active cards from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'paid',
+    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
               'COALESCE(SUM(price), 0) total')
     statements = sh.get_statements(fields=fields, active=True)
     return render_template('credit/statements_page.html',
@@ -121,7 +123,7 @@ def update_statements_display():
     # Determine the card IDs from the arguments of POST method
     cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'paid',
+    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
               'COALESCE(SUM(price), 0) total')
     statements = sh.get_statements(fields=fields,
                                    card_ids=[card['id'] for card in cards])
@@ -136,7 +138,7 @@ def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
     # Get the statement information from the database
     fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'COALESCE(SUM(price), 0) total')
+              'payment_date', 'COALESCE(SUM(price), 0) total')
     statement = sh.get_statement(statement_id, fields=fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
@@ -146,6 +148,34 @@ def show_statement(statement_id):
     return render_template('credit/statement_page.html',
                            statement=statement,
                            statement_transactions=transactions)
+
+
+@bp.route('/_update_statement_due_date/<int:statement_id>', methods=('POST',))
+@login_required
+def update_statement_due_date(statement_id):
+    sh = StatementHandler()
+    # Get the autocomplete field from the AJAX request
+    new_due_date = request.get_json()
+    # Update the statement in the database
+    sh.update_statement_due_date(statement_id, new_due_date)
+    statement = sh.get_statement(statement_id, fields=('due_date',))
+    return str(statement['due_date'])
+
+
+@bp.route('/_update_statement_payment/<int:statement_id>', methods=('POST',))
+@login_required
+def update_statement_payment(statement_id):
+    sh = StatementHandler()
+    # Get the autocomplete field from the AJAX request
+    payment_date = request.get_json()
+    # Update the statement in the database
+    sh.update_statement_payment(statement_id, payment_date)
+    # Get the statement information from the database
+    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
+              'payment_date', 'COALESCE(SUM(price), 0) total')
+    statement = sh.get_statement(statement_id, fields=fields)
+    return render_template('credit/statement_info.html',
+                           statement=statement)
 
 
 @bp.route('/transactions')
@@ -268,16 +298,30 @@ def delete_transaction(transaction_id):
 def suggest_autocomplete():
     th = TransactionHandler()
     # Get the autocomplete field from the AJAX request
-    field = request.get_json()
+    post_args = request.get_json()
+    field = post_args['field']
+    vendor = post_args['vendor']
     if field not in ('bank', 'last_four_digits', 'vendor', 'notes'):
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
-    db_column = th.get_transactions(fields=(field,))
-    column = [row[field] for row in db_column]
+    if field != 'notes':
+        transactions = th.get_transactions(fields=(field,))
+    else:
+        transactions = th.get_transactions(fields=('vendor', 'notes'))
+        # Generate a map of notes for the current vendor
+        note_by_vendor = {}
+        for transaction in transactions:
+            note = transaction['notes']
+            if not note_by_vendor.get(note):
+                note_by_vendor[note] = (transaction['vendor'] == vendor)
+    items = [row[field] for row in transactions]
     # Order the returned values by their frequency in the database
-    item_counts = Counter(column)
-    unique_items = set(column)
+    item_counts = Counter(items)
+    unique_items = set(items)
     suggestions = sorted(unique_items, key=item_counts.get, reverse=True)
+    # Also sort note fields by vendor
+    if field == 'notes':
+        suggestions.sort(key=note_by_vendor.get, reverse=True)
     return jsonify(suggestions)
 
 
@@ -287,18 +331,19 @@ def infer_card():
     ch = CardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    bank = (post_args['bank'],)
+    bank = post_args['bank']
     if 'digits' in post_args:
-        last_four_digits = (post_args['digits'],)
+        last_four_digits = post_args['digits']
         # Try to infer card from digits alone
-        cards = ch.get_cards(last_four_digits=last_four_digits, active=True)
+        cards = ch.get_cards(last_four_digits=(last_four_digits,), active=True)
         if len(cards) != 1:
             # Infer card from digits and bank if necessary
-            cards = ch.get_cards(banks=bank, last_four_digits=last_four_digits,
+            cards = ch.get_cards(banks=(bank,),
+                                 last_four_digits=(last_four_digits,),
                                  active=True)
     elif 'bank' in post_args:
         # Try to infer card from bank alone
-        cards = ch.get_cards(banks=bank, active=True)
+        cards = ch.get_cards(banks=(bank,), active=True)
     # Return an inferred card if a single card is identified
     if len(cards) == 1:
         # Return the card info if its is found
@@ -316,11 +361,12 @@ def infer_statement():
     ch, sh = CardHandler(), StatementHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    bank = (post_args['bank'],)
-    last_four_digits = (post_args['digits'],)
+    bank = post_args['bank']
+    last_four_digits = post_args['digits']
     transaction_date = parse_date(post_args['transaction_date'])
     # Determine the card used for the transaction from the given info
-    cards = ch.get_cards(banks=bank, last_four_digits=last_four_digits,
+    cards = ch.get_cards(banks=(bank,),
+                         last_four_digits=(last_four_digits,),
                          active=True)
     if len(cards) == 1:
         # Determine the statement corresponding to the card and date
