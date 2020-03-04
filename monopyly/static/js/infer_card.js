@@ -8,43 +8,47 @@
  * remaining information is populated.
  */
 
-// Identify all input elements in the form
-let $inputElements = $('form input');
-// Identify inputs for card information
-let $inputBank = $inputElements.filter('input#bank');
-let $inputDigits = $inputElements.filter('input#last_four_digits');
+(function() {
 
-// Set triggers for checking about inferences
-$inputBank.on('blur', function() {
-	let rawData = {'bank': $(this).val()};
-	inferCardAjaxRequest(rawData);
-});
-$inputDigits.on('blur', function() {
-	let rawData = {
-		'bank': $inputBank.val(),
-		'digits': $(this).val()
-	};
-	inferCardAjaxRequest(rawData);
-});
-
-function inferCardAjaxRequest(rawData) {
-	// Return a single card matching the criteria of the raw data
-	$.ajax({
-		url: INFER_CARD_ENDPOINT,
-		type: 'POST',
-		data: JSON.stringify(rawData),
-		contentType: 'application/json; charset=UTF-8',
-		success: function(response) {
-			if (response != '') {
-				// A card can be inferred, so populate the fields with its info
-				$inputBank.val(response['bank']);
-				$inputDigits.val(response['digits']);
-				let nextInputIndex = $inputElements.index($inputDigits[0])+1;
-				$inputElements.eq(nextInputIndex).focus();
-			}
-		},
-		error: function(xhr) {
-			console.log('There was an error in the Ajax request.');
-		}
+	// Identify all input elements in the form
+	let $inputElements = $('form input');
+	// Identify inputs for card information
+	let $inputBank = $inputElements.filter('input#bank');
+	let $inputDigits = $inputElements.filter('input#last_four_digits');
+	
+	// Set triggers for checking about inferences
+	$inputBank.on('blur', function() {
+		let rawData = {'bank': $(this).val()};
+		inferCardAjaxRequest(rawData);
 	});
-}
+	$inputDigits.on('blur', function() {
+		let rawData = {
+			'bank': $inputBank.val(),
+			'digits': $(this).val()
+		};
+		inferCardAjaxRequest(rawData);
+	});
+	
+	function inferCardAjaxRequest(rawData) {
+		// Return a single card matching the criteria of the raw data
+		$.ajax({
+			url: INFER_CARD_ENDPOINT,
+			type: 'POST',
+			data: JSON.stringify(rawData),
+			contentType: 'application/json; charset=UTF-8',
+			success: function(response) {
+				if (response != '') {
+					// A card can be inferred, so populate the fields with its info
+					$inputBank.val(response['bank']);
+					$inputDigits.val(response['digits']);
+					let nextInputIndex = $inputElements.index($inputDigits[0])+1;
+					$inputElements.eq(nextInputIndex).focus();
+				}
+			},
+			error: function(xhr) {
+				console.log('There was an error in the Ajax request.');
+			}
+		});
+	}
+
+})();
