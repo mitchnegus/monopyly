@@ -178,7 +178,7 @@ form input.button {
 
 form button:hover,
 form input.button:hover {
-	filter: brightness(0.95);
+	filter: brightness(0.98);
   cursor: pointer;
 }
 
@@ -655,6 +655,7 @@ form#card #submit {
   background-color: #e5fbd8;
   border-radius: 15px;
 	text-align: center;
+	text-transform: uppercase;
 }
 
 #statements-container .card-column .digits {
@@ -669,10 +670,16 @@ form#card #submit {
 	margin: 10px;
 	padding: 45px 50px;
   background-color: #eeeeee;
+	background-image: linear-gradient(#eeeeee, #e6e6e6);
 	border: 2px solid #dddddd;
   border-radius: 10px;
 	color: inherit;
 	text-decoration: none;
+}
+
+
+.statement-block:hover {
+	filter: brightness(0.98);
 }
 
 .statement-block .date,
