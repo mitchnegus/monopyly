@@ -481,6 +481,39 @@ table.transactions td div.notes{
   font-weight: 100;
 }
 
+#homepage-panels {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.panel {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	margin: 25px;
+	padding: 50px;
+	background-color: #f6f6f6;
+	border-radius: 15px;
+}
+
+.panel h2 {
+	margin-top: 0;
+}
+
+#bank.panel,
+#investments.panel {
+	justify-content: center;
+}
+
+#bank.panel h2,
+#investments.panel h2 {
+	color: #bbbbbb;
+}
+
+#bank.panel {
+}
+
 
 /*
  * Customization for the 'About' page

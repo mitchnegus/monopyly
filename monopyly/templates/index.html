@@ -7,21 +7,40 @@
 	</div>
 	<br>
 	{% if g.user %}
-		<h4>Cards</h4>
-		<a href="{{ url_for('credit.show_cards') }}">
-			Manage credit cards
-		</a>
-		<h4>Statements</h4>
-		<a href="{{ url_for('credit.show_statements') }}">
-			See statement history
-		</a>
-		<h4>Transactions</h4>
-		<a href="{{ url_for('credit.show_transactions') }}">
-			See transaction history
-		</a>
-		<br>
-		<a href="{{ url_for('credit.new_transaction') }}">
-			Create a new transaction
-		</a>
+		<div id="homepage-panels">
+
+			<div id="bank" class="panel">
+				<h2>Coming soon!</h2>
+			</div>
+	
+			<div id="credit" class="panel">
+				<h2>Credit Cards</h2>
+	
+				<h4>Cards</h4>
+				<a href="{{ url_for('credit.show_cards') }}">
+					Manage credit cards
+				</a>
+	
+				<h4>Statements</h4>
+				<a href="{{ url_for('credit.show_statements') }}">
+					See statement history
+				</a>
+	
+				<h4>Transactions</h4>
+				<a href="{{ url_for('credit.show_transactions') }}">
+					See transaction history
+				</a>
+				<br>
+				<a href="{{ url_for('credit.new_transaction') }}">
+					Create a new transaction
+				</a>
+	
+			</div>
+	
+			<div id="investments" class="panel">
+				<h2>Coming soon!</h2>
+			</div>
+
+		</div>
 	{% endif %}
 {% endblock %}
