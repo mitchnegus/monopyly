@@ -23,7 +23,7 @@ STATEMENT_FIELDS = {'card_id': None,
 TRANSACTION_FIELDS = {'statement_id': None,
                       'transaction_date': 'Date',
                       'vendor': 'Vendor',
-                      'price': 'Price',
+                      'amount': 'Amount',
                       'notes': 'Notes'}
 # Create a dictionary with all database fields
 ALL_FIELDS = {**CARD_FIELDS, **STATEMENT_FIELDS, **TRANSACTION_FIELDS}

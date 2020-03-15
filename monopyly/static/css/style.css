@@ -439,8 +439,8 @@ table.transactions td.text {
 	text-align: left;
 }
 
-table.transactions th.price,
-table.transactions td.price {
+table.transactions th.amount,
+table.transactions td.amount {
 	text-align: right;
 }
 

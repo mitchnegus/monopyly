@@ -8,7 +8,7 @@
 			<img class="sort-icon desc{{ ' selected' if sort_order == 'DESC' else '' }}" src="{{ url_for('static', filename='img/sort-desc.png') }}" />
 		</th>
 		<th class="text">Vendor</th>
-		<th class="price">Price</th>
+		<th class="amount">Amount</th>
 		<th class="text">Notes</th>
 		<th class="date">Statement Date</th>
 		<th class="edit"></th>
@@ -23,7 +23,7 @@
 			</td>
 			<td class="date">{{ transaction['transaction_date'] }}</td>
 			<td>{{ transaction['vendor'] }}</td>
-			<td class="price">{{ '${:,.2f}'.format(transaction['price']) }}</td>
+			<td class="amount">{{ '${:,.2f}'.format(transaction['amount']) }}</td>
 			<td class="notes">
 				<div class="notes">{{ transaction['notes'] }}</div>
 			</td>

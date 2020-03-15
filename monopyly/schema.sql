@@ -38,7 +38,7 @@ CREATE TABLE credit_transactions (
 	statement_id INTEGER NOT NULL,
 	transaction_date TEXT NOT NULL,
 	vendor TEXT NOT NULL,
-	price REAL NOT NULL,
+	amount REAL NOT NULL,
 	notes TEXT NOT NULL,
 	PRIMARY KEY(id),
 	FOREIGN KEY(statement_id) REFERENCES credit_statements(id)

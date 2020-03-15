@@ -61,8 +61,8 @@ class StatementHandler(DatabaseHandler):
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
             the 'credit_statements' or 'credit_cards' tables, or a
-            summation over the price column in the `credit_transactions`
-            table.
+            summation over the amount column in the
+            `credit_transactions` table.
         card_ids : tuple of str, optional
             A sequence of card IDs for which statements will be selected
             (if `None`, all cards will be selected).

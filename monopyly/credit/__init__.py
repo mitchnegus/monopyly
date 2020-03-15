@@ -105,7 +105,7 @@ def show_statements():
     active_cards = ch.get_cards(active=True)
     # Get all of the user's statements for active cards from the database
     fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
-              'COALESCE(SUM(price), 0) total')
+              'COALESCE(SUM(amount), 0) total')
     statements = sh.get_statements(fields=fields, active=True)
     return render_template('credit/statements_page.html',
                            filter_cards=cards,
@@ -124,7 +124,7 @@ def update_statements_display():
     cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
     fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
-              'COALESCE(SUM(price), 0) total')
+              'COALESCE(SUM(amount), 0) total')
     statements = sh.get_statements(fields=fields,
                                    card_ids=[card['id'] for card in cards])
     return render_template('credit/statements.html',
@@ -138,7 +138,7 @@ def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
     # Get the statement information from the database
     fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'payment_date', 'COALESCE(SUM(price), 0) total')
+              'payment_date', 'COALESCE(SUM(amount), 0) total')
     statement = sh.get_statement(statement_id, fields=fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
@@ -172,7 +172,7 @@ def update_statement_payment(statement_id):
     sh.update_statement_payment(statement_id, payment_date)
     # Get the statement information from the database
     fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'payment_date', 'COALESCE(SUM(price), 0) total')
+              'payment_date', 'COALESCE(SUM(amount), 0) total')
     statement = sh.get_statement(statement_id, fields=fields)
     return render_template('credit/statement_info.html',
                            statement=statement)
