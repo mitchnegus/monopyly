@@ -744,6 +744,7 @@ form#card #submit {
 
 #statement-details #statement-info #payment {
 	width: 100%;
+	min-width: 325px;
 	font-size: 12pt;
 }
 
