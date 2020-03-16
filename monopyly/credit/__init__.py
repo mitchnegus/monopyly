@@ -13,7 +13,6 @@ from ..db import get_db
 from ..auth import login_required
 from ..forms import *
 from ..utils import parse_date
-from .constants import DISPLAY_FIELDS
 from .cards import CardHandler
 from .statements import StatementHandler
 from .transactions import TransactionHandler, determine_statement_date
@@ -105,7 +104,7 @@ def show_statements():
     active_cards = ch.get_cards(active=True)
     # Get all of the user's statements for active cards from the database
     fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
-              'COALESCE(SUM(amount), 0) total')
+              'balance')
     statements = sh.get_statements(fields=fields, active=True)
     return render_template('credit/statements_page.html',
                            filter_cards=cards,
@@ -124,7 +123,7 @@ def update_statements_display():
     cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
     fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
-              'COALESCE(SUM(amount), 0) total')
+              'balance')
     statements = sh.get_statements(fields=fields,
                                    card_ids=[card['id'] for card in cards])
     return render_template('credit/statements.html',
@@ -137,12 +136,13 @@ def update_statements_display():
 def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
     # Get the statement information from the database
-    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'payment_date', 'COALESCE(SUM(amount), 0) total')
-    statement = sh.get_statement(statement_id, fields=fields)
+    statement_fields = ('bank', 'last_four_digits', 'issue_date', 'due_date',
+                        'paid', 'payment_date', 'balance')
+    statement = sh.get_statement(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
-    transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
+    transaction_fields = ('transaction_date', 'vendor', 'amount')
+    transactions = th.get_transactions(fields=transaction_fields,
                                        sort_order=sort_order,
                                        statement_ids=(statement['id'],))
     return render_template('credit/statement_page.html',
@@ -172,7 +172,7 @@ def update_statement_payment(statement_id):
     sh.update_statement_payment(statement_id, payment_date)
     # Get the statement information from the database
     fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'payment_date', 'COALESCE(SUM(amount), 0) total')
+              'payment_date', 'balance')
     statement = sh.get_statement(statement_id, fields=fields)
     return render_template('credit/statement_info.html',
                            statement=statement)
@@ -186,7 +186,9 @@ def show_transactions():
     cards = ch.get_cards()
     # Get all of the user's transactions for active cards from the database
     sort_order = 'DESC'
-    transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
+    transaction_fields = ('bank', 'last_four_digits', 'transaction_date',
+                           'vendor', 'amount', 'notes', 'issue_date')
+    transactions = th.get_transactions(fields=transaction_fields,
                                        sort_order=sort_order,
                                        active=True)
     return render_template('credit/transactions_page.html',
@@ -206,7 +208,9 @@ def update_transactions_display():
     # Determine the card IDs from the arguments of POST method
     cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected transactions from the database
-    transactions = th.get_transactions(fields=DISPLAY_FIELDS.keys(),
+    transaction_fields = ('bank', 'last_four_digits', 'transaction_date',
+                           'vendor', 'amount', 'notes', 'issue_date')
+    transactions = th.get_transactions(fields=transaction_fields,
                                        card_ids=[card['id'] for card in cards],
                                        sort_order=sort_order)
     return render_template('credit/transactions.html',
@@ -235,8 +239,8 @@ def new_transaction(statement_id):
     if statement_id:
         sh = StatementHandler()
         # Get the necessary fields from the database
-        fields = ('bank', 'last_four_digits', 'issue_date')
-        statement = sh.get_statement(statement_id, fields=fields)
+        statement_fields = ('bank', 'last_four_digits', 'issue_date')
+        statement = sh.get_statement(statement_id, fields=statement_fields)
         form.bank.data = statement['bank']
         form.last_four_digits.data = statement['last_four_digits']
         form.issue_date.data = statement['issue_date']
@@ -247,9 +251,7 @@ def new_transaction(statement_id):
             # Insert the new transaction into the database
             transaction = th.save_transaction(form)
             return render_template('credit/transaction_submission_page.html',
-                                   field_names=DISPLAY_FIELDS,
-                                   transaction=transaction,
-                                   update=False)
+                                   transaction=transaction, update=False)
         else:
             # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
@@ -272,9 +274,7 @@ def update_transaction(transaction_id):
             # Update the database with the updated transaction
             transaction = th.save_transaction(form, transaction_id)
             return render_template('credit/transaction_submission_page.html',
-                                   field_names=DISPLAY_FIELDS,
-                                   transaction=transaction,
-                                   update=True)
+                                   transaction=transaction, update=True)
         else:
             # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
@@ -284,7 +284,7 @@ def update_transaction(transaction_id):
                            transaction_id=transaction_id, form=form)
 
 
-@bp.route('/delete_transaction/<int:transaction_id>', methods=('POST',))
+@bp.route('/delete_transaction/<int:transaction_id>')
 @login_required
 def delete_transaction(transaction_id):
     th = TransactionHandler()
@@ -366,8 +366,7 @@ def infer_statement():
     transaction_date = parse_date(post_args['transaction_date'])
     # Determine the card used for the transaction from the given info
     cards = ch.get_cards(banks=(bank,),
-                         last_four_digits=(last_four_digits,),
-                         active=True)
+                         last_four_digits=(last_four_digits,))
     if len(cards) == 1:
         # Determine the statement corresponding to the card and date
         card = cards[0]

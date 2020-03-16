@@ -16,7 +16,7 @@
 					</div>
 					<div class="payment">
 						<div class="total">
-						{{ '${:,.2f}'.format(statement['total']) }}
+						{{ '${:,.2f}'.format(statement['balance']) }}
 						</div>
 						{% if statement['paid'] %}
 							{% if statement['payment_date'] %}

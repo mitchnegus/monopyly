@@ -45,7 +45,7 @@ class StatementHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_statements(self, fields=STATEMENT_FIELDS.keys(), card_ids=None,
+    def get_statements(self, fields=STATEMENT_FIELDS, card_ids=None,
                        banks=None, sort_order='DESC', active=False):
         """
         Get credit card statements from the database.
@@ -88,14 +88,13 @@ class StatementHandler(DatabaseHandler):
         bank_filter = filter_items(banks, 'bank', 'AND')
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 's.id')} "
-                  "  FROM credit_statements AS s "
+                  "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
                   "       ON c.id = s.card_id "
-                  "       LEFT OUTER JOIN credit_transactions AS t "
-                  "       ON t.statement_id = s.id "
+                  "       INNER JOIN credit_accounts AS a "
+                  "       ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {bank_filter} {active_filter} "
-                  " GROUP BY s.id "
                  f" ORDER BY issue_date {sort_order}, active DESC")
         placeholders = (self.user_id, *fill_places(card_ids),
                        *fill_places(banks))
@@ -103,13 +102,32 @@ class StatementHandler(DatabaseHandler):
         return statements
 
     def get_statement(self, statement_id, fields=None):
-        """Get a credit statement from the database given its statement ID."""
+        """
+        Get a credit statement from the database given its statement ID.
+
+        Accesses a set of fields for a given statement. By default, all
+        fields for a statement, the corresponding credit card, and
+        transactions on the statement are returned.
+
+        Parameters
+        ––––––––––
+        statement_id : int
+            The ID of the statement to be found.
+        fields : tuple of str, optional
+            The fields (in either the statements, cards, or transactions
+            tables) to be returned.
+
+        Returns
+        –––––––
+        statement : sqlite3.Row
+            The statement information from the database.
+        """
         query = (f"SELECT {select_fields(fields, 's.id')} "
-                  "  FROM credit_statements AS s "
+                  "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
                   "       ON c.id = s.card_id "
-                  "       LEFT OUTER JOIN credit_transactions AS t "
-                  "       ON t.statement_id = s.id "
+                  "       INNER JOIN credit_accounts AS a "
+                  "       ON a.id = c.account_id "
                   " WHERE s.id = ? AND user_id = ?")
         placeholders = (statement_id, self.user_id)
         statement = self.cursor.execute(query, placeholders).fetchone()
@@ -147,10 +165,12 @@ class StatementHandler(DatabaseHandler):
         """
         card_filter = filter_item(card_id, 'card_id', 'AND')
         date_filter = filter_item(issue_date, 'issue_date', 'AND')
-        query = (f"SELECT {select_fields(STATEMENT_FIELDS.keys(), 's.id')} "
-                  "  FROM credit_statements AS s "
+        query = (f"SELECT {select_fields(STATEMENT_FIELDS, 's.id')} "
+                  "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
                   "       ON c.id = s.card_id "
+                  "       INNER JOIN credit_accounts AS a "
+                  "       ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {date_filter} "
                   " ORDER BY issue_date DESC")

@@ -46,7 +46,7 @@ class TransactionHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_transactions(self, fields=TRANSACTION_FIELDS.keys(), card_ids=None,
+    def get_transactions(self, fields=TRANSACTION_FIELDS, card_ids=None,
                          statement_ids=None, sort_order='DESC', active=False):
         """
         Get credit card transactions from the database.
@@ -95,6 +95,8 @@ class TransactionHandler(DatabaseHandler):
                   "      ON s.id = t.statement_id "
                   "      INNER JOIN credit_cards AS c "
                   "      ON c.id = s.card_id "
+                  "      INNER JOIN credit_accounts AS a "
+                  "      ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {statement_filter} {active_filter}"
                  f" ORDER BY transaction_date {sort_order}")
@@ -111,7 +113,9 @@ class TransactionHandler(DatabaseHandler):
                   "       ON s.id = t.statement_id "
                   "       INNER JOIN credit_cards AS c "
                   "       ON c.id = s.card_id "
-                  " WHERE t.id = ? AND c.user_id = ?")
+                  "       INNER JOIN credit_accounts AS a "
+                  "       ON a.id = c.account_id "
+                  " WHERE t.id = ? AND user_id = ?")
         placeholders = (transaction_id, self.user_id)
         transaction = self.cursor.execute(query, placeholders).fetchone()
         # Check that a transaction was found
@@ -144,9 +148,9 @@ class TransactionHandler(DatabaseHandler):
             The saved transaction.
         """
         mapping = self.process_transaction_form(form)
-        if TRANSACTION_FIELDS.keys() != mapping.keys():
+        if TRANSACTION_FIELDS != tuple(mapping.keys()):
             raise ValueError('The mapping does not match the database. Fields '
-                            f'({", ".join(TRANSACTION_FIELDS.keys())}) must '
+                            f'({", ".join(TRANSACTION_FIELDS)}) must '
                              'be provided.')
         # Either create a new entry or update an existing entry
         if not transaction_id:

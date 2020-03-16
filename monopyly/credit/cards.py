@@ -42,8 +42,8 @@ class CardHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_cards(self, fields=CARD_FIELDS.keys(), banks=None,
-                  last_four_digits=None, active=False):
+    def get_cards(self, fields=None, banks=None, last_four_digits=None,
+                  active=False):
         """
         Get credit cards from the database.
 
@@ -77,8 +77,10 @@ class CardHandler(DatabaseHandler):
         digit_filter = filter_items(last_four_digits,
                                     'last_four_digits', 'AND')
         active_filter = "AND active = 1" if active else ""
-        query = (f"SELECT {select_fields(fields, 'id')} "
-                  "  FROM credit_cards "
+        query = (f"SELECT {select_fields(fields, 'c.id')} "
+                  "  FROM credit_cards AS c "
+                  "       INNER JOIN credit_accounts AS a "
+                  "       ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} {digit_filter} {active_filter} "
                   " ORDER BY active DESC")
@@ -89,9 +91,11 @@ class CardHandler(DatabaseHandler):
 
     def get_card(self, card_id, fields=None):
         """Get a credit card from the database given its card ID."""
-        query = (f"SELECT {select_fields(fields, 'id')} "
-                  "  FROM credit_cards"
-                  " WHERE id = ? AND user_id = ?")
+        query = (f"SELECT {select_fields(fields, 'c.id')} "
+                  "  FROM credit_cards AS c "
+                  "       INNER JOIN credit_accounts AS a "
+                  "       ON a.id = c.account_id "
+                  " WHERE c.id = ? AND user_id = ?")
         placeholders = (card_id, self.user_id)
         card = self.cursor.execute(query, placeholders).fetchone()
         # Check that a card was found
@@ -129,8 +133,10 @@ class CardHandler(DatabaseHandler):
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        query = (f"SELECT {select_fields(CARD_FIELDS.keys(), 'id')} "
-                  "  FROM credit_cards "
+        query = (f"SELECT {select_fields(CARD_FIELDS, 'c.id')} "
+                  "  FROM credit_cards AS c "
+                  "       INNER JOIN credit_accounts AS a "
+                  "       ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} {digit_filter}")
         placeholders = (self.user_id, *fill_place(bank),
@@ -160,10 +166,12 @@ class CardHandler(DatabaseHandler):
         card : sqlite3.Row
             The saved credit card.
         """
+        raise NotImplementedError()
+        ### ADD ACCOUNT LINKAGE
         mapping = self.process_card_form(form)
-        if CARD_FIELDS.keys() != mapping.keys():
+        if CARD_FIELDS != tuple(mapping.keys()):
             raise ValueError('The mapping does not match the database. Fields '
-                            f'({", ".join(CARD_FIELDS.keys())}) must be '
+                            f'({", ".join(CARD_FIELDS)}) must be '
                              'provided.')
         # Either create a new entry or update an existing entry
         if not card_id:

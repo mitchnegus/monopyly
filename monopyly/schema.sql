@@ -10,16 +10,23 @@ CREATE TABLE users (
 	PRIMARY KEY(id)
 );
 
-CREATE TABLE credit_cards (
+CREATE TABLE credit_accounts (
 	id INTEGER,
 	user_id INTEGER NOT NULL,
 	bank TEXT NOT NULL,
-	last_four_digits TEXT NOT NULL,
 	statement_issue_day INTEGER NOT NULL,
 	statement_due_day INTEGER NOT NULL,
-	active INTEGER NOT NULL,
 	PRIMARY KEY(id),
 	FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE TABLE credit_cards (
+	id INTEGER,
+	account_id INTEGER NOT NULL,
+	last_four_digits TEXT NOT NULL,
+	active INTEGER NOT NULL,
+	PRIMARY KEY(id),
+	FOREIGN KEY(account_id) REFERENCES credit_accounts(id)
 );
 
 CREATE TABLE credit_statements (
@@ -37,10 +44,12 @@ CREATE VIEW credit_statements_view AS
 SELECT *
   FROM (SELECT s.*,
 	       COALESCE(SUM(amount)
-	          	OVER (PARTITION BY s.card_id ORDER BY s.id),
+	          	OVER (PARTITION BY c.account_id ORDER BY s.issue_date),
 		       	0
 	       ) balance
 	  FROM credit_statements AS s 
+	       INNER JOIN credit_cards AS c
+	       ON c.id = s.card_id
                LEFT OUTER JOIN credit_transactions AS t
 	       ON t.statement_id = s.id
 )

@@ -1,7 +1,6 @@
 """General utility functions."""
 from abc import ABC, abstractmethod
 import itertools as it
-import operator as op
 from datetime import datetime
 
 from flask import g
@@ -98,17 +97,6 @@ class DatabaseHandler(ABC):
             (entry_id,)
         )
         self.db.commit()
-
-
-def filter_dict(dictionary, operator, condition, by_value=False):
-    """Filter a dictionary by key using the given operator and condition."""
-    if operator is op.contains:
-        # `contains` method has reversed operands
-        def operator(x, y): return op.contains(y, x)
-    if not by_value:
-        return {k: v for k, v in dictionary.items() if operator(k, condition)}
-    else:
-        return {k: v for k, v in dictionary.items() if operator(v, condition)}
 
 
 def parse_date(given_date):
