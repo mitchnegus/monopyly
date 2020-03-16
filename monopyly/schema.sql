@@ -33,6 +33,19 @@ CREATE TABLE credit_statements (
 	FOREIGN KEY(card_id) REFERENCES credit_cards(id)
 );
 
+CREATE VIEW credit_statements_view AS
+SELECT *
+  FROM (SELECT s.*,
+	       COALESCE(SUM(amount)
+	          	OVER (PARTITION BY s.card_id ORDER BY s.id),
+		       	0
+	       ) balance
+	  FROM credit_statements AS s 
+               LEFT OUTER JOIN credit_transactions AS t
+	       ON t.statement_id = s.id
+)
+GROUP BY id;
+
 CREATE TABLE credit_transactions (
 	id INTEGER,
 	statement_id INTEGER NOT NULL,
