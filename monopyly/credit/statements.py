@@ -1,5 +1,5 @@
 """
-Tools for interacting with the credit statements database.
+Tools for interacting with the credit statements in the database.
 """
 from dateutil.relativedelta import relativedelta
 
@@ -16,7 +16,7 @@ from .cards import CardHandler
 
 class StatementHandler(DatabaseHandler):
     """
-    A database handler for accessing the credit statements database.
+    A database handler for managing credit card statements.
 
     Parameters
     ––––––––––
@@ -60,9 +60,8 @@ class StatementHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
-            the 'credit_statements' or 'credit_cards' tables, or a
-            summation over the amount column in the
-            `credit_transactions` table.
+            the 'credit_statements', 'credit_cards', or 'credit_accounts'
+            tables.
         card_ids : tuple of str, optional
             A sequence of card IDs for which statements will be selected
             (if `None`, all cards will be selected).
@@ -114,7 +113,7 @@ class StatementHandler(DatabaseHandler):
         statement_id : int
             The ID of the statement to be found.
         fields : tuple of str, optional
-            The fields (in either the statements, cards, or transactions
+            The fields (in either the statements, cards, or accounts
             tables) to be returned.
 
         Returns

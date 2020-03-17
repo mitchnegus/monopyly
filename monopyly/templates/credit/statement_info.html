@@ -5,7 +5,7 @@
 	<div id="issue-date">
 		{{ statement['issue_date'].strftime('%B %Y') }}
 	</div>
-	<div id="total">
+	<div id="balance">
 		<div>$</div>
 		<div>{{ '{:,.2f}'.format(statement['balance']) }}</div>
 	</div>

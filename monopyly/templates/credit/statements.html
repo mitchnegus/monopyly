@@ -15,7 +15,7 @@
 						<div class="year">{{ statement['issue_date'].year }}</div>
 					</div>
 					<div class="payment">
-						<div class="total">
+						<div class="balance">
 						{{ '${:,.2f}'.format(statement['balance']) }}
 						</div>
 						{% if statement['paid'] %}

@@ -21,7 +21,9 @@ input {
 	font-size: inherit;
 }
 
-input[type="text"] {
+input[type="text"],
+select {
+	box-sizing: border-box;
   border: 1px solid #cccccc;
   border-radius: 3px;
 }
@@ -144,16 +146,22 @@ form label {
 }
 
 form button,
-form input {
+form input,
+form select {
 	width: 100%;
 	box-sizing: border-box;
+  border-radius: 3px;
+  background-color: #fafafa;
 	font-size: 1.1em;
 	filter: none; /*removes FireFox autofill background*/
 }
 
 form input {
   padding: 5px;
-  background-color: #fafafa;
+}
+
+form select {
+	padding: 4px 5px;
 }
 
 form input[type="checkbox"] {
@@ -170,7 +178,6 @@ form input.button {
   background-color: #fbfbfb;
   background-image: linear-gradient(#fbfbfb, #efefef);
   border:1px solid #d8d8d8;
-  border-radius: 3px;
   text-align: center; 
   color: #333333;
   font-weight:bold; 
@@ -608,32 +615,32 @@ table.transactions td div.notes{
 /*
  * Customization for the 'New Card' & 'Update Card' pages
  */
-form#card #bank {
+form#card #account-field {
 	flex-basis: 70%;
 	min-width: 320px;
 }
 
-form#card #last-four-digits {
+form#card #last-four-digits-field {
 	flex-basis: 30%;
 	min-width: 160px;
 }
 
-form#card #statement-issue-day {
+form#card #statement-issue-day-field {
 	flex-basis: 40%;
 	min-width: 180px;
 }
 
-form#card #statement-due-day {
+form#card #statement-due-day-field  {
 	flex-basis: 40%;
 	min-width: 180px;
 }
 
-form#card #active {
+form#card #active-field {
 	flex-basis: 20%;
 	min-width: 100px;
 }
 
-form#card #submit {
+form#card #submit-field {
 	min-width: 490px;
 }
 
@@ -699,7 +706,7 @@ form#card #submit {
   letter-spacing: 1px;
 }
 
-.statement-block .payment .total {
+.statement-block .payment .balance {
 	font-size: 30pt;
 	font-weight: bold;
 }
@@ -732,7 +739,7 @@ form#card #submit {
 	font-size: 28pt;
 }
 
-#statement-details #statement-info #total {
+#statement-details #statement-info #balance {
 	display: flex;
 	justify-content: space-between;
 	margin: 20px 0;
@@ -880,11 +887,11 @@ table#transactions {
 /*
  * Customization for the 'New Transaction' & 'Update Transaction' pages
  */
-form#transaction #bank {
+form#transaction #bank-field {
 	flex-basis: 70%;
 }
 
-form#transaction #last-four-digits {
+form#transaction #last-four-digits-field {
 	flex-basis: 30%;
 	min-width: 150px;
 }

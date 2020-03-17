@@ -3,7 +3,8 @@ Generate forms for the user to fill out.
 """
 from flask_wtf import FlaskForm
 from wtforms.fields import (
-    DecimalField, IntegerField, TextField, BooleanField, SubmitField
+    DecimalField, IntegerField, TextField, BooleanField, SelectField,
+    SubmitField
 )
 from wtforms.validators import ValidationError, DataRequired, Length
 
@@ -58,7 +59,7 @@ class TransactionForm(FlaskForm):
 
 
 class CardForm(FlaskForm):
-    bank = TextField('Bank')
+    account_id = SelectField('Account', coerce=int)
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]

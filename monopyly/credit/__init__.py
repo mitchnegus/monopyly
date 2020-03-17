@@ -13,6 +13,7 @@ from ..db import get_db
 from ..auth import login_required
 from ..forms import *
 from ..utils import parse_date
+from .accounts import AccountHandler
 from .cards import CardHandler
 from .statements import StatementHandler
 from .transactions import TransactionHandler, determine_statement_date
@@ -49,6 +50,7 @@ def show_card(card_id):
 def new_card():
     # Define a form for a credit card
     form = CardForm()
+    form.account.choices = prepare_account_choices()
     # Check if a card was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
@@ -71,7 +73,9 @@ def update_card(card_id):
     card = ch.get_card(card_id)
     # Define a form for a card
     form = CardForm(data=card)
+    form.account_id.choices = prepare_account_choices()
     # Check if a card was updated and update it in the database
+
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated credit card
@@ -379,3 +383,18 @@ def infer_statement():
         return str(statement['issue_date'])
     else:
         return ''
+
+
+def prepare_account_choices():
+    """Prepare account choices for the card form dropdown."""
+    ah, ch = AccountHandler(), CardHandler()
+    # Collect all available user accounts
+    user_accounts = ah.get_accounts()
+    choices = []
+    for account in user_accounts:
+        cards = ch.get_cards(accounts=(account['id'],))
+        digits = [card['last_four_digits'] for card in cards]
+        # Create a description for the account using the bank and card digits
+        description = f"{account['bank']} (Accounts: {', '.join(digits)})"
+        choices.append((account['id'], description))
+    return choices

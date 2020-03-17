@@ -1,5 +1,5 @@
 """
-Tools for interacting with the credit transactions database.
+Tools for interacting with the credit transactions in the database.
 """
 from dateutil.relativedelta import relativedelta
 
@@ -17,7 +17,7 @@ from .statements import StatementHandler
 
 class TransactionHandler(DatabaseHandler):
     """
-    A database handler for accessing the credit transactions database.
+    A database handler for accessing credit transactions.
 
     Parameters
     ––––––––––
@@ -63,8 +63,8 @@ class TransactionHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
-            the 'credit_transactions', credit_statements', or
-            'credit_cards' tables.
+            the 'credit_transactions', credit_statements',
+            'credit_cards', or 'credit_accounts' tables.
         card_ids : tuple of str, optional
             A sequence of card IDs with which to filter transactions (if
             `None`, all card IDs will be shown).
@@ -106,7 +106,26 @@ class TransactionHandler(DatabaseHandler):
         return transactions
 
     def get_transaction(self, transaction_id, fields=None):
-        """Get a transaction from the database given its transaction ID."""
+        """
+        Get a transaction from the database given its transaction ID.
+
+        Accesses a set of fields for a given transaction. By default,
+        all fields for a transaction, the corresponding statement,
+        issuing credit card and account are returned.
+
+        Parameters
+        ––––––––––
+        transaction_id : int
+            The ID of the transaction to be found.
+        fields : tuple of str, optional
+            The fields (in either the transactions, statements, cards,
+            or accounts tables) to be returned.
+
+        Returns
+        –––––––
+        transaction : sqlite3.Row
+            The transaction information from the database.
+        """
         query = (f"SELECT {select_fields(fields, 't.id')} "
                   "  FROM credit_transactions AS t "
                   "       INNER JOIN credit_statements AS s "

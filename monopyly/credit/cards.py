@@ -1,5 +1,5 @@
 """
-Tools for interacting with the credit cards database.
+Tools for interacting with credit cards in the database.
 """
 from werkzeug.exceptions import abort
 
@@ -13,7 +13,7 @@ from .tools import select_fields
 
 class CardHandler(DatabaseHandler):
     """
-    A database handler for accessing the credit cards database.
+    A database handler for managing credit cards.
 
     Parameters
     ––––––––––
@@ -42,8 +42,8 @@ class CardHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_cards(self, fields=None, banks=None, last_four_digits=None,
-                  active=False):
+    def get_cards(self, fields=None, accounts=None, banks=None,
+                  last_four_digits=None, active=False):
         """
         Get credit cards from the database.
 
@@ -56,11 +56,14 @@ class CardHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
-            'credit_cards' table.
+            'credit_cards' or 'credit_accounts' tables.
+        accounts : tuple of str, optional
+            A sequence of accounts for which cards will be selected (if
+            `None`, all accounts will be selected).
         banks : tuple of str, optional
             A sequence of banks for which cards will be selected (if
             `None`, all banks will be selected).
-        last_four_digits : tuple of int, optional
+        last_four_digits : tuple of str, optional
             A sequence of final 4 digits for which cards will be
             selected (if `None`, cards with any last 4 digits will be
             selected).
@@ -73,6 +76,7 @@ class CardHandler(DatabaseHandler):
         cards : list of sqlite3.Row
             A list of credit cards matching the criteria.
         """
+        account_filter = filter_items(accounts, 'account_id', 'AND')
         bank_filter = filter_items(banks, 'bank', 'AND')
         digit_filter = filter_items(last_four_digits,
                                     'last_four_digits', 'AND')
@@ -82,9 +86,12 @@ class CardHandler(DatabaseHandler):
                   "       INNER JOIN credit_accounts AS a "
                   "       ON a.id = c.account_id "
                   " WHERE user_id = ? "
-                 f"       {bank_filter} {digit_filter} {active_filter} "
+                 f"       {account_filter} {bank_filter} "
+                 f"       {digit_filter} {active_filter} "
                   " ORDER BY active DESC")
-        placeholders = (self.user_id, *fill_places(banks),
+        placeholders = (self.user_id,
+                        *fill_places(accounts),
+                        *fill_places(banks),
                         *fill_places(last_four_digits))
         cards = self.cursor.execute(query, placeholders).fetchall()
         return cards
