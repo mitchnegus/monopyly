@@ -1,4 +1,4 @@
-/* * Infer card information if enough identifying info is provided.
+/* Infer card information if enough identifying info is provided.
  *
  * When entering a transaction, infer the remaining card information
  * based on the current set of provided information. After a user

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+
+{% block header %}
+
+	<h1>{% block title %}{% endblock %}</h1>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+	<script>
+		const AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_autocomplete') }}";
+	</script>
+	<script src="{{ url_for('static', filename='js/autocomplete_transaction.js') }}">
+	</script>
+
+{% endblock %}

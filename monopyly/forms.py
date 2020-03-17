@@ -4,9 +4,9 @@ Generate forms for the user to fill out.
 from flask_wtf import FlaskForm
 from wtforms.fields import (
     DecimalField, IntegerField, TextField, BooleanField, SelectField,
-    SubmitField
+    SubmitField, HiddenField
 )
-from wtforms.validators import ValidationError, DataRequired, Length
+from wtforms.validators import ValidationError, Optional, DataRequired, Length
 
 from .utils import parse_date
 
@@ -30,6 +30,29 @@ class NumeralsOnly:
         try:
             int(field.data)
         except ValueError:
+            raise ValidationError(self.message)
+
+
+class SelectionNotBlank:
+    """
+    Validates that a selection is not a blank submission.
+
+    Parameters
+    ––––––––––
+    blank : int
+        The integer representing a blank selection.
+    message : str
+        Error message to raise in case of a validation error.
+    """
+
+    def __init__(self, blank=-1, message=None):
+        self.blank = blank
+        if not message:
+            message = 'A selection must be made.'
+        self.message = message
+
+    def __call__(self, form, field):
+        if field.data == self.blank:
             raise ValidationError(self.message)
 
 
@@ -58,13 +81,24 @@ class TransactionForm(FlaskForm):
     submit = SubmitField('Save Transaction')
 
 
+class AccountForm(FlaskForm):
+    statement_issue_day = IntegerField('Statement Issue Day', [DataRequired()])
+    statement_due_day = IntegerField('Statement Due Day', [DataRequired()])
+    submit = SubmitField('Save Account')
+
+
+class UpdateAccountForm(AccountForm):
+    bank = HiddenField('Bank', [DataRequired()])
+
+
 class CardForm(FlaskForm):
-    account_id = SelectField('Account', coerce=int)
+    account_id = SelectField('Account', [SelectionNotBlank()], coerce=int)
+    bank = TextField('Bank')
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
     )
-    statement_issue_day = IntegerField('Statement Issue Day', [DataRequired()])
-    statement_due_day = IntegerField('Statement Due Day', [DataRequired()])
-    active = BooleanField('Active Card', default='checked')
+    statement_issue_day = IntegerField('Statement Issue Day', [Optional()])
+    statement_due_day = IntegerField('Statement Due Day', [Optional()])
+    active = BooleanField('Active', default='checked')
     submit = SubmitField('Save Card')

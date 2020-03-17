@@ -4,7 +4,7 @@
 
 	<h1>
 		{% block title %}
-			Card {{ 'Updated' if update else 'Added' }}
+			Account {{ 'Updated' if update else 'Added' }}
 		{% endblock %}
 	</h1>
 
@@ -14,9 +14,9 @@
 {% block content %}
 
 	{% if update %}
-		<p>The card was updated successfully.</p>
+		<p>The account was updated successfully.</p>
 	{% else %}
-		<p>The card was added successfully.</p>
+		<p>The account was added successfully.</p>
 	{% endif %}
 
 {% endblock %}

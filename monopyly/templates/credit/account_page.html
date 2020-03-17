@@ -5,7 +5,7 @@
 
 	<h1>
 		{% block title %}
-			Card Details
+			Account Details
 		{% endblock %}
 	</h1>
 
@@ -32,26 +32,38 @@
 
 {% block content %}
 
-	<div id="card-details">
+	<div id="account-details">
 
-		<table id="card-info">
+		<table id="account-info">
 
 			<tr>
-				<th scope="row" class="card">Card</th>
-				<td class="card">
-					{{ card['bank'] }} ****-{{ card['last_four_digits'] }}
-					({{ 'Active' if card['active'] else 'Inactive' }})
-				</td>
+				<th scope="row">Bank</th>
+				<td>{{ account['bank'] }}<td>
 			</tr>
 
 			<tr>
-				<th scope="row" class="date">Statement Issue Day</th>
-				<td class="date">{{ card['statement_issue_day'] }}</td>
+				<th scope="row">Cards</th>
+				<td></td>
+			</tr>
+
+			{% for card in cards %}
+				<tr>
+					<th></th>
+					<td>
+						****-{{ card['last_four_digits'] }}
+					  ({{ 'Active' if card['active'] else 'Inactive' }})
+					</td>
+				</tr>
+			{% endfor %}
+
+			<tr>
+				<th scope="row">Statement Issue Day</th>
+				<td>{{ account['statement_issue_day'] }}</td>
 			</tr>
 
 			<tr>
-				<th scope="row" class="text">Statement Due Day</th>
-				<td class="text">{{ card['statement_due_day'] }}</td>
+				<th scope="row">Statement Due Day</th>
+				<td>{{ account['statement_due_day'] }}</td>
 			</tr>
 
 		</table>
@@ -60,14 +72,14 @@
 			<div class="form-line">
 
 				<div class="form-field">
-					<button type="submit" formaction="{{ url_for('credit.update_card', card_id=card['id']) }}">
+					<button type="submit" formaction="{{ url_for('credit.update_account', account_id=account['id']) }}">
 						<img class="button-icon" src="{{ url_for('static', filename='img/edit.png') }}">
 						Update
 					</button>
 				</div>
 
 				<div class="form-field">
-					<button class="danger" type="submit" formaction="{{ url_for('credit.delete_card', card_id=card['id']) }}" onclick="return confirm('Are you sure you want to delete this card?');">
+					<button class="danger" type="submit" formaction="{{ url_for('credit.delete_account', account_id=account['id']) }}" onclick="return confirm('Are you sure you want to delete this account?');">
 						<img class="button-icon" src="{{ url_for('static', filename='img/delete.png') }}">
 						Delete
 					</button>

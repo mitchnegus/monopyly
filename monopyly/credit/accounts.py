@@ -87,3 +87,73 @@ class AccountHandler(DatabaseHandler):
             abort_msg = f'Account ID {account_id} does not exist for the user.'
             abort(404, abort_msg)
         return account
+
+    def save_account(self, form, account_id=None):
+        """
+        Save a new credit account in the database from a submitted form.
+
+        Accept a user provided form and either insert the information
+        into the database as a new credit account or update the account
+        with matching ID. All fields are processed and sanitized using
+        the database handler.
+
+        Parameters
+        ––––––––––
+        form : AccountForm
+            An object containing the submitted form information.
+        account_id : int, optional
+            If given, the ID of the card to be updated. If left as
+            `None`, a new credit card is created.
+
+        Returns
+        –––––––
+        account : sqlite3.Row
+            The saved account.
+        """
+        mapping = self.process_account_form(form)
+        if ACCOUNT_FIELDS != tuple(mapping.keys()):
+            raise ValueError('The mapping does not match the database. Fields '
+                            f'({", ".join(ACCOUNT_FIELDS)}) must be provided.')
+        # Either create a new entry or update an existing entry
+        if not account_id:
+            self.new_entry(mapping)
+            account_id = self.cursor.lastrowid
+        else:
+            self.update_entry(account_id, mapping)
+        account = self.get_account(account_id)
+        return account
+
+    def process_account_form(self, form):
+        """
+        Process credit account information submitted on a form.
+
+        Collect all credit account information submitted through the
+        form. This aggregates all credit account data from the form,
+        fills in defaults and makes inferrals when necessary, and then
+        returns a dictionary mapping of the account information.
+
+        Parameters
+        ––––––––––
+        form : CardForm
+            An object containing the submitted form information.
+
+        Returns
+        –––––––
+        mapping : dict
+            A dictionary of account information collected from the user
+            submission.
+        """
+        # Iterate through the transaction submission and create the dictionary
+        mapping = {}
+        for field in ACCOUNT_FIELDS:
+            if field == 'user_id':
+                mapping[field] = self.user_id
+            else:
+                mapping[field] = form[field].data
+        return mapping
+
+#    def delete_card(self, card_id):
+#        """Delete a credit card from the database given its ID."""
+#        # Check that the card exists and belongs to the user
+#        self.get_card(card_id)
+#        super().delete_entry(card_id)

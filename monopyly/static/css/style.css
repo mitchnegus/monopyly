@@ -585,63 +585,88 @@ table.transactions td div.notes{
 
 
 /*
- * Customization for the 'Card Details' page
+ * Customization for the 'Account Details' page
  */
-#card-details {
+#account-details {
 	width: 50%;
 	margin: 20px auto;
 }
 
-#card-info {
+#account-info {
 	width: 100%;
 	border-collapse: collapse;
 }
 
-#card-details th,
-#card-details td {
+#account-info th,
+#account-info td {
 	padding: 5px 10px;
 	vertical-align: top;
 }
 
-#card-details th {
+#account-info th {
 	text-align: right;
 }
 
-#card-details td {
+#account-info td {
 	text-align: left;
+}
+
+
+/*
+ * Customization for the 'Update Account' page
+ */
+form#account #account-field {
+	flex-basis: 70%;
+	min-width: 320px;
+}
+
+form#account #statement-issue-day-field {
+	flex-grow: 1;
+	min-width: 180px;
+}
+
+form#account #statement-due-day-field  {
+	flex-grow: 1;
+	min-width: 180px;
 }
 
 
 /*
  * Customization for the 'New Card' & 'Update Card' pages
  */
-form#card #account-field {
-	flex-basis: 70%;
-	min-width: 320px;
+form#card {
+	min-width: 500px;
+}
+
+form#card #bank-field {
+	flex-basis: 65%;
+	min-width: 260px;
 }
 
 form#card #last-four-digits-field {
-	flex-basis: 30%;
-	min-width: 160px;
-}
-
-form#card #statement-issue-day-field {
-	flex-basis: 40%;
-	min-width: 180px;
-}
-
-form#card #statement-due-day-field  {
-	flex-basis: 40%;
-	min-width: 180px;
+	flex-basis: 25%;
+	min-width: 150px;
 }
 
 form#card #active-field {
-	flex-basis: 20%;
-	min-width: 100px;
+	flex-basis: 10%;
+	min-width: 60px;
 }
 
-form#card #submit-field {
-	min-width: 490px;
+form#card #active-field label {
+	text-align: center;
+}
+
+form#card #secondary-info.hidden {
+	display: none;
+}
+
+form#card #statement-issue-day-field {
+	flex-grow: 1;
+}
+
+form#card #statement-due-day-field  {
+	flex-grow: 1;
 }
 
 

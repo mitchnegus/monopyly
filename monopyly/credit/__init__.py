@@ -35,22 +35,12 @@ def show_cards():
     return render_template('credit/cards_page.html', cards=cards)
 
 
-@bp.route('/card/<int:card_id>')
-@login_required
-def show_card(card_id):
-    ch = CardHandler()
-    # Get the credit card information from the database
-    card = ch.get_card(card_id)
-    return render_template('credit/card_page.html',
-                           card=card)
-
-
 @bp.route('/new_card', methods=('GET', 'POST'))
 @login_required
 def new_card():
     # Define a form for a credit card
     form = CardForm()
-    form.account.choices = prepare_account_choices()
+    form.account_id.choices = prepare_account_choices()
     # Check if a card was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
@@ -65,31 +55,6 @@ def new_card():
     return render_template('credit/card_form_page_new.html', form=form)
 
 
-@bp.route('/update_card/<int:card_id>', methods=('GET', 'POST'))
-@login_required
-def update_card(card_id):
-    ch = CardHandler()
-    # Get the credit card information from the database
-    card = ch.get_card(card_id)
-    # Define a form for a card
-    form = CardForm(data=card)
-    form.account_id.choices = prepare_account_choices()
-    # Check if a card was updated and update it in the database
-
-    if request.method == 'POST':
-        if form.validate():
-            # Update the database with the updated credit card
-            card = ch.save_card(form, card_id)
-            return render_template('credit/card_submission_page.html',
-                                   update=True)
-        else:
-            flash(form_err_msg)
-            print(form.errors)
-    # Display the form for accepting user input
-    return render_template('credit/card_form_page_update.html',
-                           card_id=card_id, form=form)
-
-
 @bp.route('/delete_card/<int:card_id>', methods=('POST',))
 @login_required
 def delete_card(card_id):
@@ -97,6 +62,51 @@ def delete_card(card_id):
     # Remove the credit card from the database
     ch.delete_card(card_id)
     return redirect(url_for('credit.show_cards'))
+
+
+@bp.route('/account/<int:account_id>')
+@login_required
+def show_account(account_id):
+    ah, ch = AccountHandler(), CardHandler()
+    # Get the account information from the database
+    account = ah.get_account(account_id)
+    cards = ch.get_cards(accounts=(account_id,))
+    return render_template('credit/account_page.html',
+                           account=account,
+                           cards=cards)
+
+
+@bp.route('/update_account/<int:account_id>', methods=('GET', 'POST'))
+@login_required
+def update_account(account_id):
+    ah, ch = AccountHandler(), CardHandler()
+    # Get the account information from the database
+    account = ah.get_account(account_id)
+    # Define a form for an account
+    form = UpdateAccountForm(data=account)
+    # Check if an account was updated, and update it in the database
+    if request.method == 'POST':
+        if form.validate():
+            # Update the database with the updated account
+            account = ah.save_account(form, account_id)
+            return render_template('credit/account_submission_page.html',
+                                   update=True)
+        else:
+            flash(form_err_msg)
+            print(form.errors)
+    # Display the form for accepting user input
+    cards = ch.get_cards(accounts=(account_id,))
+    return render_template('credit/account_form_page_update.html',
+                           account=account,
+                           cards=cards,
+                           form=form)
+
+
+@bp.route('/delete_account/<int:account_id>')
+@login_required
+def delete_account(account_id):
+    flash('This functionality is not currently available.')
+    return redirect(url_for('credit.show_account', account_id=account_id))
 
 
 @bp.route('/statements')
@@ -385,16 +395,29 @@ def infer_statement():
         return ''
 
 
+@bp.route('/_infer_bank', methods=('POST',))
+@login_required
+def infer_bank():
+    ah = AccountHandler()
+    # Separate the arguments of the POST method
+    post_args = request.get_json()
+    account_id = post_args['account_id']
+    account = ah.get_account(account_id)
+    if not account:
+        abort(404, 'An account with the given ID was not found.')
+    return account['bank']
+
+
 def prepare_account_choices():
     """Prepare account choices for the card form dropdown."""
     ah, ch = AccountHandler(), CardHandler()
     # Collect all available user accounts
     user_accounts = ah.get_accounts()
-    choices = []
+    choices = [(-1, '-'), (0, 'New account')]
     for account in user_accounts:
         cards = ch.get_cards(accounts=(account['id'],))
-        digits = [card['last_four_digits'] for card in cards]
+        digits = [f"*{card['last_four_digits']}" for card in cards]
         # Create a description for the account using the bank and card digits
-        description = f"{account['bank']} (Accounts: {', '.join(digits)})"
+        description = f"{account['bank']} (cards: {', '.join(digits)})"
         choices.append((account['id'], description))
     return choices

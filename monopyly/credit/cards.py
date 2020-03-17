@@ -9,6 +9,7 @@ from ..utils import (
 )
 from .constants import CARD_FIELDS
 from .tools import select_fields
+from .accounts import AccountHandler
 
 
 class CardHandler(DatabaseHandler):
@@ -173,13 +174,10 @@ class CardHandler(DatabaseHandler):
         card : sqlite3.Row
             The saved credit card.
         """
-        raise NotImplementedError()
-        ### ADD ACCOUNT LINKAGE
         mapping = self.process_card_form(form)
         if CARD_FIELDS != tuple(mapping.keys()):
             raise ValueError('The mapping does not match the database. Fields '
-                            f'({", ".join(CARD_FIELDS)}) must be '
-                             'provided.')
+                            f'({", ".join(CARD_FIELDS)}) must be provided.')
         # Either create a new entry or update an existing entry
         if not card_id:
             self.new_entry(mapping)
@@ -212,8 +210,20 @@ class CardHandler(DatabaseHandler):
         # Iterate through the transaction submission and create the dictionary
         mapping = {}
         for field in CARD_FIELDS:
-            if field == 'user_id':
-                mapping[field] = self.user_id
+            if field == 'account_id':
+                account_id = form[field].data
+                if account_id == 0:
+                    # Create a new account
+                    ah = AccountHandler()
+                    account_mapping = {'user_id': self.user_id,
+                                       'bank': form['bank'].data,
+                                       'statement_issue_day':
+                                       form['statement_issue_day'].data,
+                                       'statement_due_day':
+                                       form['statement_due_day'].data}
+                    ah.new_entry(account_mapping)
+                    account_id = ah.cursor.lastrowid
+                mapping[field] = account_id
             else:
                 mapping[field] = form[field].data
         return mapping
