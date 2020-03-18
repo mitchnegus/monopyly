@@ -116,7 +116,9 @@ aside.sidebar {
 }
 
 #content-header h1 {
-  margin-top: 40px;
+  margin: 40px 0 30px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #dddddd;
   text-align: center;
   font-size: 2em;
   letter-spacing: -2px;
@@ -588,13 +590,13 @@ table.transactions td div.notes{
  * Customization for the 'Account Details' page
  */
 #account-details {
-	width: 50%;
 	margin: 20px auto;
 }
 
 #account-info {
 	width: 100%;
 	border-collapse: collapse;
+	font-size: 18pt;
 }
 
 #account-info th,
@@ -604,12 +606,19 @@ table.transactions td div.notes{
 }
 
 #account-info th {
+	white-space: nowrap;
 	text-align: right;
 }
 
 #account-info td {
 	text-align: left;
 }
+
+#account-details form {
+	width: 40%;
+	margin: 40px auto 0;
+}
+
 
 
 /*

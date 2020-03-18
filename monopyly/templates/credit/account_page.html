@@ -43,18 +43,15 @@
 
 			<tr>
 				<th scope="row">Cards</th>
-				<td></td>
+				<td>
+					{% for card in cards %}
+						<div>
+							****-{{ card['last_four_digits'] }}
+						  ({{ 'Active' if card['active'] else 'Inactive' }})
+						</div>
+					{% endfor %}
+				</td>
 			</tr>
-
-			{% for card in cards %}
-				<tr>
-					<th></th>
-					<td>
-						****-{{ card['last_four_digits'] }}
-					  ({{ 'Active' if card['active'] else 'Inactive' }})
-					</td>
-				</tr>
-			{% endfor %}
 
 			<tr>
 				<th scope="row">Statement Issue Day</th>
