@@ -39,6 +39,7 @@ class AccountHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     table_name = 'credit_accounts'
+    table_fields = ACCOUNT_FIELDS
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
@@ -75,7 +76,7 @@ class AccountHandler(DatabaseHandler):
         accounts = self.cursor.execute(query, placeholders).fetchall()
         return accounts
 
-    def get_account(self, account_id, fields=None):
+    def get_entry(self, account_id, fields=None):
         """Get a credit account from the database given its account ID."""
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
@@ -88,42 +89,7 @@ class AccountHandler(DatabaseHandler):
             abort(404, abort_msg)
         return account
 
-    def save_account(self, form, account_id=None):
-        """
-        Save a new credit account in the database from a submitted form.
-
-        Accept a user provided form and either insert the information
-        into the database as a new credit account or update the account
-        with matching ID. All fields are processed and sanitized using
-        the database handler.
-
-        Parameters
-        ––––––––––
-        form : AccountForm
-            An object containing the submitted form information.
-        account_id : int, optional
-            If given, the ID of the card to be updated. If left as
-            `None`, a new credit card is created.
-
-        Returns
-        –––––––
-        account : sqlite3.Row
-            The saved account.
-        """
-        mapping = self.process_account_form(form)
-        if ACCOUNT_FIELDS != tuple(mapping.keys()):
-            raise ValueError('The mapping does not match the database. Fields '
-                            f'({", ".join(ACCOUNT_FIELDS)}) must be provided.')
-        # Either create a new entry or update an existing entry
-        if not account_id:
-            self.new_entry(mapping)
-            account_id = self.cursor.lastrowid
-        else:
-            self.update_entry(account_id, mapping)
-        account = self.get_account(account_id)
-        return account
-
-    def process_account_form(self, form):
+    def process_account_form(self, form, account_id=None):
         """
         Process credit account information submitted on a form.
 
@@ -136,24 +102,25 @@ class AccountHandler(DatabaseHandler):
         ––––––––––
         form : CardForm
             An object containing the submitted form information.
+        account_id : int, optional
+            If given, the ID of the card to be updated. If left as
+            `None`, a new credit card is created.
 
         Returns
         –––––––
-        mapping : dict
-            A dictionary of account information collected from the user
-            submission.
+        account : sqlite3.Row
+            The saved account.
         """
-        # Iterate through the transaction submission and create the dictionary
+        # Iterate through the account submission and create the dictionary
         mapping = {}
-        for field in ACCOUNT_FIELDS:
+        for field in self.table_fields:
             if field == 'user_id':
                 mapping[field] = self.user_id
             else:
                 mapping[field] = form[field].data
-        return mapping
-
-#    def delete_card(self, card_id):
-#        """Delete a credit card from the database given its ID."""
-#        # Check that the card exists and belongs to the user
-#        self.get_card(card_id)
-#        super().delete_entry(card_id)
+        # Either create a new entry or update an existing entry
+        if not account_id:
+            account = self.new_entry(mapping)
+        else:
+            account = self.update_entry(account_id, mapping)
+        return account

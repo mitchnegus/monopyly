@@ -7,7 +7,7 @@ from werkzeug.exceptions import abort
 
 from ..utils import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
-    check_sort_order, parse_date
+    check_sort_order
 )
 from .constants import STATEMENT_FIELDS
 from .tools import select_fields
@@ -41,6 +41,7 @@ class StatementHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     table_name = 'credit_statements'
+    table_fields = STATEMENT_FIELDS
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
@@ -100,7 +101,7 @@ class StatementHandler(DatabaseHandler):
         statements = self.cursor.execute(query, placeholders).fetchall()
         return statements
 
-    def get_statement(self, statement_id, fields=None):
+    def get_entry(self, statement_id, fields=None):
         """
         Get a credit statement from the database given its statement ID.
 
@@ -164,7 +165,7 @@ class StatementHandler(DatabaseHandler):
         """
         card_filter = filter_item(card_id, 'card_id', 'AND')
         date_filter = filter_item(issue_date, 'issue_date', 'AND')
-        query = (f"SELECT {select_fields(STATEMENT_FIELDS, 's.id')} "
+        query = (f"SELECT {select_fields(self.table_fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
                   "       ON c.id = s.card_id "
@@ -178,74 +179,42 @@ class StatementHandler(DatabaseHandler):
         statement = self.cursor.execute(query, placeholders).fetchone()
         return statement
 
-    def new_statement(self, card_id, issue_date, payment_date=''):
+    def new_entry(self, mapping):
         """
-        Create a new credit card statement in the database.
+        Create a new statement in the database given a mapping.
 
-        Accept a credit card and statement issue date and insert a new
-        entry in the database for the corresponding credit card
-        statement.
+        Accept a mapping between statement fields and data. This mapping
+        is used to insert a new entry into the database. All fields are
+        sanitized prior to insertion.
 
         Parameters
         ––––––––––
-        card : sqlite3.Row
-            A credit card entry from the database.
-        issue_date : datetime.date
-            The date the new statement was issued.
-        payment_date : datetime.date, optional
-            The date the new statement was paid.
+        mapping : dict
+            A mapping between database fields and the value to be
+            entered into that field for the entry.
 
         Returns
         –––––––
         statement : sqlite3.Row
-            The newly added statement.
+            The saved statement.
         """
         ch = CardHandler()
-        card = ch.get_card(card_id)
-        mapping = {'card_id': card_id,
-                   'issue_date': issue_date,
-                   'due_date': determine_due_date(card['statement_due_day'],
-                                                  issue_date),
-                   'paid': 1 if payment_date else 0,
-                   'payment_date': payment_date}
-        self.new_entry(mapping)
-        statement = self.get_statement(self.cursor.lastrowid)
+        if 'card_id' not in mapping:
+            raise ValueError('A new statement cannot be created without '
+                             'knowing the card it belongs to.')
+        card = ch.get_entry(mapping['card_id'])
+        if 'issue_date' not in mapping:
+            raise ValueError('A new statement cannot be created without '
+                             'specifying the date of issue.')
+        if 'due_date' not in mapping:
+            mapping['due_date'] = determine_due_date(card['statement_due_day'],
+                                                     mapping['issue_date'])
+        if 'paid' not in mapping:
+            mapping['paid'] = 0
+        if 'payment_date' not in mapping:
+            mapping['payment_date'] = ''
+        statement = self.new_entry(mapping)
         return statement
-
-    def update_statement_due_date(self, statement_id, new_due_date):
-        """
-        Update a statement's due date given its ID and new due date.
-
-        Parameters
-        ––––––––––
-        statement_id : int
-            The ID of the statement to be updated.
-        new_due_date : str
-            The date to set as the new statement due date.
-        """
-        mapping = {'due_date': parse_date(new_due_date)}
-        self.update_entry(statement_id, mapping)
-
-    def update_statement_payment(self, statement_id, payment_date):
-        """
-        Update a statement's pay status given its ID and a payment date.
-
-        Parameters
-        ––––––––––
-        statement_id : int
-            The ID of the statement to be updated.
-        payment_date : str
-            The date to set as the statement payment date.
-        """
-        mapping = {'paid': 1,
-                   'payment_date': parse_date(payment_date)}
-        self.update_entry(statement_id, mapping)
-
-    def delete_statement(self, statement_id):
-        """Delete a statement from the database given its ID."""
-        # Check that the statement exists and belongs to the user
-        self.get_statement(statement_id)
-        super().delete_entry(statement_id)
 
 
 def determine_due_date(statement_due_day, issue_date):

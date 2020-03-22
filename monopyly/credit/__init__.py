@@ -46,7 +46,7 @@ def new_card():
         if form.validate():
             ch = CardHandler()
             # Insert the new credit card into the database
-            card = ch.save_card(form)
+            card = ch.process_card_form(form)
             return render_template('credit/card_submission_page.html',
                                    update=False)
         else:
@@ -60,7 +60,7 @@ def new_card():
 def delete_card(card_id):
     ch = CardHandler()
     # Remove the credit card from the database
-    ch.delete_card(card_id)
+    ch.delete_entry(card_id)
     return redirect(url_for('credit.show_cards'))
 
 
@@ -69,7 +69,7 @@ def delete_card(card_id):
 def show_account(account_id):
     ah, ch = AccountHandler(), CardHandler()
     # Get the account information from the database
-    account = ah.get_account(account_id)
+    account = ah.get_entry(account_id)
     cards = ch.get_cards(accounts=(account_id,))
     return render_template('credit/account_page.html',
                            account=account,
@@ -81,14 +81,14 @@ def show_account(account_id):
 def update_account(account_id):
     ah, ch = AccountHandler(), CardHandler()
     # Get the account information from the database
-    account = ah.get_account(account_id)
+    account = ah.get_entry(account_id)
     # Define a form for an account
     form = UpdateAccountForm(data=account)
     # Check if an account was updated, and update it in the database
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated account
-            account = ah.save_account(form, account_id)
+            account = ah.process_account_form(form, account_id)
             return render_template('credit/account_submission_page.html',
                                    update=True)
         else:
@@ -152,7 +152,7 @@ def show_statement(statement_id):
     # Get the statement information from the database
     statement_fields = ('bank', 'last_four_digits', 'issue_date', 'due_date',
                         'paid', 'payment_date', 'balance')
-    statement = sh.get_statement(statement_id, fields=statement_fields)
+    statement = sh.get_entry(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
     transaction_fields = ('transaction_date', 'vendor', 'amount')
@@ -169,10 +169,11 @@ def show_statement(statement_id):
 def update_statement_due_date(statement_id):
     sh = StatementHandler()
     # Get the autocomplete field from the AJAX request
-    new_due_date = request.get_json()
+    due_date = request.get_json()
     # Update the statement in the database
-    sh.update_statement_due_date(statement_id, new_due_date)
-    statement = sh.get_statement(statement_id, fields=('due_date',))
+    mapping = {'due_date': parse_date(due_date)}
+    sh.update_entry(statement_id, mapping)
+    statement = sh.get_entry(statement_id, fields=('due_date',))
     return str(statement['due_date'])
 
 
@@ -183,11 +184,12 @@ def update_statement_payment(statement_id):
     # Get the autocomplete field from the AJAX request
     payment_date = request.get_json()
     # Update the statement in the database
-    sh.update_statement_payment(statement_id, payment_date)
+    mapping = {'paid': 1, 'payment_date': parse_date(payment_date)}
+    sh.update_entry(statement_id, mapping)
     # Get the statement information from the database
     fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
               'payment_date', 'balance')
-    statement = sh.get_statement(statement_id, fields=fields)
+    statement = sh.get_entry(statement_id, fields=fields)
     return render_template('credit/statement_info.html',
                            statement=statement)
 
@@ -237,7 +239,7 @@ def update_transactions_display():
 def show_transaction(transaction_id):
     th = TransactionHandler()
     # Get the transaction information from the database
-    transaction = th.get_transaction(transaction_id)
+    transaction = th.get_entry(transaction_id)
     return render_template('credit/transaction_page.html',
                            transaction=transaction)
 
@@ -254,7 +256,7 @@ def new_transaction(statement_id):
         sh = StatementHandler()
         # Get the necessary fields from the database
         statement_fields = ('bank', 'last_four_digits', 'issue_date')
-        statement = sh.get_statement(statement_id, fields=statement_fields)
+        statement = sh.get_entry(statement_id, fields=statement_fields)
         form.bank.data = statement['bank']
         form.last_four_digits.data = statement['last_four_digits']
         form.issue_date.data = statement['issue_date']
@@ -263,7 +265,7 @@ def new_transaction(statement_id):
         if form.validate():
             th = TransactionHandler()
             # Insert the new transaction into the database
-            transaction = th.save_transaction(form)
+            transaction = th.process_transaction_form(form)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:
@@ -279,14 +281,14 @@ def new_transaction(statement_id):
 def update_transaction(transaction_id):
     th = TransactionHandler()
     # Get the transaction information from the database
-    transaction = th.get_transaction(transaction_id)
+    transaction = th.get_entry(transaction_id)
     # Define a form for a transaction
     form = TransactionForm(data=transaction)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated transaction
-            transaction = th.save_transaction(form, transaction_id)
+            transaction = th.process_transaction_form(form, transaction_id)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=True)
         else:
@@ -303,7 +305,7 @@ def update_transaction(transaction_id):
 def delete_transaction(transaction_id):
     th = TransactionHandler()
     # Remove the transaction from the database
-    th.delete_transaction(transaction_id)
+    th.delete_entry(transaction_id)
     return redirect(url_for('credit.show_transactions'))
 
 
@@ -402,7 +404,7 @@ def infer_bank():
     # Separate the arguments of the POST method
     post_args = request.get_json()
     account_id = post_args['account_id']
-    account = ah.get_account(account_id)
+    account = ah.get_entry(account_id)
     if not account:
         abort(404, 'An account with the given ID was not found.')
     return account['bank']

@@ -39,6 +39,7 @@ class CardHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     table_name = 'credit_cards'
+    table_fields = CARD_FIELDS
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
@@ -97,7 +98,7 @@ class CardHandler(DatabaseHandler):
         cards = self.cursor.execute(query, placeholders).fetchall()
         return cards
 
-    def get_card(self, card_id, fields=None):
+    def get_entry(self, card_id, fields=None):
         """Get a credit card from the database given its card ID."""
         query = (f"SELECT {select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
@@ -141,7 +142,7 @@ class CardHandler(DatabaseHandler):
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        query = (f"SELECT {select_fields(CARD_FIELDS, 'c.id')} "
+        query = (f"SELECT {select_fields(self.table_fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "       ON a.id = c.account_id "
@@ -152,14 +153,14 @@ class CardHandler(DatabaseHandler):
         card = self.cursor.execute(query, placeholders).fetchone()
         return card
 
-    def save_card(self, form, card_id=None):
+    def process_card_form(self, form, card_id=None):
         """
-        Save a new credit card in the database from a submitted form.
+        Process credit card information submitted on a form.
 
-        Accept a user provided form and either insert the information
-        into the database as a new credit card or update the credit card
-        with matching ID. All fields are processed and sanitized using
-        the database handler.
+        Collect all credit card information submitted through the form.
+        This aggregates all credit card data from the form, fills in
+        defaults and makes inferrals when necessary, and then returns a
+        dictionary mapping of the card information.
 
         Parameters
         ––––––––––
@@ -174,42 +175,9 @@ class CardHandler(DatabaseHandler):
         card : sqlite3.Row
             The saved credit card.
         """
-        mapping = self.process_card_form(form)
-        if CARD_FIELDS != tuple(mapping.keys()):
-            raise ValueError('The mapping does not match the database. Fields '
-                            f'({", ".join(CARD_FIELDS)}) must be provided.')
-        # Either create a new entry or update an existing entry
-        if not card_id:
-            self.new_entry(mapping)
-            card_id = self.cursor.lastrowid
-        else:
-            self.update_entry(card_id, mapping)
-        card = self.get_card(card_id)
-        return card
-
-    def process_card_form(self, form):
-        """
-        Process credit card information submitted on a form.
-
-        Collect all credit card information submitted through the form.
-        This aggregates all credit card data from the form, fills in
-        defaults and makes inferrals when necessary, and then returns a
-        dictionary mapping of the card information.
-
-        Parameters
-        ––––––––––
-        form : CardForm
-            An object containing the submitted form information.
-
-        Returns
-        –––––––
-        mapping : dict
-            A dictionary of credit card information collected from the
-            user submission.
-        """
-        # Iterate through the transaction submission and create the dictionary
+        # Iterate through the card submission and create the dictionary
         mapping = {}
-        for field in CARD_FIELDS:
+        for field in self.table_fields:
             if field == 'account_id':
                 account_id = form[field].data
                 if account_id == 0:
@@ -226,10 +194,9 @@ class CardHandler(DatabaseHandler):
                 mapping[field] = account_id
             else:
                 mapping[field] = form[field].data
-        return mapping
-
-    def delete_card(self, card_id):
-        """Delete a credit card from the database given its ID."""
-        # Check that the card exists and belongs to the user
-        self.get_card(card_id)
-        super().delete_entry(card_id)
+        # Either create a new entry or update an existing entry
+        if not card_id:
+            card = self.new_entry(mapping)
+        else:
+            card = self.update_entry(card_id, mapping)
+        return card

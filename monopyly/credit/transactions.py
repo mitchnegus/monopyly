@@ -42,6 +42,7 @@ class TransactionHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     table_name = 'credit_transactions'
+    table_fields = TRANSACTION_FIELDS
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
@@ -105,7 +106,7 @@ class TransactionHandler(DatabaseHandler):
         transactions = self.cursor.execute(query, placeholders).fetchall()
         return transactions
 
-    def get_transaction(self, transaction_id, fields=None):
+    def get_entry(self, transaction_id, fields=None):
         """
         Get a transaction from the database given its transaction ID.
 
@@ -144,14 +145,16 @@ class TransactionHandler(DatabaseHandler):
             abort(404, abort_msg)
         return transaction
 
-    def save_transaction(self, form, transaction_id=None):
+    def process_transaction_form(self, form, transaction_id=None):
         """
-        Save a transaction in the database from a submitted form.
+        Process transaction information submitted on a form.
 
         Accept a user provided form and either insert the information
         into the database as a new transaction or update the transaction
-        with matching ID. All fields are processed and sanitized using
-        the database handler.
+        with matching ID. This aggregates all transaction data from the
+        form, sanitizes the data, fills in defaults and makes inferrals
+        when necessary, and then creates or updates the database using
+        the form's transaction information.
 
         Parameters
         ––––––––––
@@ -166,43 +169,9 @@ class TransactionHandler(DatabaseHandler):
         transaction : sqlite3.Row
             The saved transaction.
         """
-        mapping = self.process_transaction_form(form)
-        if TRANSACTION_FIELDS != tuple(mapping.keys()):
-            raise ValueError('The mapping does not match the database. Fields '
-                            f'({", ".join(TRANSACTION_FIELDS)}) must '
-                             'be provided.')
-        # Either create a new entry or update an existing entry
-        if not transaction_id:
-            self.new_entry(mapping)
-            transaction_id = self.cursor.lastrowid
-        else:
-            self.update_entry(transaction_id, mapping)
-        transaction = self.get_transaction(transaction_id)
-        return transaction
-
-    def process_transaction_form(self, form):
-        """
-        Process transaction information submitted on a form.
-
-        Collect all transaction information submitted through the form.
-        This aggregates all transaction data from the form, fills in
-        defaults and makes inferrals when necessary, and then returns a
-        dictionary mapping of the transaction information.
-
-        Parameters
-        ––––––––––
-        form : TransactionForm
-            An object containing the submitted form information.
-
-        Returns
-        –––––––
-        mapping : dict
-            A dictionary of transaction information collected (and/or
-            extrapolated) from the user submission.
-        """
         # Iterate through the transaction submission and create the dictionary
         mapping = {}
-        for field in TRANSACTION_FIELDS:
+        for field in self.table_fields:
             if field == 'statement_id':
                 # Match the transaction to a credit card and statement
                 ch, sh = CardHandler(), StatementHandler()
@@ -221,17 +190,18 @@ class TransactionHandler(DatabaseHandler):
                 statement = sh.find_statement(card['id'], issue_date)
                 # If a matching statement does not exist, create a statement
                 if not statement:
-                    statement = sh.new_statement(card['id'], issue_date)
+                    mapping = {'card_id': card['id'],
+                               'issue_date': issue_date}
+                    statement = sh.new_entry(mapping)
                 mapping[field] = statement['id']
             else:
                 mapping[field] = form[field].data
-        return mapping
-
-    def delete_transaction(self, transaction_id):
-        """Delete a transaction from the database given its ID."""
-        # Check that the transaction exists and belongs to the user
-        self.get_transaction(transaction_id)
-        super().delete_entry(transaction_id)
+        # Either create a new entry or update an existing entry
+        if not transaction_id:
+            transaction = self.new_entry(mapping)
+        else:
+            transaction = self.update_entry(transaction_id, mapping)
+        return transaction
 
 
 def determine_statement_date(statement_day, transaction_date):

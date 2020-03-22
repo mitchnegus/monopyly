@@ -38,6 +38,8 @@ class DatabaseHandler(ABC):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+    table_name = None
+    table_fields = ()
 
     def __init__(self, db=None, user_id=None, check_user=True):
         self.db = db if db else get_db()
@@ -46,32 +48,60 @@ class DatabaseHandler(ABC):
         if check_user and self.user_id != g.user['id']:
             abort(403)
 
+    def get_entry(self, entry_id, fields=None):
+        """Get an entry from the database given its ID."""
+        query = (f"SELECT {select_fields(fields, 'id')} "
+                 f"  FROM {self.table_name} "
+                  " WHERE id = ? AND user_id = ?")
+        placeholders = (entry_id, self.user_id)
+        entry = self.cursor.execute(query, placeholders).fetchone()
+        # Check that an entry was found
+        if not entry:
+            abort_msg = (f'The entry with ID {entry_id} does not exist for '
+                          'the user.')
+            abort(404, abort_msg)
+        return entry
+
     def new_entry(self, mapping):
         """
         Create a new entry in the database given a mapping for fields.
 
         Accept a mapping relating given inputs to database fields. This
-        mapping is used to insert a new entry into the database.
+        mapping is used to insert a new entry into the database. All
+        fields are sanitized prior to insertion.
 
         Parameters
         ––––––––––
         mapping : dict
             A mapping between database fields and the value to be
             entered into that field for the entry.
+
+        Returns
+        –––––––
+        entry : sqlite3.Row
+            The saved entry.
         """
+        if tuple(self.table_fields) !=  tuple(mapping.keys()):
+            raise ValueError('The fields given in the matching do not match '
+                             'the fields in the database. The fields must be '
+                            f'the following: {", ".join(self.table_fields)}.')
         self.cursor.execute(
-            f"INSERT INTO {self.table_name} {tuple(mapping.keys())} "
+            f"INSERT INTO {self.table_name} {tuple(self.table_fields)} "
             f"VALUES ({reserve_places(mapping.values())})",
             (*mapping.values(),)
         )
         self.db.commit()
+        entry_id = self.cursor.lastrowid
+        entry = self.get_entry(entry_id)
+        return entry
 
     def update_entry(self, entry_id, mapping):
         """
         Update an entry in the database given a mapping for fields.
 
         Accept a mapping relating given inputs to database fields. This
-        mapping is used to update an existing entry in the database.
+        mapping is used to update an existing entry in the database. All
+        fields are sanitized prior to updating.
 
         Parameters
         ––––––––––
@@ -80,7 +110,16 @@ class DatabaseHandler(ABC):
         mapping : dict
             A mapping between database fields and the values to be
             updated in that field for the entry.
+
+        Returns
+        –––––––
+        entry : sqlite3.Row
+            The saved entry.
         """
+        if not all(key in self.table_fields for key in mapping.keys()):
+            raise ValueError('The mapping contains at least one field that '
+                             'not match the database. Fields must be one of '
+                            f'the following: {", ".join(self.table_fields)}.')
         update_fields = ', '.join([f'{field} = ?' for field in mapping])
         self.cursor.execute(
             f"UPDATE {self.table_name} "
@@ -89,9 +128,13 @@ class DatabaseHandler(ABC):
             (*mapping.values(), entry_id)
         )
         self.db.commit()
+        entry = self.get_entry(entry_id)
+        return entry
 
     def delete_entry(self, entry_id):
-        """Delete an entry in the database."""
+        """Delete an entry in the database given its ID."""
+        # Check that the transaction exists and belongs to the user
+        self.get_entry(entry_id)
         self.cursor.execute(
             f"DELETE FROM {self.table_name} WHERE id = ?",
             (entry_id,)
