@@ -142,7 +142,7 @@ class CardHandler(DatabaseHandler):
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        query = (f"SELECT {select_fields(self.table_fields, 'c.id')} "
+        query = (f"SELECT {select_fields(self.table_fields, 'c.id, a.bank')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "       ON a.id = c.account_id "
