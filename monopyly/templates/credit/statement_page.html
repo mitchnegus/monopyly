@@ -75,9 +75,9 @@
 		const UPDATE_STATEMENT_DUE_DATE_ENDPOINT = "{{ url_for('credit.update_statement_due_date', statement_id=statement['id']) }}";
 		const UPDATE_STATEMENT_PAYMENT_ENDPOINT = "{{ url_for('credit.update_statement_payment', statement_id=statement['id']) }}";
 	</script>
-	<script src="{{ url_for('static', filename='js/update_statement_due_date.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/update_statement_due_date.js') }}">
 	</script>
-	<script src="{{ url_for('static', filename='js/update_statement_payment.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/update_statement_payment.js') }}">
 	</script>
 
 {% endblock %}

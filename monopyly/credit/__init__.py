@@ -114,14 +114,14 @@ def delete_account(account_id):
 def show_statements():
     ch, sh = CardHandler(), StatementHandler()
     # Get all of the user's credit cards from the database
-    cards = ch.get_cards()
+    all_cards = ch.get_cards()
     active_cards = ch.get_cards(active=True)
     # Get all of the user's statements for active cards from the database
     fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
               'balance')
     statements = sh.get_statements(fields=fields, active=True)
     return render_template('credit/statements_page.html',
-                           filter_cards=cards,
+                           filter_cards=all_cards,
                            selected_cards=active_cards,
                            statements=statements)
 

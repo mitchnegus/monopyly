@@ -13,6 +13,9 @@
  * 	  or descending order.
  */
 
+import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
+
+
 (function() {
 
 	// Identify the card filters
@@ -49,29 +52,14 @@
 			sortOrder = 'desc';
 		}
 		// Update the table with the filters and ordering
-		updateTableAjaxRequest(filterIDs, sortOrder);
+		let endpoint = FILTER_ENDPOINT;
+		let rawData = {
+			'filter_ids': filterIDs,
+			'sort_order': sortOrder
+		};
+		updateDisplayAjaxRequest(endpoint, rawData, container);
 		// Update the sorters since they have been replaced
 		sorters = $('.sort-icon');
 	}
 	
-	function updateTableAjaxRequest(filterIDs, sortOrder) {
-		var rawData = {
-			'filter_ids': filterIDs,
-			'sort_order': sortOrder
-		};
-		// Return a filtered table for each ID in the set of filterIDs
-		$.ajax({
-			url: FILTER_ENDPOINT,
-			type: 'POST',
-			data: JSON.stringify(rawData),
-			contentType: 'application/json; charset=UTF-8',
-			success: function(response) {
-				container.html(response);
-			},
-			error: function(xhr) {
-				console.log('There was an error in the Ajax request.');
-			}
-		});
-	}
-
 })();

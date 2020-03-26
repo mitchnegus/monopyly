@@ -75,7 +75,7 @@
 	<script>
 		const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
 	</script>
-	<script src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
 	</script>
 
 {% endblock %}
