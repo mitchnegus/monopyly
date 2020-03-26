@@ -1,35 +1,52 @@
 <div id="statement-info">
+
 	<div id="card">
 		{{ statement['bank'].upper() }} {{ statement['last_four_digits'] }}
 	</div>
+
 	<div id="issue-date">
 		{{ statement['issue_date'].strftime('%B %Y') }}
 	</div>
+
 	<div id="balance">
 		<div>$</div>
 		<div>{{ '{:,.2f}'.format(statement['balance']) }}</div>
 	</div>
+
 	<div id="payment">
+
 		<div id="due">
 			<div>DUE</div>
-			<div id="due-date" class="date">{{ statement['due_date'] }}</div>
-			<input id="edit-due-date" class="date" type="text" name="due_date" value="{{ statement['due_date'] }}" size="10" />
-			<img id="edit-due-date-icon" src="{{ url_for('static', filename='img/edit.png') }}" />
+			<div id="due-date" class="update-db-widget">
+				<div class="widget-text">
+					<div class="widget-display">{{ statement['due_date'] }}</div>
+					<input class="widget-input" type="text" name="due_date" value="{{ statement['due_date'] }}" />
+				</div>
+				<img class="widget-edit-icon" src="{{ url_for('static', filename='img/edit.png') }}" />
+			</div>
 		</div>
+
 		{% if statement['paid'] %}
+
 			{% if statement['payment_date'] %}
+
 				<div id="paid" class="paid-notice slide-text">
 					<div class="sleeve">
 						<div class="main">PAID</div>
 						<div class="reveal">{{ statement['payment_date'] }}</div>
 					</div>
 				</div>
+
 			{% else %}
+
 				<div id="paid" class="paid-notice">
 					PAID
 				</div>
+
 			{% endif %}
+
 		{% else %}
+
 			<form id="pay" action="" method="post">
 				<div class="form-line">
 					<input id="pay-date" type="text" name="pay_date" />
@@ -39,6 +56,8 @@
 					</button>
 				</div>
 			</form>
+
 		{% endif %}
 	</div>
+
 </div>

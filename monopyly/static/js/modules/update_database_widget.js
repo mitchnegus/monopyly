@@ -11,17 +11,21 @@
 import { updateDisplayAjaxRequest } from './update_display_ajax.js';
 
 
-function updateWidget(endpoint, $button, $display, $input) {
+function updateDBWidget(endpoint, $widget) {
+
+	// Identify the key elements of the widget
+	let $button = $widget.find('.widget-edit-icon');
+	let $display = $widget.find('.widget-display');
+	let $input = $widget.find('.widget-input');
 
 	$button.on('click', function() {
 		// Hide the edit button while editing
 		$button.hide();
-		// Allow the user to enter a due date
-		$display.hide();
+		// Set the text of the input to match the displayed value
+		$input.val($display.html());
+		// Allow the user to enter a new value
 		$input.show();
 		$input[0].select();
-		// Set the text of the input to match the set due date
-		$input.val($display.html());
 		// Bind the enter key to blur
 		$input.on('keydown', function(event) {
 			if (event.which == 13) {
@@ -32,19 +36,18 @@ function updateWidget(endpoint, $button, $display, $input) {
 	});
 
 	$input.on('blur', function() {
-		// Show the edit button (on hover) when not editing
-		$button.show();
-		// Hide the input box and show the database due date
-		$input.hide();
-		$display.show();
 		// Execute an AJAX request to update the database
 		let value = $input.val();
 		updateDisplayAjaxRequest(endpoint, value, $display);
 		// Unbind the enter key
 		$input.off('keydown');
+		// Hide the input box (showing the displayed value)
+		$input.hide();
+		// Show the edit button (on hover) when not editing
+		$button.show();
 	});
 
 }
 
 
-export { updateWidget };
+export { updateDBWidget };

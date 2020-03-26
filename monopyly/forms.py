@@ -81,16 +81,6 @@ class TransactionForm(FlaskForm):
     submit = SubmitField('Save Transaction')
 
 
-class AccountForm(FlaskForm):
-    statement_issue_day = IntegerField('Statement Issue Day', [DataRequired()])
-    statement_due_day = IntegerField('Statement Due Day', [DataRequired()])
-    submit = SubmitField('Save Account')
-
-
-class UpdateAccountForm(AccountForm):
-    bank = HiddenField('Bank', [DataRequired()])
-
-
 class CardForm(FlaskForm):
     account_id = SelectField('Account', [SelectionNotBlank()], coerce=int)
     bank = TextField('Bank')

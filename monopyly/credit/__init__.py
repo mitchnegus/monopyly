@@ -76,30 +76,30 @@ def show_account(account_id):
                            cards=cards)
 
 
-@bp.route('/update_account/<int:account_id>', methods=('GET', 'POST'))
+@bp.route('/_update_account_statement_issue_day/<int:account_id>',
+          methods=('POST',))
 @login_required
-def update_account(account_id):
-    ah, ch = AccountHandler(), CardHandler()
-    # Get the account information from the database
-    account = ah.get_entry(account_id)
-    # Define a form for an account
-    form = UpdateAccountForm(data=account)
-    # Check if an account was updated, and update it in the database
-    if request.method == 'POST':
-        if form.validate():
-            # Update the database with the updated account
-            account = ah.process_account_form(form, account_id)
-            return render_template('credit/account_submission_page.html',
-                                   update=True)
-        else:
-            flash(form_err_msg)
-            print(form.errors)
-    # Display the form for accepting user input
-    cards = ch.get_cards(accounts=(account_id,))
-    return render_template('credit/account_form_page_update.html',
-                           account=account,
-                           cards=cards,
-                           form=form)
+def update_account_statement_issue_day(account_id):
+    ah = AccountHandler()
+    # Get the autocomplete field from the AJAX request
+    issue_day = request.get_json()
+    # Update the account in the database
+    mapping = {'statement_issue_day': int(issue_day)}
+    account = ah.update_entry(account_id, mapping)
+    return str(account['statement_issue_day'])
+
+
+@bp.route('/_update_account_statement_due_day/<int:account_id>',
+          methods=('POST',))
+@login_required
+def update_account_statement_due_day(account_id):
+    ah = AccountHandler()
+    # Get the autocomplete field from the AJAX request
+    due_day = request.get_json()
+    # Update the account in the database
+    mapping = {'statement_due_day': int(due_day)}
+    account = ah.update_entry(account_id, mapping)
+    return str(account['statement_due_day'])
 
 
 @bp.route('/delete_account/<int:account_id>')
@@ -168,12 +168,11 @@ def show_statement(statement_id):
 @login_required
 def update_statement_due_date(statement_id):
     sh = StatementHandler()
-    # Get the autocomplete field from the AJAX request
+    # Get the field from the AJAX request
     due_date = request.get_json()
     # Update the statement in the database
     mapping = {'due_date': parse_date(due_date)}
-    sh.update_entry(statement_id, mapping)
-    statement = sh.get_entry(statement_id, fields=('due_date',))
+    statement = sh.update_entry(statement_id, mapping)
     return str(statement['due_date'])
 
 
@@ -181,7 +180,7 @@ def update_statement_due_date(statement_id):
 @login_required
 def update_statement_payment(statement_id):
     sh = StatementHandler()
-    # Get the autocomplete field from the AJAX request
+    # Get the field from the AJAX request
     payment_date = request.get_json()
     # Update the statement in the database
     mapping = {'paid': 1, 'payment_date': parse_date(payment_date)}
