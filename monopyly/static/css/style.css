@@ -127,6 +127,27 @@ aside.sidebar {
 /*
  * General object characteristics
  */
+.icon-button {
+	height: 50px;
+	width: 50px;
+	margin: 0 5px;
+	background-size: 50px 50px;
+}
+
+.icon-button.delete {
+	background-image: url('../img/delete.png');
+}
+
+.icon-button.delete:hover {
+	background-image: url('../img/delete-orange.png');
+}
+
+.paid-notice {
+  color: #85bb65;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+
 form .form-line {
 	display: flex;
 	justify-content: space-between;
@@ -257,12 +278,6 @@ form .autocomplete-box .item.active {
 	margin: 3px auto;
 }
 
-
-.paid-notice {
-  color: #85bb65;
-	font-weight: bold;
-	letter-spacing: 1px;
-}
 
 
 /*
@@ -700,9 +715,12 @@ table.transactions td div.notes{
 	padding-left: 0;
 }
 
-#account-details form {
-	width: 40%;
-	margin: 40px auto 0;
+#account-menu {
+	position: relative;
+}
+
+#account-menu .icon-button {
+	float: right;
 }
 
 
