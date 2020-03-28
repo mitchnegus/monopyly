@@ -70,7 +70,8 @@ def show_account(account_id):
     ah, ch = AccountHandler(), CardHandler()
     # Get the account information from the database
     account = ah.get_entry(account_id)
-    cards = ch.get_cards(accounts=(account_id,))
+    # Get all cards with active cards at the end of the list
+    cards = ch.get_cards(accounts=(account_id,))[::-1]
     return render_template('credit/account_page.html',
                            account=account,
                            cards=cards)

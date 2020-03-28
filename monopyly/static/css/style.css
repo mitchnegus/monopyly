@@ -112,7 +112,6 @@ aside.sidebar {
 	height: 100%;
 	width: 10%;
 	min-width: 25px;
-	padding: 0 10px;
 }
 
 #content-header h1 {
@@ -421,6 +420,37 @@ form .autocomplete-box .item.active {
 	color: #bbbbbb;
 }
 
+/*
+ * Style blocks for displaying credit cards
+ */
+.credit-card-block {
+	color: inherit;
+}
+
+.credit-card {
+	position: relative;
+}
+
+.credit-card.inactive {
+	filter: contrast(25%) brightness(150%);
+}
+
+.credit-card-block .card-background {
+	width: 400px;
+	border: 1px solid #cccccc;
+	border-radius: 20px;
+	box-shadow: 1px 1px 3px #222222;
+}
+
+.credit-card-block .card-number {
+	position: absolute;
+	top: 160px;
+	width: 100%;
+	text-align: center;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 20pt;
+}
+
 
 /*
  * Style tables for presenting transaction details
@@ -594,39 +624,26 @@ table.transactions td div.notes{
 	width: 420px;
 	margin: auto;
 }
-@media screen and (min-width: 1040px) {
+@media screen and (min-width: 1060px) {
 	#cards-container {
 		width: 840px;
 	}
 }
-@media screen and (min-width: 1460px) {
+@media screen and (min-width: 1580px) {
 	#cards-container {
 		width: 1260px;
 	}
 }
-@media screen and (min-width: 1880px) {
+@media screen and (min-width: 2100px) {
 	#cards-container {
 		width: 1680px;
 	}
 }
 
-.credit-card-block {
+#cards-container .credit-card-block {
 	position: relative;
 	width: 400px;
 	margin: 10px;
-	color: inherit;
-}
-
-.credit-card-block .card-background {
-	width: 100%;
-}
-
-.credit-card-block .card-number {
-	position: absolute;
-	top: 160px;
-	left: 50px;
-	font-family: "Courier New", Courier, monospace;
-	font-size: 20pt;
 }
 
 
@@ -639,48 +656,53 @@ table.transactions td div.notes{
 
 #account-info {
 	width: 100%;
-	border-collapse: collapse;
 	font-size: 18pt;
 }
 
-#account-info th,
-#account-info td {
-	padding: 5px 10px;
-	vertical-align: top;
+#account-info .info-row {
+	display: flex;
+	margin: 15px 0;
 }
 
-#account-info th {
-	white-space: nowrap;
+#account-info .info-title {
+	width: 10%;
+	min-width: 250px;
+	margin-right: 20px;
 	text-align: right;
+	font-weight: bold;
 }
 
-#account-info td {
-	text-align: left;
+#account-info .cards-container {
+	display: flex;
+	flex-direction: row-reverse;
+	flex-wrap: nowrap;
+	justify-content: flex-end;
+	padding: 10px 10px 20px 0;
+	overflow: auto;
+}
+
+#account-info .credit-card-block {
+	margin-left: -375px;
+	transition: margin-left 0.2s;
+}
+
+#account-info .credit-card-block:hover {
+	margin-left: 0;
+	padding-left: 15px;
+}
+
+#account-info .credit-card-block:first-of-type {
+	padding-right: 10px;
+}
+
+#account-info .credit-card-block:last-of-type {
+	margin-left: 0;
+	padding-left: 0;
 }
 
 #account-details form {
 	width: 40%;
 	margin: 40px auto 0;
-}
-
-
-
-/*
- * Customization for the 'Update Account' page
- */
-form#account #account-field {
-	flex-basis: 70%;
-	min-width: 320px;
-}
-
-form#account #statement-issue-day-field {
-	flex-grow: 1;
-	min-width: 180px;
-}
-
-form#account #statement-due-day-field  {
-	flex-grow: 1;
-	min-width: 180px;
 }
 
 

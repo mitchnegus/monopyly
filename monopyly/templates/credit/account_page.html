@@ -34,28 +34,37 @@
 
 	<div id="account-details">
 
-		<table id="account-info">
+		<div id="account-info">
 
-			<tr>
-				<th scope="row">Bank</th>
-				<td>{{ account['bank'] }}<td>
-			</tr>
+			<div class="info-row">
+				<div class="info-title">Bank</div>
+				<div>{{ account['bank'] }}</div>
+			</div>
 
-			<tr>
-				<th scope="row">Cards</th>
-				<td>
+			<div class="info-row">
+				<div class="info-title">Cards</div>
+				<div class="cards-container">
 					{% for card in cards %}
-						<div>
-							****-{{ card['last_four_digits'] }}
-						  ({{ 'Active' if card['active'] else 'Inactive' }})
+					
+						<div class="credit-card-block">
+							<div class="credit-card {{'inactive' if not card['active'] else '' }}">
+								<img class="card-background" src="{{ url_for('static', filename='img/') }}{{ card['bank'].lower() }}-card.png">
+								<div class="card-number">
+									▐▐▐▐ ▐▐▐▐ ▐▐▐▐ {{ card['last_four_digits'] }}
+									{% if not card['active'] %}
+										<br>INACTIVE
+									{% endif %}
+								</div>
+							</div>
 						</div>
+					
 					{% endfor %}
-				</td>
-			</tr>
+				</div>
+			</div>
 
-			<tr>
-				<th scope="row">Statement Issue Day</th>
-				<td>
+			<div class="info-row">
+				<div class="info-title">Statement Issue Day</div>
+				<div>
 					<div id="statement-issue-day" class="update-db-widget">
 						<div class="widget-text">
 							<div class="widget-display">{{ account['statement_issue_day'] }}</div>
@@ -63,12 +72,12 @@
 						</div>
 						<img class="widget-edit-icon" src="{{ url_for('static', filename='img/edit.png') }}" />
 					</div>
-				</td>
-			</tr>
+				</div>
+			</div>
 
-			<tr>
-				<th scope="row">Statement Due Day</th>
-				<td>
+			<div class="info-row">
+				<div class="info-title">Statement Due Day</div>
+				<div>
 					<div id="statement-due-day" class="update-db-widget">
 						<div class="widget-text">
 							<div class="widget-display">{{ account['statement_due_day'] }}</div>
@@ -76,10 +85,10 @@
 						</div>
 						<img class="widget-edit-icon" src="{{ url_for('static', filename='img/edit.png') }}" />
 					</div>
-				</td>
-			</tr>
+				</div>
+			</div>
 
-		</table>
+		</div>
 
 		<form method="get">
 			<div class="form-line">
