@@ -131,13 +131,15 @@ class DatabaseHandler(ABC):
         entry = self.get_entry(entry_id)
         return entry
 
-    def delete_entry(self, entry_id):
-        """Delete an entry in the database given its ID."""
-        # Check that the transaction exists and belongs to the user
-        self.get_entry(entry_id)
+    def delete_entries(self, entry_ids):
+        """Delete entries in the database given their IDs."""
+        # Check that the entries exist and belong to the user
+        for entry_id in entry_ids:
+            self.get_entry(entry_id)
         self.cursor.execute(
-            f"DELETE FROM {self.table_name} WHERE id = ?",
-            (entry_id,)
+            f"DELETE FROM {self.table_name} "
+            f" WHERE id IN ({reserve_places(entry_ids)})",
+            entry_ids
         )
         self.db.commit()
 

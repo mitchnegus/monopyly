@@ -60,7 +60,7 @@ def new_card():
 def delete_card(card_id):
     ch = CardHandler()
     # Remove the credit card from the database
-    ch.delete_entry(card_id)
+    ch.delete_entries((card_id,))
     return redirect(url_for('credit.show_cards'))
 
 
@@ -305,7 +305,7 @@ def update_transaction(transaction_id):
 def delete_transaction(transaction_id):
     th = TransactionHandler()
     # Remove the transaction from the database
-    th.delete_entry(transaction_id)
+    th.delete_entries((transaction_id,))
     return redirect(url_for('credit.show_transactions'))
 
 
