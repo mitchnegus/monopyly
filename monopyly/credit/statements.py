@@ -129,13 +129,9 @@ class StatementHandler(DatabaseHandler):
                   "       INNER JOIN credit_accounts AS a "
                   "       ON a.id = c.account_id "
                   " WHERE s.id = ? AND user_id = ?")
-        placeholders = (statement_id, self.user_id)
-        statement = self.cursor.execute(query, placeholders).fetchone()
-        # Check that a statement was found
-        if statement is None:
-            abort_msg = (f'Statement ID {statement_id} does not exist for the '
-                          'user.')
-            abort(404, abort_msg)
+        abort_msg = (f'Statement ID {statement_id} does not exist for the '
+                      'user.')
+        statement = self._query_entry(statement_id, query, abort_msg)
         return statement
 
     def find_statement(self, card_id, issue_date=None):

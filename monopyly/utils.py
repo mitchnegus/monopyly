@@ -3,7 +3,7 @@ General utility objects.
 """
 from abc import ABC, abstractmethod
 import itertools as it
-from datetime import datetime
+import datetime
 
 from flask import g
 
@@ -50,17 +50,24 @@ class DatabaseHandler(ABC):
         if check_user and self.user_id != g.user['id']:
             abort(403)
 
+    @abstractmethod
     def get_entry(self, entry_id, fields=None):
-        """Get an entry from the database given its ID."""
-        query = (f"SELECT {select_fields(fields, 'id')} "
-                 f"  FROM {self.table_name} "
-                  " WHERE id = ? AND user_id = ?")
+        raise NotImplementedError('This is an Abstract Base Class. Define '
+                                  'a `get_entry` method in a subclass.')
+
+    def _query_entry(self, entry_id, query=None, abort_msg=None):
+        """Execute a query to return a single entry from the database."""
+        if not query:
+            query = (f"SELECT * "
+                     f"  FROM {self.table_name} "
+                      " WHERE id = ? AND user_id = ?")
         placeholders = (entry_id, self.user_id)
         entry = self.cursor.execute(query, placeholders).fetchone()
         # Check that an entry was found
         if not entry:
-            abort_msg = (f'The entry with ID {entry_id} does not exist for '
-                          'the user.')
+            if not abort_msg:
+                abort_msg = (f'The entry with ID {entry_id} does not exist '
+                              'for the user.')
             abort(404, abort_msg)
         return entry
 
@@ -84,9 +91,10 @@ class DatabaseHandler(ABC):
             The saved entry.
         """
         if tuple(self.table_fields) !=  tuple(mapping.keys()):
-            raise ValueError('The fields given in the matching do not match '
-                             'the fields in the database. The fields must be '
-                            f'the following: {", ".join(self.table_fields)}.')
+            raise ValueError('The fields given in the mapping '
+                            f'{tuple(mapping.keys())} do not match the fields '
+                             'in the database. The fields must be the '
+                            f'following: {", ".join(self.table_fields)}.')
         self.cursor.execute(
             f"INSERT INTO {self.table_name} {tuple(self.table_fields)} "
             f"VALUES ({reserve_places(mapping.values())})",
@@ -164,9 +172,12 @@ def parse_date(given_date):
     indicated by '08' or just '8'). For dates that are given with a
     delimiter, it may be either "/", ".", or "-".
 
+    If a `datetime.date` object is given, it is returned without
+    processing.
+
     Parameters
     ––––––––––
-    given_date : str
+    given_date : str, datetime.date
         A date given in one of the acceptable formats to be formatted
         consistently with the database.
 
@@ -177,6 +188,9 @@ def parse_date(given_date):
     """
     if not given_date:
         return None
+    if isinstance(given_date, datetime.date):
+        return given_date
+    # Handle options for alternate delimiters
     alt_delimiters = ('.', '/')
     date_formats = ('%Y-%m-%d', '%m-%d-%Y', '%m-%d-%y')
     err_msg = (f"The given date ('{given_date}') was not in an acceptable "
@@ -197,7 +211,7 @@ def parse_date(given_date):
     # Join the components back together and parse with `datetime` module
     for fmt in date_formats:
         try:
-            date = datetime.strptime(parseable_date, fmt).date()
+            date = datetime.datetime.strptime(parseable_date, fmt).date()
             return date
         except ValueError:
             pass

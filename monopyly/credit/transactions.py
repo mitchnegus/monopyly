@@ -134,52 +134,9 @@ class TransactionHandler(DatabaseHandler):
                   "       INNER JOIN credit_accounts AS a "
                   "       ON a.id = c.account_id "
                   " WHERE t.id = ? AND user_id = ?")
-        placeholders = (transaction_id, self.user_id)
-        transaction = self.cursor.execute(query, placeholders).fetchone()
-        # Check that a transaction was found
-        if transaction is None:
-            abort_msg = (f'Transaction ID {transaction_id} does not exist for '
-                          'the user.')
-            abort(404, abort_msg)
-        return transaction
-
-    def process_transaction_form(self, form, transaction_id=None):
-        """
-        Process transaction information submitted on a form.
-
-        Accept a user provided form and either insert the information
-        into the database as a new transaction or update the transaction
-        with matching ID. This aggregates all transaction data from the
-        form, sanitizes the data, fills in defaults and makes inferrals
-        when necessary, and then creates or updates the database using
-        the form's transaction information.
-
-        Parameters
-        ––––––––––
-        form : TransactionForm
-            An object containing the submitted form information.
-        transaction_id : int, optional
-            If given, the ID of the transaction to be updated. If left
-            as `None`, a new transaction is created.
-
-        Returns
-        –––––––
-        transaction : sqlite3.Row
-            The saved transaction.
-        """
-        # Iterate through the transaction submission and create the dictionary
-        mapping = {}
-        for field in self.table_fields:
-            if field == 'statement_id':
-                statement = form.get_transaction_statement()
-                mapping[field] = statement['id']
-            else:
-                mapping[field] = form[field].data
-        # Either create a new entry or update an existing entry
-        if not transaction_id:
-            transaction = self.new_entry(mapping)
-        else:
-            transaction = self.update_entry(transaction_id, mapping)
+        abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
+                      'user.')
+        transaction = self._query_entry(transaction_id, query, abort_msg)
         return transaction
 
 

@@ -105,12 +105,8 @@ class CardHandler(DatabaseHandler):
                   "       INNER JOIN credit_accounts AS a "
                   "       ON a.id = c.account_id "
                   " WHERE c.id = ? AND user_id = ?")
-        placeholders = (card_id, self.user_id)
-        card = self.cursor.execute(query, placeholders).fetchone()
-        # Check that a card was found
-        if card is None:
-            abort_msg = f'Card ID {card_id} does not exist for the user.'
-            abort(404, abort_msg)
+        abort_msg = f'Card ID {card_id} does not exist for the user.'
+        card = self._query_entry(card_id, query, abort_msg)
         return card
 
     def find_card(self, bank=None, last_four_digits=None):

@@ -39,6 +39,15 @@ class TransactionForm(FlaskForm):
     issue_date = TextField('Statement Date', filters=[parse_date])
     submit = SubmitField('Save Transaction')
 
+    @property
+    def database_data(self):
+        """Produce a dictionary corresponding to a database transaction."""
+        statement = self.get_transaction_statement()
+        database_data = {'statement_id': statement['id']}
+        for field in ('transaction_date', 'vendor', 'amount', 'notes'):
+            database_data[field] = self[field].data
+        return database_data
+
     def get_transaction_card(self):
         """Get the credit card associated with the transaction."""
         ch = CardHandler()

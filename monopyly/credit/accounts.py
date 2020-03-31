@@ -81,12 +81,8 @@ class AccountHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
                   " WHERE a.id = ? AND user_id = ?")
-        placeholders = (account_id, self.user_id)
-        account = self.cursor.execute(query, placeholders).fetchone()
-        # Check that a account was found
-        if account is None:
-            abort_msg = f'Account ID {account_id} does not exist for the user.'
-            abort(404, abort_msg)
+        abort_msg = f'Account ID {account_id} does not exist for the user.'
+        account = self._query_entry(account_id, query, abort_msg)
         return account
 
     def process_account_form(self, form, account_id=None):

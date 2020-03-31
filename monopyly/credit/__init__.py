@@ -257,15 +257,13 @@ def new_transaction(statement_id):
         # Get the necessary fields from the database
         statement_fields = ('bank', 'last_four_digits', 'issue_date')
         statement = sh.get_entry(statement_id, fields=statement_fields)
-        form.bank.data = statement['bank']
-        form.last_four_digits.data = statement['last_four_digits']
-        form.issue_date.data = statement['issue_date']
+        form.process(data=statement)
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
             th = TransactionHandler()
             # Insert the new transaction into the database
-            transaction = th.process_transaction_form(form)
+            transaction = th.new_entry(form.database_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:
