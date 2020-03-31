@@ -22,6 +22,7 @@ function updateDBWidget(endpoint, $widget) {
 		// Hide the edit button while editing
 		$button.hide();
 		// Set the text of the input to match the displayed value
+		console.log($display.html());
 		$input.val($display.html());
 		// Allow the user to enter a new value
 		$input.show();

@@ -70,9 +70,11 @@
 			<div class="info-row">
 				<div class="info-title">Statement Issue Day</div>
 				<div>
-					<div id="statement-issue-day" class="update-db-widget">
+					<div id="statement-issue-day" class="update-db-widget key-day">
 						<div class="widget-text">
-							<div class="widget-display">{{ account['statement_issue_day'] }}</div>
+							<div class="widget-display">
+								{{- account['statement_issue_day'] -}}
+							</div>
 							<input class="widget-input" type="text" name="issue_day" value="{{ account['statement_issue_day'] }}" />
 						</div>
 						<img class="widget-edit-icon" src="{{ url_for('static', filename='img/edit.png') }}" />
@@ -83,9 +85,11 @@
 			<div class="info-row">
 				<div class="info-title">Statement Due Day</div>
 				<div>
-					<div id="statement-due-day" class="update-db-widget">
+					<div id="statement-due-day" class="update-db-widget key-day">
 						<div class="widget-text">
-							<div class="widget-display">{{ account['statement_due_day'] }}</div>
+							<div class="widget-display">
+								{{- account['statement_due_day'] -}}
+							</div>
 							<input class="widget-input" type="text" name="due_day" value="{{ account['statement_due_day'] }}" />
 						</div>
 						<img class="widget-edit-icon" src="{{ url_for('static', filename='img/edit.png') }}" />

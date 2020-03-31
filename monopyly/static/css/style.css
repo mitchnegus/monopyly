@@ -290,13 +290,13 @@ form .autocomplete-box .item.active {
 
 .update-db-widget .widget-text {
 	position: relative;
-	font-size: inherity;
+	font-size: inherit;
 	font-weight: inherit;
 }
 
 .update-db-widget .widget-display {
 	padding: 0 5px;
-	font-size: inherity;
+	font-size: inherit;
 	font-weight: inherit;
 }
 
@@ -307,7 +307,7 @@ form .autocomplete-box .item.active {
 	width: 100%;
 	margin-top: -1px;
 	padding: 0 4px;
-	font-size: inherity;
+	font-size: inherit;
 	font-weight: inherit;
 }
 
@@ -669,6 +669,14 @@ table.transactions td div.notes{
 	margin: 20px auto;
 }
 
+#account-menu {
+	position: relative;
+}
+
+#account-menu .icon-button {
+	float: right;
+}
+
 #account-info {
 	width: 100%;
 	font-size: 18pt;
@@ -715,12 +723,13 @@ table.transactions td div.notes{
 	padding-left: 0;
 }
 
-#account-menu {
-	position: relative;
+#account-info .key-day .widget-text {
+	min-width: 40px;
 }
 
-#account-menu .icon-button {
-	float: right;
+#account-info .key-day .widget-text .widget-display,
+#account-info .key-day .widget-text .widget-input {
+	text-align: right;
 }
 
 
