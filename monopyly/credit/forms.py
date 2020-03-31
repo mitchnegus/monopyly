@@ -11,6 +11,7 @@ from wtforms.validators import Optional, DataRequired, Length
 
 from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
+from .accounts import AccountHandler
 from .cards import CardHandler
 from .statements import StatementHandler, determine_due_date
 from .transactions import determine_statement_date
@@ -54,7 +55,7 @@ class TransactionForm(FlaskForm):
         card = ch.find_card(self.bank.data, self.last_four_digits.data)
         return card
 
-    def get_transaction_statement(self):
+    def get_transaction_statement(self, statement_creation=True):
         """Get the credit card statement associated with the transaction."""
         # Get the card for the transaction
         card = self.get_transaction_card()
@@ -69,8 +70,8 @@ class TransactionForm(FlaskForm):
         # Get the statement corresponding to the card and issue date
         sh = StatementHandler()
         statement = sh.find_statement(card['id'], issue_date)
-        # Create the statement if it does not exist
-        if not statement:
+        # Check if the statement exists and potentially create it if not
+        if not statement and statement_creation:
             statement_data = {
                 'card_id': card['id'],
                 'issue_date': issue_date,
@@ -95,3 +96,31 @@ class CardForm(FlaskForm):
     statement_due_day = IntegerField('Statement Due Day', [Optional()])
     active = BooleanField('Active', default='checked')
     submit = SubmitField('Save Card')
+
+    @property
+    def database_data(self):
+        """Produce a dictionary corresponding to a database card."""
+        account = self.get_card_account()
+        database_data = {'account_id': account['id']}
+        for field in ('last_four_digits', 'active'):
+            database_data[field] = self[field].data
+        return database_data
+
+    def get_card_account(self, account_creation=True):
+        """Get the account associated with the credit card."""
+        ah = AccountHandler()
+        # Check if the account exists and potentially create it if not
+        if self.account_id.data == 0:
+            if account_creation:
+                account_data = {
+                    'user_id': ah.user_id,
+                    'bank': self.bank.data,
+                    'statement_issue_day': self.statement_issue_day.data,
+                    'statement_due_day': self.statement_due_day.data
+                }
+                account = ah.new_entry(account_data)
+            else:
+                account = None
+        else:
+            account = ah.get_entry(self.account_id.data)
+        return account

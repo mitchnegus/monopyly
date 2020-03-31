@@ -4,8 +4,7 @@ Tools for interacting with credit accounts in the database.
 from werkzeug.exceptions import abort
 
 from ..utils import (
-    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
-    reserve_places
+    DatabaseHandler, fill_place, fill_places, filter_item, filter_items
 )
 from .constants import ACCOUNT_FIELDS
 from .tools import select_fields

@@ -46,22 +46,14 @@ def new_card():
         if form.validate():
             ch = CardHandler()
             # Insert the new credit card into the database
-            card = ch.process_card_form(form)
+            card_data = form.database_data
+            card = ch.new_entry(card_data)
             return render_template('credit/card_submission_page.html',
                                    update=False)
         else:
             flash(form_err_msg)
             print(form.errors)
     return render_template('credit/card_form_page_new.html', form=form)
-
-
-@bp.route('/delete_card/<int:card_id>', methods=('POST',))
-@login_required
-def delete_card(card_id):
-    ch = CardHandler()
-    # Remove the credit card from the database
-    ch.delete_entries((card_id,))
-    return redirect(url_for('credit.show_cards'))
 
 
 @bp.route('/account/<int:account_id>')
@@ -75,6 +67,15 @@ def show_account(account_id):
     return render_template('credit/account_page.html',
                            account=account,
                            cards=cards)
+
+
+@bp.route('/delete_card/<int:card_id>', methods=('POST',))
+@login_required
+def delete_card(card_id):
+    ch = CardHandler()
+    # Remove the credit card from the database
+    ch.delete_entries((card_id,))
+    return redirect(url_for('credit.show_cards'))
 
 
 @bp.route('/_update_account_statement_issue_day/<int:account_id>',
@@ -264,7 +265,7 @@ def new_transaction(statement_id):
             th = TransactionHandler()
             # Insert the new transaction into the database
             transaction_data = form.database_data
-            transaction = th.new_entry(form.database_data)
+            transaction = th.new_entry(transaction_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:
@@ -287,7 +288,8 @@ def update_transaction(transaction_id):
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated transaction
-            transaction = th.process_transaction_form(form, transaction_id)
+            transaction_data = form.database_data
+            transaction = th.update_entry(transaction_id, transaction_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=True)
         else:

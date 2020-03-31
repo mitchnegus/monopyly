@@ -4,12 +4,10 @@ Tools for interacting with credit cards in the database.
 from werkzeug.exceptions import abort
 
 from ..utils import (
-    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
-    reserve_places
+    DatabaseHandler, fill_place, fill_places, filter_item, filter_items
 )
 from .constants import CARD_FIELDS
 from .tools import select_fields
-from .accounts import AccountHandler
 
 
 class CardHandler(DatabaseHandler):
@@ -169,52 +167,4 @@ class CardHandler(DatabaseHandler):
         placeholders = (self.user_id, *fill_place(bank),
                         *fill_place(last_four_digits))
         card = self.cursor.execute(query, placeholders).fetchone()
-        return card
-
-    def process_card_form(self, form, card_id=None):
-        """
-        Process credit card information submitted on a form.
-
-        Collect all credit card information submitted through the form.
-        This aggregates all credit card data from the form, fills in
-        defaults and makes inferrals when necessary, and then returns a
-        dictionary mapping of the card information.
-
-        Parameters
-        ––––––––––
-        form : CardForm
-            An object containing the submitted form information.
-        card_id : int, optional
-            If given, the ID of the card to be updated. If left as
-            `None`, a new credit card is created.
-
-        Returns
-        –––––––
-        card : sqlite3.Row
-            The saved credit card.
-        """
-        # Iterate through the card submission and create the dictionary
-        mapping = {}
-        for field in self.table_fields:
-            if field == 'account_id':
-                account_id = form[field].data
-                if account_id == 0:
-                    # Create a new account
-                    ah = AccountHandler()
-                    account_mapping = {'user_id': self.user_id,
-                                       'bank': form['bank'].data,
-                                       'statement_issue_day':
-                                       form['statement_issue_day'].data,
-                                       'statement_due_day':
-                                       form['statement_due_day'].data}
-                    ah.new_entry(account_mapping)
-                    account_id = ah.cursor.lastrowid
-                mapping[field] = account_id
-            else:
-                mapping[field] = form[field].data
-        # Either create a new entry or update an existing entry
-        if not card_id:
-            card = self.new_entry(mapping)
-        else:
-            card = self.update_entry(card_id, mapping)
         return card
