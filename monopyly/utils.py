@@ -1,4 +1,6 @@
-"""General utility functions."""
+"""
+General utility objects.
+"""
 from abc import ABC, abstractmethod
 import itertools as it
 from datetime import datetime

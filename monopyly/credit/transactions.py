@@ -11,8 +11,6 @@ from ..utils import (
 )
 from .constants import TRANSACTION_FIELDS
 from .tools import select_fields
-from .cards import CardHandler
-from .statements import StatementHandler
 
 
 class TransactionHandler(DatabaseHandler):
@@ -173,26 +171,7 @@ class TransactionHandler(DatabaseHandler):
         mapping = {}
         for field in self.table_fields:
             if field == 'statement_id':
-                # Match the transaction to a credit card and statement
-                ch, sh = CardHandler(), StatementHandler()
-                card = ch.find_card(form['bank'].data,
-                                    form['last_four_digits'].data)
-                # Check that a card was found and that it belongs to the user
-                if not card:
-                    abort(404, 'A card matching the criteria was not found.')
-                if not form['issue_date'].data:
-                    statement_issue_day = card['statement_issue_day']
-                    transaction_date = form['transaction_date'].data
-                    issue_date = determine_statement_date(statement_issue_day,
-                                                          transaction_date)
-                else:
-                    issue_date = form['issue_date'].data
-                statement = sh.find_statement(card['id'], issue_date)
-                # If a matching statement does not exist, create a statement
-                if not statement:
-                    mapping = {'card_id': card['id'],
-                               'issue_date': issue_date}
-                    statement = sh.new_entry(mapping)
+                statement = form.get_transaction_statement()
                 mapping[field] = statement['id']
             else:
                 mapping[field] = form[field].data

@@ -27,7 +27,7 @@
 	});
 	
 	$('div.autocomplete input').on('blur', function() {
-		var inputElement = this
+		let inputElement = this
 		unbindUpdate(inputElement);
 		closeAutocomplete(inputElement);
 	});
