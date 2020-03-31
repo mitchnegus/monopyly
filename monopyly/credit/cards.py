@@ -99,7 +99,26 @@ class CardHandler(DatabaseHandler):
         return cards
 
     def get_entry(self, card_id, fields=None):
-        """Get a credit card from the database given its card ID."""
+        """
+        Get a credit card from the database given its card ID.
+
+        Accesses a set of fields for a given card. By default, all
+        fields for a credit card and the corresponding account are
+        returned.
+
+        Parameters
+        ––––––––––
+        card_id : int
+            The ID of the card to be found.
+        fields : tuple of str, optional
+            The fields (in either the cards or accounts tables) to be
+            returned
+
+        Returns
+        –––––––
+        card : sqlite3.Row
+            The card information from the database.
+        """
         query = (f"SELECT {select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
@@ -109,7 +128,7 @@ class CardHandler(DatabaseHandler):
         card = self._query_entry(card_id, query, abort_msg)
         return card
 
-    def find_card(self, bank=None, last_four_digits=None):
+    def find_card(self, bank=None, last_four_digits=None, fields=None):
         """
         Find a credit card using uniquely identifying characteristics.
 
@@ -129,6 +148,9 @@ class CardHandler(DatabaseHandler):
             The bank of the card to find.
         last_four_digits : int
             The last four digits of the card to find.
+        fields : tuple of str, optional
+            The fields (in either the cards or accounts tables) to be
+            returned
 
         Returns
         –––––––
@@ -138,7 +160,7 @@ class CardHandler(DatabaseHandler):
         """
         bank_filter = filter_item(bank, 'bank', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        query = (f"SELECT {select_fields(self.table_fields, 'c.id, a.bank')} "
+        query = (f"SELECT {select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "       ON a.id = c.account_id "

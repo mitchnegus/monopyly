@@ -263,6 +263,7 @@ def new_transaction(statement_id):
         if form.validate():
             th = TransactionHandler()
             # Insert the new transaction into the database
+            transaction_data = form.database_data
             transaction = th.new_entry(form.database_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)

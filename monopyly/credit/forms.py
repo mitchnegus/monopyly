@@ -12,7 +12,7 @@ from wtforms.validators import Optional, DataRequired, Length
 from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
 from .cards import CardHandler
-from .statements import StatementHandler
+from .statements import StatementHandler, determine_due_date
 from .transactions import determine_statement_date
 
 
@@ -55,6 +55,7 @@ class TransactionForm(FlaskForm):
         return card
 
     def get_transaction_statement(self):
+        """Get the credit card statement associated with the transaction."""
         # Get the card for the transaction
         card = self.get_transaction_card()
         if not card:
@@ -68,6 +69,17 @@ class TransactionForm(FlaskForm):
         # Get the statement corresponding to the card and issue date
         sh = StatementHandler()
         statement = sh.find_statement(card['id'], issue_date)
+        # Create the statement if it does not exist
+        if not statement:
+            statement_data = {
+                'card_id': card['id'],
+                'issue_date': issue_date,
+                'due_date': determine_due_date(card['statement_due_day'],
+                                               issue_date),
+                'paid': 0,
+                'payment_date': ''
+            }
+            statement = sh.new_entry(statement_data)
         return statement
 
 

@@ -11,7 +11,6 @@ from ..utils import (
 )
 from .constants import STATEMENT_FIELDS
 from .tools import select_fields
-from .cards import CardHandler
 
 
 class StatementHandler(DatabaseHandler):
@@ -106,8 +105,8 @@ class StatementHandler(DatabaseHandler):
         Get a credit statement from the database given its statement ID.
 
         Accesses a set of fields for a given statement. By default, all
-        fields for a statement, the corresponding credit card, and
-        transactions on the statement are returned.
+        fields for a statement and the corresponding credit card/account
+        are returned.
 
         Parameters
         ––––––––––
@@ -134,7 +133,7 @@ class StatementHandler(DatabaseHandler):
         statement = self._query_entry(statement_id, query, abort_msg)
         return statement
 
-    def find_statement(self, card_id, issue_date=None):
+    def find_statement(self, card_id, issue_date=None, fields=None):
         """
         Find a statement using uniquely identifying characteristics.
 
@@ -152,16 +151,19 @@ class StatementHandler(DatabaseHandler):
             A Python `date` object giving the issue date for the
             statement to be found (if `None`, the most recent statement
             will be found).
+        fields : tuple of str, optional
+            The fields (in either the statements, cards, or accounts
+            tables) to be returned.
 
         Returns
         –––––––
-        statement : int
+        statement : sqlite3.Row
             The statement entry matching the given criteria. If no
             matching statement is found, returns `None`.
         """
         card_filter = filter_item(card_id, 'card_id', 'AND')
         date_filter = filter_item(issue_date, 'issue_date', 'AND')
-        query = (f"SELECT {select_fields(self.table_fields, 's.id')} "
+        query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
                   "       ON c.id = s.card_id "
@@ -173,43 +175,6 @@ class StatementHandler(DatabaseHandler):
         placeholders = (self.user_id, *fill_place(card_id),
                         *fill_place(issue_date))
         statement = self.cursor.execute(query, placeholders).fetchone()
-        return statement
-
-    def new_entry(self, mapping):
-        """
-        Create a new statement in the database given a mapping.
-
-        Accept a mapping between statement fields and data. This mapping
-        is used to insert a new entry into the database. All fields are
-        sanitized prior to insertion.
-
-        Parameters
-        ––––––––––
-        mapping : dict
-            A mapping between database fields and the value to be
-            entered into that field for the entry.
-
-        Returns
-        –––––––
-        statement : sqlite3.Row
-            The saved statement.
-        """
-        ch = CardHandler()
-        if 'card_id' not in mapping:
-            raise ValueError('A new statement cannot be created without '
-                             'knowing the card it belongs to.')
-        card = ch.get_entry(mapping['card_id'])
-        if 'issue_date' not in mapping:
-            raise ValueError('A new statement cannot be created without '
-                             'specifying the date of issue.')
-        if 'due_date' not in mapping:
-            mapping['due_date'] = determine_due_date(card['statement_due_day'],
-                                                     mapping['issue_date'])
-        if 'paid' not in mapping:
-            mapping['paid'] = 0
-        if 'payment_date' not in mapping:
-            mapping['payment_date'] = ''
-        statement = self.new_entry(mapping)
         return statement
 
 

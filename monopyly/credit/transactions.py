@@ -6,8 +6,7 @@ from dateutil.relativedelta import relativedelta
 from werkzeug.exceptions import abort
 
 from ..utils import (
-    DatabaseHandler, fill_places, filter_items, check_sort_order,
-    reserve_places, parse_date
+    DatabaseHandler, fill_places, filter_items, check_sort_order
 )
 from .constants import TRANSACTION_FIELDS
 from .tools import select_fields

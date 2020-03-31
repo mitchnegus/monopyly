@@ -17,8 +17,8 @@ STATEMENT_FIELDS = ('card_id',
                     'issue_date',
                     'due_date',
                     'paid',
-                    'payment_date',
-                    'balance')
+                    'payment_date')
+STATEMENT_VIEW_FIELDS = ('balance',)
 # Define database fields for credit card transactions (without the 'id' field)
 TRANSACTION_FIELDS = ('statement_id',
                       'transaction_date',
@@ -27,4 +27,5 @@ TRANSACTION_FIELDS = ('statement_id',
                       'notes')
 # Create a dictionary with all database fields
 ALL_FIELDS = (*ACCOUNT_FIELDS, *CARD_FIELDS,
-              *STATEMENT_FIELDS, *TRANSACTION_FIELDS)
+              *STATEMENT_FIELDS, *STATEMENT_VIEW_FIELDS,
+              *TRANSACTION_FIELDS)
