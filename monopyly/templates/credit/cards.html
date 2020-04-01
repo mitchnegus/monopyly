@@ -2,13 +2,15 @@
 
 	<a class="credit-card-block" href="{{ url_for('credit.show_account', account_id=card['account_id']) }}">
 		<div class="credit-card {{'inactive' if not card['active'] else '' }}">
+
 			<img class="card-background" src="{{ url_for('static', filename='img/') }}{{ card['bank'].lower() }}-card.png">
 			<div class="card-number">
 				▐▐▐▐ ▐▐▐▐ ▐▐▐▐ {{ card['last_four_digits'] }}
-				{% if not card['active'] %}
-					<br>INACTIVE
-				{% endif %}
 			</div>
+			{% if not card['active'] %}
+				<div class="notice">INACTIVE</div>
+			{% endif %}
+
 		</div>
 	</a>
 

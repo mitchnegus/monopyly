@@ -439,15 +439,9 @@ form .autocomplete-box .item.active {
  * Style blocks for displaying credit cards
  */
 .credit-card-block {
-	color: inherit;
-}
-
-.credit-card {
 	position: relative;
-}
-
-.credit-card.inactive {
-	filter: contrast(25%) brightness(150%);
+	width: 400px;
+	color: inherit;
 }
 
 .credit-card-block .card-background {
@@ -457,13 +451,32 @@ form .autocomplete-box .item.active {
 	box-shadow: 1px 1px 3px #222222;
 }
 
-.credit-card-block .card-number {
+.credit-card {
+	position: relative;
+	height: 100%;
+	width: 100%;
+	font-size: 20pt;
+}
+
+.credit-card .card-number {
 	position: absolute;
 	top: 160px;
 	width: 100%;
 	text-align: center;
 	font-family: "Courier New", Courier, monospace;
-	font-size: 20pt;
+}
+
+.credit-card.inactive {
+	filter: contrast(25%) brightness(150%);
+}
+
+.credit-card.inactive .notice {
+	position: absolute;
+	bottom: 1em;
+	width: 100%;
+	text-align: center;
+	font-size: 0.9em;
+	letter-spacing: 2px;
 }
 
 
@@ -656,8 +669,6 @@ table.transactions td div.notes{
 }
 
 #cards-container .credit-card-block {
-	position: relative;
-	width: 400px;
 	margin: 10px;
 }
 
@@ -707,6 +718,7 @@ table.transactions td div.notes{
 #account-info .credit-card-block {
 	margin-left: -375px;
 	transition: margin-left 0.2s;
+	perspective: 600px;
 }
 
 #account-info .credit-card-block:hover {
