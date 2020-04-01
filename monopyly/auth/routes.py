@@ -62,7 +62,7 @@ def login():
         if not error:
             session.clear()
             session['user_id'] = user['id']
-            return redirect(url_for('index'))
+            return redirect(url_for('core.index'))
         else:
             flash(error)
     # Display the login page
@@ -72,4 +72,4 @@ def login():
 def logout():
     # End the session and clear the user ID;k
     session.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for('core.index'))
