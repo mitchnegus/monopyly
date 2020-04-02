@@ -56,14 +56,32 @@
 
 								<div class="card-face front">
 									<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ card['bank'].lower() }}-card.png">
-									<div class="card-number">
-										▐▐▐▐ ▐▐▐▐ ▐▐▐▐ {{ card['last_four_digits'] }}
+									<div class="number">
+										<div class="digits obscure">▐▐▐▐</div>
+										<div class="digits obscure">▐▐▐▐</div>
+										<div class="digits obscure">▐▐▐▐</div>
+										<div class="digits">{{ card['last_four_digits'] }}</div>
 									</div>
 									{% if not card['active'] %}
 										<div class="notice">INACTIVE</div>
 									{% endif %}
 								</div>
+
 								<div class="card-face back">
+									<div class="bank">{{ card['bank']|upper }}</div>
+									<div class="number">
+										<div class="digits obscure">▐▐▐▐</div>
+										<div class="digits obscure">▐▐▐▐</div>
+										<div class="digits obscure">▐▐▐▐</div>
+										<div class="digits">{{ card['last_four_digits'] }}</div>
+									</div>
+									<div class="options">
+										<div class="slider">
+											<input type="checkbox" />
+										</div>
+										<a class="icon-button delete" href="{{ url_for('credit.delete_card', card_id=card['id']) }}" onclick="return confirm('Are you sure you want to delete this card?');">
+										</a>
+									</div>
 								</div>
 
 							</div>
@@ -113,18 +131,10 @@
 {% block javascript %}
 
 	<script>
-		let $container = $('.cards-container');
-		let $cards = $('.credit-card');
-		$cards.on('click', function() {
-			$(this).toggleClass('flipped');
-		});
-		$container.on('mouseleave', function() {
-			$cards.removeClass('flipped');
-		});
-	</script>
-	<script>
 		const UPDATE_ACCOUNT_STATEMENT_ISSUE_DAY_ENDPOINT = "{{ url_for('credit.update_account_statement_issue_day', account_id=account['id']) }}";
 		const UPDATE_ACCOUNT_STATEMENT_DUE_DAY_ENDPOINT = "{{ url_for('credit.update_account_statement_due_day', account_id=account['id']) }}";
+	</script>
+	<script src="{{ url_for('static', filename='js/flip_card.js') }}">
 	</script>
 	<script type="module" src="{{ url_for('static', filename='js/update_account_statement_due_day.js') }}">
 	</script>

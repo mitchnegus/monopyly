@@ -66,7 +66,7 @@ def show_account(account_id):
                            cards=cards)
 
 
-@credit.route('/delete_card/<int:card_id>', methods=('POST',))
+@credit.route('/delete_card/<int:card_id>')
 @login_required
 def delete_card(card_id):
     ch = CardHandler()

@@ -130,8 +130,8 @@ aside.sidebar {
 .icon-button {
 	height: 40px;
 	width: 40px;
-	margin: 0 5px;
 	background-size: 40px 40px;
+	margin: 0 5px;
 }
 
 .icon-button.delete {
@@ -455,7 +455,14 @@ form .autocomplete-box .item.active {
 	height: 100%;
 	width: 100%;
 	font-size: 20pt;
+	transition: transform 0.4s;
+	transform-style: preserve-3d;
 }
+
+.credit-card.flipped {
+	transform: rotateY(180deg);
+}
+
 
 .credit-card .card-face {
 	position: absolute;
@@ -464,26 +471,87 @@ form .autocomplete-box .item.active {
 	border: 1px solid #cccccc;
 	border-radius: 20px;
 	box-shadow: 1px 1px 3px #222222;
+	text-align: center;
+	backface-visibility: hidden;
 }
 
-.credit-card .card-number {
+.credit-card .card-face.back {
+	display: flex;
+	flex-direction: column;
+	color: gray;
+	border-color: gray;
+	background-color: #eeeeee;
+	transform: rotateY(180deg);
+}
+
+.credit-card .card-face .number {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	font-family: "Consolas", Courier, monospace;
+	line-height: 1em;
+}
+
+.credit-card .card-face .number .digits {
+	margin: 0 0.3em;
+}
+
+.credit-card .card-face .number .digits.obscure {
+	font-size: smaller;
+}
+
+.credit-card .card-face.front .number {
 	position: absolute;
 	top: 160px;
-	width: 100%;
-	text-align: center;
-	font-family: "Courier New", Courier, monospace;
+}
+
+.credit-card .card-face.back .bank {
+	padding: 15px 0;
+	font-size: 1.5em;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+
+.credit-card .card-face.back .number {
+	font-size: 14pt;
+}
+
+.credit-card .card-face.back .options {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	flex-grow: 1;
+	height: 100%;
+	padding: 5% 10%;
+}
+
+.credit-card .card-face.back .slider {
+	width: 200px;
+	background-color: gray;
+}
+
+.credit-card .card-face.back .icon-button {
+	height: 30px;
+	width: 30px;
+	background-size: 30px;
+	filter: brightness(0.8);
+}
+
+.credit-card .card-face.back .icon-button:hover {
+	filter: none;
 }
 
 .credit-card.inactive .card-face.front {
-	filter: contrast(25%) brightness(150%);
+	filter: contrast(0.25) brightness(1.5);
 }
 
 .credit-card.inactive .notice {
 	position: absolute;
-	bottom: 1.5em;
+	bottom: 2em;
 	width: 100%;
 	text-align: center;
-	font-size: 0.75em;
+	font-size: 0.5em;
 	letter-spacing: 2px;
 }
 
@@ -745,24 +813,8 @@ table.transactions td div.notes{
 	padding-left: 0;
 }
 
-#account-info .credit-card {
-	transition: transform 0.4s;
-	transform-style: preserve-3d;
-}
-
-#account-info .credit-card.flipped {
-	transform: rotateY(180deg);
-}
-
 #account-info .credit-card .card-face {
-	backface-visibility: hidden;
 	cursor: pointer;
-}
-
-#account-info .credit-card .card-face.back {
-	border-color: gray;
-	background-color: gray;
-	transform: rotateY(180deg);
 }
 
 #account-info .key-day .widget-text {
@@ -852,7 +904,6 @@ form#card #statement-due-day-field  {
 	color: inherit;
 	text-decoration: none;
 }
-
 
 .statement-block:hover {
 	filter: brightness(0.98);
