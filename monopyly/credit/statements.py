@@ -3,14 +3,13 @@ Tools for interacting with the credit statements in the database.
 """
 from dateutil.relativedelta import relativedelta
 
-from werkzeug.exceptions import abort
-
 from ..utils import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
     check_sort_order
 )
 from .constants import STATEMENT_FIELDS
 from .tools import select_fields
+from .transactions import TransactionHandler
 
 
 class StatementHandler(DatabaseHandler):
@@ -62,7 +61,7 @@ class StatementHandler(DatabaseHandler):
             all fields will be selected). A field can be any column from
             the 'credit_statements', 'credit_cards', or 'credit_accounts'
             tables.
-        card_ids : tuple of str, optional
+        card_ids : tuple of int, optional
             A sequence of card IDs for which statements will be selected
             (if `None`, all cards will be selected).
         banks : tuple of str, optional
@@ -176,6 +175,27 @@ class StatementHandler(DatabaseHandler):
                         *fill_place(issue_date))
         statement = self.cursor.execute(query, placeholders).fetchone()
         return statement
+
+    def delete_entries(self, entry_ids):
+        """
+        Delete statements from the database.
+
+        Given a set of statement IDs, delete the statements from the
+        database. Deleting a statement will also delete all transactions
+        on that statement.
+
+        Parameters
+        ––––––––––
+        entry_ids : list of int
+            The IDs of statements to be deleted.
+        """
+        # Delete all transactions corresponding to these statements
+        th = TransactionHandler()
+        transactions = th.get_transactions(fields=(), statement_ids=entry_ids)
+        transaction_ids = [transaction['id'] for transaction in transactions]
+        th.delete_entries(transaction_ids)
+        # Delete the given statements
+        super().delete_entries(entry_ids)
 
 
 def determine_due_date(statement_due_day, issue_date):

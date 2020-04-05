@@ -1,13 +1,12 @@
 """
 Tools for interacting with credit cards in the database.
 """
-from werkzeug.exceptions import abort
-
 from ..utils import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items
 )
 from .constants import CARD_FIELDS
 from .tools import select_fields
+from .statements import StatementHandler
 
 
 class CardHandler(DatabaseHandler):
@@ -42,7 +41,7 @@ class CardHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_cards(self, fields=None, accounts=None, banks=None,
+    def get_cards(self, fields=None, account_ids=None, banks=None,
                   last_four_digits=None, active=False):
         """
         Get credit cards from the database.
@@ -57,8 +56,8 @@ class CardHandler(DatabaseHandler):
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
             'credit_cards' or 'credit_accounts' tables.
-        accounts : tuple of str, optional
-            A sequence of accounts for which cards will be selected (if
+        account_ids : tuple of int, optional
+            A sequence of account IDs for which cards will be selected (if
             `None`, all accounts will be selected).
         banks : tuple of str, optional
             A sequence of banks for which cards will be selected (if
@@ -76,7 +75,7 @@ class CardHandler(DatabaseHandler):
         cards : list of sqlite3.Row
             A list of credit cards matching the criteria.
         """
-        account_filter = filter_items(accounts, 'account_id', 'AND')
+        account_filter = filter_items(account_ids, 'account_id', 'AND')
         bank_filter = filter_items(banks, 'bank', 'AND')
         digit_filter = filter_items(last_four_digits,
                                     'last_four_digits', 'AND')
@@ -90,7 +89,7 @@ class CardHandler(DatabaseHandler):
                  f"       {digit_filter} {active_filter} "
                   " ORDER BY active DESC")
         placeholders = (self.user_id,
-                        *fill_places(accounts),
+                        *fill_places(account_ids),
                         *fill_places(banks),
                         *fill_places(last_four_digits))
         cards = self.cursor.execute(query, placeholders).fetchall()
@@ -168,3 +167,24 @@ class CardHandler(DatabaseHandler):
                         *fill_place(last_four_digits))
         card = self.cursor.execute(query, placeholders).fetchone()
         return card
+
+    def delete_entries(self, entry_ids):
+        """
+        Delete credit cards from the database.
+
+        Given a set of card IDs, delete the credit cards from the
+        database. Deleting a card will also delete all statements (and
+        transactions) for that card.
+
+        Parameters
+        ––––––––––
+        entry_ids : list of int
+            The IDs of credit cards to be deleted.
+        """
+        # Delete all statements corresponding to these cards
+        sh = StatementHandler()
+        statements = sh.get_statements(fields=(), card_ids=entry_ids)
+        statement_ids = [statement['id'] for statement in statements]
+        sh.delete_entries(statement_ids)
+        # Delete the given cards
+        super().delete_entries(entry_ids)

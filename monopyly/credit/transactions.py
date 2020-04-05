@@ -3,8 +3,6 @@ Tools for interacting with the credit transactions in the database.
 """
 from dateutil.relativedelta import relativedelta
 
-from werkzeug.exceptions import abort
-
 from ..utils import (
     DatabaseHandler, fill_places, filter_items, check_sort_order
 )
@@ -63,7 +61,7 @@ class TransactionHandler(DatabaseHandler):
             all fields will be selected). A field can be any column from
             the 'credit_transactions', credit_statements',
             'credit_cards', or 'credit_accounts' tables.
-        card_ids : tuple of str, optional
+        card_ids : tuple of int, optional
             A sequence of card IDs with which to filter transactions (if
             `None`, all card IDs will be shown).
         statement_ids : tuple of str, optional

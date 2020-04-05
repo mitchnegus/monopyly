@@ -1,14 +1,12 @@
 """
 Tools for interacting with credit accounts in the database.
 """
-from werkzeug.exceptions import abort
-
 from ..utils import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items
 )
 from .constants import ACCOUNT_FIELDS
 from .tools import select_fields
-
+from .cards import CardHandler
 
 
 class AccountHandler(DatabaseHandler):
@@ -119,3 +117,24 @@ class AccountHandler(DatabaseHandler):
         else:
             account = self.update_entry(account_id, mapping)
         return account
+
+    def delete_entries(self, entry_ids):
+        """
+        Delete credit card accounts from the database.
+
+        Given a set of account IDs, delete the credit card accounts from
+        the database. Deleting an account will also delete all credit
+        cards (and statements, transactions) for that account.
+
+        Parameters
+        ––––––––––
+        entry_ids : list of int
+            The IDs of accounts to be deleted.
+        """
+        # Delete all cards corresponding to these accounts
+        ch = CardHandler()
+        cards = ch.get_cards(fields=(), account_ids=entry_ids)
+        card_ids = [card['id'] for card in cards]
+        ch.delete_entries(card_ids)
+        # Delete the given accounts
+        super().delete_entries(entry_ids)

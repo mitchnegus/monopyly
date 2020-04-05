@@ -3,8 +3,8 @@ Routes for credit card financials.
 """
 from collections import Counter
 
-from werkzeug.exceptions import abort
 from flask import redirect, render_template, flash, request, url_for, jsonify
+from werkzeug.exceptions import abort
 
 from monopyly.db import get_db
 from monopyly.utils import parse_date
@@ -45,8 +45,8 @@ def new_card():
             # Insert the new credit card into the database
             card_data = form.database_data
             card = ch.new_entry(card_data)
-            return render_template('credit/card_submission_page.html',
-                                   update=False)
+            return redirect(url_for('credit.show_account',
+                                    account_id=card['account_id']))
         else:
             flash(form_err_msg)
             print(form.errors)
@@ -60,7 +60,7 @@ def show_account(account_id):
     # Get the account information from the database
     account = ah.get_entry(account_id)
     # Get all cards with active cards at the end of the list
-    cards = ch.get_cards(accounts=(account_id,))[::-1]
+    cards = ch.get_cards(account_ids=(account_id,))[::-1]
     return render_template('credit/account_page.html',
                            account=account,
                            cards=cards)
@@ -87,9 +87,10 @@ def update_card_status():
 @login_required
 def delete_card(card_id):
     ch = CardHandler()
+    account_id = ch.get_entry(card_id)['account_id']
     # Remove the credit card from the database
     ch.delete_entries((card_id,))
-    return redirect(url_for('credit.show_cards'))
+    return redirect(url_for('credit.show_account', account_id=account_id))
 
 
 @credit.route('/_update_account_statement_issue_day/<int:account_id>',
@@ -121,8 +122,10 @@ def update_account_statement_due_day(account_id):
 @credit.route('/delete_account/<int:account_id>')
 @login_required
 def delete_account(account_id):
-    flash('This functionality is not currently available.')
-    return redirect(url_for('credit.show_account', account_id=account_id))
+    ah = AccountHandler()
+    # Remove the account from the database
+    ah.delete_entries((account_id,))
+    return redirect(url_for('credit.show_cards'))
 
 
 @credit.route('/statements')
@@ -432,7 +435,7 @@ def prepare_account_choices():
     user_accounts = ah.get_accounts()
     choices = [(-1, '-'), (0, 'New account')]
     for account in user_accounts:
-        cards = ch.get_cards(accounts=(account['id'],))
+        cards = ch.get_cards(account_ids=(account['id'],))
         digits = [f"*{card['last_four_digits']}" for card in cards]
         # Create a description for the account using the bank and card digits
         description = f"{account['bank']} (cards: {', '.join(digits)})"
