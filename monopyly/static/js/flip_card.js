@@ -7,18 +7,20 @@
 
 (function() {
 
-	// Identify the card container and the cards
-	let $container = $('.cards-container');
+	// Identify the cards
 	let $cards = $('.credit-card');
 
 	// Add the flipped class to clicked cards
 	$cards.on('click', function() {
-		$(this).toggleClass('flipped');
+		$(this).addClass('flipped');
 	});
 
-	// Remove the flipped class when the mouse leaves the card container
-	$container.on('mouseleave', function() {
-		$cards.removeClass('flipped');
+	// Remove the flipped class after clicking outside of a card
+	$('html').on('click', function(event) {
+		let $target = $(event.target);
+		if (!$target.closest($cards).length) {
+			$cards.removeClass('flipped');
+		}
 	});
 
 })();

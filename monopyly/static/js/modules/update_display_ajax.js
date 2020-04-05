@@ -7,6 +7,7 @@
  */
 
 function updateDisplayAjaxRequest(endpoint, rawData, $display) {
+
 	// Return the newly updated value and assign it to the display object
 	$.ajax({
 		url: endpoint,
@@ -14,12 +15,13 @@ function updateDisplayAjaxRequest(endpoint, rawData, $display) {
 		data: JSON.stringify(rawData),
 		contentType: 'application/json; charset=UTF-8',
 		success: function(response) {
-			$display.html(response)
+			$display.html(response);
 		},
 		error: function(xhr) {
 			console.log('There was an error in the Ajax request.');
 		}
 	});
+
 }
 
 export { updateDisplayAjaxRequest };

@@ -172,8 +172,8 @@ form input,
 form select {
 	width: 100%;
 	box-sizing: border-box;
-  border-radius: 3px;
   background-color: #fafafa;
+  border-radius: 3px;
 	font-size: 1.1em;
 	filter: none; /*removes FireFox autofill background*/
 }
@@ -228,7 +228,8 @@ form .autocomplete {
 }
 
 form .autocomplete-box {
-	position: absolute; top: 98%;
+	position: absolute;
+	top: 98%;
 	left: 0;
 	width: 100%;
 	padding-right: 10px;
@@ -327,31 +328,31 @@ form .autocomplete-box .item.active {
 /*
  * Style the gadget to reveal text (sideways slide) on hover
  */
-.slide-text {
+.slide-text-gadget {
 	position: relative;
 	height: 1.2em;
 	width: 150px;
 	overflow: hidden;
 }
 
-.slide-text .sleeve {
+.slide-text-gadget .sleeve {
 	position: relative;
 	right: -100%;
 	width: min-content;
 	transition: 0.4s;
 } 
 
-.slide-text:hover .sleeve {
+.slide-text-gadget:hover .sleeve {
 	transform: translateX(-100%);
 }
 
-.slide-text .sleeve .main {
+.slide-text-gadget .sleeve .main {
 	position: absolute;
 	transform: translateX(-100%);
 	transition: 0.2s;
 }
 
-.slide-text:hover .sleeve .main {
+.slide-text-gadget:hover .sleeve .main {
 	padding-right: 5px;
 }
 
@@ -359,7 +360,7 @@ form .autocomplete-box .item.active {
 /*
  * Style the gadget to flip text on hover
  */
-.flip-text {
+.flip-text-gadget {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -367,15 +368,15 @@ form .autocomplete-box .item.active {
 	width: 100px;
 }
 
-.flip-text .flip-text-inner {
+.flip-text-gadget .flip-text-inner {
 	position: relative;
 	height: 100%;
 	width: 100%;
 	text-align: center;
 }
 
-.flip-text .front,
-.flip-text .back {
+.flip-text-gadget .front,
+.flip-text-gadget .back {
 	position: absolute;
 	height: 100%;
 	width: 100%;
@@ -384,16 +385,83 @@ form .autocomplete-box .item.active {
 	transition: transform 0.4s;
 }
 
-.flip-text:hover .front {
+.flip-text-gadget:hover .front {
 	transform: rotateX(180deg);
 }
 
-.flip-text .back {
+.flip-text-gadget .back {
 	transform: rotateX(180deg);
 }
 
-.flip-text:hover .back {
+.flip-text-gadget:hover .back {
 	transform: rotateX(0deg);
+}
+
+/*
+ * Style the gadget to provide a sliding toggle switch
+ */
+.toggle-switch-gadget {
+	display: flex;
+	align-items: center;
+}
+
+.toggle-switch-gadget input {
+	/* Hide the default checkbox */
+	opacity: 0;
+	height: 0;
+	width: 0;
+	
+}
+
+.toggle-switch-gadget .option {
+	display: flex;
+	align-items: center;
+	transition: 0.4s;
+}
+
+.toggle-switch-gadget .option .text {
+	margin: 0 5px;
+	filter: opacity(0.5);
+}
+
+.toggle-switch-gadget .option .slider {
+	margin: 0 5px;
+	transition: inherit;
+}
+
+.toggle-switch-gadget .option .slider {
+	height: 40px;
+	width: 70px;
+	padding: 5px;
+	box-sizing: border-box;
+	border-radius: 20px;
+	background-color: gray;
+	transition: inherit;
+	cursor: pointer;
+}
+
+.toggle-switch-gadget .option .slider .switch {
+	position: relative;
+	left: 0;
+	width: 50%;
+	height: 100%;
+	box-sizing: border-box;
+	background-color: #eeeeee;
+	border-radius: 50%;
+	transition: inherit;
+}
+
+.toggle-switch-gadget input:checked + .option .text {
+	color: #85bb65;
+	filter: none;
+}
+
+.toggle-switch-gadget input:checked + .option .slider {
+	background-color: #85bb65;
+}
+
+.toggle-switch-gadget input:checked + .option .slider .switch {
+	margin-left: 50%;
 }
 
 
@@ -519,22 +587,19 @@ form .autocomplete-box .item.active {
 
 .credit-card .card-face.back .options {
 	display: flex;
-	justify-content: space-around;
+	justify-content: space-between;
 	align-items: center;
 	flex-grow: 1;
 	height: 100%;
-	padding: 5% 10%;
-}
-
-.credit-card .card-face.back .slider {
-	width: 200px;
-	background-color: gray;
+	padding: 5% 20%;
+	font-size: 0.8em;
 }
 
 .credit-card .card-face.back .icon-button {
-	height: 30px;
-	width: 30px;
-	background-size: 30px;
+	height: 35px;
+	width: 35px;
+	margin: 0 15px;
+	background-size: 35px;
 	filter: brightness(0.8);
 }
 
@@ -546,7 +611,7 @@ form .autocomplete-box .item.active {
 	filter: contrast(0.25) brightness(1.5);
 }
 
-.credit-card.inactive .notice {
+.credit-card.inactive .card-face .notice {
 	position: absolute;
 	bottom: 2em;
 	width: 100%;
@@ -815,6 +880,10 @@ table.transactions td div.notes{
 
 #account-info .credit-card .card-face {
 	cursor: pointer;
+}
+
+#account-info .credit-card.flipped .card-face {
+	cursor: auto;
 }
 
 #account-info .key-day .widget-text {

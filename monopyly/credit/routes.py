@@ -66,6 +66,23 @@ def show_account(account_id):
                            cards=cards)
 
 
+@credit.route('/_update_card_status', methods=('POST',))
+@login_required
+def update_card_status():
+    ch = CardHandler()
+    # Get the field from the AJAX request
+    post_args = request.get_json()
+    input_id = post_args['input_id']
+    active = post_args['active']
+    # Get the card ID as the second component of the input's ID attribute
+    card_id = input_id.split('-')[1]
+    # Update the card in the database
+    mapping = {'active': int(active)}
+    card = ch.update_entry(card_id, mapping)
+    return render_template('credit/card_front.html',
+                           card=card)
+
+
 @credit.route('/delete_card/<int:card_id>')
 @login_required
 def delete_card(card_id):
@@ -80,7 +97,7 @@ def delete_card(card_id):
 @login_required
 def update_account_statement_issue_day(account_id):
     ah = AccountHandler()
-    # Get the autocomplete field from the AJAX request
+    # Get the field from the AJAX request
     issue_day = request.get_json()
     # Update the account in the database
     mapping = {'statement_issue_day': int(issue_day)}
@@ -93,7 +110,7 @@ def update_account_statement_issue_day(account_id):
 @login_required
 def update_account_statement_due_day(account_id):
     ah = AccountHandler()
-    # Get the autocomplete field from the AJAX request
+    # Get the field from the AJAX request
     due_day = request.get_json()
     # Update the account in the database
     mapping = {'statement_due_day': int(due_day)}

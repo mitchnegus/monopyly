@@ -4,13 +4,7 @@
 		<div class="credit-card {{'inactive' if not card['active'] else '' }}">
 
 			<div class="card-face front">
-				<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ card['bank'].lower() }}-card.png">
-				<div class="number">
-					▐▐▐▐ ▐▐▐▐ ▐▐▐▐ {{ card['last_four_digits'] }}
-				</div>
-				{% if not card['active'] %}
-					<div class="notice">INACTIVE</div>
-				{% endif %}
+				{% include 'credit/card_front.html' %}
 			</div>
 
 		</div>
