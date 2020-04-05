@@ -52,6 +52,21 @@ class DatabaseHandler(ABC):
             abort(403)
 
     @abstractmethod
+    def get_entries(self, fields=None):
+        raise NotImplementedError('This is an Abstract Base Class. Define '
+                                  'a `get_entries` method in a subclass.')
+
+    def _query_entries(self, query=None, placeholders=None):
+        """Execute a query to return a single entry from the database."""
+        if not query:
+            query = (f"SELECT * "
+                     f"  FROM {self.table_name} "
+                      " WHERE user_id = ?")
+            placeholders = (entry_ids, self.user_id)
+        entries = self.cursor.execute(query, placeholders).fetchall()
+        return entries
+
+    @abstractmethod
     def get_entry(self, entry_id, fields=None):
         raise NotImplementedError('This is an Abstract Base Class. Define '
                                   'a `get_entry` method in a subclass.')
@@ -59,7 +74,7 @@ class DatabaseHandler(ABC):
     def _query_entry(self, entry_id, query=None, abort_msg=None):
         """Execute a query to return a single entry from the database."""
         if not query:
-            query = (f"SELECT * "
+            query['query'] = (f"SELECT * "
                      f"  FROM {self.table_name} "
                       " WHERE id = ? AND user_id = ?")
         placeholders = (entry_id, self.user_id)

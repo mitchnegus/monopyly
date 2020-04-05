@@ -41,8 +41,8 @@ class CardHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_cards(self, fields=None, account_ids=None, banks=None,
-                  last_four_digits=None, active=False):
+    def get_entries(self, account_ids=None, banks=None, last_four_digits=None,
+                  active=False, fields=None):
         """
         Get credit cards from the database.
 
@@ -52,10 +52,6 @@ class CardHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        fields : tuple of str, optional
-            A sequence of fields to select from the database (if `None`,
-            all fields will be selected). Can be any field in the
-            'credit_cards' or 'credit_accounts' tables.
         account_ids : tuple of int, optional
             A sequence of account IDs for which cards will be selected (if
             `None`, all accounts will be selected).
@@ -69,6 +65,10 @@ class CardHandler(DatabaseHandler):
         active : bool, optional
             A flag indicating whether only active cards will be
             returned. The default is `False` (all cards are returned).
+        fields : tuple of str, optional
+            A sequence of fields to select from the database (if `None`,
+            all fields will be selected). Can be any field in the
+            'credit_cards' or 'credit_accounts' tables.
 
         Returns
         –––––––
@@ -92,7 +92,7 @@ class CardHandler(DatabaseHandler):
                         *fill_places(account_ids),
                         *fill_places(banks),
                         *fill_places(last_four_digits))
-        cards = self.cursor.execute(query, placeholders).fetchall()
+        cards = self._query_entries(query, placeholders)
         return cards
 
     def get_entry(self, card_id, fields=None):
@@ -183,7 +183,7 @@ class CardHandler(DatabaseHandler):
         """
         # Delete all statements corresponding to these cards
         sh = StatementHandler()
-        statements = sh.get_statements(fields=(), card_ids=entry_ids)
+        statements = sh.get_entries(fields=(), card_ids=entry_ids)
         statement_ids = [statement['id'] for statement in statements]
         sh.delete_entries(statement_ids)
         # Delete the given cards

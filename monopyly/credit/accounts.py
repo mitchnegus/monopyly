@@ -41,7 +41,7 @@ class AccountHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_accounts(self, fields=None, banks=None):
+    def get_entries(self, banks=None, fields=None):
         """
         Get credit accounts from the database.
 
@@ -51,13 +51,13 @@ class AccountHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
+        banks : tuple of str, optional
+            A sequence of banks for which cards will be selected (if
+            `None`, all banks will be selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
             'credit_accounts' table.
-        banks : tuple of str, optional
-            A sequence of banks for which cards will be selected (if
-            `None`, all banks will be selected).
 
         Returns
         –––––––
@@ -70,7 +70,7 @@ class AccountHandler(DatabaseHandler):
                   " WHERE user_id = ? "
                  f"       {bank_filter} ")
         placeholders = (self.user_id, *fill_places(banks))
-        accounts = self.cursor.execute(query, placeholders).fetchall()
+        accounts = self._query_entries(query, placeholders)
         return accounts
 
     def get_entry(self, account_id, fields=None):
@@ -133,7 +133,7 @@ class AccountHandler(DatabaseHandler):
         """
         # Delete all cards corresponding to these accounts
         ch = CardHandler()
-        cards = ch.get_cards(fields=(), account_ids=entry_ids)
+        cards = ch.get_entries(fields=(), account_ids=entry_ids)
         card_ids = [card['id'] for card in cards]
         ch.delete_entries(card_ids)
         # Delete the given accounts

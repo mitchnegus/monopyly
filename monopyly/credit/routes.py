@@ -28,7 +28,7 @@ form_err_msg = 'There was an improper value in your form. Please try again.'
 def show_cards():
     ch = CardHandler()
     # Get all of the user's credit cards from the database
-    cards = ch.get_cards()
+    cards = ch.get_entries()
     return render_template('credit/cards_page.html', cards=cards)
 
 
@@ -60,7 +60,7 @@ def show_account(account_id):
     # Get the account information from the database
     account = ah.get_entry(account_id)
     # Get all cards with active cards at the end of the list
-    cards = ch.get_cards(account_ids=(account_id,))[::-1]
+    cards = ch.get_entries(account_ids=(account_id,))[::-1]
     return render_template('credit/account_page.html',
                            account=account,
                            cards=cards)
@@ -133,12 +133,12 @@ def delete_account(account_id):
 def show_statements():
     ch, sh = CardHandler(), StatementHandler()
     # Get all of the user's credit cards from the database
-    all_cards = ch.get_cards()
-    active_cards = ch.get_cards(active=True)
+    all_cards = ch.get_entries()
+    active_cards = ch.get_entries(active=True)
     # Get all of the user's statements for active cards from the database
     fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
               'balance')
-    statements = sh.get_statements(fields=fields, active=True)
+    statements = sh.get_entries(active=True, fields=fields)
     return render_template('credit/statements_page.html',
                            filter_cards=all_cards,
                            selected_cards=active_cards,
@@ -157,8 +157,8 @@ def update_statements_display():
     # Filter selected statements from the database
     fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
               'balance')
-    statements = sh.get_statements(fields=fields,
-                                   card_ids=[card['id'] for card in cards])
+    statements = sh.get_entries(card_ids=[card['id'] for card in cards],
+                                fields=fields)
     return render_template('credit/statements.html',
                            selected_cards=cards,
                            statements=statements)
@@ -175,9 +175,9 @@ def show_statement(statement_id):
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
     transaction_fields = ('transaction_date', 'vendor', 'amount')
-    transactions = th.get_transactions(fields=transaction_fields,
-                                       sort_order=sort_order,
-                                       statement_ids=(statement['id'],))
+    transactions = th.get_entries(statement_ids=(statement['id'],),
+                                  sort_order=sort_order,
+                                       fields=transaction_fields)
     return render_template('credit/statement_page.html',
                            statement=statement,
                            statement_transactions=transactions)
@@ -217,14 +217,14 @@ def update_statement_payment(statement_id):
 def show_transactions():
     ch, th = CardHandler(), TransactionHandler()
     # Get all of the user's credit cards from the database
-    cards = ch.get_cards()
+    cards = ch.get_entries()
     # Get all of the user's transactions for active cards from the database
     sort_order = 'DESC'
     transaction_fields = ('bank', 'last_four_digits', 'transaction_date',
                            'vendor', 'amount', 'notes', 'issue_date')
-    transactions = th.get_transactions(fields=transaction_fields,
-                                       sort_order=sort_order,
-                                       active=True)
+    transactions = th.get_entries(active=True,
+                                  sort_order=sort_order,
+                                  fields=transaction_fields)
     return render_template('credit/transactions_page.html',
                            filter_cards=cards,
                            sort_order=sort_order,
@@ -244,9 +244,9 @@ def update_transactions_display():
     # Filter selected transactions from the database
     transaction_fields = ('bank', 'last_four_digits', 'transaction_date',
                            'vendor', 'amount', 'notes', 'issue_date')
-    transactions = th.get_transactions(fields=transaction_fields,
-                                       card_ids=[card['id'] for card in cards],
-                                       sort_order=sort_order)
+    transactions = th.get_entries(card_ids=[card['id'] for card in cards],
+                                  fields=transaction_fields,
+                                  sort_order=sort_order)
     return render_template('credit/transactions.html',
                            sort_order=sort_order,
                            transactions=transactions)
@@ -339,9 +339,9 @@ def suggest_autocomplete():
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
     if field != 'notes':
-        transactions = th.get_transactions(fields=(field,))
+        transactions = th.get_entries(fields=(field,))
     else:
-        transactions = th.get_transactions(fields=('vendor', 'notes'))
+        transactions = th.get_entries(fields=('vendor', 'notes'))
         # Generate a map of notes for the current vendor
         note_by_vendor = {}
         for transaction in transactions:
@@ -369,15 +369,16 @@ def infer_card():
     if 'digits' in post_args:
         last_four_digits = post_args['digits']
         # Try to infer card from digits alone
-        cards = ch.get_cards(last_four_digits=(last_four_digits,), active=True)
+        cards = ch.get_entries(last_four_digits=(last_four_digits,),
+                               active=True)
         if len(cards) != 1:
             # Infer card from digits and bank if necessary
-            cards = ch.get_cards(banks=(bank,),
-                                 last_four_digits=(last_four_digits,),
-                                 active=True)
+            cards = ch.get_entries(banks=(bank,),
+                                   last_four_digits=(last_four_digits,),
+                                   active=True)
     elif 'bank' in post_args:
         # Try to infer card from bank alone
-        cards = ch.get_cards(banks=(bank,), active=True)
+        cards = ch.get_entries(banks=(bank,), active=True)
     # Return an inferred card if a single card is identified
     if len(cards) == 1:
         # Return the card info if its is found
@@ -399,8 +400,8 @@ def infer_statement():
     last_four_digits = post_args['digits']
     transaction_date = parse_date(post_args['transaction_date'])
     # Determine the card used for the transaction from the given info
-    cards = ch.get_cards(banks=(bank,),
-                         last_four_digits=(last_four_digits,))
+    cards = ch.get_entries(banks=(bank,),
+                           last_four_digits=(last_four_digits,))
     if len(cards) == 1:
         # Determine the statement corresponding to the card and date
         card = cards[0]
@@ -432,10 +433,10 @@ def prepare_account_choices():
     """Prepare account choices for the card form dropdown."""
     ah, ch = AccountHandler(), CardHandler()
     # Collect all available user accounts
-    user_accounts = ah.get_accounts()
+    user_accounts = ah.get_entries()
     choices = [(-1, '-'), (0, 'New account')]
     for account in user_accounts:
-        cards = ch.get_cards(account_ids=(account['id'],))
+        cards = ch.get_entries(account_ids=(account['id'],))
         digits = [f"*{card['last_four_digits']}" for card in cards]
         # Create a description for the account using the bank and card digits
         description = f"{account['bank']} (cards: {', '.join(digits)})"

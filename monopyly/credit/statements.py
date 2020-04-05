@@ -44,8 +44,8 @@ class StatementHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_statements(self, fields=STATEMENT_FIELDS, card_ids=None,
-                       banks=None, sort_order='DESC', active=False):
+    def get_entries(self, card_ids=None, banks=None, active=False,
+                    sort_order='DESC', fields=STATEMENT_FIELDS):
         """
         Get credit card statements from the database.
 
@@ -56,25 +56,25 @@ class StatementHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        fields : tuple of str, optional
-            A sequence of fields to select from the database (if `None`,
-            all fields will be selected). A field can be any column from
-            the 'credit_statements', 'credit_cards', or 'credit_accounts'
-            tables.
         card_ids : tuple of int, optional
             A sequence of card IDs for which statements will be selected
             (if `None`, all cards will be selected).
         banks : tuple of str, optional
             A sequence of banks for which statements will be selected (if
             `None`, all banks will be selected).
-        sort_order : {'ASC', 'DESC'}
-            An indicator of whether the statements should be ordered in
-            ascending (oldest at top) or descending (newest at top)
-            order.
         active : bool, optional
             A flag indicating whether only statements for active cards
             will be returned. The default is `False` (all statements are
             returned).
+        sort_order : {'ASC', 'DESC'}
+            An indicator of whether the statements should be ordered in
+            ascending (oldest at top) or descending (newest at top)
+            order.
+        fields : tuple of str, optional
+            A sequence of fields to select from the database (if `None`,
+            all fields will be selected). A field can be any column from
+            the 'credit_statements', 'credit_cards', or 'credit_accounts'
+            tables.
 
         Returns
         –––––––
@@ -96,7 +96,7 @@ class StatementHandler(DatabaseHandler):
                  f" ORDER BY issue_date {sort_order}, active DESC")
         placeholders = (self.user_id, *fill_places(card_ids),
                        *fill_places(banks))
-        statements = self.cursor.execute(query, placeholders).fetchall()
+        statements = self._query_entries(query, placeholders)
         return statements
 
     def get_entry(self, statement_id, fields=None):
@@ -191,7 +191,7 @@ class StatementHandler(DatabaseHandler):
         """
         # Delete all transactions corresponding to these statements
         th = TransactionHandler()
-        transactions = th.get_transactions(fields=(), statement_ids=entry_ids)
+        transactions = th.get_entries(statement_ids=entry_ids, fields=())
         transaction_ids = [transaction['id'] for transaction in transactions]
         th.delete_entries(transaction_ids)
         # Delete the given statements

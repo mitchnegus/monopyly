@@ -42,8 +42,8 @@ class TransactionHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_transactions(self, fields=TRANSACTION_FIELDS, card_ids=None,
-                         statement_ids=None, sort_order='DESC', active=False):
+    def get_entries(self, card_ids=None, statement_ids=None, active=False,
+                    sort_order='DESC', fields=TRANSACTION_FIELDS):
         """
         Get credit card transactions from the database.
 
@@ -56,25 +56,25 @@ class TransactionHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        fields : tuple of str, optional
-            A sequence of fields to select from the database (if `None`,
-            all fields will be selected). A field can be any column from
-            the 'credit_transactions', credit_statements',
-            'credit_cards', or 'credit_accounts' tables.
         card_ids : tuple of int, optional
             A sequence of card IDs with which to filter transactions (if
             `None`, all card IDs will be shown).
         statement_ids : tuple of str, optional
             A sequence of statement IDs with which to filter
             transactions (if `None`, all statement IDs will be shown).
-        sort_order : {'ASC', 'DESC'}
-            An indicator of whether the transactions should be ordered
-            in ascending (oldest at top) or descending (newest at top)
-            order.
         active : bool, optional
             A flag indicating whether only transactions for active cards
             will be returned. The default is `False` (all transactions
             are returned).
+        sort_order : {'ASC', 'DESC'}
+            An indicator of whether the transactions should be ordered
+            in ascending (oldest at top) or descending (newest at top)
+            order.
+        fields : tuple of str, optional
+            A sequence of fields to select from the database (if `None`,
+            all fields will be selected). A field can be any column from
+            the 'credit_transactions', credit_statements',
+            'credit_cards', or 'credit_accounts' tables.
 
         Returns
         –––––––
@@ -98,7 +98,7 @@ class TransactionHandler(DatabaseHandler):
                  f" ORDER BY transaction_date {sort_order}")
         placeholders = (self.user_id, *fill_places(card_ids),
                         *fill_places(statement_ids))
-        transactions = self.cursor.execute(query, placeholders).fetchall()
+        transactions = self._query_entries(query, placeholders)
         return transactions
 
     def get_entry(self, transaction_id, fields=None):
