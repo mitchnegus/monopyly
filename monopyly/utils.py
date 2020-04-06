@@ -74,7 +74,7 @@ class DatabaseHandler(ABC):
     def _query_entry(self, entry_id, query=None, abort_msg=None):
         """Execute a query to return a single entry from the database."""
         if not query:
-            query['query'] = (f"SELECT * "
+            query = (f"SELECT * "
                      f"  FROM {self.table_name} "
                       " WHERE id = ? AND user_id = ?")
         placeholders = (entry_id, self.user_id)
@@ -113,7 +113,7 @@ class DatabaseHandler(ABC):
                             f'following: {", ".join(self.table_fields)}.')
         self.cursor.execute(
             f"INSERT INTO {self.table_name} {tuple(self.table_fields)} "
-            f"VALUES ({reserve_places(mapping.values())})",
+            f"     VALUES ({reserve_places(mapping.values())})",
             (*mapping.values(),)
         )
         self.db.commit()
@@ -163,8 +163,9 @@ class DatabaseHandler(ABC):
         for entry_id in entry_ids:
             self.get_entry(entry_id)
         self.cursor.execute(
-            f"DELETE FROM {self.table_name} "
-            f" WHERE id IN ({reserve_places(entry_ids)})",
+            "DELETE "
+           f"  FROM {self.table_name} "
+           f" WHERE id IN ({reserve_places(entry_ids)})",
             entry_ids
         )
         self.db.commit()

@@ -15,10 +15,9 @@ CARD_FIELDS = ('account_id',
 # Define database fields for credit card statements (without the 'id' field)
 STATEMENT_FIELDS = ('card_id',
                     'issue_date',
-                    'due_date',
-                    'paid',
-                    'payment_date')
-STATEMENT_VIEW_FIELDS = ('balance',)
+                    'due_date')
+STATEMENT_VIEW_FIELDS = ('balance',
+                         'payment_date')
 # Define database fields for credit card transactions (without the 'id' field)
 TRANSACTION_FIELDS = ('statement_id',
                       'transaction_date',

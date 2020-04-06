@@ -136,8 +136,7 @@ def show_statements():
     all_cards = ch.get_entries()
     active_cards = ch.get_entries(active=True)
     # Get all of the user's statements for active cards from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
-              'balance')
+    fields = ('card_id', 'issue_date', 'due_date', 'balance', 'payment_date')
     statements = sh.get_entries(active=True, fields=fields)
     return render_template('credit/statements_page.html',
                            filter_cards=all_cards,
@@ -155,8 +154,7 @@ def update_statements_display():
     # Determine the card IDs from the arguments of POST method
     cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'paid', 'payment_date',
-              'balance')
+    fields = ('card_id', 'issue_date', 'due_date', 'balance', 'payment_date')
     statements = sh.get_entries(card_ids=[card['id'] for card in cards],
                                 fields=fields)
     return render_template('credit/statements.html',
@@ -170,7 +168,7 @@ def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
     # Get the statement information from the database
     statement_fields = ('bank', 'last_four_digits', 'issue_date', 'due_date',
-                        'paid', 'payment_date', 'balance')
+                        'balance', 'payment_date')
     statement = sh.get_entry(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
@@ -205,8 +203,8 @@ def update_statement_payment(statement_id):
     mapping = {'paid': 1, 'payment_date': parse_date(payment_date)}
     sh.update_entry(statement_id, mapping)
     # Get the statement information from the database
-    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'paid',
-              'payment_date', 'balance')
+    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'balance',
+              'payment_date')
     statement = sh.get_entry(statement_id, fields=fields)
     return render_template('credit/statement_info.html',
                            statement=statement)

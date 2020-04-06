@@ -76,9 +76,7 @@ class TransactionForm(FlaskForm):
                 'card_id': card['id'],
                 'issue_date': issue_date,
                 'due_date': determine_due_date(card['statement_due_day'],
-                                               issue_date),
-                'paid': 0,
-                'payment_date': ''
+                                               issue_date)
             }
             statement = sh.new_entry(statement_data)
         return statement

@@ -18,23 +18,17 @@
 						<div class="balance">
 						{{ '${:,.2f}'.format(statement['balance']) }}
 						</div>
-						{% if statement['paid'] %}
-							{% if statement['payment_date'] %}
-								<div class="paid-notice flip-text-gadget">
-									<div class="flip-text-inner">
-										<div class="front">
-											PAID
-										</div>
-										<div class="back">
-											{{ statement['payment_date'] }}
-										</div>
+						{% if statement['payment_date'] %}
+							<div class="paid-notice flip-text-gadget">
+								<div class="flip-text-inner">
+									<div class="front">
+										PAID
+									</div>
+									<div class="back">
+										{{ statement['payment_date'] }}
 									</div>
 								</div>
-							{% else %}
-								<div class="paid-notice">
-									PAID
-								</div>
-							{% endif %}
+							</div>
 						{% endif %}
 					</div>
 				</a>

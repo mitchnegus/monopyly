@@ -88,9 +88,9 @@ class StatementHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
-                  "       ON c.id = s.card_id "
+                  "               ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
-                  "       ON a.id = c.account_id "
+                  "               ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {bank_filter} {active_filter} "
                  f" ORDER BY issue_date {sort_order}, active DESC")
@@ -123,9 +123,9 @@ class StatementHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
-                  "       ON c.id = s.card_id "
+                  "               ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
-                  "       ON a.id = c.account_id "
+                  "               ON a.id = c.account_id "
                   " WHERE s.id = ? AND user_id = ?")
         abort_msg = (f'Statement ID {statement_id} does not exist for the '
                       'user.')
@@ -164,12 +164,11 @@ class StatementHandler(DatabaseHandler):
         date_filter = filter_item(issue_date, 'issue_date', 'AND')
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
-                  "       INNER JOIN credit_cards AS c "
-                  "       ON c.id = s.card_id "
-                  "       INNER JOIN credit_accounts AS a "
-                  "       ON a.id = c.account_id "
-                  " WHERE user_id = ? "
-                 f"       {card_filter} {date_filter} "
+                  " INNER JOIN credit_cards AS c "
+                  "    ON c.id = s.card_id "
+                  " INNER JOIN credit_accounts AS a "
+                  "    ON a.id = c.account_id "
+                  " WHERE user_id = ? {card_filter} {date_filter} "
                   " ORDER BY issue_date DESC")
         placeholders = (self.user_id, *fill_place(card_id),
                         *fill_place(issue_date))

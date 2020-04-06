@@ -26,24 +26,14 @@
 			</div>
 		</div>
 
-		{% if statement['paid'] %}
+		{% if statement['payment_date'] %}
 
-			{% if statement['payment_date'] %}
-
-				<div id="paid" class="paid-notice slide-text-gadget">
-					<div class="sleeve">
-						<div class="main">PAID</div>
-						<div class="reveal">{{ statement['payment_date'] }}</div>
-					</div>
+			<div id="paid" class="paid-notice slide-text-gadget">
+				<div class="sleeve">
+					<div class="main">PAID</div>
+					<div class="reveal">{{ statement['payment_date'] }}</div>
 				</div>
-
-			{% else %}
-
-				<div id="paid" class="paid-notice">
-					PAID
-				</div>
-
-			{% endif %}
+			</div>
 
 		{% else %}
 

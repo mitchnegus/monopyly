@@ -87,14 +87,14 @@ class TransactionHandler(DatabaseHandler):
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 't.id')} "
                   "  FROM credit_transactions AS t "
-                  "      INNER JOIN credit_statements AS s "
-                  "      ON s.id = t.statement_id "
-                  "      INNER JOIN credit_cards AS c "
-                  "      ON c.id = s.card_id "
-                  "      INNER JOIN credit_accounts AS a "
-                  "      ON a.id = c.account_id "
+                  "       INNER JOIN credit_statements AS s "
+                  "               ON s.id = t.statement_id "
+                  "       INNER JOIN credit_cards AS c "
+                  "               ON c.id = s.card_id "
+                  "       INNER JOIN credit_accounts AS a "
+                  "               ON a.id = c.account_id "
                   " WHERE user_id = ? "
-                 f"       {card_filter} {statement_filter} {active_filter}"
+                 f"       {card_filter} {statement_filter} {active_filter} "
                  f" ORDER BY transaction_date {sort_order}")
         placeholders = (self.user_id, *fill_places(card_ids),
                         *fill_places(statement_ids))
@@ -125,11 +125,11 @@ class TransactionHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 't.id')} "
                   "  FROM credit_transactions AS t "
                   "       INNER JOIN credit_statements AS s "
-                  "       ON s.id = t.statement_id "
+                  "               ON s.id = t.statement_id "
                   "       INNER JOIN credit_cards AS c "
-                  "       ON c.id = s.card_id "
+                  "               ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
-                  "       ON a.id = c.account_id "
+                  "               ON a.id = c.account_id "
                   " WHERE t.id = ? AND user_id = ?")
         abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
                       'user.')
