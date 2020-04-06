@@ -34,26 +34,9 @@ CREATE TABLE credit_statements (
 	card_id INTEGER NOT NULL,
 	issue_date TEXT NOT NULL,
 	due_date TEXT NOT NULL,
-	paid INTEGER NOT NULL,
-	payment_date TEXT,
 	PRIMARY KEY(id),
 	FOREIGN KEY(card_id) REFERENCES credit_cards(id)
 );
-
-CREATE VIEW credit_statements_view AS
-SELECT *
-  FROM (SELECT s.*,
-	       COALESCE(SUM(amount)
-	          	OVER (PARTITION BY c.account_id ORDER BY s.issue_date),
-		       	0
-	       ) balance
-	  FROM credit_statements AS s 
-	       INNER JOIN credit_cards AS c
-	       ON c.id = s.card_id
-               LEFT OUTER JOIN credit_transactions AS t
-	       ON t.statement_id = s.id
-)
-GROUP BY id;
 
 CREATE TABLE credit_transactions (
 	id INTEGER,
@@ -65,3 +48,47 @@ CREATE TABLE credit_transactions (
 	PRIMARY KEY(id),
 	FOREIGN KEY(statement_id) REFERENCES credit_statements(id)
 );
+
+CREATE VIEW credit_statements_view AS
+WITH view AS (
+    SELECT
+        id, account_id, card_id, issue_date, due_date, transaction_date,
+        COALESCE(
+            SUM(amount)
+            OVER (PARTITION BY account_id ORDER BY issue_date),
+            0
+        ) balance,
+        COALESCE(
+            SUM(charges)
+            OVER (PARTITION BY account_id ORDER BY issue_date),
+            0
+        ) statement_charge_total,
+        COALESCE(
+            SUM(payments)
+            OVER (PARTITION BY account_id ORDER BY transaction_date),
+            0
+        ) daily_payment_total
+    FROM (
+        SELECT
+            s.*, c.*, transaction_date, amount,
+            CASE WHEN amount > 0 THEN amount END charges,
+            CASE WHEN amount < 0 THEN amount END payments
+        FROM credit_statements AS s
+            INNER JOIN credit_cards AS c
+                ON c.id = s.card_id
+            LEFT OUTER JOIN credit_transactions AS t
+    	        ON t.statement_id = s.id
+    )
+)
+SELECT
+    v.id, v.card_id, v.issue_date, v.due_date, v.balance,
+    (
+    SELECT
+        MIN(transaction_date) OVER (PARTITION BY v.account_id)
+    FROM
+        view
+    WHERE
+        v.statement_charge_total + daily_payment_total <= 0
+    ) payment_date
+FROM view AS v
+GROUP BY id;
