@@ -51,50 +51,58 @@ CREATE TABLE credit_transactions (
 
 CREATE VIEW credit_statements_view AS
 WITH view AS (
-    SELECT
-        id,
-        COALESCE(
-            SUM(amount)
-            OVER (PARTITION BY account_id ORDER BY issue_date),
-            0
-        ) balance,
-        COALESCE(
-            SUM(charges)
-            OVER (PARTITION BY account_id ORDER BY issue_date),
-            0
-        ) statement_charge_total,
-        COALESCE(
-            SUM(payments)
-            OVER (PARTITION BY account_id ORDER BY transaction_date),
-            0
-        ) daily_payment_total
-    FROM (
-        SELECT
-            s.id, s.issue_date, c.account_id, t.transaction_date, t.amount,
-            CASE WHEN amount > 0 THEN amount END charges,
-            CASE WHEN amount < 0 THEN amount END payments
-        FROM credit_statements AS s
-            INNER JOIN credit_cards AS c
-                ON c.id = s.card_id
-            LEFT OUTER JOIN credit_transactions AS t
-    	        ON t.statement_id = s.id
-    )
+	SELECT
+		*
+	FROM (
+		SELECT
+			s.id,
+			s.issue_date,
+			c.account_id,
+			t.transaction_date,
+			COALESCE(
+				SUM(amount) OVER (PARTITION BY account_id ORDER BY issue_date),
+				0
+			) balance,
+			COALESCE(
+			  SUM(charges) OVER (PARTITION BY account_id ORDER BY issue_date),
+			  0
+			) statement_charge_total,
+			COALESCE(
+			    SUM(payments)
+			    OVER (PARTITION BY account_id ORDER BY transaction_date),
+			    0
+			) daily_payment_total
+	    FROM (
+	      SELECT
+					statement_id, transaction_date, amount,
+	        CASE WHEN amount >= 0 THEN amount END charges,
+	        CASE WHEN amount < 0 THEN amount END payments
+				FROM credit_transactions
+			) t
+				LEFT OUTER JOIN credit_statements s
+					ON s.id = t.statement_id 
+				INNER JOIN credit_cards c
+					ON c.id = s.card_id
+	)
+	GROUP BY id, daily_payment_total
+	ORDER BY transaction_date
 )
-SELECT
-    s.id, s.card_id, s.issue_date, s.due_date, v.balance,
-    (
-    SELECT
-        MIN(t.transaction_date) OVER (PARTITION BY c.account_id)
-    FROM
-        view
-    WHERE
-        v.statement_charge_total + daily_payment_total <= 0
-    ) payment_date
-FROM view AS v
-    INNER JOIN credit_statements AS s
-        ON s.id = v.id
-    INNER JOIN credit_cards AS c
-        ON c.id = s.card_id
-    LEFT OUTER JOIN credit_transactions AS t
-        ON t.statement_id = s.id
-GROUP BY s.id;
+SELECT 
+	s.*,
+	v1.balance,
+	v2.payment_date
+FROM credit_statements s
+	INNER JOIN view v1
+		ON v1.id = s.id
+	LEFT OUTER JOIN (
+		SELECT
+			v1.id,
+			v2.transaction_date payment_date
+		FROM view v1, view v2
+		WHERE
+		  v1.account_id = v2.account_id
+			-v2.daily_payment_total >= v1.statement_charge_total
+		ORDER BY v1.issue_date
+	) v2
+		ON v2.id = s.id
+GROUP BY s.id
