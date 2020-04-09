@@ -3,7 +3,7 @@ Tools for dealing with the authorization blueprint.
 """
 import functools
 
-from flask import g, session
+from flask import g, redirect, session, url_for
 
 from monopyly.auth import auth
 from monopyly.db import get_db
