@@ -92,7 +92,7 @@ SELECT
 	v1.balance,
 	v2.payment_date
 FROM credit_statements s
-	INNER JOIN view v1
+	LEFT OUTER JOIN view v1
 		ON v1.id = s.id
 	LEFT OUTER JOIN (
 		SELECT
