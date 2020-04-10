@@ -4,6 +4,12 @@ Filters defined for the application.
 from monopyly.core import core
 
 
+@core.app_template_filter('currency')
+def make_currency(amount):
+    """Return the amount to two decimal places (always shown)."""
+    return f'{amount:,.2f}'
+
+
 @core.app_template_filter('ordinal')
 def make_ordinal(integer):
     """
