@@ -87,9 +87,49 @@ WITH view AS (
 	GROUP BY id, daily_payment_total
 	ORDER BY transaction_date
 )
+WITH view AS (
+	SELECT
+		*
+	FROM (
+		SELECT
+			s.id,
+			s.issue_date,
+			c.account_id,
+			t.transaction_date,
+			COALESCE(
+				/* Get the overall balance by statement */
+				SUM(amount) OVER (PARTITION BY account_id ORDER BY issue_date),
+				0
+			) statement_balance,
+			COALESCE(
+				/* Get the total charges by statement */
+			  SUM(charges) OVER (PARTITION BY account_id ORDER BY issue_date),
+			  0
+			) statement_charge_total,
+			COALESCE(
+				/* Get the total payments by day */
+			  SUM(payments)
+			  OVER (PARTITION BY account_id ORDER BY transaction_date),
+			  0
+			) daily_payment_total
+	    FROM (
+	      SELECT
+					statement_id, transaction_date, amount,
+	        CASE WHEN amount >= 0 THEN amount END charges,
+	        CASE WHEN amount < 0 THEN amount END payments
+				FROM credit_transactions
+			) t
+				LEFT OUTER JOIN credit_statements s
+					ON s.id = t.statement_id 
+				INNER JOIN credit_cards c
+					ON c.id = s.card_id
+	)
+	GROUP BY id, daily_payment_total
+	ORDER BY transaction_date
+)
 SELECT 
 	s.*,
-	v1.balance,
+	v1.statement_balance balance,
 	v2.payment_date
 FROM credit_statements s
 	LEFT OUTER JOIN view v1
@@ -100,9 +140,11 @@ FROM credit_statements s
 			v2.transaction_date payment_date
 		FROM view v1, view v2
 		WHERE
+			/* Only compare balances for a single account */
 		  v1.account_id = v2.account_id
-			-v2.daily_payment_total >= v1.statement_charge_total
-		ORDER BY v1.issue_date
+			/* Get times where payments offset chargest (with float tolerance)*/
+			AND v1.statement_charge_total + v2.daily_payment_total < 1E-6
+		ORDER BY v1.transaction_date
 	) v2
 		ON v2.id = s.id
 GROUP BY s.id
