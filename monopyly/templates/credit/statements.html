@@ -16,7 +16,7 @@
 					</div>
 					<div class="payment">
 						<div class="balance">
-						{{ '${:,.2f}'.format(statement['balance']) }}
+							${{ statement['balance']|currency }}
 						</div>
 						{% if statement['payment_date'] %}
 							<div class="paid-notice flip-text-gadget">

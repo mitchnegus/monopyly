@@ -88,11 +88,11 @@ class TransactionHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 't.id')} "
                   "  FROM credit_transactions AS t "
                   "       INNER JOIN credit_statements AS s "
-                  "               ON s.id = t.statement_id "
+                  "          ON s.id = t.statement_id "
                   "       INNER JOIN credit_cards AS c "
-                  "               ON c.id = s.card_id "
+                  "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
-                  "               ON a.id = c.account_id "
+                  "          ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {statement_filter} {active_filter} "
                  f" ORDER BY transaction_date {sort_order}")
@@ -125,44 +125,13 @@ class TransactionHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 't.id')} "
                   "  FROM credit_transactions AS t "
                   "       INNER JOIN credit_statements AS s "
-                  "               ON s.id = t.statement_id "
+                  "          ON s.id = t.statement_id "
                   "       INNER JOIN credit_cards AS c "
-                  "               ON c.id = s.card_id "
+                  "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
-                  "               ON a.id = c.account_id "
+                  "          ON a.id = c.account_id "
                   " WHERE t.id = ? AND user_id = ?")
         abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
                       'user.')
         transaction = self._query_entry(transaction_id, query, abort_msg)
         return transaction
-
-
-def determine_statement_date(statement_day, transaction_date):
-    """
-    Determine the date for the statement belonging to a transaction.
-
-    Given the day of them month on which statements are issued and the
-    date a transaction occurred, determine the date the transaction's
-    statement was issued.
-
-    Parameters
-    ––––––––––
-    statement_day : int
-        The day of the month on which statements are issued.
-    transaction_date : datetime.date
-        The date the transaction took place.
-
-    Returns
-    –––––––
-    statement_date : datetime.date
-        The date on which the statement corresponding to the transaction
-        date was issued.
-    """
-    curr_month_statement_date = transaction_date.replace(day=statement_day)
-    if transaction_date.day < statement_day:
-        # The transaction will be on the statement later in the month
-        statement_date = curr_month_statement_date
-    else:
-        # The transaction will be on the next month's statement
-        statement_date = curr_month_statement_date + relativedelta(months=+1)
-    return statement_date

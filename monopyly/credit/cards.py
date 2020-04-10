@@ -83,7 +83,7 @@ class CardHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
-                  "               ON a.id = c.account_id "
+                  "          ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {account_filter} {bank_filter} "
                  f"       {digit_filter} {active_filter} "
@@ -119,7 +119,7 @@ class CardHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
-                  "               ON a.id = c.account_id "
+                  "          ON a.id = c.account_id "
                   " WHERE c.id = ? AND user_id = ?")
         abort_msg = f'Card ID {card_id} does not exist for the user.'
         card = self._query_entry(card_id, query, abort_msg)
@@ -160,7 +160,7 @@ class CardHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
-                  "       ON a.id = c.account_id "
+                  "          ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} {digit_filter}")
         placeholders = (self.user_id, *fill_place(bank),

@@ -10,7 +10,7 @@
 
 	<div id="balance">
 		<div>$</div>
-		<div>{{ '{:,.2f}'.format(statement['balance']) }}</div>
+		<div>{{ statement['balance']|currency }}</div>
 	</div>
 
 	<div id="payment">
@@ -39,12 +39,14 @@
 
 			<form id="pay" action="" method="post">
 				<div class="form-line">
-					<input id="pay-date" type="text" name="pay_date" />
-					<button id="make-payment" class="dark-background" type="button"> 
-						<div id="prompt">Pay this statement</div>
-						<img class="button-icon" src="{{ url_for('static', filename='img/checkmark.png') }}" />
-					</button>
+					<div class="dollar-sign">$</div>
+					<input id="pay-amount" type="text" name="pay_amount" value="{{ statement['balance']|currency }}" maxlength="8"/>
+					<input id="pay-date" type="text" name="pay_date" value="{{ date_today }}" maxlength="10"/>
 				</div>
+				<button id="make-payment" class="dark-background" type="button"> 
+					<div id="prompt">Make a payment</div>
+					<img class="button-icon" src="{{ url_for('static', filename='img/checkmark.png') }}" />
+				</button>
 			</form>
 
 		{% endif %}

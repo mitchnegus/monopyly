@@ -13,8 +13,7 @@ from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
 from .accounts import AccountHandler
 from .cards import CardHandler
-from .statements import StatementHandler, determine_due_date
-from .transactions import determine_statement_date
+from .statements import StatementHandler, determine_statement_due_date
 
 
 class TransactionForm(FlaskForm):
@@ -55,30 +54,21 @@ class TransactionForm(FlaskForm):
         card = ch.find_card(self.bank.data, self.last_four_digits.data)
         return card
 
-    def get_transaction_statement(self, statement_creation=True):
+    def get_transaction_statement(self):
         """Get the credit card statement associated with the transaction."""
         # Get the card for the transaction
         card = self.get_transaction_card()
         if not card:
             abort(404, 'A card matching the criteria was not found.')
-        # Determine the date the statement was issued
-        if self.issue_date.data:
-            issue_date = self.issue_date.data
-        else:
-            issue_date = determine_statement_date(card['statement_issue_day'],
-                                                  self.transaction_date.data)
-        # Get the statement corresponding to the card and issue date
         sh = StatementHandler()
-        statement = sh.find_statement(card['id'], issue_date)
-        # Check if the statement exists and potentially create it if not
-        if not statement and statement_creation:
-            statement_data = {
-                'card_id': card['id'],
-                'issue_date': issue_date,
-                'due_date': determine_due_date(card['statement_due_day'],
-                                               issue_date)
-            }
-            statement = sh.new_entry(statement_data)
+        # Get the statement corresponding to the card and issue date
+        issue_date = self.issue_date.data
+        if issue_date:
+            statement = sh.find_statement(card['id'], issue_date)
+        else:
+            statement = sh.infer_statement(card,
+                                           self.transaction_date.data,
+                                           creation=True)
         return statement
 
 

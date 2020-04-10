@@ -28,6 +28,10 @@ select {
   border-radius: 3px;
 }
 
+::selection {
+	background-color: #dfdfdf;
+}
+
 
 /*
  * Create dark grey header with a white logo
@@ -1016,6 +1020,7 @@ form#card #statement-due-day-field  {
 #statement-details #statement-info {
 	display: flex;
 	flex-direction: column;
+	width: min-content;
 	padding: 0 50px;
 }
 
@@ -1063,20 +1068,61 @@ form#card #statement-due-day-field  {
 form#pay {
 	clear: left;
 	position: relative;
-	width: 80%;
+	height: 60px;
+	width: 300px;
 	margin: 100px auto;
+	border-radius: 5px;
 }
 
 form#pay button,
 form#pay input {
-	height: 50px;
+	height: 100%;
 	margin: 0;
 	border: none;
-	border-radius: 5px;
+	border-radius: inherit;
 }
+
+form#pay .form-line {
+	position: relative;
+	height: 100%;
+	width: 80%;
+	box-sizing: border-box;
+	border: 1px solid #cccccc;
+	border-radius: inherit;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+form#pay .form-line .dollar-sign {
+	position: absolute;
+	left: 10px;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	color: #666666;
+}
+
+form#pay .form-line #pay-amount,
+form#pay .form-line #pay-date {
+	width: 50%;
+	border: none;
+}
+
+form#pay .form-line #pay-amount {
+	padding-left: 25px;
+	padding-right: 15px;
+	border-right: 2px solid #eeeeee;
+	text-align: right;
+}
+
+form#pay .form-line #pay-date {
+	text-align: center;
+}
+
 
 form#pay #make-payment {
 	position: absolute;
+	top: 0;
 	left: 0;
 	background-color: green;
 	background-image: linear-gradient(90deg, #85bb65, #73a457);
@@ -1098,14 +1144,6 @@ form#pay #make-payment[type="submit"] #prompt {
 
 form#pay #make-payment[type="button"] .button-icon {
 	display: none;
-}
-
-form#pay #pay-date {
-	width: 80%;
-	box-sizing: border-box;
-	border: 1px solid #cccccc;
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
 }
 
 #statement-details table#statement-transactions {

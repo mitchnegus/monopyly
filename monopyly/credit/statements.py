@@ -88,9 +88,9 @@ class StatementHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
-                  "               ON c.id = s.card_id "
+                  "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
-                  "               ON a.id = c.account_id "
+                  "          ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {bank_filter} {active_filter} "
                  f" ORDER BY issue_date {sort_order}, active DESC")
@@ -123,9 +123,9 @@ class StatementHandler(DatabaseHandler):
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
-                  "               ON c.id = s.card_id "
+                  "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
-                  "               ON a.id = c.account_id "
+                  "          ON a.id = c.account_id "
                   " WHERE s.id = ? AND user_id = ?")
         abort_msg = (f'Statement ID {statement_id} does not exist for the '
                       'user.')
@@ -164,15 +164,59 @@ class StatementHandler(DatabaseHandler):
         date_filter = filter_item(issue_date, 'issue_date', 'AND')
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
-                  " INNER JOIN credit_cards AS c "
-                  "    ON c.id = s.card_id "
-                  " INNER JOIN credit_accounts AS a "
-                  "    ON a.id = c.account_id "
-                  " WHERE user_id = ? {card_filter} {date_filter} "
+                  "       INNER JOIN credit_cards AS c "
+                  "          ON c.id = s.card_id "
+                  "       INNER JOIN credit_accounts AS a "
+                  "          ON a.id = c.account_id "
+                 f" WHERE user_id = ? {card_filter} {date_filter} "
                   " ORDER BY issue_date DESC")
         placeholders = (self.user_id, *fill_place(card_id),
                         *fill_place(issue_date))
         statement = self.cursor.execute(query, placeholders).fetchone()
+        return statement
+
+    def infer_statement(self, card, transaction_date, creation=False):
+        """
+        Infer the statement corresponding to the date of a transaction.
+
+        Given the date of a transaction and the card used, infer the
+        statement that the transaction belongs to. If the given card
+        issues statements on a date later in the month than the
+        transaction, the transaction will be assumed to be on that
+        statement. Otherwise, the transaction is assumed to be on the
+        following statement.
+
+        Parameters
+        ––––––––––
+        card : sqlite3.Row
+            The entry for the card used for the transaction.
+        transaction_date : datetime.date
+            The date the transaction took place.
+        creation : bool, optional
+            A flag indicating whether a statement should be created
+            if it is not found in the database. The default is `False`;
+            a statement will not be created, even if no matching
+            statement already exists in the database.
+
+        Returns
+        –––––––
+        statement : sqlite3.Row
+            The inferred statement entry for the transaction.
+        """
+        statement_day = card['statement_issue_day']
+        statement_date = determine_statement_issue_date(statement_day,
+                                                        transaction_date)
+        statement = self.find_statement(card['id'], statement_date)
+        if creation and not statement:
+            issue_day = card['statement_issue_day']
+            due_day = card['statement_due_day']
+            issue_date = determine_statement_issue_date(issue_day,
+                                                        transaction_date)
+            due_date = determine_statement_due_date(due_day, issue_date)
+            statement_data = {'card_id': card['id'],
+                              'issue_date': issue_date,
+                              'due_date': due_date}
+            statement = self.new_entry(statement_data)
         return statement
 
     def delete_entries(self, entry_ids):
@@ -197,7 +241,38 @@ class StatementHandler(DatabaseHandler):
         super().delete_entries(entry_ids)
 
 
-def determine_due_date(statement_due_day, issue_date):
+def determine_statement_issue_date(issue_day, transaction_date):
+    """
+    Determine the date for the statement belonging to a transaction.
+
+    Given the day of them month on which statements are issued and the
+    date a transaction occurred, determine the date the transaction's
+    statement was issued.
+
+    Parameters
+    ––––––––––
+    issue_day : int
+        The day of the month on which statements are issued.
+    transaction_date : datetime.date
+        The date the transaction took place.
+
+    Returns
+    –––––––
+    statement_date : datetime.date
+        The date on which the statement corresponding to the transaction
+        date was issued.
+    """
+    curr_month_statement_date = transaction_date.replace(day=issue_day)
+    if transaction_date.day < issue_day:
+        # The transaction will be on the statement later in the month
+        statement_date = curr_month_statement_date
+    else:
+        # The transaction will be on the next month's statement
+        statement_date = curr_month_statement_date + relativedelta(months=+1)
+    return statement_date
+
+
+def determine_statement_due_date(due_day, issue_date):
     """
     Determine the due date for a statement.
 
@@ -206,7 +281,7 @@ def determine_due_date(statement_due_day, issue_date):
 
     Parameters
     ––––––––––
-    statement_due_day : int
+    due_day : int
         The day of the month on which statements are due.
     issue_date : datetime.date
         The date the statement was issued.
@@ -216,8 +291,8 @@ def determine_due_date(statement_due_day, issue_date):
     due_date : datetime.date
         The date on which the statement is determined to be due.
     """
-    curr_month_due_date = issue_date.replace(day=statement_due_day)
-    if issue_date.day < statement_due_day:
+    curr_month_due_date = issue_date.replace(day=due_day)
+    if issue_date.day < due_day:
         # The statement is due on the due date later this month
         due_date = curr_month_due_date
     else:

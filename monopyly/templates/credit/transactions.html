@@ -23,7 +23,10 @@
 			</td>
 			<td class="date">{{ transaction['transaction_date'] }}</td>
 			<td>{{ transaction['vendor'] }}</td>
-			<td class="amount">{{ '${:,.2f}'.format(transaction['amount']) }}</td>
+			<td class="amount">
+				<span class="dollar-sign">$</span>
+				<span>{{ transaction['amount']|currency }}</span>
+			</td>
 			<td class="notes">
 				<div class="notes">{{ transaction['notes'] }}</div>
 			</td>

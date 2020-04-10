@@ -52,7 +52,10 @@
 				<tr>
 					<td class="date">{{ transaction['transaction_date'] }}</td>
 					<td class="text">{{ transaction['vendor'] }}</td>
-					<td class="amount">{{ '${:,.2f}'.format(transaction['amount']) }}</td>
+					<td class="amount">
+						<span class="dollar-sign">$</span>
+						<span>{{ transaction['amount']|currency }}</span>
+					</td>
 					<td>
 						<a href="{{ url_for('credit.show_transaction', transaction_id=transaction['id']) }}">
 							<img class="more" src="{{ url_for('static', filename='img/plus.png') }}" />
@@ -73,11 +76,11 @@
 
 	<script>
 		const UPDATE_STATEMENT_DUE_DATE_ENDPOINT = "{{ url_for('credit.update_statement_due_date', statement_id=statement['id']) }}";
-		const UPDATE_STATEMENT_PAYMENT_ENDPOINT = "{{ url_for('credit.update_statement_payment', statement_id=statement['id']) }}";
+		const MAKE_PAYMENT_ENDPOINT = "{{ url_for('credit.make_payment', card_id=statement['card_id'], statement_id=statement['id']) }}";
 	</script>
 	<script type="module" src="{{ url_for('static', filename='js/update_statement_due_date.js') }}">
 	</script>
-	<script type="module" src="{{ url_for('static', filename='js/update_statement_payment.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/make_payment.js') }}">
 	</script>
 
 {% endblock %}

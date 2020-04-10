@@ -8,3 +8,4 @@ core = Blueprint('core', __name__)
 
 import monopyly.core.routes
 import monopyly.core.filters
+import monopyly.core.context_processors

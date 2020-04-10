@@ -13,10 +13,11 @@ from monopyly.credit import credit
 from monopyly.credit.forms import *
 from monopyly.credit.accounts import AccountHandler
 from monopyly.credit.cards import CardHandler
-from monopyly.credit.statements import StatementHandler
-from monopyly.credit.transactions import (
-    TransactionHandler, determine_statement_date
+from monopyly.credit.statements import (
+    StatementHandler, determine_statement_issue_date,
+    determine_statement_issue_date
 )
+from monopyly.credit.transactions import TransactionHandler
 
 
 # Define a custom form error messaage
@@ -167,8 +168,8 @@ def update_statements_display():
 def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
     # Get the statement information from the database
-    statement_fields = ('bank', 'last_four_digits', 'issue_date', 'due_date',
-                        'balance', 'payment_date')
+    statement_fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
+                        'due_date', 'balance', 'payment_date')
     statement = sh.get_entry(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
@@ -181,7 +182,8 @@ def show_statement(statement_id):
                            statement_transactions=transactions)
 
 
-@credit.route('/_update_statement_due_date/<int:statement_id>', methods=('POST',))
+@credit.route('/_update_statement_due_date/<int:statement_id>',
+              methods=('POST',))
 @login_required
 def update_statement_due_date(statement_id):
     sh = StatementHandler()
@@ -193,18 +195,27 @@ def update_statement_due_date(statement_id):
     return str(statement['due_date'])
 
 
-@credit.route('/_update_statement_payment/<int:statement_id>', methods=('POST',))
+@credit.route('/_make_payment/<int:card_id>/<int:statement_id>',
+              methods=('POST',))
 @login_required
-def update_statement_payment(statement_id):
-    sh = StatementHandler()
+def make_payment(card_id, statement_id):
+    th, sh, ch = TransactionHandler(), StatementHandler(), CardHandler()
     # Get the field from the AJAX request
-    payment_date = request.get_json()
-    # Update the statement in the database
-    mapping = {'paid': 1, 'payment_date': parse_date(payment_date)}
-    sh.update_entry(statement_id, mapping)
+    post_args = request.get_json()
+    payment_amount = float(post_args['payment_amount'])
+    payment_date = parse_date(post_args['payment_date'])
+    # Add the paymnet as a transaction in the database
+    card = ch.get_entry(card_id)
+    statement = sh.infer_statement(card, payment_date, creation=True)
+    transaction_data = {'statement_id': statement['id'],
+                        'transaction_date': payment_date,
+                        'vendor': '-',
+                        'amount': -payment_amount,
+                        'notes': 'Card payment'}
+    th.new_entry(transaction_data)
     # Get the statement information from the database
-    fields = ('bank', 'last_four_digits', 'issue_date', 'due_date', 'balance',
-              'payment_date')
+    fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
+              'due_date', 'balance', 'payment_date')
     statement = sh.get_entry(statement_id, fields=fields)
     return render_template('credit/statement_info.html',
                            statement=statement)
@@ -291,7 +302,8 @@ def new_transaction(statement_id):
     return render_template('credit/transaction_form_page_new.html', form=form)
 
 
-@credit.route('/update_transaction/<int:transaction_id>', methods=('GET', 'POST'))
+@credit.route('/update_transaction/<int:transaction_id>',
+              methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
     th = TransactionHandler()
@@ -403,9 +415,7 @@ def infer_statement():
     if len(cards) == 1:
         # Determine the statement corresponding to the card and date
         card = cards[0]
-        statement_date = determine_statement_date(card['statement_issue_day'],
-                                                  transaction_date)
-        statement = sh.find_statement(card['id'], issue_date=statement_date)
+        statement = sh.infer_statement(card, transaction_date)
         # Check that a statement was found and that it belongs to the user
         if not statement:
             abort(404, 'A statement matching the criteria was not found.')
