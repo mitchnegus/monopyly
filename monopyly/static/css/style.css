@@ -1166,6 +1166,7 @@ table#transactions {
  */
 #transaction-details {
 	width: 50%;
+	min-width: 400px;
 	margin: 20px auto;
 }
 
@@ -1186,6 +1187,11 @@ table#transactions {
 
 #transaction-info td {
 	text-align: left;
+}
+
+#transaction-details form {
+	width: 80%;
+	min-width: 350px;
 }
 
 

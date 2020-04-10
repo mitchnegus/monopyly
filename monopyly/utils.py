@@ -244,6 +244,15 @@ def strip_function(field):
     return field
 
 
+def dedelimit_float(value):
+    """Remove delimiters from strings before conversion to floats."""
+    delimiter = ','
+    try:
+        return float(value.replace(delimiter, ''))
+    except AttributeError:
+        return value
+
+
 def reserve_places(placeholders):
     """Reserve a set of places matching the placeholders input."""
     return ', '.join(['?']*len(placeholders))

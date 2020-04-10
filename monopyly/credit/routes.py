@@ -7,7 +7,7 @@ from flask import redirect, render_template, flash, request, url_for, jsonify
 from werkzeug.exceptions import abort
 
 from monopyly.db import get_db
-from monopyly.utils import parse_date
+from monopyly.utils import parse_date, dedelimit_float
 from monopyly.auth.tools import login_required
 from monopyly.credit import credit
 from monopyly.credit.forms import *
@@ -202,7 +202,7 @@ def make_payment(card_id, statement_id):
     th, sh, ch = TransactionHandler(), StatementHandler(), CardHandler()
     # Get the field from the AJAX request
     post_args = request.get_json()
-    payment_amount = float(post_args['payment_amount'])
+    payment_amount = dedelimit_float(post_args['payment_amount'])
     payment_date = parse_date(post_args['payment_date'])
     # Add the paymnet as a transaction in the database
     card = ch.get_entry(card_id)
