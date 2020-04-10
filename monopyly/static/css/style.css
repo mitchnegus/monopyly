@@ -698,6 +698,7 @@ table.transactions td.text {
 table.transactions th.amount,
 table.transactions td.amount {
 	text-align: right;
+	white-space: nowrap;
 }
 
 table.transactions td.notes{
