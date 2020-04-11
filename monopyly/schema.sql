@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS credit_cards;
 DROP TABLE IF EXISTS credit_statements;
 DROP TABLE IF EXISTS credit_transactions;
 
+/* Store user information */
 CREATE TABLE users (
 	id INTEGER,
 	username TEXT UNIQUE NOT NULL,
@@ -10,6 +11,7 @@ CREATE TABLE users (
 	PRIMARY KEY(id)
 );
 
+/* Store credit account information */
 CREATE TABLE credit_accounts (
 	id INTEGER,
 	user_id INTEGER NOT NULL,
@@ -20,6 +22,7 @@ CREATE TABLE credit_accounts (
 	FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
+/* Store credit card information */
 CREATE TABLE credit_cards (
 	id INTEGER,
 	account_id INTEGER NOT NULL,
@@ -29,6 +32,7 @@ CREATE TABLE credit_cards (
 	FOREIGN KEY(account_id) REFERENCES credit_accounts(id)
 );
 
+/* Store credit card statement information */
 CREATE TABLE credit_statements (
 	id INTEGER,
 	card_id INTEGER NOT NULL,
@@ -38,6 +42,7 @@ CREATE TABLE credit_statements (
 	FOREIGN KEY(card_id) REFERENCES credit_cards(id)
 );
 
+/* Store credit card transaction information */
 CREATE TABLE credit_transactions (
 	id INTEGER,
 	statement_id INTEGER NOT NULL,
@@ -49,6 +54,7 @@ CREATE TABLE credit_transactions (
 	FOREIGN KEY(statement_id) REFERENCES credit_statements(id)
 );
 
+/* Prepare a view giving enhanced credit card statement information */
 CREATE VIEW credit_statements_view AS
 WITH view AS (
 	SELECT
@@ -59,58 +65,21 @@ WITH view AS (
 			s.issue_date,
 			c.account_id,
 			t.transaction_date,
+			/* Determine the balance on an account for each statement */
 			COALESCE(
 				SUM(amount) OVER (PARTITION BY account_id ORDER BY issue_date),
 				0
 			) balance,
+			/* Determine the total charges on an account for each statement */
 			COALESCE(
 			  SUM(charges) OVER (PARTITION BY account_id ORDER BY issue_date),
 			  0
 			) statement_charge_total,
+			/* Determine the total payments on an account for each transaction */
 			COALESCE(
 			    SUM(payments)
 			    OVER (PARTITION BY account_id ORDER BY transaction_date),
 			    0
-			) daily_payment_total
-	    FROM (
-	      SELECT
-					statement_id, transaction_date, amount,
-	        CASE WHEN amount >= 0 THEN amount END charges,
-	        CASE WHEN amount < 0 THEN amount END payments
-				FROM credit_transactions
-			) t
-				LEFT OUTER JOIN credit_statements s
-					ON s.id = t.statement_id 
-				INNER JOIN credit_cards c
-					ON c.id = s.card_id
-	)
-	GROUP BY id, daily_payment_total
-	ORDER BY transaction_date
-)
-WITH view AS (
-	SELECT
-		*
-	FROM (
-		SELECT
-			s.id,
-			s.issue_date,
-			c.account_id,
-			t.transaction_date,
-			COALESCE(
-				/* Get the overall balance by statement */
-				SUM(amount) OVER (PARTITION BY account_id ORDER BY issue_date),
-				0
-			) statement_balance,
-			COALESCE(
-				/* Get the total charges by statement */
-			  SUM(charges) OVER (PARTITION BY account_id ORDER BY issue_date),
-			  0
-			) statement_charge_total,
-			COALESCE(
-				/* Get the total payments by day */
-			  SUM(payments)
-			  OVER (PARTITION BY account_id ORDER BY transaction_date),
-			  0
 			) daily_payment_total
 	    FROM (
 	      SELECT
