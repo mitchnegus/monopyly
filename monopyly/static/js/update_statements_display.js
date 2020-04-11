@@ -14,25 +14,25 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 (function() {
 
 	// Identify the card filters
-	let container = $('#statements-container');
-	let filterContainer = $('#card-filter');
+	const $container = $('#statements-container');
+	const $filterContainer = $('#card-filter');
 	
 	// Send the Ajax request on click
-	let filters = filterContainer.find('.card');
-	filters.on('click', function() {
+	const $filters = $filterContainer.find('.card');
+	$filters.on('click', function() {
 		// Add or remove the selected tag when clicked
 		updateDisplay();
 	});
 	
 	function updateDisplay() {
 		// Determine the selected credit cards to use from the filters
-		let selectedFilters = filterContainer.find('.card.selected');
-		let filterIDs = [];
-		selectedFilters.each(function() {filterIDs.push(this.id);});
+		const $selectedFilters = $filterContainer.find('.card.selected');
+		const filterIDs = [];
+		$selectedFilters.each(function() {filterIDs.push(this.id);});
 		// Update the display with the filters
-		let endpoint = FILTER_ENDPOINT;
-		let rawData = {'filter_ids': filterIDs};
-		updateDisplayAjaxRequest(endpoint, rawData, container);
+		const endpoint = FILTER_ENDPOINT;
+		const rawData = {'filter_ids': filterIDs};
+		updateDisplayAjaxRequest(endpoint, rawData, $container);
 	}
 	
 })();

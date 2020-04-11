@@ -19,47 +19,45 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 (function() {
 
 	// Identify the card filters
-	var container = $('#transactions-table-container');
-	var filterContainer = $('#card-filter');
+	const $container = $('#transactions-table-container');
+	const $filterContainer = $('#card-filter');
 	
 	// Send the Ajax request on click
-	var filters = filterContainer.find('.card');
-	filters.on('click', function() {
+	const $filters = $filterContainer.find('.card');
+	$filters.on('click', function() {
 		updateTable();
 	});
 	
 	// Change the table ordering and send the Ajax request on click
-	var sorters;
-	container.on('click', 'img.sort-icon', function() {
-		sorters = $('img.sort-icon');
+	$container.on('click', 'table img.sort-icon', function() {
+		// Identify the table sorters
+		const $sorters = $('table img.sort-icon');
 		// Swap the sorter icons
-		sorters.toggleClass('selected');
+		$sorters.toggleClass('selected');
 		// Update the table
 		updateTable();
 	});
 	
 	function updateTable() {
 		// Determine the selected credit cards to use from the filters
-		var selectedFilters = filterContainer.find('.card.selected');
-		var filterIDs = [];
-		selectedFilters.each(function() {filterIDs.push(this.id);});
+		const $selectedFilters = $filterContainer.find('.card.selected');
+		const filterIDs = [];
+		$selectedFilters.each(function() {filterIDs.push(this.id);});
 		// Determine the table ordering (ascending/descending transaction date)
-		var sortOrder;
-		var sorter = $('.sort-icon.selected');
-		if (sorter.hasClass('asc')) {
+		const $sorter = $('.sort-icon.selected');
+		let sortOrder
+		if ($sorter.hasClass('asc')) {
 			sortOrder = 'asc';
 		} else {
 			sortOrder = 'desc';
 		}
 		// Update the table with the filters and ordering
-		let endpoint = FILTER_ENDPOINT;
-		let rawData = {
+		const endpoint = FILTER_ENDPOINT;
+		const rawData = {
 			'filter_ids': filterIDs,
 			'sort_order': sortOrder
 		};
-		updateDisplayAjaxRequest(endpoint, rawData, container);
-		// Update the sorters since they have been replaced
-		sorters = $('.sort-icon');
+		updateDisplayAjaxRequest(endpoint, rawData, $container);
 	}
 	
 })();

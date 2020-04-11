@@ -13,24 +13,24 @@
 (function() {
 
 	// Identify all input elements in the form
-	let $inputElements = $('form input');
+	const $inputElements = $('form input');
 	// Identify inputs for card information
-	let $inputBank = $inputElements.filter('input#bank');
-	let $inputDigits = $inputElements.filter('input#last_four_digits');
-	let $inputTransactionDate = $inputElements.filter('input#transaction_date');
-	let $inputStatementDate = $inputElements.filter('input#issue_date');
+	const $inputBank = $inputElements.filter('#bank');
+	const $inputDigits = $inputElements.filter('#last_four_digits');
+	const $inputTransactionDate = $inputElements.filter('#transaction_date');
+	const $inputStatementDate = $inputElements.filter('#issue_date');
 	
 	$inputTransactionDate.on('blur', function() {
-		inferStatementAjaxRequest();
-	});
-	
-	function inferStatementAjaxRequest() {
-		// Return a single statement matching the criteria of the raw data
-		let rawData = {
+		const rawData = {
 			'bank': $inputBank.val(),
 			'digits': $inputDigits.val(),
 			'transaction_date': $inputTransactionDate.val()
 		};
+		inferStatementAjaxRequest(rawData);
+	});
+	
+	function inferStatementAjaxRequest(rawData) {
+		// Return a single statement matching the criteria of the raw data
 		$.ajax({
 			url: INFER_STATEMENT_ENDPOINT,
 			type: 'POST',
@@ -40,7 +40,7 @@
 				if (response != '') {
 					// A statement can be inferred, so populate the fields with its info
 					$inputStatementDate.val(response);
-					let nextInputIndex = $inputElements.index($inputTransactionDate[0])+1;
+					const nextInputIndex = $inputElements.index($inputTransactionDate[0])+1;
 					$inputElements.eq(nextInputIndex).focus();
 				}
 			},

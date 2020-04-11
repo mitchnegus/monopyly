@@ -13,18 +13,18 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 
 (function() {
 
-	let endpoint = UPDATE_CARD_STATUS_ENDPOINT;
+	const endpoint = UPDATE_CARD_STATUS_ENDPOINT;
 	// Identify the key elements
-	let $switches = $('.toggle-switch-gadget');
+	const $switches = $('.toggle-switch-gadget');
 
 	// Send an AJAX request when the switch is toggled
 	$switches.on('change', function() {
-		let $toggleSwitch = $(this);
-		let $card = $toggleSwitch.closest('.credit-card');
-		let $cardFront = $card.find('.card-face.front');
-		let $checkbox = $toggleSwitch.find('input[type="checkbox"]');
-		let cardActive = $checkbox.is(':checked');
-		let rawData = {
+		const $toggleSwitch = $(this);
+		const $card = $toggleSwitch.closest('.credit-card');
+		const $cardFront = $card.find('.card-face.front');
+		const $checkbox = $toggleSwitch.find('input[type="checkbox"]');
+		const cardActive = $checkbox.is(':checked');
+		const rawData = {
 			'input_id': $checkbox[0].id,
 			'active': cardActive
 		};

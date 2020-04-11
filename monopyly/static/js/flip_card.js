@@ -8,7 +8,7 @@
 (function() {
 
 	// Identify the cards
-	let $cards = $('.credit-card');
+	const $cards = $('.credit-card');
 
 	// Add the flipped class to clicked cards
 	$cards.on('click', function() {
@@ -17,7 +17,7 @@
 
 	// Remove the flipped class after clicking outside of a card
 	$('html').on('click', function(event) {
-		let $target = $(event.target);
+		const $target = $(event.target);
 		if (!$target.closest($cards).length) {
 			$cards.removeClass('flipped');
 		}

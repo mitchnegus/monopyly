@@ -15,9 +15,9 @@ import { updateDBWidget } from './modules/update_database_widget.js';
 
 (function() {
 
-	let endpoint = UPDATE_STATEMENT_DUE_DATE_ENDPOINT;
+	const endpoint = UPDATE_STATEMENT_DUE_DATE_ENDPOINT;
 	// Identify the key elements
-	let $widget = $('#due-date.update-db-widget');
+	const $widget = $('#due-date.update-db-widget');
 
 	updateDBWidget(endpoint, $widget);
 	

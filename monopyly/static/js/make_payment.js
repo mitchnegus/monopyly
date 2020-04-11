@@ -15,7 +15,7 @@
 (function() {
 
 	// Identify the key elements
-	let $container = $('#statement-info-container');
+	const $container = $('#statement-info-container');
 	let $buttonPay = $('#make-payment[type="button"]');
 	let $inputPayAmount = $('#pay-amount');
 	let $inputPayDate = $('#pay-date');
@@ -25,7 +25,7 @@
 	
 	// Clicking outside the form returns the form to its original state
 	$(document).on('click', function(event) {
-		let $formPay = $('form#pay');
+		const $formPay = $('form#pay');
 		// Change the button type back to 'button' for clicks outside the form
 		if (!$formPay.is(event.target) && $formPay.has(event.target).length === 0) {
 			$buttonPay.off('click');
@@ -46,7 +46,7 @@
 				// Stop the form from being submitted by the form action
 				event.preventDefault();
 				// Submit the form using an AJAX request
-				let rawData = {
+				const rawData = {
 					'payment_amount': $inputPayAmount.val(),
 					'payment_date': $inputPayDate.val()
 				}

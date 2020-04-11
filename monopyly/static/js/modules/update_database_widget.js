@@ -14,15 +14,14 @@ import { updateDisplayAjaxRequest } from './update_display_ajax.js';
 function updateDBWidget(endpoint, $widget) {
 
 	// Identify the key elements of the widget
-	let $button = $widget.find('.widget-edit-icon');
-	let $display = $widget.find('.widget-display');
-	let $input = $widget.find('.widget-input');
+	const $button = $widget.find('.widget-edit-icon');
+	const $display = $widget.find('.widget-display');
+	const $input = $widget.find('.widget-input');
 
 	$button.on('click', function() {
 		// Hide the edit button while editing
 		$button.hide();
 		// Set the text of the input to match the displayed value
-		console.log($display.html());
 		$input.val($display.html());
 		// Allow the user to enter a new value
 		$input.show();
@@ -38,14 +37,14 @@ function updateDBWidget(endpoint, $widget) {
 
 	$input.on('blur', function() {
 		// Execute an AJAX request to update the database
-		let value = $input.val();
+		const value = $input.val();
 		updateDisplayAjaxRequest(endpoint, value, $display);
+		// Show the edit button (on hover) when not editing
+		$button.show();
 		// Unbind the enter key
 		$input.off('keydown');
 		// Hide the input box (showing the displayed value)
-		$input.hide();
-		// Show the edit button (on hover) when not editing
-		$button.show();
+		$input.delay(50).hide(0);
 	});
 
 }

@@ -11,12 +11,17 @@ body {
 }
 
 a {
-	color: #85bb65;
+	color: #5e8f40;
 	text-decoration: none;
 }
 
 a:hover {
 	text-decoration: underline;
+}
+
+a:focus {
+	color: #85bb65;
+	outline: none;
 }
 
 form {
@@ -493,6 +498,7 @@ form .autocomplete-box .item.active {
 	padding: 1px 10px;
 	background-color: #eeeeee;
 	border-radius: 10px;
+	color: inherit;
 	text-align: center;
 	font-size: 8pt;
 	cursor: pointer;
@@ -500,6 +506,7 @@ form .autocomplete-box .item.active {
 
 #card-filter .card:hover {
 	background-color: #cccccc; 
+	text-decoration: none;
 }
 
 #card-filter .inactive.card {
@@ -527,8 +534,16 @@ form .autocomplete-box .item.active {
 	color: inherit;
 }
 
+.credit-card-block:focus {
+	color: inherit;
+}
+
 .credit-card-block .card-background {
 	width: 100%;
+}
+
+.credit-card-block:hover .card-background {
+	filter: brightness(0.98);
 }
 
 .credit-card {
@@ -779,7 +794,19 @@ table.transactions td div.notes{
 	margin: 0 0 5px;
 }
 
-.panel h4 {
+.panel .category {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+
+.panel .category li {
+	margin: 5px 0;
+}
+
+.panel .category h4 {
+	width: 50%;
+	min-width: min-content;
 	margin: 25px 0 10px;
 	border-bottom: 2px solid #eaeaea;
 }
@@ -982,8 +1009,10 @@ form#card #statement-due-day-field  {
 	padding: 20px;
   background-color: #e5fbd8;
   border-radius: 15px;
+	box-shadow: 0 0 20px #eeeeee;
 	text-align: center;
 	text-transform: uppercase;
+	font-size: 1.1em;
 }
 
 #statements-container .card-column .digits {
@@ -999,14 +1028,19 @@ form#card #statement-due-day-field  {
 	padding: 45px 50px;
   background-color: #eeeeee;
 	background-image: linear-gradient(#eeeeee, #e6e6e6);
-	border: 2px solid #dddddd;
+	box-shadow: 1px 1px 3px #bbbbbb;
+	border: 1px solid #dddddd;
   border-radius: 10px;
 	color: inherit;
-	text-decoration: none;
 }
 
 .statement-block:hover {
 	filter: brightness(0.98);
+	text-decoration: none;
+}
+
+.statement-block:focus {
+	color: inherit;
 }
 
 .statement-block .date,

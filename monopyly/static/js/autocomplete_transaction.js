@@ -11,13 +11,13 @@
 (function() {
 
 	// Identify all input elements in the form
-	var $inputElements = $('form input');
+	const $inputElements = $('form input');
 	// Identify the vendor input box (used when suggesting notes)
-	let $vendor = $('form input#vendor');
+	const $vendor = $('form input#vendor');
 	// Set global variables for selection movement
-	var matches;
-	var displayStart, displayCount;
-	var currentFocus;
+	const matches;
+	let displayStart, displayCount;
+	let currentFocus;
 	
 	// Get possible values for fields with autocomplete
 	$('div.autocomplete input').on('focus', function() {
@@ -33,7 +33,7 @@
 	});
 	
 	function autocompleteAjaxRequest(inputElement, vendor = null) {
-		let rawData = {
+		const rawData = {
 			'field': inputElement.id,
 			'vendor': $vendor.val()
 		};
@@ -45,10 +45,10 @@
 			contentType: 'application/json; charset=UTF-8',
 			success: function(response) {
 				// Define variables for the user input and its database matches
-				var existingUserInput = $(inputElement).val().toLowerCase();
+				const userInput = $(inputElement).val().toLowerCase();
 				// Refresh the set of matches and update the menu
-				refreshMatches(existingUserInput, response);
-				updateAutocomplete(inputElement, existingUserInput);
+				refreshMatches(userInput, response);
+				updateAutocomplete(inputElement, userInput);
 				// Bind keyup to also perform update, arrow keys to navigate
 				bindUpdate(inputElement, response);
 			},
@@ -66,7 +66,7 @@
 	function bindUpdate(inputElement, response) {
 		// Bind any input action to refresh/update autocomplete
 		$(inputElement).on('input', function() {
-			var userInput = $(this).val().toLowerCase();
+			let userInput = $(this).val().toLowerCase();
 			// Check the user input against the Ajax response
 			refreshMatches(userInput, response);
 			// Update the autocomplete menu (including showing/hiding the menu)
@@ -77,34 +77,31 @@
 	function refreshMatches(userInput, response) {
 		// Refresh autocomplete matches against Ajax response
 		matches = [];
-		var responseItem, lowerResponseItem;
 		// First check if the response starts with the user input substring
-		for (var i = 0; i < response.length; i++) {
-			responseItem = response[i];
-			lowerResponseItem = responseItem.toLowerCase();
-			if (lowerResponseItem.startsWith(userInput)) {
-				matches.push(responseItem);
+		for (let i = 0; i < response.length; i++) {
+			const responseItem = response[i].toLowerCase();
+			if (responseItem.startsWith(userInput)) {
+				matches.push(response[i]);
 			}
 		}
 		// Second, check if the reponse contains the user input substring anywhere
-		for (var i = 0; i < response.length; i++) {
-			responseItem = response[i] 
-			var lowerResponseItem = responseItem.toLowerCase();
-			var userInputMatches = lowerResponseItem.includes(userInput);
-			var responseItemIncluded = matches.includes(responseItem);
-			if (userInputMatches && !responseItemIncluded) {
-				matches.push(responseItem);
+		for (let i = 0; i < response.length; i++) {
+			const responseItem = response[i].toLowerCase()
+			const responseMatchesInput = responseItem.includes(userInput);
+			const responseNotYetIncluded = !matches.includes(response[i]);
+			if (responseMatchesInput && responseNotYetIncluded) {
+				matches.push(response[i]);
 			}
 		}
 	}
 	
 	function updateAutocomplete(inputElement, userInput) {
 		// Define conditions for showing/closing the autocomplete box
-		var matchCount = matches.length;
+		const matchCount = matches.length;
 		if (userInput && matchCount) {
 			// There is user input and some matches, so show the autocomplete box
-			var lowerFirstMatch = matches[0].toLowerCase();
-			var onlyUserInput = (matchCount == 1 && userInput == lowerFirstMatch);
+			const firstMatch = matches[0].toLowerCase();
+			const onlyUserInput = (matchCount == 1 && userInput == firstMatch);
 			if (!onlyUserInput) {
 				// Don't show a suggestion if the given input matches the only suggestion
 				showAutocomplete(inputElement);
@@ -123,11 +120,11 @@
 	function showAutocomplete(inputElement) {
 		closeAutocomplete(inputElement);
 		// Define the outer autocomplete box
-		var autocompleteBox = '<div class="autocomplete-box"></div>';
+		const autocompleteBox = '<div class="autocomplete-box"></div>';
 		$(inputElement).parent().append(autocompleteBox);
 		// Define each item within the autocomplete box
-		var displayStartDefault = 0;
-		var displayCountDefault = 10;
+		const displayStartDefault = 0;
+		const displayCountDefault = 10;
 		displayStart = displayStartDefault;
 		displayCount = displayCountDefault;
 		populateAutocompleteItems(inputElement);
@@ -142,8 +139,6 @@
 	function populateAutocompleteItems(inputElement) {
 		clearAutocompleteItems();
 		// Populate the autocomplete list with suggestions
-		var autocompleteItem;	
-		var $suggestions;
 		if (matches.length < displayCount) {
 			// Show all suggestions available
 			displayCount = matches.length;
@@ -151,20 +146,20 @@
 			// Reset the starting point to the fixed number of suggestions above bottom
 			displayStart = matches.length - displayCount;
 		}
-		var displayEnd = displayStart + displayCount;
-		for (var i = displayStart; i < displayEnd; i++) {
-			autocompleteItem = '<div class="item">' + matches[i] + '</div>';
+		const displayEnd = displayStart + displayCount;
+		for (let i = displayStart; i < displayEnd; i++) {
+			const autocompleteItem = '<div class="item">' + matches[i] + '</div>';
 			$('div.autocomplete-box').append(autocompleteItem);
 		}
-		$suggestions = $('div.autocomplete-box div.item');
+		const $suggestions = $('div.autocomplete-box div.item');
 		$suggestions.on('mousedown', function(e) {
 			// Prevent "premature" blurring
 			e.preventDefault();
 		});
 		$suggestions.on('click', function() {
-			$suggestion = $(this);
+			const $suggestion = $(this);
 			autofillReplacement($suggestion, inputElement);
-			var nextInputIndex = $inputElements.index(inputElement)+1;
+			const nextInputIndex = $inputElements.index(inputElement)+1;
 			$inputElements.eq(nextInputIndex).focus();
 		});
 	}
@@ -205,11 +200,11 @@
 	function selectItem(inputElement) {
 		if (currentFocus > -1) {
 			// Simulate a click on the active item
-			$suggestion = $('div.autocomplete-box div.item.active');
+			const $suggestion = $('div.autocomplete-box div.item.active');
 			autofillReplacement($suggestion, inputElement);
 		}
 		closeAutocomplete(inputElement);
-		var nextInputIndex = $inputElements.index(inputElement)+1;
+		const nextInputIndex = $inputElements.index(inputElement)+1;
 		$inputElements.eq(nextInputIndex).focus();
 	}
 	
@@ -220,7 +215,7 @@
 		}
 		// Keep the display within the limits of the number of matches
 		if (currentFocus == displayCount - 1) {
-			var displayEnd = displayStart + displayCount;
+			const displayEnd = displayStart + displayCount;
 			if (displayEnd < matches.length) {
 				displayStart++;
 			}
@@ -246,17 +241,16 @@
 	}
 	
 	function makeActive(currentFocus) {
-		var $suggestions, activeSuggestion
-		$suggestions = $('div.autocomplete-box div.item');
+		const $suggestions = $('div.autocomplete-box div.item');
 		$suggestions.removeClass('active');
 		if (currentFocus >= 0) {
-			activeSuggestion = $suggestions[currentFocus];
+			const activeSuggestion = $suggestions[currentFocus];
 			$(activeSuggestion).addClass('active');
 		}
 	}
 	
 	function autofillReplacement($suggestion, inputElement) {
-		var text = $suggestion.text();
+		const text = $suggestion.text();
 		$(inputElement).val(text);
 		closeAutocomplete(inputElement);
 	}
