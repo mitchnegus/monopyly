@@ -10,6 +10,15 @@ body {
 	color: #444444;
 }
 
+a {
+	color: #85bb65;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
 form {
 	width: 50%;
 	margin: auto;
@@ -717,10 +726,12 @@ table.transactions td div.notes{
 /*
  * Customization for the 'Home' page
  */
-#homepage-block.jumbo {
+#homepage-block {
   padding: 10px 0 30px 0;
-  background-color: #eeeeee;
+  background-color: #dddddd;
+	border: 1px solid #d8d8d8;
   border-radius: 6px;
+	box-shadow: 2px 2px 5px #cccccc;
 }
 
 #homepage-block h2 {
@@ -733,9 +744,10 @@ table.transactions td div.notes{
 #homepage-block h3 {
   margin-top: 30px;
   text-align: center;
-  color: #999999;
+  color: #777777;
   font-size: 1.7em;
   font-weight: 100;
+	letter-spacing: 0.5px;
 }
 
 #homepage-panels {
@@ -748,14 +760,28 @@ table.transactions td div.notes{
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
-	margin: 25px;
+	margin: 20px;
 	padding: 50px;
-	background-color: #f6f6f6;
-	border-radius: 15px;
+	background-color: #fafafa;
+	border: 1px solid #f5f5f5;
+	box-shadow: 2px 2px 5px #cccccc;
+}
+
+.panel:first-of-type {
+	margin-left: 0;
+}
+
+.panel:last-of-type {
+	margin-right: 0;
 }
 
 .panel h2 {
-	margin-top: 0;
+	margin: 0 0 5px;
+}
+
+.panel h4 {
+	margin: 25px 0 10px;
+	border-bottom: 2px solid #eaeaea;
 }
 
 #bank.panel,
