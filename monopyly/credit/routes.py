@@ -168,12 +168,12 @@ def update_statements_display():
 def show_statement(statement_id):
     sh, th = StatementHandler(), TransactionHandler()
     # Get the statement information from the database
-    statement_fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
-                        'due_date', 'balance', 'payment_date')
+    statement_fields = ('account_id', 'card_id', 'bank', 'last_four_digits',
+                        'issue_date', 'due_date', 'balance', 'payment_date')
     statement = sh.get_entry(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
-    transaction_fields = ('transaction_date', 'vendor', 'amount')
+    transaction_fields = ('transaction_date', 'vendor', 'amount', 'notes')
     transactions = th.get_entries(statement_ids=(statement['id'],),
                                   sort_order=sort_order,
                                        fields=transaction_fields)
@@ -229,8 +229,9 @@ def show_transactions():
     cards = ch.get_entries()
     # Get all of the user's transactions for active cards from the database
     sort_order = 'DESC'
-    transaction_fields = ('bank', 'last_four_digits', 'transaction_date',
-                           'vendor', 'amount', 'notes', 'issue_date')
+    transaction_fields = ('account_id', 'bank', 'last_four_digits',
+                          'transaction_date', 'vendor', 'amount', 'notes',
+                          'statement_id', 'issue_date')
     transactions = th.get_entries(active=True,
                                   sort_order=sort_order,
                                   fields=transaction_fields)
