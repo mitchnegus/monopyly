@@ -15,8 +15,8 @@
 	const durationSlideExpanded = durationFadeCompact + durationSlideCompact
 	const durationFadeExpanded = 200
 	// Identify the plus/minus icons
-	const $iconsMoreInfo = $('tr.compact .more');
-	const $iconsLessInfo = $('tr.expanded .less');
+	const $iconsMoreInfo = $('tr.compact .more.button');
+	const $iconsLessInfo = $('tr.expanded .less.button');
 	// Initially hide all extra details
 	$('tr.expanded .details').hide();
 

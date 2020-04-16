@@ -145,18 +145,22 @@ aside.sidebar {
 /*
  * General object characteristics
  */
-.icon-button {
+.action {
 	height: 40px;
 	width: 40px;
 	background-size: 40px 40px;
-	margin: 0 5px;
+	margin: 0 10px;
 }
 
-.icon-button.delete {
+.action .button-icon {
+	width: 100%;
+}
+
+.action.delete {
 	background-image: url('../img/delete.png');
 }
 
-.icon-button.delete:hover {
+.action.delete:hover {
 	background-image: url('../img/delete-orange.png');
 }
 
@@ -164,6 +168,14 @@ aside.sidebar {
   color: #85bb65;
 	font-weight: bold;
 	letter-spacing: 1px;
+}
+
+.card-background {
+	width: 100%;
+}
+
+.card-number {
+	font-family: "Consolas", Courier, monospace;
 }
 
 form .form-line {
@@ -295,6 +307,15 @@ form .autocomplete-box .item.active {
 	height: 35px;
 	width: 35px;
 	margin: 3px auto;
+}
+
+#details-menu {
+	position: relative;
+	width: 100%;
+}
+
+#details-menu .action {
+	float: right;
 }
 
 
@@ -498,8 +519,8 @@ form .autocomplete-box .item.active {
 	padding: 1px 10px;
 	background-color: #eeeeee;
 	border-radius: 10px;
-	color: inherit;
 	text-align: center;
+	color: inherit;
 	font-size: 8pt;
 	cursor: pointer;
 }
@@ -523,6 +544,7 @@ form .autocomplete-box .item.active {
 	color: #bbbbbb;
 }
 
+
 /*
  * Style blocks for displaying credit cards
  */
@@ -536,10 +558,6 @@ form .autocomplete-box .item.active {
 
 .credit-card-block:focus {
 	color: inherit;
-}
-
-.credit-card-block .card-background {
-	width: 100%;
 }
 
 .credit-card-block:hover .card-background {
@@ -580,24 +598,23 @@ form .autocomplete-box .item.active {
 	transform: rotateY(180deg);
 }
 
-.credit-card .card-face .number {
+.credit-card .card-face .card-number {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	width: 100%;
-	font-family: "Consolas", Courier, monospace;
 	line-height: 1em;
 }
 
-.credit-card .card-face .number .digits {
+.credit-card .card-face .card-number .digits {
 	margin: 0 0.3em;
 }
 
-.credit-card .card-face .number .digits.obscure {
+.credit-card .card-face .card-number .digits.obscure {
 	font-size: smaller;
 }
 
-.credit-card .card-face.front .number {
+.credit-card .card-face.front .card-number {
 	position: absolute;
 	top: 160px;
 }
@@ -609,7 +626,7 @@ form .autocomplete-box .item.active {
 	letter-spacing: 1px;
 }
 
-.credit-card .card-face.back .number {
+.credit-card .card-face.back .card-number {
 	font-size: 14pt;
 }
 
@@ -657,50 +674,43 @@ table.transactions {
 	font-size: 9pt;
 }
 
+table.transactions a {
+	color: inherit;
+}
+
 table.transactions tr {
-	border: 1pt #eeeeee;
-	border-style: solid none;
+	box-sizing: border-box;
 }
 
-table.transactions tr:hover td {
-	background-color: #fafafa;
-}
-
-table.transactions tr .more {
+table.transactions tr .buttons {
 	visibility: hidden;
-	width: 16px;
 }
 
-table.transactions tr:hover .more {
+table.transactions tr:hover .buttons {
 	visibility: visible;
 }
 
-table.transactions th,
+table.transactions tr .buttons .button {
+	height: 20px;
+	width: 20px;
+	cursor: pointer;
+}
+
+table.transactions tr.compact {
+	border: 1pt #eeeeee;
+	border-style: solid none none;
+}
+
+table.transactions tr.compact:hover td {
+	background-color: #fafafa;
+}
+
 table.transactions td {
+	padding: 0;
+}
+
+table.transactions th {
 	padding: 5px 10px;
-}
-
-table.transactions th.card,
-table.transactions td.card {
-	text-align: right;
-}
-
-table.transactions th.card {
-	padding-right: 30px;
-}
-
-table.transactions td.card .bank {
-	display: inline-block;
-}
-@media screen and (max-width: 1200px) {
-	table.transactions td.card .bank {
-		display: none;
-	}
-}
-
-table.transactions th.date,
-table.transactions td.date {
-	text-align: center;
 }
 
 table.transactions th .sort-icon {
@@ -714,27 +724,164 @@ table.transactions th .sort-icon.selected {
 	display: inline;
 }
 
-table.transactions th.text,
-table.transactions td.text {
+table.transactions th.card {
+	padding-right: 30px;
+}
+
+table.transactions .detail {
+	padding: 5px 10px;
+}
+
+table.transactions .date {
+	text-align: center;
+}
+
+table.transactions .text {
 	text-align: left;
 }
 
-table.transactions th.amount,
-table.transactions td.amount {
+table.transactions .amount {
 	text-align: right;
 	white-space: nowrap;
 }
 
-table.transactions td.notes{
+table.transactions .notes {
 	max-width: 250px;	
-	text-align: left;
-}
-
-table.transactions td div.notes{
-	width: 100%;
-	text-align: left;
 	white-space: nowrap;
 	overflow: auto;
+}
+
+table.transactions .card {
+	text-align: right;
+}
+
+@media screen and (max-width: 1200px) {
+	table.transactions .card.detail {
+		padding-right: 30px;
+	}
+}
+
+table.transactions .card .bank {
+	display: inline-block;
+}
+@media screen and (max-width: 1200px) {
+	table.transactions .card .bank {
+		display: none;
+	}
+}
+
+table.transactions .buttons.detail {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	height: 100%;
+	padding: 3px 10px;
+}
+
+table.transactions tr.expanded .details {
+	display: flex;
+	align-items: center;
+	height: 150px;
+	padding: 5px 0;
+	font-size: 1.2em;
+	opacity: 0;
+}
+
+table.transactions .details .setting {
+	display: flex;
+	align-items: center;
+	flex-grow: 4;
+	margin: 0 20px;
+}
+@media screen and (max-width: 1200px) {
+	table.transactions .details .setting {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+table.transactions .details .setting .when {
+	margin-right: 50px;
+	color: #666666;
+	font-size: 1.5em;
+	font-weight: bold;
+	letter-spacing: 2px;
+}
+@media screen and (max-width: 1200px) {
+	table.transactions .details .setting .when {
+		margin-right: 0;
+		font-size: 1.2em;
+	}
+}
+
+table.transactions .details .setting .who.what {
+}
+
+table.transactions .details .setting .vendor {
+	margin: 10px 0 5px;
+	font-size: 2em;
+	font-weight: 600;
+}
+
+table.transactions .details .setting .notes {
+	max-width: 100%;
+	color: #666666;
+	font-size: 1.2em;
+}
+
+table.transactions .details .amount {
+	width: 250px;
+	margin: 0 5% 0 auto;
+	text-align: right;
+	font-size: 3em;
+	font-weight: bold;
+}
+
+table.transactions .details .card {
+	position: relative;
+	width: 150px;
+	margin: 0 30px;
+	box-sizing: border-box;
+	border-radius: 6px;
+	box-shadow: 1px 1px 2px #aaaaaa;
+	line-height: 0;
+}
+
+table.transactions .details .card .card-number {
+	position: absolute;
+	top: 70%;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	font-size: 1.5em;
+}
+
+table.transactions .details .statement {
+	position: relative;
+	padding-top: 4px;
+}
+
+table.transactions .details .statement img {
+	width: 118px;
+}
+
+table.transactions .details .statement .date {
+	position: absolute;
+	top: 25px;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	color: #bbbbbb;
+	font-weight: bold;
+}
+
+table.transactions .details .buttons {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-self: flex-start;
+	height: 100%;
+	padding: 0 10px;
 }
 
 
@@ -821,9 +968,6 @@ table.transactions td div.notes{
 	color: #bbbbbb;
 }
 
-#bank.panel {
-}
-
 
 /*
  * Customization for the 'About' page
@@ -877,14 +1021,6 @@ table.transactions td div.notes{
  */
 #account-details {
 	margin: 20px auto;
-}
-
-#account-menu {
-	position: relative;
-}
-
-#account-menu .icon-button {
-	float: right;
 }
 
 #account-info {
@@ -1028,9 +1164,9 @@ form#card #statement-due-day-field  {
 	padding: 45px 50px;
   background-color: #eeeeee;
 	background-image: linear-gradient(#eeeeee, #e6e6e6);
-	box-shadow: 1px 1px 3px #bbbbbb;
 	border: 1px solid #dddddd;
   border-radius: 10px;
+	box-shadow: 1px 1px 3px #bbbbbb;
 	color: inherit;
 }
 
@@ -1075,7 +1211,6 @@ form#card #statement-due-day-field  {
 #statement-details {
 	display: flex;
 	justify-content: space-around;
-	padding-top: 10px;
 }
 
 #statement-details #statement-info {

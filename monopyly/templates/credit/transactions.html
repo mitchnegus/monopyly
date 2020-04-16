@@ -1,7 +1,6 @@
 <table id="transactions" class="transactions">
 
 	<tr>
-		<th class="card">Card</th>
 		<th class="date">
 			Date
 			<img class="sort-icon asc{{ ' selected' if sort_order == 'ASC' else '' }}" src="{{ url_for('static', filename='img/sort-asc.png') }}" />
@@ -9,32 +8,101 @@
 		</th>
 		<th class="text">Vendor</th>
 		<th class="amount">Amount</th>
-		<th class="text">Notes</th>
-		<th class="date">Statement Date</th>
+		<th class="text notes">Notes</th>
+		<th class="card">Card</th>
 		<th class="edit"></th>
 	</tr>
 
-	{% for transaction in transactions %}
+	{% for transaction in transactions[:100] %}
 
-		<tr>
-			<td class="card">
-				<span class="bank">{{ transaction['bank'] }}</span>
-				-{{ transaction['last_four_digits'] }}
-			</td>
-			<td class="date">{{ transaction['transaction_date'] }}</td>
-			<td>{{ transaction['vendor'] }}</td>
-			<td class="amount">
-				<span class="dollar-sign">$</span>
-				<span>{{ transaction['amount']|currency }}</span>
-			</td>
-			<td class="notes">
-				<div class="notes">{{ transaction['notes'] }}</div>
-			</td>
-			<td class="date">{{ transaction['issue_date'] }}</td>
+		<tr class="compact">
 			<td>
-				<a href="{{ url_for('credit.show_transaction', transaction_id=transaction['id']) }}">
-					<img class="more" src="{{ url_for('static', filename='img/plus.png') }}" />
-				</a>
+				<div class="date detail">
+					{{ transaction['transaction_date'] }}</td>
+				</div>
+			<td>
+				<div class="text detail">
+					{{ transaction['vendor'] }}
+				</div>
+			</td>
+			<td>
+				<div class="amount detail">
+					<span class="dollar-sign">$</span>
+					<span>{{ transaction['amount']|currency }}</span>
+				</div>
+			</td>
+			<td>
+				<div class="text notes detail">{{ transaction['notes'] }}</div>
+			</td>
+			<td>
+				<div class="card detail">
+					<span class="bank">{{ transaction['bank'] }}</span>
+					-{{ transaction['last_four_digits'] }}
+				</div>
+			</td>
+			<td>
+				<div class="buttons detail">
+					<img class="more button" src="{{ url_for('static', filename='img/plus-thick.png') }}" />
+				</div>
+			</td>
+		</tr>
+		<tr class="expanded">
+			<td colspan="6">
+				<div class="details">
+
+					<div class="setting">
+						<div class="when">
+							{{ transaction['transaction_date'] }}
+						</div>
+						<div class="who what">
+							<div class="vendor">
+								{{ transaction['vendor'] }}
+							</div>
+							<div class="notes">
+								{{ transaction['notes'] }}
+							</div>
+						</div>
+					</div>
+
+					<!--<div class="tags">
+						<ul>
+							<li>Tag 1</li>
+							<li>Tag 2</li>
+							<li>Tag 3</li>
+						<ul>
+					</div>-->
+
+					<div class="amount">
+						${{ transaction['amount']|currency }}
+					</div>
+
+					<a href="{{ url_for('credit.show_account', account_id=transaction['account_id']) }}">
+						<div class="card">
+							<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ transaction['bank'].lower() }}-card.png">
+							<div class="card-number">
+								{{ transaction['last_four_digits'] }}
+							</div>
+						</div>
+					</a>
+
+					<a href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+					<div class="statement">
+						<img src="{{ url_for('static', filename='img/statement.png') }}">
+						<div class="date">
+							<div class="month">{{ transaction['issue_date'].strftime('%b')|upper }}</div>
+							<div class="year">{{ transaction['issue_date'].year }}</div>
+						</div>
+					</div>
+					</a>
+
+					<div class="buttons">
+						<img class="less button" src="{{ url_for('static', filename='img/minus-thick.png') }}" />
+						<a href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
+							<img class="edit button" src="{{ url_for('static', filename='img/edit.png') }}" />
+						</a>
+					</div>
+
+				</div>
 			</td>
 		</tr>
 
