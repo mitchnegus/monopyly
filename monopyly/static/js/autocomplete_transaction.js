@@ -15,7 +15,7 @@
 	// Identify the vendor input box (used when suggesting notes)
 	const $vendor = $('form input#vendor');
 	// Set global variables for selection movement
-	const matches;
+	let matches;
 	let displayStart, displayCount;
 	let currentFocus;
 	
