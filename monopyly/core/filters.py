@@ -7,6 +7,8 @@ from monopyly.core import core
 @core.app_template_filter('currency')
 def make_currency(amount):
     """Return the amount to two decimal places (always shown)."""
+    # Correct values of -0.00 to 0
+    amount = amount if round(amount, 2) != 0 else 0
     return f'{amount:,.2f}'
 
 
