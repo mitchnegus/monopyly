@@ -146,10 +146,14 @@ aside.sidebar {
  * General object characteristics
  */
 .action {
-	height: 40px;
-	width: 40px;
-	background-size: 40px 40px;
-	margin: 0 10px;
+	height: 30px;
+	width: 30px;
+	background-size: 30px 30px;
+	margin: 7.5px 0;
+}
+
+.action:hover {
+	filter: brightness(0.85);
 }
 
 .action .button-icon {
@@ -162,6 +166,7 @@ aside.sidebar {
 
 .action.delete:hover {
 	background-image: url('../img/delete-orange.png');
+	filter: none;
 }
 
 .paid-notice {
@@ -176,6 +181,29 @@ aside.sidebar {
 
 .card-number {
 	font-family: "Consolas", Courier, monospace;
+}
+
+.details-container {
+	display: flex;
+	justify-content: space-between;
+}
+
+.details-container .details-menu {
+	display: flex;
+	flex-direction: column;
+	height: min-content;
+	margin-left: 50px;
+	padding: 10px;
+	background-color: #f8f8f8;
+	border-radius: 10px;
+}
+
+.details-container .details-menu a:first-of-type {
+	margin-top: 5px;
+}
+
+.details-container .details-menu a:last-of-type {
+	margin-bottom: 5px;
 }
 
 form .form-line {
@@ -308,16 +336,6 @@ form .autocomplete-box .item.active {
 	width: 35px;
 	margin: 3px auto;
 }
-
-#details-menu {
-	position: relative;
-	width: 100%;
-}
-
-#details-menu .action {
-	float: right;
-}
-
 
 
 /*
@@ -1019,10 +1037,6 @@ table.transactions .details .buttons {
 /*
  * Customization for the 'Account Details' page
  */
-#account-details {
-	margin: 20px auto;
-}
-
 #account-info {
 	width: 100%;
 	font-size: 18pt;
@@ -1208,16 +1222,11 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the 'Statement Details' page
  */
-#statement-details {
-	display: flex;
-	justify-content: space-around;
-}
-
 #statement-details #statement-info {
 	display: flex;
 	flex-direction: column;
 	width: min-content;
-	padding: 0 50px;
+	margin-right: 50px;
 }
 
 #statement-details #statement-info #card {
@@ -1342,8 +1351,12 @@ form#pay #make-payment[type="button"] .button-icon {
 	display: none;
 }
 
-#statement-details table#statement-transactions {
-	width: 50%;
+#statement-details #statement-transactions {
+	flex-grow: 1;
+}
+
+#statement-details #statement-transactions table.transactions{
+	width: 100%;
 }
 
 

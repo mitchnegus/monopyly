@@ -97,7 +97,7 @@
 
 					<div class="buttons">
 						<img class="less button" src="{{ url_for('static', filename='img/minus-thick.png') }}" />
-						<a href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
+						<a class="button" href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
 							<img class="edit button" src="{{ url_for('static', filename='img/edit.png') }}" />
 						</a>
 					</div>
