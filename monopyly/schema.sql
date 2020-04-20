@@ -111,8 +111,10 @@ FROM credit_statements s
 		WHERE
 			/* Only compare balances for a single account */
 		  v1.account_id = v2.account_id
-			/* Get times where payments offset chargest (with float tolerance)*/
+			/* Get times where payments offset charges (with float tolerance)*/
 			AND v1.statement_charge_total + v2.daily_payment_total < 1E-6
+			/* Exclude times where the statement charges are zero (new statements)*/
+			AND ABS(v1.statement_balance) > 1E-6
 		ORDER BY v1.transaction_date
 	) v2
 		ON v2.id = s.id
