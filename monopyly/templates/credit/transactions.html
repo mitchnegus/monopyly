@@ -96,9 +96,11 @@
 					</a>
 
 					<div class="buttons">
-						<img class="less button" src="{{ url_for('static', filename='img/minus-thick.png') }}" />
+						<img class="less button" src="{{ url_for('static', filename='img/x-thick.png') }}" />
 						<a class="button" href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
-							<img class="edit button" src="{{ url_for('static', filename='img/edit.png') }}" />
+							<img class="edit icon" src="{{ url_for('static', filename='img/edit.png') }}" />
+						</a>
+						<a class="action button delete" href="{{ url_for('credit.delete_transaction', transaction_id=transaction['id']) }}" onclick="return confirm('Are you sure you want to delete this transaction?');">
 						</a>
 					</div>
 

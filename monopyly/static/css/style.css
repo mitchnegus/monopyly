@@ -145,18 +145,11 @@ aside.sidebar {
 /*
  * General object characteristics
  */
-.action {
-	height: 30px;
-	width: 30px;
-	background-size: 30px 30px;
-	margin: 7.5px 0;
-}
-
-.action:hover {
+.button:hover {
 	filter: brightness(0.85);
 }
 
-.action .button-icon {
+.button .icon {
 	width: 100%;
 }
 
@@ -198,11 +191,23 @@ aside.sidebar {
 	border-radius: 10px;
 }
 
-.details-container .details-menu a:first-of-type {
+.details-container .details-menu .action {
+	height: 30px;
+	width: 30px;
+	margin: 7.5px 0;
+	background-size: 30px 30px;
+	filter: brightness(0.9);
+}
+
+.details-container .details-menu .action.delete:hover {
+	filter: none;
+}
+
+.details-container .details-menu :first-of-type {
 	margin-top: 5px;
 }
 
-.details-container .details-menu a:last-of-type {
+.details-container .details-menu :last-of-type {
 	margin-bottom: 5px;
 }
 
@@ -269,14 +274,14 @@ form input.button:hover {
   cursor: pointer;
 }
 
-form button .button-icon {
+form button .icon {
 	height: 40px;
 	width: 40px;
 	margin: 0 10px;
 	filter: brightness(0.8);
 }
 
-form button.dark-background .button-icon {
+form button.dark-background .icon {
 	filter: brightness(1.2);
 	opacity: 0.5;
 }
@@ -331,7 +336,7 @@ form .autocomplete-box .item.active {
 	margin: 1px 0;
 }
 
-#sidebar-nav-menu .button-icon {
+#sidebar-nav-menu .button .icon {
 	height: 35px;
 	width: 35px;
 	margin: 3px auto;
@@ -711,7 +716,18 @@ table.transactions tr:hover .buttons {
 table.transactions tr .buttons .button {
 	height: 20px;
 	width: 20px;
+	margin-left: 10px;
+	background-size: 20px 20px;
 	cursor: pointer;
+}
+
+table.transactions tr .buttons .action.delete {
+	background-image: url('../img/delete-thick.png');
+}
+
+table.transactions tr .buttons .action.delete:hover {
+	background-image: url('../img/delete-orange-thick.png');
+	filter: none;
 }
 
 table.transactions tr.compact {
@@ -896,9 +912,9 @@ table.transactions .details .statement .date {
 table.transactions .details .buttons {
 	display: flex;
 	flex-direction: column;
-	justify-content: flex-start;
+	justify-content: space-between;
 	align-self: flex-start;
-	height: 100%;
+	height: 50%;
 	padding: 0 10px;
 }
 
@@ -936,7 +952,7 @@ table.transactions .details .buttons {
 	width: 100%;
 }
 
-.panel {
+div.panel {
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
@@ -947,29 +963,29 @@ table.transactions .details .buttons {
 	box-shadow: 2px 2px 5px #cccccc;
 }
 
-.panel:first-of-type {
+div.panel:first-of-type {
 	margin-left: 0;
 }
 
-.panel:last-of-type {
+div.panel:last-of-type {
 	margin-right: 0;
 }
 
-.panel h2 {
+div.panel h2 {
 	margin: 0 0 5px;
 }
 
-.panel .category {
+div.panel .category {
 	margin: 0;
 	padding: 0;
 	list-style-type: none;
 }
 
-.panel .category li {
+div.panel .category li {
 	margin: 5px 0;
 }
 
-.panel .category h4 {
+div.panel .category h4 {
 	width: 50%;
 	min-width: min-content;
 	margin: 25px 0 10px;
@@ -1066,22 +1082,22 @@ table.transactions .details .buttons {
 	overflow: auto;
 }
 
-#account-info .credit-card-block {
+#account-info div.credit-card-block {
 	margin-left: -375px;
 	transition: margin-left 0.2s;
 	perspective: 1200px;
 }
 
-#account-info .credit-card-block:hover {
+#account-info div.credit-card-block:hover {
 	margin-left: 0;
 	padding-left: 15px;
 }
 
-#account-info .credit-card-block:first-of-type {
+#account-info div.credit-card-block:first-of-type {
 	padding-right: 10px;
 }
 
-#account-info .credit-card-block:last-of-type {
+#account-info div.credit-card-block:last-of-type {
 	margin-left: 0;
 	padding-left: 0;
 }
@@ -1347,7 +1363,7 @@ form#pay #make-payment[type="submit"] #prompt {
 	display: none;
 }
 
-form#pay #make-payment[type="button"] .button-icon {
+form#pay #make-payment[type="button"] .icon {
 	display: none;
 }
 

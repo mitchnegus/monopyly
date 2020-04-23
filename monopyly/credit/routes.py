@@ -262,16 +262,6 @@ def update_transactions_display():
                            transactions=transactions)
 
 
-@credit.route('/transaction/<int:transaction_id>')
-@login_required
-def show_transaction(transaction_id):
-    th = TransactionHandler()
-    # Get the transaction information from the database
-    transaction = th.get_entry(transaction_id)
-    return render_template('credit/transaction_page.html',
-                           transaction=transaction)
-
-
 @credit.route('/new_transaction', defaults={'statement_id': None},
           methods=('GET', 'POST'))
 @credit.route('/new_transaction/<int:statement_id>', methods=('GET', 'POST'))
