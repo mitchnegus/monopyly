@@ -29,9 +29,9 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 	});
 	
 	// Change the table ordering and send the Ajax request on click
-	$container.on('click', 'table img.sort-icon', function() {
+	$container.on('click', '.transactions-table .sort-button', function() {
 		// Identify the table sorters
-		const $sorters = $('table img.sort-icon');
+		const $sorters = $('.transactions-table .sort-button');
 		// Swap the sorter icons
 		$sorters.toggleClass('selected');
 		// Update the table
@@ -44,7 +44,7 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 		const filterIDs = [];
 		$selectedFilters.each(function() {filterIDs.push(this.id);});
 		// Determine the table ordering (ascending/descending transaction date)
-		const $sorter = $('.sort-icon.selected');
+		const $sorter = $('.transactions-table .sort-button.selected');
 		let sortOrder
 		if ($sorter.hasClass('asc')) {
 			sortOrder = 'asc';
