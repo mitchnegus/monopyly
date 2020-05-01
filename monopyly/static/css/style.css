@@ -157,11 +157,11 @@ aside.sidebar {
 }
 
 .action.delete {
-	background-image: url('../img/delete.png');
+	background-image: url('../img/icons/delete.png');
 }
 
 .action.delete:hover {
-	background-image: url('../img/delete-orange.png');
+	background-image: url('../img/icons/delete-orange.png');
 	filter: none;
 }
 
@@ -820,11 +820,11 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .transaction .buttons .action.delete {
-	background-image: url('../img/delete-thick.png');
+	background-image: url('../img/icons/delete-thick.png');
 }
 
 .transactions-table .transaction .buttons .action.delete:hover {
-	background-image: url('../img/delete-orange-thick.png');
+	background-image: url('../img/icons/delete-orange-thick.png');
 	filter: none;
 }
 
@@ -958,7 +958,7 @@ form .autocomplete-box .item.active {
 	font-weight: 600;
 	transition: font-size 0.3s;
 }
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1200px) {
 	.transactions-table .expanded.summary .setting .vendor {
 		font-size: 1.5em;
 	}
@@ -1006,7 +1006,6 @@ form .autocomplete-box .item.active {
 .transactions-table .expanded.summary .payment .card {
 	position: relative;
 	width: 150px;
-	margin: 0 30px;
 	box-sizing: border-box;
 	border-radius: 6px;
 	box-shadow: 1px 1px 2px #aaaaaa;
@@ -1016,7 +1015,6 @@ form .autocomplete-box .item.active {
 @media screen and (max-width: 1200px) {
 	.transactions-table .expanded.summary .payment .card {
 		width: 100px;
-		margin: 0 10px 0 20px;
 	}
 }
 
@@ -1037,7 +1035,13 @@ form .autocomplete-box .item.active {
 
 .transactions-table .expanded.summary .payment .statement {
 	position: relative;
+	margin: 0 30px;
 	padding-top: 5px;
+}
+@media screen and (max-width: 1200px) {
+	.transactions-table .expanded.summary .payment .statement {
+		margin: 0 10px 0 20px;
+	}
 }
 
 .transactions-table .expanded.summary .payment .statement img {

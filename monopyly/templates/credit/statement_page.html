@@ -50,7 +50,7 @@
 						</td>
 						<td>
 							<div class="buttons detail">
-								<img class="more button" src="{{ url_for('static', filename='img/plus-thick.png') }}" />
+								<img class="more button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
 							</div>
 						</td>
 					</tr>
@@ -94,9 +94,9 @@
 								</a>
 	
 								<div class="buttons">
-									<img class="less button" src="{{ url_for('static', filename='img/minus-thick.png') }}" />
+									<img class="less button" src="{{ url_for('static', filename='img/icons/minus-thick.png') }}" />
 									<a href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
-										<img class="edit button" src="{{ url_for('static', filename='img/edit.png') }}" />
+										<img class="edit button" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
 									</a>
 								</div>
 	
@@ -111,7 +111,7 @@
 
 		<div class="details-menu">
 			<a class="action button" href="{{ url_for('credit.new_transaction', statement_id=statement['id']) }}">
-				<img class="icon" src="{{ url_for('static', filename='img/plus.png') }}" />
+				<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
 			</a>
 		</div>
 
