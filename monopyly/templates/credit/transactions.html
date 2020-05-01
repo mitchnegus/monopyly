@@ -69,20 +69,20 @@
 					<div class="amount">
 						${{ transaction['amount']|currency }}
 					</div>
-					<a href="{{ url_for('credit.show_account', account_id=transaction['account_id']) }}">
-						<div class="card">
-							<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ transaction['bank'].lower() }}-card.png">
-							<div class="card-number">
-								{{ transaction['last_four_digits'] }}
-							</div>
-						</div>
-					</a>
 					<a href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
 						<div class="statement">
 							<img src="{{ url_for('static', filename='img/statement.png') }}">
 							<div class="date">
 								<div class="month">{{ transaction['issue_date'].strftime('%b')|upper }}</div>
 								<div class="year">{{ transaction['issue_date'].year }}</div>
+							</div>
+						</div>
+					</a>
+					<a href="{{ url_for('credit.show_account', account_id=transaction['account_id']) }}">
+						<div class="card">
+							<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ transaction['bank'].lower() }}-card.png">
+							<div class="card-number">
+								{{ transaction['last_four_digits'] }}
 							</div>
 						</div>
 					</a>
