@@ -89,6 +89,9 @@
 				</div>
 				<div class="buttons">
 					<img class="less button" src="{{ url_for('static', filename='img/icons/x-thick.png') }}" />
+					<a class="button" href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+						<img class="icon" src="{{ url_for('static', filename='img/icons/statement.png') }}" />
+					</a>
 					<a class="button" href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
 						<img class="edit icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
 					</a>
