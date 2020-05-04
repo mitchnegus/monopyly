@@ -176,7 +176,7 @@ def show_statement(statement_id):
     transaction_fields = ('transaction_date', 'vendor', 'amount', 'notes')
     transactions = th.get_entries(statement_ids=(statement['id'],),
                                   sort_order=sort_order,
-                                       fields=transaction_fields)
+                                  fields=transaction_fields)
     return render_template('credit/statement_page.html',
                            statement=statement,
                            statement_transactions=transactions)
@@ -252,11 +252,12 @@ def update_transactions_display():
     # Determine the card IDs from the arguments of POST method
     cards = [ch.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected transactions from the database
-    transaction_fields = ('bank', 'last_four_digits', 'transaction_date',
-                           'vendor', 'amount', 'notes', 'issue_date')
+    transaction_fields = ('account_id', 'bank', 'last_four_digits',
+                          'transaction_date', 'vendor', 'amount', 'notes',
+                          'statement_id', 'issue_date')
     transactions = th.get_entries(card_ids=[card['id'] for card in cards],
-                                  fields=transaction_fields,
-                                  sort_order=sort_order)
+                                  sort_order=sort_order,
+                                  fields=transaction_fields)
     return render_template('credit/transactions.html',
                            sort_order=sort_order,
                            transactions=transactions)

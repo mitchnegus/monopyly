@@ -20,99 +20,10 @@
 			{% include 'credit/statement_info.html' %}
 		</div>
 		
-		<div id="statement-transactions">
-			<table class="transactions">
-		
-				<tr>
-					<th class="date">Date</th>
-					<th class="text">Vendor</th>
-					<th class="amount">Amount</th>
-					<th class="edit"></th>
-				</tr>
-		
-				{% for transaction in statement_transactions %}
-		
-					<tr class="compact">
-						<td>
-							<div class="date detail">
-								{{ transaction['transaction_date'] }}</td>
-							</div>
-						<td>
-							<div class="text detail">
-								{{ transaction['vendor'] }}
-							</div>
-						</td>
-						<td>
-							<div class="amount detail">
-								<span class="dollar-sign">$</span>
-								<span>{{ transaction['amount']|currency }}</span>
-							</div>
-						</td>
-						<td>
-							<div class="buttons detail">
-								<img class="more button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
-							</div>
-						</td>
-					</tr>
-					<tr class="expanded">
-						<td colspan="4">
-							<div class="details">
-	
-								<div class="setting">
-									<div class="when">
-										{{ transaction['transaction_date'] }}
-									</div>
-									<div class="who what">
-										<div class="vendor">
-											{{ transaction['vendor'] }}
-										</div>
-										<div class="notes">
-											{{ transaction['notes'] }}
-										</div>
-									</div>
-								</div>
-	
-								<!--<div class="tags">
-									<ul>
-										<li>Tag 1</li>
-										<li>Tag 2</li>
-										<li>Tag 3</li>
-									<ul>
-								</div>-->
-	
-								<div class="amount">
-									${{ transaction['amount']|currency }}
-								</div>
-	
-								<a href="{{ url_for('credit.show_account', account_id=statement['account_id']) }}">
-									<div class="card">
-										<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ statement['bank'].lower() }}-card.png">
-										<div class="card-number">
-											{{ statement['last_four_digits'] }}
-										</div>
-									</div>
-								</a>
-	
-								<div class="buttons">
-									<img class="less button" src="{{ url_for('static', filename='img/icons/minus-thick.png') }}" />
-									<a href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
-										<img class="edit button" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
-									</a>
-								</div>
-	
-							</div>
-						</td>
-					</tr>
-		
-				{% endfor %}	
-		
-			</table>
-		</div>
-
-		<div class="details-menu">
-			<a class="action button" href="{{ url_for('credit.new_transaction', statement_id=statement['id']) }}">
-				<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
-			</a>
+		<div id="statement-transactions-container">
+			{% with transactions = statement_transactions %}
+				{% include 'credit/transactions_table/transactions.html' %}
+			{% endwith %}
 		</div>
 
 	</div>

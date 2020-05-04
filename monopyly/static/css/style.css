@@ -763,6 +763,7 @@ form .autocomplete-box .item.active {
 
 .transactions-table .buttons.column {
 	min-width: 40px;
+	margin-left: 20px;
 }
 
 .transactions-table .titles,
@@ -821,7 +822,6 @@ form .autocomplete-box .item.active {
 	background-size: 20px 20px;
 	cursor: pointer;
 }
-
 
 .transactions-table .transaction .buttons .action.delete {
 	/* Set background image to allow color change on hover */
@@ -1114,6 +1114,7 @@ form .autocomplete-box .item.active {
 	justify-content: space-between;
 	align-self: flex-start;
 	height: 75%;
+	margin-left: 20px;
 	padding: 5px 10px;
 }
 
@@ -1437,6 +1438,21 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the 'Statement Details' page
  */
+@media screen and (max-width: 1200px) {
+	#statement-details {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+}
+
+#statement-details #statement-info-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex-grow: 1;
+}
+
 #statement-details #statement-info {
 	display: flex;
 	flex-direction: column;
@@ -1490,7 +1506,7 @@ form#pay {
 	position: relative;
 	height: 60px;
 	width: 300px;
-	margin: 100px auto;
+	margin: 100px auto 10px;
 	border-radius: 5px;
 }
 
@@ -1566,12 +1582,66 @@ form#pay #make-payment[type="button"] .icon {
 	display: none;
 }
 
-#statement-details #statement-transactions {
+#statement-details #statement-transactions-container {
 	flex-grow: 1;
 }
+@media screen and (max-width: 1200px) {
+	#statement-details #statement-transactions-container {
+		margin-top: 100px;
+	}
+}
 
-#statement-details #statement-transactions table.transactions{
+#statement-details .transactions-table {
 	width: 100%;
+}
+
+#statement-details .transactions-table .date.column {
+	flex-basis: 10%;
+}
+
+#statement-details .transactions-table .vendor.column {
+	flex-basis: 40%;
+	min-width: 150px;
+}
+
+#statement-details .transactions-table .amount.column {
+	flex-basis: 10%;
+	margin-left: auto;
+}
+
+#statement-details .transactions-table .notes.column {
+	flex-basis: 40%;
+	min-width: 100px;
+	white-space: nowrap;
+	overflow: auto;
+}
+
+#statement-details .transactions-table .buttons.column {
+	min-width: 40px;
+}
+
+#statement-details .transactions-table .expanded.summary .setting {
+	flex-basis: 80%;
+}
+
+#statement-details .transactions-table .expanded.summary .payment {
+	flex-basis: 20%;
+	justify-content: flex-end;
+}
+
+@media screen and (max-width: 1000px) {
+	#statement-details .transactions-table .expanded.summary .payment .amount {
+		margin-right: 0;
+	}
+}
+@media screen and (max-width: 800px) {
+	#statement-details .transactions-table .expanded.summary .payment .amount {
+		margin: 5px 0 0;
+	}
+}
+
+#statement-details .transactions-table .expanded.summary .buttons {
+	height: 60%;
 }
 
 
