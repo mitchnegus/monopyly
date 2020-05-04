@@ -1306,10 +1306,6 @@ div.panel .category h4 {
 	cursor: pointer;
 }
 
-#account-info .credit-card.flipped .card-face {
-	cursor: auto;
-}
-
 #account-info .key-day .widget-text {
 	min-width: 40px;
 }
