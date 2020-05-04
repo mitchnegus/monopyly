@@ -13,9 +13,11 @@
 		<span>{{ transaction['amount']|currency }}</span>
 	</div>
 
-	<div class="notes text column">
-		{{ transaction['notes'] }}
-	</div>
+	{% if 'statement_id' in transaction.keys() %}
+		<div class="notes text column">
+			{{ transaction['notes'] }}
+		</div>
+	{% endif %}
 
 	{% if 'bank' in transaction.keys() %}
 		<div class="card column">

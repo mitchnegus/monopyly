@@ -16,14 +16,28 @@
 
 	<div id="statement-details" class="details-container">
 
-		<div id="statement-info-container">
-			{% include 'credit/statement_info.html' %}
+		<div class="details-content">
+
+			<div id="statement-info-container">
+				{% include 'credit/statement_info.html' %}
+			</div>
+			
+			<div id="statement-transactions-container">
+				{% with transactions = statement_transactions %}
+					{% include 'credit/transactions_table/transactions.html' %}
+				{% endwith %}
+			</div>
+
 		</div>
-		
-		<div id="statement-transactions-container">
-			{% with transactions = statement_transactions %}
-				{% include 'credit/transactions_table/transactions.html' %}
-			{% endwith %}
+
+		<div class="details-menu">
+
+			<div class="button">
+				<a class="action" href="{{ url_for('credit.new_transaction', statement_id=statement['id']) }}">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+				</a>
+			</div>
+
 		</div>
 
 	</div>

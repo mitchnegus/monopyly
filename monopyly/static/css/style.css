@@ -185,36 +185,50 @@ aside.sidebar {
 .details-container {
 	display: flex;
 	justify-content: space-between;
+	width: 100%;
+}
+
+.details-container .details-content {
+	display: flex;
+	justify-content: space-between;
+	width: 90%;
 }
 
 .details-container .details-menu {
 	display: flex;
 	flex-direction: column;
 	height: min-content;
-	margin-left: 50px;
+	width: 30px;
+	margin-left: 20px;
 	padding: 10px;
 	background-color: #f8f8f8;
 	border-radius: 10px;
 }
 
-.details-container .details-menu .action {
+.details-container .details-menu div:first-of-type {
+	margin-top: 5px;
+}
+
+.details-container .details-menu div:last-of-type {
+	margin-bottom: 5px;
+}
+
+.details-container .details-menu .button {
 	height: 30px;
 	width: 30px;
 	margin: 7.5px 0;
+}
+
+.details-container .details-menu .action {
+	display: inline-block;
+	height: 30px;
+	width: 30px;
 	background-size: 30px 30px;
 	filter: brightness(0.9);
 }
 
 .details-container .details-menu .action.delete:hover {
 	filter: none;
-}
-
-.details-container .details-menu :first-of-type {
-	margin-top: 5px;
-}
-
-.details-container .details-menu :last-of-type {
-	margin-bottom: 5px;
 }
 
 form .form-line {
@@ -1434,8 +1448,8 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the 'Statement Details' page
  */
-@media screen and (max-width: 1200px) {
-	#statement-details {
+@media screen and (max-width: 1400px) {
+	#statement-details .details-content {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -1446,7 +1460,7 @@ form#card #statement-due-day-field  {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	flex-grow: 1;
+	flex-basis: 50%;
 }
 
 #statement-details #statement-info {
@@ -1579,9 +1593,9 @@ form#pay #make-payment[type="button"] .icon {
 }
 
 #statement-details #statement-transactions-container {
-	flex-grow: 1;
+	flex-basis: 50%;
 }
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 1400px) {
 	#statement-details #statement-transactions-container {
 		margin-top: 100px;
 	}
