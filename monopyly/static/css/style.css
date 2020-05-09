@@ -1673,22 +1673,17 @@ form#pay #make-payment[type="button"] .icon {
 }
 
 #statement-details .transactions-table .expanded.summary .setting {
-	flex-basis: 80%;
+	flex-basis: 70%;
 }
 
 #statement-details .transactions-table .expanded.summary .payment {
 	flex-basis: 20%;
-	justify-content: flex-end;
 }
 
-@media screen and (max-width: 1000px) {
-	#statement-details .transactions-table .expanded.summary .payment .amount {
-		margin-right: 0;
-	}
-}
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1200px) {
 	#statement-details .transactions-table .expanded.summary .payment .amount {
 		margin: 5px 0 0;
+		transition: all 0.3s;
 	}
 }
 
