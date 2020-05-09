@@ -270,7 +270,7 @@ def update_transactions_display():
     transactions = th.get_entries(card_ids=[card['id'] for card in cards],
                                   sort_order=sort_order,
                                   fields=transaction_fields)
-    return render_template('credit/transactions.html',
+    return render_template('credit/transactions_table/transactions.html',
                            sort_order=sort_order,
                            transactions=transactions)
 
