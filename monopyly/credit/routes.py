@@ -241,6 +241,18 @@ def show_transactions():
                            transactions=transactions)
 
 
+@credit.route('/_show_transaction_tags', methods=('POST',))
+@login_required
+def show_transaction_tags():
+    # Get the transaction ID from the AJAX request
+    transaction_id = request.get_json().split('-')[-1]
+    print(transaction_id)
+    tags = ['Thing 1', 'Thing 2']
+    if int(transaction_id) % 2:
+        tags.append('Thing 3')
+    return render_template('credit/transactions_table/tags.html', tags=tags)
+
+
 @credit.route('/_update_transactions_display', methods=('POST',))
 @login_required
 def update_transactions_display():

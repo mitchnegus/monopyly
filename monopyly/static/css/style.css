@@ -757,7 +757,7 @@ form .autocomplete-box .item.active {
 	white-space: nowrap;
 	overflow: auto;
 }
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .notes.column {
 		display: none;
 	}
@@ -895,10 +895,10 @@ form .autocomplete-box .item.active {
 .transactions-table .expanded.summary .setting {
 	display: flex;
 	align-items: center;
-	flex-basis: 50%;
+	flex-basis: 45%;
 	min-width: 370px;
 }
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .expanded.summary .setting {
 		flex-direction: column;
 		align-items: flex-start;
@@ -915,7 +915,7 @@ form .autocomplete-box .item.active {
 	min-width: 100px;
 	font-weight: bold;
 }
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .expanded.summary .setting .date {
 		display: block;
 		margin: -15px 0 10px;
@@ -924,7 +924,7 @@ form .autocomplete-box .item.active {
 	}
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .expanded.summary .setting .date .month,
 	.transactions-table .expanded.summary .setting .date .day,
 	.transactions-table .expanded.summary .setting .date .year {
@@ -952,7 +952,7 @@ form .autocomplete-box .item.active {
 	color: #aaaaaa;
 	font-size: 1.1em;
 }
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .expanded.summary .setting .date .full {
 		display: block;
 	}
@@ -963,7 +963,7 @@ form .autocomplete-box .item.active {
 	min-width: 250px;
 	padding: 0 10px;
 }
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .expanded.summary .setting .description {
 		width: 90%;
 	}
@@ -995,79 +995,99 @@ form .autocomplete-box .item.active {
 	}
 }
 
+.transactions-table .expanded.summary .tags-container {
+	flex-basis: 10%;
+	max-height: 80%;
+	min-width: 100px;
+	margin: 0 5px;
+}
+
+.transactions-table .expanded.summary .tags {
+	overflow: auto;
+}
+
+.transactions-table .expanded.summary .tags .tag {
+	margin: 5px 0;
+	padding: 2px 15px;
+	border-radius: 10px;
+	background-color: #dddddd;
+}
+
 .transactions-table .expanded.summary .payment {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	flex-basis: 50%;
-	margin: 0 10px 0 5px;
+	flex-basis: 45%;
+	height: 100%;
+	margin: 0 10px 0 30px;
 }
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .expanded.summary .payment {
 		flex-direction: column;
+		justify-content: center;
 		align-items: flex-end;
 	}
 }
 
 .transactions-table .expanded.summary .payment .amount {
-	width: 180px;
+	min-width: 180px;
+	margin-left: 5%;
 	text-align: right;
 	font-size: 3em;
 	font-weight: bold;
 	transition: all 0.3s;
 }
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1200px) {
 	.transactions-table .expanded.summary .payment .amount {
-		margin-right: 30px;
-	}
-}
-@media screen and (max-width: 900px) {
-	.transactions-table .expanded.summary .payment .amount {
-		width: 120px;
+		min-width: 120px;
+		margin-right: 20px;
 		font-size: 2em;
 		transition: all 0.3s, margin 0s;
 	}
 }
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .expanded.summary .payment .amount {
 		align-items: flex-end;
-		margin: 0 0 20px;
+		margin: 0 0 10px;
 		font-size: 2em;
 	}
 }
 
 .transactions-table .expanded.summary .payment .statement {
 	position: relative;
+	height: 60%;
+	margin-left: 5%;
 	padding-top: 5px;
+	transition: all 0.3s;
 }
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1500px) {
+	.transactions-table .expanded.summary .payment .statement {
+	height: 50%;
+	}
+}
+@media screen and (max-width: 1200px) {
 	.transactions-table .expanded.summary .payment .statement {
 		display: none;
 	}
 }
 
 .transactions-table .expanded.summary .payment .statement img {
-	width: 78px;
-	transition: width 0.3s;
-}
-@media screen and (max-width: 1200px) {
-	.transactions-table .expanded.summary .payment .statement img {
-		width: 46px;
-	}
+	height: 100%;
+	width: auto;
 }
 
 .transactions-table .expanded.summary .payment .statement .date {
 	position: absolute;
-	top: 15px;
+	top: 14%;
 	left: 0;
 	width: 100%;
 	text-align: center;
 	color: #bbbbbb;
 	font-size: 1.2em;
 	font-weight: bold;
-	transition: font-size 0.3s;
+	transition: all 0.3s;
 }
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 1500px) {
 	.transactions-table .expanded.summary .payment .statement .date {
 		font-size: 1em;
 	}
@@ -1084,22 +1104,35 @@ form .autocomplete-box .item.active {
 
 .transactions-table .expanded.summary .payment .card {
 	position: relative;
-	width: 150px;
+	height: 60%;
+	margin-left: 3%;
 	box-sizing: border-box;
-	border-radius: 6px;
-	box-shadow: 1px 1px 2px #aaaaaa;
 	line-height: 0;
 	transition: all 0.3s;
 }
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 1500px) {
 	.transactions-table .expanded.summary .payment .card {
-		width: 90px;
+		height: 50%;
 	}
 }
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1200px) {
 	.transactions-table .expanded.summary .payment .card {
-		width: 50px;
+		height: 30%;
 	}
+}
+@media screen and (max-width: 1000px) {
+	.transactions-table .expanded.summary .payment .card {
+		height: 20%;
+		transition: height 0s;
+	}
+}
+
+.transactions-table .expanded.summary .payment .card .card-background {
+	height: 100%;
+	width: auto;
+	border-radius: 6px;
+	box-shadow: 1px 1px 2px #aaaaaa;
+	transition: all 0.3s;
 }
 
 .transactions-table .expanded.summary .payment .card-number {
@@ -1111,12 +1144,17 @@ form .autocomplete-box .item.active {
 	font-size: 1.5em;
 	transition: font-size 0.3s
 }
+@media screen and (max-width: 1500px) {
+	.transactions-table .expanded.summary .payment .card-number {
+		font-size: 1.2em;
+	}
+}
 @media screen and (max-width: 1200px) {
 	.transactions-table .expanded.summary .payment .card-number {
 		font-size: 1em;
 	}
 }
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1000px) {
 	.transactions-table .expanded.summary .payment .card-number {
 		font-size: 0.5em;
 	}
@@ -1373,11 +1411,15 @@ form#card #statement-due-day-field  {
  * Customization for the 'Statements' page
  */
 #statements-container {
+	width: 100%;
+}
+
+#statements {
 	display: flex;
 	justify-content: space-around;
 }
 
-#statements-container .card-column {
+#statements .card-column {
   display: flex;
   flex-direction: column;
 	height: min-content;

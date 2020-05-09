@@ -74,10 +74,11 @@
 	</script>
 	<script>
 		const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
+		const TRANSACTION_TAGS_ENDPOINT = "{{ url_for('credit.show_transaction_tags') }}";
 	</script>
 	<script type="module" src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
 	</script>
-	<script src="{{ url_for('static', filename='js/expand_transaction.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/expand_transaction.js') }}">
 	</script>
 
 {% endblock %}

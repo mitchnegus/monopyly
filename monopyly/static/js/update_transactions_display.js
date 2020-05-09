@@ -19,8 +19,9 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 (function() {
 
 	// Identify the card filters
-	const $container = $('#transactions-table-container');
 	const $filterContainer = $('#card-filter');
+	// Identify the transactions container
+	const $container = $('#transactions-table-container');
 	
 	// Send the Ajax request on click
 	const $filters = $filterContainer.find('.card');

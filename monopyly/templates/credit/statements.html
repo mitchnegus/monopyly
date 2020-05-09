@@ -1,41 +1,45 @@
-{% for card in selected_cards %}
+<div id="statements">
 
-	<div class="card-column">
+	{% for card in selected_cards %}
 
-		<div>
-			<b>{{ card['bank'] }}</b> <span class="digits">{{ card['last_four_digits'] }}</span>
-		</div>
+		<div class="card-column">
 
-		{% for statement in statements %}
-			{% if statement['card_id'] == card['id'] %}		
+			<div>
+				<b>{{ card['bank'] }}</b> <span class="digits">{{ card['last_four_digits'] }}</span>
+			</div>
 
-				<a class="statement-block" href="{{ url_for('credit.show_statement', statement_id=statement['id']) }}">
-					<div class="date">
-						<div class="month">{{ statement['issue_date'].strftime('%b')|upper }}</div>
-						<div class="year">{{ statement['issue_date'].year }}</div>
-					</div>
-					<div class="payment">
-						<div class="balance">
-							${{ statement['balance']|currency }}
+			{% for statement in statements %}
+				{% if statement['card_id'] == card['id'] %}
+
+					<a class="statement-block" href="{{ url_for('credit.show_statement', statement_id=statement['id']) }}">
+						<div class="date">
+							<div class="month">{{ statement['issue_date'].strftime('%b')|upper }}</div>
+							<div class="year">{{ statement['issue_date'].year }}</div>
 						</div>
-						{% if statement['payment_date'] %}
-							<div class="paid-notice flip-text-gadget">
-								<div class="flip-text-inner">
-									<div class="front">
-										PAID
-									</div>
-									<div class="back">
-										{{ statement['payment_date'] }}
+						<div class="payment">
+							<div class="balance">
+								${{ statement['balance']|currency }}
+							</div>
+							{% if statement['payment_date'] %}
+								<div class="paid-notice flip-text-gadget">
+									<div class="flip-text-inner">
+										<div class="front">
+											PAID
+										</div>
+										<div class="back">
+											{{ statement['payment_date'] }}
+										</div>
 									</div>
 								</div>
-							</div>
-						{% endif %}
-					</div>
-				</a>
-	
-			{% endif %}
-		{% endfor %}
-	
-	</div>
+							{% endif %}
+						</div>
+					</a>
 
-{% endfor %}
+				{% endif %}
+			{% endfor %}
+
+		</div>
+
+	{% endfor %}
+
+</div>

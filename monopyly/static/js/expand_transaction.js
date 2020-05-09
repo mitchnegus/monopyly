@@ -7,6 +7,8 @@
  * table. A user can exit the expanded view by clicking the 'x' icon
  * button that is shown in the expanded view.
  */
+import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
+
 
 (function() {
 
@@ -16,6 +18,10 @@
 
 	$iconsMoreInfo.on('click', function() {
 		const $transaction = $(this).closest('.transaction');
+		const endpoint = TRANSACTION_TAGS_ENDPOINT;
+		const rawData = $transaction[0].id;
+		const $tagsContainer = $transaction.find('.tags-container');
+		updateDisplayAjaxRequest(endpoint, rawData, $tagsContainer);
 		$transaction.addClass('expanded');
 	});
 
