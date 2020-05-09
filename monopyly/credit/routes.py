@@ -17,7 +17,7 @@ from monopyly.credit.statements import (
     StatementHandler, determine_statement_issue_date,
     determine_statement_issue_date
 )
-from monopyly.credit.transactions import TransactionHandler
+from monopyly.credit.transactions import TransactionHandler, TagHandler
 
 
 # Define a custom form error messaage
@@ -244,12 +244,12 @@ def show_transactions():
 @credit.route('/_show_transaction_tags', methods=('POST',))
 @login_required
 def show_transaction_tags():
+    th = TagHandler()
     # Get the transaction ID from the AJAX request
     transaction_id = request.get_json().split('-')[-1]
-    print(transaction_id)
-    tags = ['Thing 1', 'Thing 2']
-    if int(transaction_id) % 2:
-        tags.append('Thing 3')
+    # Get tags for the transaction
+    tags = th.get_entries(transaction_ids=(transaction_id,),
+                          fields=('tag_name',))
     return render_template('credit/transactions_table/tags.html', tags=tags)
 
 

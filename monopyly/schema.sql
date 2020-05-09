@@ -8,7 +8,7 @@ CREATE TABLE users (
 	id INTEGER,
 	username TEXT UNIQUE NOT NULL,
 	password TEXT NOT NULL,
-	PRIMARY KEY(id)
+	PRIMARY KEY (id)
 );
 
 /* Store credit account information */
@@ -18,8 +18,8 @@ CREATE TABLE credit_accounts (
 	bank TEXT NOT NULL,
 	statement_issue_day INTEGER NOT NULL,
 	statement_due_day INTEGER NOT NULL,
-	PRIMARY KEY(id),
-	FOREIGN KEY(user_id) REFERENCES users(id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 /* Store credit card information */
@@ -28,8 +28,9 @@ CREATE TABLE credit_cards (
 	account_id INTEGER NOT NULL,
 	last_four_digits TEXT NOT NULL,
 	active INTEGER NOT NULL,
-	PRIMARY KEY(id),
-	FOREIGN KEY(account_id) REFERENCES credit_accounts(id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (account_id) REFERENCES credit_accounts (id)
+		ON DELETE CASCADE
 );
 
 /* Store credit card statement information */
@@ -38,8 +39,9 @@ CREATE TABLE credit_statements (
 	card_id INTEGER NOT NULL,
 	issue_date TEXT NOT NULL,
 	due_date TEXT NOT NULL,
-	PRIMARY KEY(id),
-	FOREIGN KEY(card_id) REFERENCES credit_cards(id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (card_id) REFERENCES credit_cards (id)
+		ON DELETE CASCADE
 );
 
 /* Store credit card transaction information */
@@ -50,8 +52,30 @@ CREATE TABLE credit_transactions (
 	vendor TEXT NOT NULL,
 	amount REAL NOT NULL,
 	notes TEXT NOT NULL,
-	PRIMARY KEY(id),
-	FOREIGN KEY(statement_id) REFERENCES credit_statements(id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (statement_id) REFERENCES credit_statements (id)
+		ON DELETE CASCADE
+);
+
+/* Store credit card transaction tags */
+CREATE TABLE credit_tags (
+	id INTEGER,
+	user_id INTEGER NOT NULL,
+	tag_name TEXT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES users (id),
+	UNIQUE (user_id, tag_name)
+);
+
+/* Associate credit transactions with tags in a link table */
+CREATE TABLE credit_tag_links (
+	transaction_id INTEGER NOT NULL,
+	tag_id INTEGER NOT NULL,
+	PRIMARY KEY (transaction_id, tag_id),
+	FOREIGN KEY (transaction_id) REFERENCES credit_transactions (id)
+		ON DELETE CASCADE,
+	FOREIGN KEY (tag_id) REFERENCES credit_tags (id)
+		ON DELETE CASCADE
 );
 
 /* Prepare a view giving enhanced credit card statement information */
@@ -69,7 +93,7 @@ WITH view AS (
 			COALESCE(
 				SUM(amount) OVER (PARTITION BY account_id ORDER BY issue_date),
 				0
-			) balance,
+			) statement_balance,
 			/* Determine the total charges on an account for each statement */
 			COALESCE(
 			  SUM(charges) OVER (PARTITION BY account_id ORDER BY issue_date),

@@ -1007,10 +1007,12 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .expanded.summary .tags .tag {
+	width: 50%;
 	margin: 5px 0;
 	padding: 2px 15px;
 	border-radius: 10px;
 	background-color: #dddddd;
+	text-align: center;
 }
 
 .transactions-table .expanded.summary .payment {
