@@ -9,4 +9,6 @@
 ## 1.0.1
 
 - Added dependencies to `setup.py` for self-contained installation
-- Add this changelog
+- Added this changelog
+- Added a generally comprehensive [README](README.md)
+- Fixed a few minor bugs with the display interface

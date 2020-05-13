@@ -23,7 +23,7 @@ pip install monopyly
 The package requires a recent version of Python (3.7+). 
 
 
-## Operation
+## Getting started
 
 Once the package is properly installed, run the app from the command line:
 
@@ -33,7 +33,7 @@ monopyly
 
 This will open to an empty homepage with a welcome message.
 
-<img src="img/homepage-user.png" alt="user homepage" width="800px">
+<img src="img/homepage.png" alt="user homepage" width="800px">
 
 To use the app, register a new profile and then log in using your newly created credentials.
 A successful login will return you to the homepage, now with several different feature panels.
@@ -71,3 +71,13 @@ Payments can be made directly from a statement's page.
 
 <img src="img/statement-details.png" alt="statement details" width="800px">
 
+
+## License
+
+This project is licensed under the GNU General Public License, Version 3.
+It is fully open-source, and while you are more than welcome to fork, add, modify, etc. it is required that you also keep those changes and additions open-source.
+
+
+## Changes
+
+Changes between versions are tracked in the [changelog](CHANGELOG.md).

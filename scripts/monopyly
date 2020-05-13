@@ -20,9 +20,6 @@ INSTANCE_DIR = os.path.join(BASE_DIR, 'var/monopyly-instance')
 if not os.path.isfile(os.path.join(INSTANCE_DIR, 'monopyly.sql')):
     os.system('flask init-db')
 
-# Backup the database
-backup()
-
 # Run Flask
 server = subprocess.Popen(['flask', 'run'])
 
