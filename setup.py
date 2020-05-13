@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='monopyly',
-    version='1.0.0',
+    version='1.0.1',
     description='A homemade personal finance manager.',
     author='Mitch Negus',
     author_email='mitchnegus57@gmail.com',
@@ -16,5 +16,10 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     scripts=['scripts/monopyly', 'scripts/backup_db.py'],
-    python_requires='>=3.7'
+    python_requires='>=3.7',
+    install_requires=[
+        'flask',
+        'flask-wtf',
+        'python-dateutil'
+    ]
 )
