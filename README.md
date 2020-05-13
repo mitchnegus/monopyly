@@ -11,7 +11,7 @@ While the development version is hosted on the builtin Flask server, a more robu
 
 ## Installation
 
-The _Monopyly_ app is hosted on the [Python Package Index (PyPI)] for easy installation. 
+The _Monopyly_ app is registered on the [Python Package Index (PyPI)](https://pypi.org/project/monopyly) for easy installation. 
 To install the app, simply run
 
 ```
