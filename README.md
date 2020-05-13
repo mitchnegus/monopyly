@@ -1,6 +1,5 @@
 # Monopyly
 
-
 This is a package designed to help manage personal finances. 
 The current functionality is fairly limited, with only the ability to track credit card history.
 Eventually the app will provide a full set of features including purchase history, bank deposits and withdrawals, and investment profiles. 

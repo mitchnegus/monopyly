@@ -12,3 +12,8 @@
 - Added this changelog
 - Added a generally comprehensive [README](README.md)
 - Fixed a few minor bugs with the display interface
+
+
+## 1.0.2
+
+- Added image support to PyPI description
