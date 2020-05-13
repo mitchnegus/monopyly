@@ -36,7 +36,7 @@ def init_db():
 def init_db_command():
     """Clear the existing data and create new tables."""
     init_db()
-    click.echo('Initialized the database.')
+    click.echo(f"Initialized the database ({current_app.config['DATABASE']})")
 
 def init_app(app):
     """Registers the database initialization command with an app."""
