@@ -1,4 +1,4 @@
-/* * Infer card information if enough identifying info is provided.
+/* Infer card information if enough identifying info is provided.
  *
  * When entering a transaction, infer the remaining card information
  * based on the current set of provided information. After a user
@@ -11,18 +11,18 @@
 (function() {
 
 	// Identify all input elements in the form
-	let $inputElements = $('form input');
+	const $inputElements = $('form input');
 	// Identify inputs for card information
-	let $inputBank = $inputElements.filter('input#bank');
-	let $inputDigits = $inputElements.filter('input#last_four_digits');
+	const $inputBank = $inputElements.filter('input#bank');
+	const $inputDigits = $inputElements.filter('input#last_four_digits');
 	
 	// Set triggers for checking about inferences
 	$inputBank.on('blur', function() {
-		let rawData = {'bank': $(this).val()};
+		const rawData = {'bank': $(this).val()};
 		inferCardAjaxRequest(rawData);
 	});
 	$inputDigits.on('blur', function() {
-		let rawData = {
+		const rawData = {
 			'bank': $inputBank.val(),
 			'digits': $(this).val()
 		};
@@ -41,7 +41,7 @@
 					// A card can be inferred, so populate the fields with its info
 					$inputBank.val(response['bank']);
 					$inputDigits.val(response['digits']);
-					let nextInputIndex = $inputElements.index($inputDigits[0])+1;
+					const nextInputIndex = $inputElements.index($inputDigits[0])+1;
 					$inputElements.eq(nextInputIndex).focus();
 				}
 			},

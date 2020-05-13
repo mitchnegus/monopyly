@@ -1,0 +1,120 @@
+{% extends 'layout.html' %}
+
+
+{% block header %}
+
+	<h1>
+		{% block title %}
+			Account Details
+		{% endblock %}
+	</h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+	<div id="account-details" class="details-container">
+
+		<div class="details-content">
+
+			<div id="account-info">
+	
+				<div class="info-row">
+					<div class="info-title">Bank</div>
+					<div>{{ account['bank'] }}</div>
+				</div>
+	
+				<div class="info-row">
+					<div class="info-title">Cards</div>
+					<div class="cards-container">
+						{% for card in cards %}
+						
+							<div class="credit-card-block">
+								<div class="credit-card {{'inactive' if not card['active'] else '' }}">
+	
+									<div class="card-face front">
+										{% include 'credit/card_front.html' %}
+									</div>
+									<div class="card-face back">
+										{% include 'credit/card_back.html' %}
+									</div>
+	
+								</div>
+							</div>
+						
+						{% endfor %}
+					</div>
+				</div>
+	
+				<div class="info-row">
+					<div class="info-title">Statement Issue Day</div>
+					<div>
+						<div id="statement-issue-day" class="update-db-widget key-day">
+							<div class="widget-text">
+								<div class="widget-display">
+									{{- account['statement_issue_day'] -}}
+								</div>
+								<input class="widget-input" type="text" name="issue_day" value="{{ account['statement_issue_day'] }}" />
+							</div>
+							<img class="widget-edit-icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+						</div>
+					</div>
+				</div>
+	
+				<div class="info-row">
+					<div class="info-title">Statement Due Day</div>
+					<div>
+						<div id="statement-due-day" class="update-db-widget key-day">
+							<div class="widget-text">
+								<div class="widget-display">
+									{{- account['statement_due_day'] -}}
+								</div>
+								<input class="widget-input" type="text" name="due_day" value="{{ account['statement_due_day'] }}" />
+							</div>
+							<img class="widget-edit-icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+						</div>
+					</div>
+				</div>
+	
+			</div>
+
+		</div>
+
+		<div class="details-menu">
+
+			<div class="button">
+				<a class="action" href="{{ url_for('credit.new_card') }}">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+				</a>
+			</div>
+
+			<div class="button">
+				<a class="action delete" href="{{ url_for('credit.delete_account', account_id=account['id']) }}" onclick="return confirm('Are you sure you want to delete this account?');">
+				</a>
+			</div>
+
+		</div>
+	
+	</div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+	<script>
+		const UPDATE_CARD_STATUS_ENDPOINT = "{{ url_for('credit.update_card_status') }}";
+		const UPDATE_ACCOUNT_STATEMENT_ISSUE_DAY_ENDPOINT = "{{ url_for('credit.update_account_statement_issue_day', account_id=account['id']) }}";
+		const UPDATE_ACCOUNT_STATEMENT_DUE_DAY_ENDPOINT = "{{ url_for('credit.update_account_statement_due_day', account_id=account['id']) }}";
+	</script>
+	<script src="{{ url_for('static', filename='js/flip_card.js') }}">
+	</script>
+	<script type="module" src="{{ url_for('static', filename='js/update_card_status.js') }}">
+	</script>
+	<script type="module" src="{{ url_for('static', filename='js/update_account_statement_due_day.js') }}">
+	</script>
+	<script type="module" src="{{ url_for('static', filename='js/update_account_statement_issue_day.js') }}">
+	</script>
+
+{% endblock %}

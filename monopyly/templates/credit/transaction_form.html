@@ -4,12 +4,12 @@
 
 	<div id="card-info" class="form-line">
 
-		<div id="bank" class="form-field autocomplete">
+		<div id="bank-field" class="form-field autocomplete">
 			{{ form.bank.label }}
 			{{ form.bank }}
 		</div>
 
-		<div id="last-four-digits" class="form-field autocomplete">
+		<div id="last-four-digits-field" class="form-field autocomplete">
 			{{ form.last_four_digits.label }}
 			{{ form.last_four_digits }}
 		</div>
@@ -27,8 +27,8 @@
 	</div>
 
 	<div class="form-field">
-		{{ form.price.label }}
-		{{ form.price }}
+		{{ form.amount.label }}
+		{{ form.amount }}
 	</div>
 
 	<div class="form-field autocomplete">

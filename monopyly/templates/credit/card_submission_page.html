@@ -10,4 +10,13 @@
 
 {% endblock %}
 
-<p>The card was added successfully.</p>
+
+{% block content %}
+
+	{% if update %}
+		<p>The card was updated successfully.</p>
+	{% else %}
+		<p>The card was added successfully.</p>
+	{% endif %}
+
+{% endblock %}

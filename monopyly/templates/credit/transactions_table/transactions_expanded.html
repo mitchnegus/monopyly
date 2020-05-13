@@ -1,0 +1,84 @@
+<div class="expanded summary">
+
+	<div class="setting">
+
+		<div class="date">
+			<div class="month">
+				{{ transaction['transaction_date'].strftime('%b')|upper }}
+			</div>
+			<div class="day">
+				{{ transaction['transaction_date'].strftime('%d')|upper }}
+			</div>
+			<div class="year">
+				{{ transaction['transaction_date'].year }}
+			</div>
+			<div class="full">
+				{{ transaction['transaction_date'] }}
+			</div>
+		</div>
+
+		<div class="description">
+			<div class="vendor">
+				{{ transaction['vendor'] }}
+			</div>
+			<div class="notes">
+				{{ transaction['notes'] }}
+			</div>
+		</div>
+
+	</div>
+
+	<div class="tags-container">
+	</div>
+
+	<div class="payment">
+
+		<div class="amount">
+			${{ transaction['amount']|currency }}
+		</div>
+
+		{% if 'statement_id' in transaction.keys() %}
+			<div class="statement">
+				<a href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+					<img src="{{ url_for('static', filename='img/statement.png') }}">
+					<div class="date">
+						<div class="month">{{ transaction['issue_date'].strftime('%b')|upper }}</div>
+						<div class="year">{{ transaction['issue_date'].year }}</div>
+					</div>
+				</a>
+			</div>
+		{% endif %}
+
+		{% if 'account_id' in transaction.keys() %}
+			<div class="card">
+				<a href="{{ url_for('credit.show_account', account_id=transaction['account_id']) }}">
+					<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ transaction['bank'].lower() }}-card.png">
+					<div class="card-number">
+						{{ transaction['last_four_digits'] }}
+					</div>
+				</a>
+			</div>
+		{% endif %}
+
+	</div>
+
+	<div class="buttons">
+
+		<img class="less button" src="{{ url_for('static', filename='img/icons/x-thick.png') }}" />
+
+		{% if 'statement_id' in transaction.keys() %}
+			<a class="button" href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+				<img class="icon" src="{{ url_for('static', filename='img/icons/statement.png') }}" />
+			</a>
+		{% endif %}
+
+		<a class="button" href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
+			<img class="edit icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+		</a>
+
+		<a class="action button delete" href="{{ url_for('credit.delete_transaction', transaction_id=transaction['id']) }}" onclick="return confirm('Are you sure you want to delete this transaction?');">
+		</a>
+
+	</div>
+
+</div>

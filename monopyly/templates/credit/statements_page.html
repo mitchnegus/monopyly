@@ -1,12 +1,35 @@
 {% extends 'layout.html' %}
 
 
+{% block left_sidebar %}
+
+	<nav id="sidebar-nav-menu">
+		<ul>
+
+			<li>
+				<a class="button" href="#top">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/arrow-up.png') }}" />
+				</a>
+			</li>
+
+			<li>
+				<a class="button" href="#bottom">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/arrow-down.png') }}" />
+				</a>
+			</li>
+
+		</ul>
+	</nav>
+
+{% endblock %}
+
+
 {% block header %}
 
+	<a name="top"></a>
+
 	<h1>
-		{% block title %}
-			Statements 
-		{% endblock %}
+		{% block title %}Statements {% endblock %}
 	</h1>
 
 {% endblock %}
@@ -28,6 +51,8 @@
 		{% include 'credit/statements.html' %}
 	</div>
 
+	<a name="bottom"></a>
+
 {% endblock %}
 
 
@@ -38,7 +63,7 @@
 	<script>
 		const FILTER_ENDPOINT = "{{ url_for('credit.update_statements_display') }}";
 	</script>
-	<script src="{{ url_for('static', filename='js/update_statements_display.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/update_statements_display.js') }}">
 	</script>
 
 {% endblock %}

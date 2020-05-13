@@ -1,0 +1,33 @@
+<div class="condensed summary">
+
+	<div class="date column">
+		{{ transaction['transaction_date'] }}
+	</div>
+
+	<div class="vendor text column">
+		{{ transaction['vendor'] }}
+	</div>
+
+	<div class="amount column">
+		<span class="dollar-sign">$</span>
+		<span>{{ transaction['amount']|currency }}</span>
+	</div>
+
+	{% if 'statement_id' in transaction.keys() %}
+		<div class="notes text column">
+			{{ transaction['notes'] }}
+		</div>
+	{% endif %}
+
+	{% if 'bank' in transaction.keys() %}
+		<div class="card column">
+			<span class="bank">{{ transaction['bank'] }}</span>
+			-{{ transaction['last_four_digits'] }}
+		</div>
+	{% endif %}
+
+	<div class="buttons column">
+		<img class="more button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
+	</div>
+
+</div>

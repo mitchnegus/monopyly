@@ -25,27 +25,27 @@
 		</p>
 
 		<p>
-			<b>{{ field_names['transaction_date'] }}: </b>
+			<b>Date: </b>
 			{{ transaction['transaction_date'] }}
 		</p>
 
 		<p>
-			<b>{{ field_names['vendor'] }}: </b>
+			<b>Vendor: </b>
 			{{ transaction['vendor'] }}
 		</p>
 
 		<p>
-			<b>{{ field_names['price'] }}: </b>
-			{{ '${:,.2f}'.format(transaction['price']) }}
+			<b>Amount: </b>
+			{{ '${:,.2f}'.format(transaction['amount']) }}
 		</p>
 
 		<p>
-			<b>{{ field_names['notes'] }}: </b>
+			<b>Notes: </b>
 			{{ transaction['notes'] }}
 		</p>
 
 		<p>
-			<b>{{ field_names['issue_date'] }}: </b>
+			<b>Statement Date: </b>
 			{{ transaction['issue_date'] }}
 		</p>
 

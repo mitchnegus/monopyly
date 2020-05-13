@@ -5,6 +5,11 @@ import os
 from flask import Flask
 from flask import render_template, request
 
+import monopyly.db as db
+from monopyly.core import core
+from monopyly.auth import auth
+from monopyly.credit import credit
+
 def create_app(test_config=None):
     # Create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -26,24 +31,17 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    @app.route('/')
-    def index():
-        return render_template('index.html')
-
-    @app.route('/about')
-    def about():
-        return render_template('about.html')
 
     # Allow the databases to be initialized from the command line
-    from . import db
     db.init_app(app)
 
-    # Register the blueprint for authentication
-    from . import auth
-    app.register_blueprint(auth.bp)
+    # Register the core functionality blueprint
+    app.register_blueprint(core)
 
-    # Register the blueprint for credit card financials 
-    from . import credit
-    app.register_blueprint(credit.bp)
+    # Register the authentication blueprint
+    app.register_blueprint(auth)
+
+    # Register the credit card financials blueprint
+    app.register_blueprint(credit)
 
     return app

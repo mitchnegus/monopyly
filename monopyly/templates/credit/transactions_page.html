@@ -7,26 +7,26 @@
 		<ul>
 
 			<li>
-				<a href="#top">
-					<img class="button-icon" src="{{ url_for('static', filename='img/arrow-up.png') }}" />
+				<a class="button" href="#top">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/arrow-up.png') }}" />
 				</a>
 			</li>
 
 			<li>
-				<a class="action" href="{{ url_for('credit.new_transaction') }}">
-					<img class="button-icon" src="{{ url_for('static', filename='img/plus.png') }}" />
+				<a class="action button" href="{{ url_for('credit.new_transaction') }}">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
 				</a>
 			</li>
 
 			<li>
-				<a class="action" href="{{ url_for('credit.show_transactions') }}">
-					<img class="button-icon" src="{{ url_for('static', filename='img/refresh.png') }}" />
+				<a class="action button" href="{{ url_for('credit.show_transactions') }}">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/refresh.png') }}" />
 				</a>
 			</li>
 
 			<li>
-				<a href="#bottom">
-					<img class="button-icon" src="{{ url_for('static', filename='img/arrow-down.png') }}" />
+				<a class="button" href="#bottom">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/arrow-down.png') }}" />
 				</a>
 			</li>
 
@@ -59,8 +59,8 @@
 		{% endfor %}
 	</div>
 
-	<div id="transactions-table-container">
-		{% include 'credit/transactions.html' %}
+	<div id="transactions-container">
+		{% include 'credit/transactions_table/transactions.html' %}
 	</div>
 
 	<a name="bottom"></a>
@@ -74,8 +74,11 @@
 	</script>
 	<script>
 		const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
+		const TRANSACTION_TAGS_ENDPOINT = "{{ url_for('credit.show_transaction_tags') }}";
 	</script>
-	<script src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
+	</script>
+	<script type="module" src="{{ url_for('static', filename='js/expand_transaction.js') }}">
 	</script>
 
 {% endblock %}

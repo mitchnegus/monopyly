@@ -1,0 +1,14 @@
+<div class="transactions-table">
+
+	{% include 'credit/transactions_table/transaction_field_titles.html' %}
+
+	{% for transaction in transactions[:100] %}
+
+		<div class="transaction">
+			{% include 'credit/transactions_table/transactions_condensed.html' %}
+			{% include 'credit/transactions_table/transactions_expanded.html' %}
+		</div>
+
+	{% endfor %}
+
+</div>

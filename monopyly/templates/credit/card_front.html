@@ -1,0 +1,12 @@
+<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ card['bank'].lower() }}-card.png">
+
+<div class="card-number">
+	<div class="digits obscure">▐▐▐▐</div>
+	<div class="digits obscure">▐▐▐▐</div>
+	<div class="digits obscure">▐▐▐▐</div>
+	<div class="digits">{{ card['last_four_digits'] }}</div>
+</div>
+
+{% if not card['active'] %}
+	<div class="notice">INACTIVE</div>
+{% endif %}

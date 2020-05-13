@@ -1,0 +1,28 @@
+<div class="bank">{{ card['bank']|upper }}</div>
+
+<div class="card-number">
+	<div class="digits obscure">▐▐▐▐</div>
+	<div class="digits obscure">▐▐▐▐</div>
+	<div class="digits obscure">▐▐▐▐</div>
+	<div class="digits">{{ card['last_four_digits'] }}</div>
+</div>
+
+<div class="options">
+
+	<label class="toggle-switch-gadget" for="card-{{ card['id'] }}-status">
+		<input id="card-{{ card['id'] }}-status" type="checkbox" {{ 'checked' if card['active'] else '' }}/>
+
+		<div class="option">
+			<div class="text">
+				Active
+			</div>
+			<div class="slider">
+				<div class="switch"></div>
+			</div>
+		</div>
+
+	</label>
+	<a class="icon-button delete" href="{{ url_for('credit.delete_card', card_id=card['id']) }}" onclick="return confirm('Are you sure you want to delete this card?');">
+	</a>
+
+</div>

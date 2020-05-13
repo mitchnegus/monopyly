@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
-	<div id="homepage-block" class="jumbo">
+	<div id="homepage-block">
 		<h2>Don't go broke!</h2>
 		<h3>This is my pet project to track my finances while learning flask.</h3>
 	</div>
@@ -16,24 +16,37 @@
 			<div id="credit" class="panel">
 				<h2>Credit Cards</h2>
 	
-				<h4>Cards</h4>
-				<a href="{{ url_for('credit.show_cards') }}">
-					Manage credit cards
-				</a>
+				<ul class="category">
+					<h4>Cards</h4>
+					<li>
+						<a href="{{ url_for('credit.show_cards') }}">
+							Manage accounts
+						</a>
+					</li>
+				</ul>
 	
-				<h4>Statements</h4>
-				<a href="{{ url_for('credit.show_statements') }}">
-					See statement history
-				</a>
+				<ul class="category">
+					<h4>Statements</h4>
+					<li>
+						<a href="{{ url_for('credit.show_statements') }}">
+							See statement history
+						</a>
+					</li>
+				</ul>
 	
-				<h4>Transactions</h4>
-				<a href="{{ url_for('credit.show_transactions') }}">
-					See transaction history
-				</a>
-				<br>
-				<a href="{{ url_for('credit.new_transaction') }}">
-					Create a new transaction
-				</a>
+				<ul class="category">
+					<h4>Transactions</h4>
+					<li>
+						<a href="{{ url_for('credit.show_transactions') }}">
+							See transaction history
+						</a>
+					</li>
+					<li>
+						<a href="{{ url_for('credit.new_transaction') }}">
+							Create a new transaction
+						</a>
+					</li>
+				</ul>
 	
 			</div>
 	

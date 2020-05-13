@@ -9,60 +9,36 @@
 		{% endblock %}
 	</h1>
 
-	<nav id="sidebar-nav-menu">
-		<ul>
-
-			<li>
-				<a class="action" href="{{ url_for('credit.show_statements') }}">
-					<img class="button-icon" src="{{ url_for('static', filename='img/arrow-left.png') }}" />
-				</a>
-			</li>
-
-			<li>
-				<a class="action" href="{{ url_for('credit.new_transaction', statement_id=statement['id']) }}">
-					<img class="button-icon" src="{{ url_for('static', filename='img/plus.png') }}" />
-				</a>
-			</li>
-
-		</ul>
-	</nav>
-
 {% endblock %}
 
 
 {% block content %}
 
-	<div id="statement-details">
+	<div id="statement-details" class="details-container">
 
-		<div id="statement-info-container">
-			{% include 'credit/statement_info.html' %}
+		<div class="details-content">
+
+			<div id="statement-info-container">
+				{% include 'credit/statement_info.html' %}
+			</div>
+			
+			<div id="statement-transactions-container">
+				{% with transactions = statement_transactions %}
+					{% include 'credit/transactions_table/transactions.html' %}
+				{% endwith %}
+			</div>
+
 		</div>
-		
-		<table id="statement-transactions" class="transactions">
-	
-			<tr>
-				<th class="date">Date</th>
-				<th class="text">Vendor</th>
-				<th class="price">Price</th>
-				<th class="edit"></th>
-			</tr>
-	
-			{% for transaction in statement_transactions %}
-	
-				<tr>
-					<td class="date">{{ transaction['transaction_date'] }}</td>
-					<td class="text">{{ transaction['vendor'] }}</td>
-					<td class="price">{{ '${:,.2f}'.format(transaction['price']) }}</td>
-					<td>
-						<a href="{{ url_for('credit.show_transaction', transaction_id=transaction['id']) }}">
-							<img class="more" src="{{ url_for('static', filename='img/plus.png') }}" />
-						</a>
-					</td>
-				</tr>
-	
-			{% endfor %}	
-	
-		</table>
+
+		<div class="details-menu">
+
+			<div class="button">
+				<a class="action" href="{{ url_for('credit.new_transaction', statement_id=statement['id']) }}">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+				</a>
+			</div>
+
+		</div>
 
 	</div>
 
@@ -73,11 +49,14 @@
 
 	<script>
 		const UPDATE_STATEMENT_DUE_DATE_ENDPOINT = "{{ url_for('credit.update_statement_due_date', statement_id=statement['id']) }}";
-		const UPDATE_STATEMENT_PAYMENT_ENDPOINT = "{{ url_for('credit.update_statement_payment', statement_id=statement['id']) }}";
+		const MAKE_PAYMENT_ENDPOINT = "{{ url_for('credit.make_payment', card_id=statement['card_id'], statement_id=statement['id']) }}";
+		const TRANSACTION_TAGS_ENDPOINT = "{{ url_for('credit.show_transaction_tags') }}";
 	</script>
-	<script src="{{ url_for('static', filename='js/update_statement_due_date.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/update_statement_due_date.js') }}">
 	</script>
-	<script src="{{ url_for('static', filename='js/update_statement_payment.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/make_payment.js') }}">
+	</script>
+	<script type="module" src="{{ url_for('static', filename='js/expand_transaction.js') }}">
 	</script>
 
 {% endblock %}

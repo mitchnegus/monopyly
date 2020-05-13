@@ -10,29 +10,29 @@
 (function() {
 
 	// Identify the card filters
-	var filterContainer = $('#card-filter');
+	const $filterContainer = $('#card-filter');
 	
 	// Label inactive cards when they are hovered over
-	var inactiveCardFilters = filterContainer.find('.inactive.card');
-	var defaultText, defaultWidth;
+	const inactiveCardFilters = $filterContainer.find('.inactive.card');
+	let defaultText;
 	inactiveCardFilters.hover(
 		function () {
-			var $this = $(this);
+			const $this = $(this);
+			const defaultWidth = $this.width();
 			defaultText = $this.text();
-			defaultWidth = $this.width();
 			// Change the text, maintain the width
 			$this.text('Inactive Card');
 			$this.width(defaultWidth);
 		},
 		function() {
-			var $this = $(this);
+			const $this = $(this);
 			$this.text(defaultText);
 		}
 	);
 	
 	// Change the filter status on click
-	var filters = filterContainer.find('.card');
-	filters.on('click', function() {
+	const $filters = $filterContainer.find('.card');
+	$filters.on('click', function() {
 		// Add or remove the selected tag when clicked
 		$(this).toggleClass('selected');
 	});

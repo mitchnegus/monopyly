@@ -6,9 +6,9 @@ import operator as op
 from flask import g
 from werkzeug.exceptions import abort
 
-from ..db import get_db
-from ..utils import parse_date, reserve_places, strip_function
-from .constants import ALL_FIELDS
+from monopyly.db import get_db
+from monopyly.utils import parse_date, reserve_places, strip_function
+from monopyly.credit.constants import ALL_FIELDS
 
 
 def check_field(field):

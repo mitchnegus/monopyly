@@ -1,0 +1,16 @@
+<div class="titles">
+	<div class="date column">
+		Date
+		<img class="sort-button asc{{ ' selected' if sort_order == 'ASC' else '' }}" src="{{ url_for('static', filename='img/icons/sort-asc.png') }}" />
+		<img class="sort-button desc{{ ' selected' if sort_order == 'DESC' else '' }}" src="{{ url_for('static', filename='img/icons/sort-desc.png') }}" />
+	</div>
+	<div class="vendor column">Vendor</div>
+	<div class="amount column">Amount</div>
+	{% if 'statement_id' in transactions[0].keys() %}
+		<div class="notes column">Notes</div>
+	{% endif %}
+	{% if transactions and 'last_four_digits' in transactions[0].keys() %}
+		<div class="card column">Card</div>
+	{% endif %}
+	<div class="buttons column"></div>
+</div>
