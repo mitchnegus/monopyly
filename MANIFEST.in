@@ -1,0 +1,5 @@
+include monopyly/schema.sql
+graft monopyly/static
+graft monopyly/templates
+global-exclude *.pyc
+

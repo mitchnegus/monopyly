@@ -7,7 +7,7 @@ import sqlite3
 # Set the application specific system variables
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 BASE_DIR = os.path.dirname(SCRIPT_DIR)
-INSTANCE_DIR = os.path.join(BASE_DIR, 'instance')
+INSTANCE_DIR = os.path.join(BASE_DIR, 'var/monopyly-instance')
 BACKUP_DIR = os.path.join(INSTANCE_DIR, 'db_backups')
 
 
@@ -34,7 +34,7 @@ def backup(verbose=False):
     create_directory(BACKUP_DIR)
     # Define the database names/paths
     orig_db_path = os.path.join(INSTANCE_DIR, 'monopyly.sql')
-    backup_db_path = os.path.join(INSTANCE_DIR, f'backup_{timestamp}.sql')
+    backup_db_path = os.path.join(BACKUP_DIR, f'backup_{timestamp}.sql')
     # Connect to the databases
     db = sqlite3.connect(orig_db_path)
     backup_db = sqlite3.connect(backup_db_path)
