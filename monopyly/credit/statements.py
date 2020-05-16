@@ -216,7 +216,7 @@ class StatementHandler(DatabaseHandler):
             statement_data = {'card_id': card['id'],
                               'issue_date': issue_date,
                               'due_date': due_date}
-            statement = self.new_entry(statement_data)
+            statement = self.add_entry(statement_data)
         return statement
 
     def delete_entries(self, entry_ids):

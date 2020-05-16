@@ -45,7 +45,7 @@ def new_card():
             ch = CardHandler()
             # Insert the new credit card into the database
             card_data = form.database_data
-            card = ch.new_entry(card_data)
+            card = ch.add_entry(card_data)
             return redirect(url_for('credit.show_account',
                                     account_id=card['account_id']))
         else:
@@ -212,7 +212,7 @@ def make_payment(card_id, statement_id):
                         'vendor': '-',
                         'amount': -payment_amount,
                         'notes': 'Card payment'}
-    th.new_entry(transaction_data)
+    th.add_entry(transaction_data)
     # Get the statement information from the database
     fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')
@@ -295,7 +295,7 @@ def new_transaction(statement_id):
             th = TransactionHandler()
             # Insert the new transaction into the database
             transaction_data = form.database_data
-            transaction = th.new_entry(transaction_data)
+            transaction = th.add_entry(transaction_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:

@@ -106,7 +106,7 @@ class CardForm(FlaskForm):
                     'statement_issue_day': self.statement_issue_day.data,
                     'statement_due_day': self.statement_due_day.data
                 }
-                account = ah.new_entry(account_data)
+                account = ah.add_entry(account_data)
             else:
                 account = None
         else:

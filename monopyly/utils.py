@@ -87,7 +87,7 @@ class DatabaseHandler(ABC):
             abort(404, abort_msg)
         return entry
 
-    def new_entry(self, mapping):
+    def add_entry(self, mapping):
         """
         Create a new entry in the database given a mapping for fields.
 
