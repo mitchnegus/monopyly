@@ -182,9 +182,9 @@ class CardHandler(DatabaseHandler):
             The IDs of credit cards to be deleted.
         """
         # Delete all statements corresponding to these cards
-        sh = StatementHandler()
-        statements = sh.get_entries(fields=(), card_ids=entry_ids)
+        statement_db = StatementHandler()
+        statements = statement_db.get_entries(fields=(), card_ids=entry_ids)
         statement_ids = [statement['id'] for statement in statements]
-        sh.delete_entries(statement_ids)
+        statement_db.delete_entries(statement_ids)
         # Delete the given cards
         super().delete_entries(entry_ids)

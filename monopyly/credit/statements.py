@@ -235,10 +235,11 @@ class StatementHandler(DatabaseHandler):
             The IDs of statements to be deleted.
         """
         # Delete all transactions corresponding to these statements
-        th = TransactionHandler()
-        transactions = th.get_entries(statement_ids=entry_ids, fields=())
+        transaction_db = TransactionHandler()
+        transactions = transaction_db.get_entries(statement_ids=entry_ids,
+                                                  fields=())
         transaction_ids = [transaction['id'] for transaction in transactions]
-        th.delete_entries(transaction_ids)
+        transaction_db.delete_entries(transaction_ids)
         # Delete the given statements
         super().delete_entries(entry_ids)
 

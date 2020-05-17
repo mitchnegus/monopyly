@@ -13,7 +13,7 @@ from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
 from .accounts import AccountHandler
 from .cards import CardHandler
-from .statements import StatementHandler, determine_statement_due_date
+from .statements import StatementHandler
 
 
 class TransactionForm(FlaskForm):
@@ -50,8 +50,8 @@ class TransactionForm(FlaskForm):
 
     def get_transaction_card(self):
         """Get the credit card associated with the transaction."""
-        ch = CardHandler()
-        card = ch.find_card(self.bank.data, self.last_four_digits.data)
+        card_db = CardHandler()
+        card = card_db.find_card(self.bank.data, self.last_four_digits.data)
         return card
 
     def get_transaction_statement(self):
@@ -60,19 +60,19 @@ class TransactionForm(FlaskForm):
         card = self.get_transaction_card()
         if not card:
             abort(404, 'A card matching the criteria was not found.')
-        sh = StatementHandler()
+        statement_db = StatementHandler()
         # Get the statement corresponding to the card and issue date
         issue_date = self.issue_date.data
         if issue_date:
-            statement = sh.find_statement(card, issue_date)
+            statement = statement_db.find_statement(card, issue_date)
             # Create the statement if it doesn't exist
             if not statement:
-                statement = sh.add_statement(card, issue_date)
+                statement = statement_db.add_statement(card, issue_date)
         else:
             # No issue date was given, so the statement must be inferred
-            statement = sh.infer_statement(card,
-                                           self.transaction_date.data,
-                                           creation=True)
+            statement = statement_db.infer_statement(card,
+                                                     self.transaction_date.data,
+                                                     creation=True)
         return statement
 
 
@@ -100,19 +100,19 @@ class CardForm(FlaskForm):
 
     def get_card_account(self, account_creation=True):
         """Get the account associated with the credit card."""
-        ah = AccountHandler()
+        account_db = AccountHandler()
         # Check if the account exists and potentially create it if not
         if self.account_id.data == 0:
             if account_creation:
                 account_data = {
-                    'user_id': ah.user_id,
+                    'user_id': account_db.user_id,
                     'bank': self.bank.data,
                     'statement_issue_day': self.statement_issue_day.data,
                     'statement_due_day': self.statement_due_day.data
                 }
-                account = ah.add_entry(account_data)
+                account = account_db.add_entry(account_data)
             else:
                 account = None
         else:
-            account = ah.get_entry(self.account_id.data)
+            account = account_db.get_entry(self.account_id.data)
         return account

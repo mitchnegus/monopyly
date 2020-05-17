@@ -96,9 +96,9 @@ class AccountHandler(DatabaseHandler):
             The IDs of accounts to be deleted.
         """
         # Delete all cards corresponding to these accounts
-        ch = CardHandler()
-        cards = ch.get_entries(fields=(), account_ids=entry_ids)
+        card_db = CardHandler()
+        cards = card_db.get_entries(fields=(), account_ids=entry_ids)
         card_ids = [card['id'] for card in cards]
-        ch.delete_entries(card_ids)
+        card_db.delete_entries(card_ids)
         # Delete the given accounts
         super().delete_entries(entry_ids)
