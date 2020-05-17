@@ -17,3 +17,8 @@
 ## 1.0.2
 
 - Added image support to PyPI description
+
+
+## 1.0.3 (upcoming)
+
+- Fixed bug in updating a transaction's statement date to a new statement

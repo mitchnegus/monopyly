@@ -64,8 +64,12 @@ class TransactionForm(FlaskForm):
         # Get the statement corresponding to the card and issue date
         issue_date = self.issue_date.data
         if issue_date:
-            statement = sh.find_statement(card['id'], issue_date)
+            statement = sh.find_statement(card, issue_date)
+            # Create the statement if it doesn't exist
+            if not statement:
+                statement = sh.add_statement(card, issue_date)
         else:
+            # No issue date was given, so the statement must be inferred
             statement = sh.infer_statement(card,
                                            self.transaction_date.data,
                                            creation=True)

@@ -132,7 +132,7 @@ class StatementHandler(DatabaseHandler):
         statement = self._query_entry(statement_id, query, abort_msg)
         return statement
 
-    def find_statement(self, card_id, issue_date=None, fields=None):
+    def find_statement(self, card, issue_date=None, fields=None):
         """
         Find a statement using uniquely identifying characteristics.
 
@@ -144,8 +144,8 @@ class StatementHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        card_id : int
-            The ID of the credit card for the statement to be found.
+        card : sqlite3.Row
+            The entry of the credit card belonging to the statement.
         issue_date : datetime.date, optional
             A Python `date` object giving the issue date for the
             statement to be found (if `None`, the most recent statement
@@ -160,7 +160,6 @@ class StatementHandler(DatabaseHandler):
             The statement entry matching the given criteria. If no
             matching statement is found, returns `None`.
         """
-        card_filter = filter_item(card_id, 'card_id', 'AND')
         date_filter = filter_item(issue_date, 'issue_date', 'AND')
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
@@ -168,9 +167,9 @@ class StatementHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
-                 f" WHERE user_id = ? {card_filter} {date_filter} "
+                 f" WHERE user_id = ? AND card_id = ? {date_filter} "
                   " ORDER BY issue_date DESC")
-        placeholders = (self.user_id, *fill_place(card_id),
+        placeholders = (self.user_id, *fill_place(card['id']),
                         *fill_place(issue_date))
         statement = self.cursor.execute(query, placeholders).fetchone()
         return statement
@@ -203,20 +202,23 @@ class StatementHandler(DatabaseHandler):
         statement : sqlite3.Row
             The inferred statement entry for the transaction.
         """
-        statement_day = card['statement_issue_day']
-        statement_date = determine_statement_issue_date(statement_day,
-                                                        transaction_date)
-        statement = self.find_statement(card['id'], statement_date)
-        if creation and not statement:
-            issue_day = card['statement_issue_day']
+        issue_day = card['statement_issue_day']
+        issue_date = determine_statement_issue_date(issue_day,
+                                                    transaction_date)
+        statement = self.find_statement(card, issue_date)
+        if not statement and creation:
+            statement = self.add_statement(card, issue_date)
+        return statement
+
+    def add_statement(self, card, issue_date, due_date=None):
+        """Add a statement to the database."""
+        if not due_date:
             due_day = card['statement_due_day']
-            issue_date = determine_statement_issue_date(issue_day,
-                                                        transaction_date)
             due_date = determine_statement_due_date(due_day, issue_date)
-            statement_data = {'card_id': card['id'],
-                              'issue_date': issue_date,
-                              'due_date': due_date}
-            statement = self.add_entry(statement_data)
+        statement_data = {'card_id': card['id'],
+                          'issue_date': issue_date,
+                          'due_date': due_date}
+        statement = self.add_entry(statement_data)
         return statement
 
     def delete_entries(self, entry_ids):

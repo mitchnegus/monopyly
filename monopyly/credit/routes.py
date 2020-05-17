@@ -207,12 +207,11 @@ def make_payment(card_id, statement_id):
     # Add the paymnet as a transaction in the database
     card = ch.get_entry(card_id)
     statement = sh.infer_statement(card, payment_date, creation=True)
-    transaction_data = {'statement_id': statement['id'],
-                        'transaction_date': payment_date,
-                        'vendor': '-',
-                        'amount': -payment_amount,
-                        'notes': 'Card payment'}
-    th.add_entry(transaction_data)
+    th.add_transaction(statement=statement,
+                       transaction_date=payment_date,
+                       vendor=card['bank'],
+                       amount=-payment_amount,
+                       notes='Card payment')
     # Get the statement information from the database
     fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')

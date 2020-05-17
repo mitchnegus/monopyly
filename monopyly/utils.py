@@ -93,7 +93,12 @@ class DatabaseHandler(ABC):
 
         Accept a mapping relating given inputs to database fields. This
         mapping is used to insert a new entry into the database. All
-        fields are sanitized prior to insertion.
+        fields are sanitized prior to insertion. In general it is
+        preferable to use a handler specific method as it will perform
+        entry-specific inferences and preprocessing. This method should
+        be used only when given a mapping that exactly corresponds to
+        the new database entry.
+
 
         Parameters
         ––––––––––

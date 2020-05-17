@@ -134,6 +134,17 @@ class TransactionHandler(DatabaseHandler):
         transaction = self._query_entry(transaction_id, query, abort_msg)
         return transaction
 
+    def add_transaction(self, statement, transaction_date, vendor, amount,
+                        notes):
+        """Add a transaction to the database."""
+        transaction_data = {'statement_id': statement['id'],
+                            'transaction_date': transaction_date,
+                            'vendor': vendor,
+                            'amount': amount,
+                            'notes': notes}
+        transaction = self.add_entry(transaction_data)
+        return transaction
+
 
 class TagHandler(DatabaseHandler):
     """
@@ -199,7 +210,6 @@ class TagHandler(DatabaseHandler):
                   "          ON l.tag_id = t.id "
                   " WHERE user_id = ? "
                  f"       {transaction_filter}")
-        print(query)
         placeholders = (self.user_id, *fill_places(transaction_ids))
         statements = self._query_entries(query, placeholders)
         return statements
