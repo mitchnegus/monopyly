@@ -57,12 +57,26 @@ class DatabaseHandler(ABC):
                                   'a `get_entries` method in a subclass.')
 
     def _query_entries(self, query=None, placeholders=None):
-        """Execute a query to return a single entry from the database."""
+        """
+        Execute a query to return entries from the database.
+
+        Accepts an optional query for selecting entries from the
+        database. If no query is provided, a default query getting all
+        database fields is used.
+
+        Parameters
+        ––––––––––
+        query : str, optional
+            A query to use in selecting entries. The query may include
+            placeholders.
+        placeholders : tuple, optional
+            Placeholders to be substituted into the query safely.
+        """
         if not query:
             query = (f"SELECT * "
                      f"  FROM {self.table_name} "
                       " WHERE user_id = ?")
-            placeholders = (entry_ids, self.user_id)
+            placeholders = (self.user_id,)
         entries = self.cursor.execute(query, placeholders).fetchall()
         return entries
 
