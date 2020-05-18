@@ -169,8 +169,7 @@ class StatementHandler(DatabaseHandler):
                   "          ON a.id = c.account_id "
                  f" WHERE user_id = ? AND card_id = ? {date_filter} "
                   " ORDER BY issue_date DESC")
-        placeholders = (self.user_id, *fill_place(card['id']),
-                        *fill_place(issue_date))
+        placeholders = (self.user_id, card['id'], *fill_place(issue_date))
         statement = self.cursor.execute(query, placeholders).fetchone()
         return statement
 
