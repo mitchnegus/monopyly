@@ -37,16 +37,24 @@ class TransactionForm(FlaskForm):
     )
     notes = TextField('Notes', [DataRequired()])
     issue_date = TextField('Statement Date', filters=[parse_date])
+    tags = TextField('Tags')
     submit = SubmitField('Save Transaction')
 
     @property
-    def database_data(self):
+    def transaction_data(self):
         """Produce a dictionary corresponding to a database transaction."""
         statement = self.get_transaction_statement()
-        database_data = {'statement_id': statement['id']}
+        transaction_data = {'statement_id': statement['id']}
         for field in ('transaction_date', 'vendor', 'amount', 'notes'):
-            database_data[field] = self[field].data
-        return database_data
+            transaction_data[field] = self[field].data
+        return transaction_data
+
+    @property
+    def tag_data(self):
+        """Produce a list of tags corresponding to the transaction."""
+        raw_tag_data = self['tags'].data.split(',')
+        tag_data = [tag.strip() for tag in raw_tag_data]
+        return tag_data
 
     def get_transaction_card(self):
         """Get the credit card associated with the transaction."""
@@ -90,13 +98,13 @@ class CardForm(FlaskForm):
     submit = SubmitField('Save Card')
 
     @property
-    def database_data(self):
+    def card_data(self):
         """Produce a dictionary corresponding to a database card."""
         account = self.get_card_account()
-        database_data = {'account_id': account['id']}
+        card_data = {'account_id': account['id']}
         for field in ('last_four_digits', 'active'):
-            database_data[field] = self[field].data
-        return database_data
+            card_data[field] = self[field].data
+        return card_data
 
     def get_card_account(self, account_creation=True):
         """Get the account associated with the credit card."""

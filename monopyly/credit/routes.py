@@ -44,8 +44,7 @@ def new_card():
         if form.validate():
             card_db = CardHandler()
             # Insert the new credit card into the database
-            card_data = form.database_data
-            card = card_db.add_entry(card_data)
+            card = card_db.add_entry(form.card_data)
             return redirect(url_for('credit.show_account',
                                     account_id=card['account_id']))
         else:
@@ -295,8 +294,7 @@ def new_transaction(statement_id):
         if form.validate():
             transaction_db = TransactionHandler()
             # Insert the new transaction into the database
-            transaction_data = form.database_data
-            transaction = transaction_db.add_entry(transaction_data)
+            transaction = transaction_db.add_entry(form.transaction_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:
@@ -311,18 +309,22 @@ def new_transaction(statement_id):
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    transaction_db = TransactionHandler()
+    transaction_db, tag_db = TransactionHandler(), TagHandler()
     # Get the transaction information from the database
     transaction = transaction_db.get_entry(transaction_id)
+    tags = tag_db.get_entries(transaction_ids=(transaction_id,),
+                              fields=('tag_name',))
+    tag_list = ', '.join([tag['tag_name'] for tag in tags])
+    form_data = {**transaction, 'tags': tag_list}
     # Define a form for a transaction
-    form = TransactionForm(data=transaction)
+    form = TransactionForm(data=form_data)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated transaction
-            transaction_data = form.database_data
             transaction = transaction_db.update_entry(transaction_id,
-                                                      transaction_data)
+                                                      form.transaction_data)
+            tag_db.update_tags(transaction, form.tag_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=True)
         else:

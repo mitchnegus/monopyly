@@ -1,6 +1,8 @@
 """
 Tools for interacting with the credit transactions in the database.
 """
+from sqlite3 import IntegrityError
+
 from ..utils import (
     DatabaseHandler, fill_places, filter_items, check_sort_order
 )
@@ -178,19 +180,23 @@ class TagHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_entries(self, transaction_ids=None, fields=TAG_FIELDS):
+    def get_entries(self, tag_names=None, transaction_ids=None,
+                    fields=TAG_FIELDS):
         """
         Get credit card transaction tags from the database.
 
         Query the database to select credit transaction tag fields. Tags
-        can be filtered by transaction. All fields for a tag are shown
-        by default.
+        can be filtered by tag name or transaction. All fields for a tag
+        are shown by default.
 
         Parameters
         ––––––––––
+        tag_names : tuple of str, optional
+            A sequence of names of tags to be selected (if `None`, all
+            tag names will be selected).
         transaction_ids : tuple of int, optional
-            A sequence of transaction IDs for which tags will be selected
-            (if `None`, all tags will be selected).
+            A sequence of transaction IDs for which tags will be
+            selected (if `None`, all transaction tags will be selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
@@ -201,6 +207,7 @@ class TagHandler(DatabaseHandler):
         tags : list of sqlite3.Row
             A list of credit card transaction tags matching the criteria.
         """
+        name_filter = filter_items(tag_names, 'tag_name', 'AND')
         transaction_filter = filter_items(transaction_ids,
                                           'transaction_id',
                                           'AND')
@@ -208,11 +215,11 @@ class TagHandler(DatabaseHandler):
                   "  FROM credit_tags AS t "
                   "       INNER JOIN credit_tag_links AS l "
                   "          ON l.tag_id = t.id "
-                  " WHERE user_id = ? "
-                 f"       {transaction_filter}")
-        placeholders = (self.user_id, *fill_places(transaction_ids))
-        statements = self._query_entries(query, placeholders)
-        return statements
+                 f" WHERE user_id = ? {name_filter} {transaction_filter}")
+        placeholders = (self.user_id, *fill_places(tag_names),
+                        *fill_places(transaction_ids))
+        tags = self._query_entries(query, placeholders)
+        return tags
 
     def get_entry(self, tag_id, fields=None):
         """
@@ -240,3 +247,95 @@ class TagHandler(DatabaseHandler):
         tag = self._query_entry(tag_id, query, abort_msg)
         return tag
 
+    def find_tag(self, tag_name, fields=None):
+        """
+        Find a tag using uniquely identifying characteristics.
+
+        Queries the database to find a transaction tag based on the
+        provided criteria (the tag's name).
+
+        Parameters
+        ––––––––––
+        tag_name : str
+            The name of the tag to be found.
+        fields : tuple of str, optional
+            The fields (in the tags table) to be returned.
+
+        Returns
+        –––––––
+        tag : sqlite3.Row
+            The tag entry matching the given criteria. If no matching
+            tag is found, returns `None`.
+        """
+        query = (f"SELECT {select_fields(fields, 't.id')} "
+                  "  FROM credit_tags AS t "
+                 f" WHERE user_id = ? AND tag_name = ?")
+        placeholders = (self.user_id, tag_name)
+        tag = self.cursor.execute(query, placeholders).fetchone()
+        return tag
+
+    def update_tags(self, transaction, tag_names):
+        """
+        Update the tags for a transaction in the database.
+
+        Given a transaction and a list of tag names, each tag is applied
+        to the transaction. Then, each existing tag that is not in the
+        list of tag names is disassociated with the transaction. Tag
+        names that do not already have database entries are created.
+
+        Parameters
+        ––––––––––
+        transaction : sqlite3.Row
+            A transaction database entries that will be assigned the
+            tags.
+        tag_names : tuple of str
+            Tag names to be assigned to the given transactions.
+        """
+        # Get all of the current tags for the transaction
+        current_tags = self.get_entries(transaction_ids=(transaction['id'],))
+        current_tag_names = [tag['tag_name'] for tag in current_tags]
+        # Determine tags to be added and tags to be removed
+        new_tag_names = [name for name in tag_names
+                         if name not in current_tag_names]
+        old_tag_names = [name for name in current_tag_names
+                         if name not in tag_names]
+        for tag_name in new_tag_names:
+            # Get the matching tag
+            tag = self.find_tag(tag_name, fields=('tag_name',))
+            # Create the tag if it does not already exist in the database
+            if not tag:
+                tag_data = {'user_id': self.user_id,
+                            'tag_name': tag_name}
+                tag = self.add_entry(tag_data)
+            # Link the tag to the transaction
+            self.link(tag, transaction)
+        for tag_name in old_tag_names:
+            # Get the matching tag
+            tag = self.find_tag(tag_name, fields=())
+            # Unlink the tag from the transaction
+            self.unlink(tag, transaction)
+
+    def link(self, tag, transaction):
+        """Add a tag to the given transaction."""
+        # Add the transaction-tag link if the two are not already associated
+        try:
+            self.cursor.execute(
+                "INSERT INTO credit_tag_links (transaction_id, tag_id) "
+               f"     VALUES (?, ?)",
+                (transaction['id'], tag['id'])
+            )
+            self.db.commit()
+        except IntegrityError:
+            # The tag link already exists
+            pass
+
+    def unlink(self, tag, transaction):
+        """Remove a tag from the given transaction."""
+        # Delete the transaction-tag link
+        self.cursor.execute(
+            "DELETE "
+            "  FROM credit_tag_links "
+            " WHERE transaction_id = ? AND tag_id = ? ",
+            (transaction['id'], tag['id'])
+        )
+        self.db.commit()
