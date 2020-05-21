@@ -4,8 +4,6 @@ import time
 import subprocess
 import webbrowser
 
-from backup_db import backup
-
 
 # Set the Flask system variables
 os.environ['FLASK_APP'] = 'monopyly'
