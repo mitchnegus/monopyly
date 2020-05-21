@@ -52,8 +52,9 @@ class TransactionForm(FlaskForm):
     @property
     def tag_data(self):
         """Produce a list of tags corresponding to the transaction."""
+        # RETURN AN EMPTY LIST NOT A LIST WITH EMPTY STRING
         raw_tag_data = self['tags'].data.split(',')
-        tag_data = [tag.strip() for tag in raw_tag_data]
+        tag_data = [tag.strip() for tag in raw_tag_data if tag]
         return tag_data
 
     def get_transaction_card(self):
