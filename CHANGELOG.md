@@ -19,7 +19,7 @@
 - Added image support to PyPI description
 
 
-## 1.0.3 (upcoming)
+## 1.0.3
 
 - Implemented (rudimentary) interface for adding and removing transaction tags
 - Added button to add more statements to a transaction (from submission complete page)
