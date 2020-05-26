@@ -292,9 +292,10 @@ def new_transaction(statement_id):
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
-            transaction_db = TransactionHandler()
+            transaction_db, tag_db = TransactionHandler(), TagHandler()
             # Insert the new transaction into the database
             transaction = transaction_db.add_entry(form.transaction_data)
+            tag_db.update_tags(transaction, form.tag_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:

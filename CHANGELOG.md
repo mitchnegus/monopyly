@@ -21,4 +21,6 @@
 
 ## 1.0.3 (upcoming)
 
+- Implemented (rudimentary) interface for adding and removing transaction tags
 - Fixed bug in updating a transaction's statement date to a new statement
+- Fixed bug where tags where not saved on new transactions
