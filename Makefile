@@ -11,6 +11,16 @@ develop :
 install :
 	python setup.py install
 
+## package	: Bundle the package for distribution
+.PHONY : package
+package :
+	python setup.py sdist bdist_wheel
+
+## upload	: Upload the package to PyPI
+.PHONY : upload
+upload :
+	python -m twine upload --skip-existing dist/*
+
 ## test		: Run tests
 .PHONY : test
 test :
