@@ -66,6 +66,10 @@
 			<a href="{{ url_for('credit.new_transaction') }}">
 				Create a new transaction
 			</a>
+			<br>
+			<a href="{{ url_for('credit.new_transaction', statement_id=transaction['statement_id']) }}">
+				Create a new transaction on this statement
+			</a>
 		{% endif %}
 
 	</div>
