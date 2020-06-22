@@ -118,7 +118,8 @@ select {
 #page {
 	display: flex;
 	justify-content: space-between;
-	padding-top: 60px;
+	margin-top: 50px;
+	padding-top: 50px;
 	padding-bottom: 30px;
 }
 
@@ -133,12 +134,19 @@ aside.sidebar {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	margin-top: 80px; /* Account for content header */
+}
+
+#content-header {
+	margin-bottom: 30px;
+	height: 50px;
+	padding-bottom: 10px;
+	box-sizing: border-box;
+	border-bottom: 1px solid #dddddd;
 }
 
 #content-header h1 {
-  margin: 40px 0 30px;
-	padding-bottom: 10px;
-	border-bottom: 1px solid #dddddd;
+  margin: 0;
   text-align: center;
   font-size: 2em;
   letter-spacing: -2px;
@@ -184,19 +192,14 @@ aside.sidebar {
 
 .details-container {
 	display: flex;
-	justify-content: space-between;
+	flex-direction: column;
 	width: 100%;
 }
 
-.details-container .details-content {
-	display: flex;
-	justify-content: space-between;
-	width: 90%;
-}
-
-.details-container .details-menu {
+.details-menu {
 	display: flex;
 	flex-direction: column;
+	align-self: flex-start;
 	height: min-content;
 	width: 30px;
 	margin-left: 20px;
@@ -205,21 +208,21 @@ aside.sidebar {
 	border-radius: 10px;
 }
 
-.details-container .details-menu div:first-of-type {
+.details-menu div:first-of-type {
 	margin-top: 5px;
 }
 
-.details-container .details-menu div:last-of-type {
+.details-menu div:last-of-type {
 	margin-bottom: 5px;
 }
 
-.details-container .details-menu .button {
+.details-menu .button {
 	height: 30px;
 	width: 30px;
 	margin: 7.5px 0;
 }
 
-.details-container .details-menu .action {
+.details-menu .action {
 	display: inline-block;
 	height: 30px;
 	width: 30px;
@@ -227,7 +230,7 @@ aside.sidebar {
 	filter: brightness(0.9);
 }
 
-.details-container .details-menu .action.delete:hover {
+.details-menu .action.delete:hover {
 	filter: none;
 }
 
@@ -859,7 +862,7 @@ form .autocomplete-box .item.active {
 	height: 100%;
 	width: 100%;
 	opacity: 1;
-	transition: opacity 0.2s ease;
+	transition: opacity 0.2s ease, background-color 0.1s ease;
 }
 
 .transactions-table .transaction .condensed.summary:hover {
@@ -1307,7 +1310,6 @@ div.panel .category h4 {
  * Customization for the 'Account Details' page
  */
 #account-info {
-	width: 100%;
 	font-size: 18pt;
 }
 
@@ -1491,26 +1493,39 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the 'Statement Details' page
  */
-@media screen and (max-width: 1400px) {
-	#statement-details .details-content {
+@media screen and (max-width: 1600px) {
+	#statement-summary {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 	}
 }
 
+#statement-summary {
+	display: flex;
+	justify-content: space-around;
+	width: 100%;
+}
+
 #statement-details #statement-info-container {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	flex-basis: 50%;
+	align-items: flex-start;
+	margin: 0 20px 50px 0;
+}
+@media screen and (max-width: 1600px) {
+	#statement-details #statement-info-container {
+		margin: 0 0 50px 0;
+	}
 }
 
 #statement-details #statement-info {
 	display: flex;
 	flex-direction: column;
 	width: min-content;
-	margin-right: 50px;
+	padding: 40px 50px 60px;
+	background-color: #f8f8f8;
+	border-radius: 25px;
 }
 
 #statement-details #statement-info #card {
@@ -1559,7 +1574,7 @@ form#pay {
 	position: relative;
 	height: 60px;
 	width: 300px;
-	margin: 100px auto 10px;
+	margin: 50px auto 0px;
 	border-radius: 5px;
 }
 
@@ -1635,9 +1650,6 @@ form#pay #make-payment[type="button"] .icon {
 	display: none;
 }
 
-#statement-details #statement-transactions-container {
-	flex-basis: 50%;
-}
 @media screen and (max-width: 1400px) {
 	#statement-details #statement-transactions-container {
 		margin-top: 100px;

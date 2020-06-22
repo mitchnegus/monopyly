@@ -25,3 +25,8 @@
 - Added button to add more statements to a transaction (from submission complete page)
 - Fixed bug in updating a transaction's statement date to a new statement
 - Fixed bug where tags where not saved on new transactions
+
+
+## 1.0.4 (in progress)
+
+- Moved menus on 'Statement Details' and 'Account Details' pages into the sidebar to prevent overlap on collapsed screens
