@@ -165,7 +165,9 @@ def update_statements_display():
 @credit.route('/statement/<int:statement_id>')
 @login_required
 def show_statement(statement_id):
-    statement_db, transaction_db = StatementHandler(), TransactionHandler()
+    statement_db = StatementHandler()
+    transaction_db = TransactionHandler()
+    tags_db = TagHandler()
     # Get the statement information from the database
     statement_fields = ('account_id', 'card_id', 'bank', 'last_four_digits',
                         'issue_date', 'due_date', 'balance', 'payment_date')
@@ -176,9 +178,15 @@ def show_statement(statement_id):
     transactions = transaction_db.get_entries(statement_ids=(statement['id'],),
                                               sort_order=sort_order,
                                               fields=transaction_fields)
+    tag_totals = tags_db.get_totals(statement_ids=(statement['id'],))
+    tag_totals = {row['tag_name']: row['total'] for row in tag_totals}
+    tag_avgs = tags_db.get_statement_average_totals()
+    tag_avgs = {row['tag_name']: row['average_total'] for row in tag_avgs}
     return render_template('credit/statement_page.html',
                            statement=statement,
-                           statement_transactions=transactions)
+                           statement_transactions=transactions,
+                           tag_totals=tag_totals,
+                           tag_average_totals=tag_avgs)
 
 
 @credit.route('/_update_statement_due_date/<int:statement_id>',
@@ -208,7 +216,7 @@ def make_payment(card_id, statement_id):
     # Add the paymnet as a transaction in the database
     card = card_db.get_entry(card_id)
     statement = statement_db.infer_statement(card, payment_date, creation=True)
-    transaction_db.add_transaction(statement=statement,
+    transaction_db.add_transaction(statement_id=statement['id'],
                                    transaction_date=payment_date,
                                    vendor=card['bank'],
                                    amount=-payment_amount,
@@ -295,7 +303,7 @@ def new_transaction(statement_id):
             transaction_db, tag_db = TransactionHandler(), TagHandler()
             # Insert the new transaction into the database
             transaction = transaction_db.add_entry(form.transaction_data)
-            tag_db.update_tags(transaction, form.tag_data)
+            tag_db.update_tags(transaction['id'], form.tag_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:
@@ -325,7 +333,7 @@ def update_transaction(transaction_id):
             # Update the database with the updated transaction
             transaction = transaction_db.update_entry(transaction_id,
                                                       form.transaction_data)
-            tag_db.update_tags(transaction, form.tag_data)
+            tag_db.update_tags(transaction['id'], form.tag_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=True)
         else:

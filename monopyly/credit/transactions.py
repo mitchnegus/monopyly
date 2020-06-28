@@ -1,10 +1,11 @@
 """
 Tools for interacting with the credit transactions in the database.
 """
+import datetime
 from sqlite3 import IntegrityError
 
 from ..utils import (
-    DatabaseHandler, fill_places, filter_items, check_sort_order
+    DatabaseHandler, fill_places, filter_items, filter_dates, check_sort_order
 )
 from .constants import TRANSACTION_FIELDS, TAG_FIELDS
 from .tools import select_fields
@@ -136,10 +137,10 @@ class TransactionHandler(DatabaseHandler):
         transaction = self._query_entry(transaction_id, query, abort_msg)
         return transaction
 
-    def add_transaction(self, statement, transaction_date, vendor, amount,
+    def add_transaction(self, statement_id, transaction_date, vendor, amount,
                         notes):
         """Add a transaction to the database."""
-        transaction_data = {'statement_id': statement['id'],
+        transaction_data = {'statement_id': statement_id,
                             'transaction_date': transaction_date,
                             'vendor': vendor,
                             'amount': amount,
@@ -274,7 +275,7 @@ class TagHandler(DatabaseHandler):
         tag = self.cursor.execute(query, placeholders).fetchone()
         return tag
 
-    def update_tags(self, transaction, tag_names):
+    def update_tags(self, transaction_id, tag_names):
         """
         Update the tags for a transaction in the database.
 
@@ -285,14 +286,14 @@ class TagHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        transaction : sqlite3.Row
-            A transaction database entries that will be assigned the
-            tags.
+        transaction_id : int
+            The ID of a transaction database entry that will be assigned
+            the tags.
         tag_names : tuple of str
             Tag names to be assigned to the given transactions.
         """
         # Get all of the current tags for the transaction
-        current_tags = self.get_entries(transaction_ids=(transaction['id'],))
+        current_tags = self.get_entries(transaction_ids=(transaction_id,))
         current_tag_names = [tag['tag_name'] for tag in current_tags]
         # Determine tags to be added and tags to be removed
         new_tag_names = [name for name in tag_names
@@ -308,34 +309,143 @@ class TagHandler(DatabaseHandler):
                             'tag_name': tag_name}
                 tag = self.add_entry(tag_data)
             # Link the tag to the transaction
-            self.link(tag, transaction)
+            self.link(tag['id'], transaction_id)
         for tag_name in old_tag_names:
             # Get the matching tag
             tag = self.find_tag(tag_name, fields=())
             # Unlink the tag from the transaction
-            self.unlink(tag, transaction)
+            self.unlink(tag['id'], transaction_id)
 
-    def link(self, tag, transaction):
+    def link(self, tag_id, transaction_id):
         """Add a tag to the given transaction."""
         # Add the transaction-tag link if the two are not already associated
         try:
             self.cursor.execute(
                 "INSERT INTO credit_tag_links (transaction_id, tag_id) "
                f"     VALUES (?, ?)",
-                (transaction['id'], tag['id'])
+                (transaction_id, tag_id)
             )
             self.db.commit()
         except IntegrityError:
             # The tag link already exists
             pass
 
-    def unlink(self, tag, transaction):
+    def unlink(self, tag_id, transaction_id):
         """Remove a tag from the given transaction."""
         # Delete the transaction-tag link
         self.cursor.execute(
             "DELETE "
             "  FROM credit_tag_links "
             " WHERE transaction_id = ? AND tag_id = ? ",
-            (transaction['id'], tag['id'])
+            (transaction_id, tag_id)
         )
         self.db.commit()
+
+    def get_totals(self, tag_ids=None, statement_ids=None, start_date=None,
+                   end_date=None, group_statements=False):
+        """
+        Get the totals for tags given the criteria.
+
+        Find the sum of all transactions for tags matching provided
+        criteria. Only tags where a transaction was registered that
+        matches the criteria will be returned.
+
+        Parameters
+        ––––––––––
+        tag_ids : tuple of int
+            A set of tag IDs for which to get tag totals. If left as
+            `None`, totals for any matching tags will be found.
+        statement_ids : tuple of int
+            A set of statement IDs for which to get tag totals. If left
+            as `None`, tag totals will be found for all statements in
+            the date range.
+        start_date : datetime.date
+            The first date to consider in the time interval over which
+            to get tag totals. If left as `None`, the date range will
+            extend back to the first transaction made.
+        end_date : datetime.date
+            The last date to consider in the time interval over which to
+            get tag totals. If left as `None`, the date range will
+            extend up to the last transaction made.
+        group_statements : bool
+            A flag indicating whether totals should be grouped by
+            statement.
+
+        Returns
+        –––––––
+        tag_totals : dict
+            The list of totals for all tags matching the criteria.
+        """
+        tag_filter = filter_items(tag_ids, 'tag_id', 'AND')
+        statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
+        date_filter = filter_dates(start_date, end_date, 'transaction_date',
+                                   'AND')
+        fields = ['SUM(amount) total', 'tag_name']
+        groups = ['tags.id']
+        if group_statements:
+            fields.append('t.statement_id')
+            groups.append('t.statement_id')
+        query = (f"SELECT {', '.join(fields)} "
+                  "  FROM credit_tags AS tags "
+                  "       INNER JOIN credit_tag_links AS l "
+                  "          ON l.tag_id = tags.id "
+                  "       INNER JOIN credit_transactions AS t "
+                  "          ON t.id = l.transaction_id "
+                  "       INNER JOIN credit_statements AS s "
+                  "          ON s.id = t.statement_id "
+                  " WHERE tags.user_id = ? "
+                 f"       {tag_filter} {statement_filter} {date_filter} "
+                 f" GROUP BY {', '.join(groups)}")
+        placeholders = (self.user_id, *fill_places(statement_ids))
+        tag_totals = self._query_entries(query, placeholders)
+        return tag_totals
+
+    def get_statement_average_totals(self, tag_ids=None, statement_ids=None):
+        """
+        Get the average tag totals per statement given the criteria.
+
+        Find the average total (per statement) of all transactions for
+        tags matching provided criteria. Only tags where a transaction
+        was registered that matches the criteria will be returned.
+
+        Parameters
+        ––––––––––
+        tag_ids : tuple of int
+            A set of tag IDs for which to get tag average totals. If
+            left as `None`, average totals for any matching tags will be
+            found.
+        statement_ids : tuple of int
+            A set of statement IDs for which to get tag average totals.
+            If left as `None`, tag average totals will be found for all
+            statements in the date range.
+
+        Returns
+        –––––––
+        tag_average_totals : list of sqlite3.Row
+            The list of average totals for all tags matching the
+            criteria.
+        """
+        statement_filter = filter_items(statement_ids, 'id', 'AND')
+        subquery = ("SELECT COUNT(s.id) "
+                    "  FROM credit_statements AS s "
+                    "       INNER JOIN credit_cards AS c "
+                    "             ON c.id = s.card_id "
+                    "       INNER JOIN credit_accounts AS a "
+                    "             ON a.id = c.account_id "
+                   f" WHERE a.user_id = ? {statement_filter}")
+        tag_filter = filter_items(tag_ids, 'tag_id', 'AND')
+        statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
+        query = (f"SELECT SUM(amount) / ({subquery}) average_total, tag_name "
+                 "  FROM credit_tags AS tags "
+                 "       INNER JOIN credit_tag_links AS l "
+                 "          ON l.tag_id = tags.id "
+                 "       INNER JOIN credit_transactions AS t "
+                 "          ON t.id = l.transaction_id "
+                 "       INNER JOIN credit_statements AS s "
+                 "          ON s.id = t.statement_id "
+                f" WHERE tags.user_id = ? {tag_filter} {statement_filter} "
+                f" GROUP BY tags.id")
+        placeholders = (self.user_id, *fill_places(statement_ids),
+                        self.user_id, *fill_places(statement_ids))
+        tag_average_totals = self._query_entries(query, placeholders)
+        return tag_average_totals

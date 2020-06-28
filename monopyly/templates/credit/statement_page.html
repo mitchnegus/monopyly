@@ -16,14 +16,34 @@
 
 	<div id="statement-details" class="details-container">
 
-		<div id="statement-info-container">
-			{% include 'credit/statement_info.html' %}
+		<div id="statement-summary">
+
+			<div id="statement-info-container">
+				{% include 'credit/statement_info.html' %}
+			</div>
+			
+			<div id="statement-transactions-container">
+				{% with transactions = statement_transactions %}
+					{% include 'credit/transactions_table/transactions.html' %}
+				{% endwith %}
+			</div>
+
 		</div>
-		
-		<div id="statement-transactions-container">
-			{% with transactions = statement_transactions %}
-				{% include 'credit/transactions_table/transactions.html' %}
-			{% endwith %}
+
+		<div id="statement-statistics">
+
+			<h2>Statistics</h2>
+
+			<div><b>Tag: Total (Avg. Total)</b></div>
+			{% for tag in tag_totals %}
+			  {% if not tag == 'Payments' %}
+					<div>
+						{{ tag }}: {{ tag_totals[tag]|currency }}
+						({{ tag_average_totals[tag]|currency }})
+					</div>
+				{% endif %}
+			{% endfor %}
+
 		</div>
 
 	</div>
