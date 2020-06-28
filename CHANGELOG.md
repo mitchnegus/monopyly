@@ -29,4 +29,6 @@
 
 ## 1.0.4 (in progress)
 
+- Renamed database files to end with `.sqlite` extension
 - Moved menus on 'Statement Details' and 'Account Details' pages into the sidebar to prevent overlap on collapsed screens
+- Introduced statement level statistics
