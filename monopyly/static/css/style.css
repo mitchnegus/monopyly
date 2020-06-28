@@ -137,16 +137,12 @@ aside.sidebar {
 	margin-top: 80px; /* Account for content header */
 }
 
-#content-header {
-	margin-bottom: 30px;
-	height: 50px;
-	padding-bottom: 10px;
-	box-sizing: border-box;
-	border-bottom: 1px solid #dddddd;
-}
-
 #content-header h1 {
-  margin: 0;
+	height: 50px;
+	box-sizing: border-box;
+  margin: 0 0 30px 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #dddddd;
   text-align: center;
   font-size: 2em;
   letter-spacing: -2px;
@@ -515,8 +511,8 @@ form .autocomplete-box .item.active {
 .toggle-switch-gadget .option .slider {
 	height: 40px;
 	width: 70px;
-	padding: 5px;
 	box-sizing: border-box;
+	padding: 5px;
 	border-radius: 20px;
 	background-color: gray;
 	transition: inherit;
@@ -722,8 +718,8 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .column {
-	padding: 0 10px;
 	box-sizing: border-box;
+	padding: 0 10px;
 }
 
 .transactions-table .date.column {
@@ -1109,8 +1105,8 @@ form .autocomplete-box .item.active {
 .transactions-table .expanded.summary .payment .card {
 	position: relative;
 	height: 60%;
-	margin-left: 3%;
 	box-sizing: border-box;
+	margin-left: 3%;
 	line-height: 0;
 	transition: all 0.3s;
 }

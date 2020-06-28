@@ -60,9 +60,12 @@ CREATE TABLE credit_transactions (
 /* Store credit card transaction tags */
 CREATE TABLE credit_tags (
 	id INTEGER,
+	parent_id INTEGER,
 	user_id INTEGER NOT NULL,
 	tag_name TEXT NOT NULL,
 	PRIMARY KEY (id),
+	FOREIGN KEY (parent_id) REFERENCES credit_tags (id)
+		ON DELETE CASCADE,
 	FOREIGN KEY (user_id) REFERENCES users (id),
 	UNIQUE (user_id, tag_name)
 );
