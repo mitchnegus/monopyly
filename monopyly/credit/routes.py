@@ -26,7 +26,7 @@ form_err_msg = 'There was an improper value in your form. Please try again.'
 
 @credit.route('/cards')
 @login_required
-def show_cards():
+def load_cards():
     card_db = CardHandler()
     # Get all of the user's credit cards from the database
     cards = card_db.get_entries()
@@ -45,7 +45,7 @@ def new_card():
             card_db = CardHandler()
             # Insert the new credit card into the database
             card = card_db.add_entry(form.card_data)
-            return redirect(url_for('credit.show_account',
+            return redirect(url_for('credit.load_account',
                                     account_id=card['account_id']))
         else:
             flash(form_err_msg)
@@ -55,7 +55,7 @@ def new_card():
 
 @credit.route('/account/<int:account_id>')
 @login_required
-def show_account(account_id):
+def load_account(account_id):
     account_db, card_db = AccountHandler(), CardHandler()
     # Get the account information from the database
     account = account_db.get_entry(account_id)
@@ -90,7 +90,7 @@ def delete_card(card_id):
     account_id = card_db.get_entry(card_id)['account_id']
     # Remove the credit card from the database
     card_db.delete_entries((card_id,))
-    return redirect(url_for('credit.show_account', account_id=account_id))
+    return redirect(url_for('credit.load_account', account_id=account_id))
 
 
 @credit.route('/_update_account_statement_issue_day/<int:account_id>',
@@ -125,12 +125,12 @@ def delete_account(account_id):
     account_db = AccountHandler()
     # Remove the account from the database
     account_db.delete_entries((account_id,))
-    return redirect(url_for('credit.show_cards'))
+    return redirect(url_for('credit.load_cards'))
 
 
 @credit.route('/statements')
 @login_required
-def show_statements():
+def load_statements():
     card_db, statement_db = CardHandler(), StatementHandler()
     # Get all of the user's credit cards from the database
     all_cards = card_db.get_entries()
@@ -164,7 +164,7 @@ def update_statements_display():
 
 @credit.route('/statement/<int:statement_id>')
 @login_required
-def show_statement(statement_id):
+def load_statement(statement_id):
     statement_db = StatementHandler()
     transaction_db = TransactionHandler()
     tags_db = TagHandler()
@@ -231,7 +231,7 @@ def make_payment(card_id, statement_id):
 
 @credit.route('/transactions')
 @login_required
-def show_transactions():
+def load_transactions():
     card_db, transaction_db = CardHandler(), TransactionHandler()
     # Get all of the user's credit cards from the database
     cards = card_db.get_entries()
@@ -352,6 +352,12 @@ def delete_transaction(transaction_id):
     # Remove the transaction from the database
     transaction_db.delete_entries((transaction_id,))
     return redirect(url_for('credit.show_transactions'))
+
+
+@credit.route('/tags')
+@login_required
+def load_tags():
+    return render_template('credit/tags_page.html')
 
 
 @credit.route('/_suggest_autocomplete', methods=('POST',))

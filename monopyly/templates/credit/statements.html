@@ -11,7 +11,7 @@
 			{% for statement in statements %}
 				{% if statement['card_id'] == card['id'] %}
 
-					<a class="statement-block" href="{{ url_for('credit.show_statement', statement_id=statement['id']) }}">
+					<a class="statement-block" href="{{ url_for('credit.load_statement', statement_id=statement['id']) }}">
 						<div class="date">
 							<div class="month">{{ statement['issue_date'].strftime('%b')|upper }}</div>
 							<div class="year">{{ statement['issue_date'].year }}</div>

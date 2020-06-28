@@ -32,3 +32,4 @@
 - Renamed database files to end with `.sqlite` extension
 - Moved menus on 'Statement Details' and 'Account Details' pages into the sidebar to prevent overlap on collapsed screens
 - Introduced statement level statistics
+- Renamed `show_*` route functions to `load_*` to clarify that they are for loading the associated pages (as opposed to just displaying content)

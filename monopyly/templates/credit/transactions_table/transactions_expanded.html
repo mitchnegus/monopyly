@@ -39,7 +39,7 @@
 
 		{% if 'statement_id' in transaction.keys() %}
 			<div class="statement">
-				<a href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+				<a href="{{ url_for('credit.load_statement', statement_id=transaction['statement_id']) }}">
 					<img src="{{ url_for('static', filename='img/statement.png') }}">
 					<div class="date">
 						<div class="month">{{ transaction['issue_date'].strftime('%b')|upper }}</div>
@@ -51,7 +51,7 @@
 
 		{% if 'account_id' in transaction.keys() %}
 			<div class="card">
-				<a href="{{ url_for('credit.show_account', account_id=transaction['account_id']) }}">
+				<a href="{{ url_for('credit.load_account', account_id=transaction['account_id']) }}">
 					<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ transaction['bank'].lower() }}-card.png">
 					<div class="card-number">
 						{{ transaction['last_four_digits'] }}
@@ -67,7 +67,7 @@
 		<img class="less button" src="{{ url_for('static', filename='img/icons/x-thick.png') }}" />
 
 		{% if 'statement_id' in transaction.keys() %}
-			<a class="button" href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+			<a class="button" href="{{ url_for('credit.load_statement', statement_id=transaction['statement_id']) }}">
 				<img class="icon" src="{{ url_for('static', filename='img/icons/statement.png') }}" />
 			</a>
 		{% endif %}
