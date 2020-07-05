@@ -34,7 +34,7 @@ def backup(verbose=False):
     create_directory(BACKUP_DIR)
     # Define the database names/paths
     orig_db_path = os.path.join(INSTANCE_DIR, 'monopyly.sqlite')
-    backup_db_path = os.path.join(BACKUP_DIR, f'backup_{timestamp}.sql')
+    backup_db_path = os.path.join(BACKUP_DIR, f'backup_{timestamp}.sqlite')
     # Connect to the databases
     db = sqlite3.connect(orig_db_path)
     backup_db = sqlite3.connect(backup_db_path)
