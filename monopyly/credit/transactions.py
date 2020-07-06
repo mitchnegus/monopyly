@@ -248,6 +248,32 @@ class TagHandler(DatabaseHandler):
         tag = self._query_entry(tag_id, query, abort_msg)
         return tag
 
+    def get_subcategories(self, tag_id, fields=None):
+        """
+        Get subcategories of a credit transaction tag given its tag ID.
+
+        Accesses a set of fields for children of a given tag. By
+        default, all fields for a tag are returned.
+
+        Parameters
+        ––––––––––
+        tag_id : int
+            The ID of the tag to be found.
+        fields : tuple of str, optional
+            The fields (in the tags table) to be returned.
+
+        Returns
+        –––––––
+        subtags : list of sqlite3.Row
+            A list of credit card transaction tags that are
+            subcategories of the given tag.
+        """
+        query = (f"SELECT {select_fields(fields, 't.id')} "
+                  "  FROM credit_tags AS t "
+                  " WHERE parent_id = ? AND user_id = ?")
+        subtags = self._query_entries(query, (tag_id, self.user_id))
+        return subtags
+
     def find_tag(self, tag_name, fields=None):
         """
         Find a tag using uniquely identifying characteristics.
@@ -274,6 +300,62 @@ class TagHandler(DatabaseHandler):
         placeholders = (self.user_id, tag_name)
         tag = self.cursor.execute(query, placeholders).fetchone()
         return tag
+
+    def get_heirarchy(self):
+        """
+        Get the heirarchy of tags as a dictionary.
+
+        Returns a dictionary representation of the tags database. The
+        dictionary has two top-level keys, 'categories' and 'tags'. The
+        'categories' key is matched to a dictionary of categories (tags
+        with a parent ID of 0) and each category is mapped to a similar
+        dictionary of subcategories. The 'tags' key is matched to a
+        list of tags which have no categorical association (e.g. no
+        parents and no children).
+
+        Returns
+        –––––––
+        heirarchy : dict
+            The dictionary representing the user's tags and categories.
+        """
+        query = ("SELECT id, tag_name "
+                 "  FROM credit_tags "
+                 " WHERE user_id = ? AND parent_id IS ?")
+        tags = self._query_entries(query, (self.user_id, None))
+        heirarchy = {'categories': self._recurse_heirarchy(parent_id=0),
+                     'tags': [tag['tag_name'] for tag in tags]}
+        return heirarchy
+
+    def _recurse_heirarchy(self, parent_id):
+        """
+        Recurse through a list of categories to get children.
+
+        Recursively iterate through a list of categories, identifying
+        all of the subcategories for each category. The returned
+        dictionary will be a dictionary of dictionaries with each
+        parent category paired to a dictionary of its children. A top-
+        level parent category will have a parent ID of 0.
+
+        Parameters
+        ––––––––––
+        parent_id : int
+            The ID of the parent tag to use as the starting point when
+            recursing through the tree.
+
+        Returns
+        –––––––
+        categories : dict
+            A dictionary representing the heirarchy tree starting from
+            the given parent ID. Each key in the dictionary is a
+            subcategory of the parent, and it is matched to a similar
+            dictionary of the subcategory's own children.
+        """
+        categories = {}
+        subcategories = self.get_subcategories(parent_id)
+        for category in subcategories:
+            category_id, category_name = category['id'], category['tag_name']
+            categories[category_name] = self._recurse_heirarchy(category_id)
+        return categories
 
     def update_tags(self, transaction_id, tag_names):
         """

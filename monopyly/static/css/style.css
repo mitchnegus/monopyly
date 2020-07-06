@@ -1711,40 +1711,6 @@ form#pay #make-payment[type="button"] .icon {
 
 
 /*
- * Customization for the 'Transaction Details' page
- */
-#transaction-details {
-	width: 50%;
-	min-width: 400px;
-	margin: 20px auto;
-}
-
-#transaction-info {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-#transaction-info th,
-#transaction-info td {
-	padding: 5px 10px;
-	vertical-align: top;
-}
-
-#transaction-info th {
-	text-align: right;
-}
-
-#transaction-info td {
-	text-align: left;
-}
-
-#transaction-details form {
-	width: 80%;
-	min-width: 350px;
-}
-
-
-/*
  * Customization for the 'New Transaction' & 'Update Transaction' pages
  */
 form#transaction #bank-field {
@@ -1767,4 +1733,19 @@ form#transaction #last-four-digits-field {
 
 #receipt-title {
 	text-align: center;
+}
+
+
+/*
+ * Customization for the 'Transaction Tags' page
+ */
+#transaction-tags ul {
+	list-style-type: none;
+	margin: 5px 0;
+	padding-left: 10px;
+}
+
+#transaction-tags .subcategories {
+	margin: 0;
+	padding-left: 25px;
 }

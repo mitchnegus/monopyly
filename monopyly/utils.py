@@ -304,6 +304,7 @@ def filter_items(items, db_item_name, prefix=""):
         return ""
     return f"{prefix} {db_item_name} IN ({reserve_places(items)})"
 
+
 def filter_dates(start_date, end_date, db_date_name, prefix=""):
     """Create a filter for a date range."""
     start_filter, end_filter = "", ""
@@ -315,7 +316,6 @@ def filter_dates(start_date, end_date, db_date_name, prefix=""):
         end_filter = f"{db_date_name} <= {end_date}"
     date_filter = ' AND '.join([_ for _ in (start_filter, end_filter) if _])
     return f"{prefix} {date_filter}"
-
 
 
 def check_sort_order(sort_order):

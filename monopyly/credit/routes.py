@@ -357,7 +357,11 @@ def delete_transaction(transaction_id):
 @credit.route('/tags')
 @login_required
 def load_tags():
-    return render_template('credit/tags_page.html')
+    tags_db = TagHandler()
+    # Get the tag heirarchy from the database
+    heirarchy = tags_db.get_heirarchy()
+    return render_template('credit/tags_page.html',
+                           tags_heirarchy=heirarchy)
 
 
 @credit.route('/_suggest_autocomplete', methods=('POST',))
