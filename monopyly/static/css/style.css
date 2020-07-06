@@ -1746,6 +1746,17 @@ form#transaction #last-four-digits-field {
 }
 
 #transaction-tags .subcategories {
-	margin: 0;
-	padding-left: 25px;
+	margin: 0 0 15px 10px;
+	padding-left: 40px;
+	border-left: 1px solid #dddddd;
+}
+
+#transaction-tags .tag-name {
+	width: min-content;
+	min-width: 200px;
+	margin: 5px 0;
+	padding: 2px 15px;
+	border-radius: 20px;
+	background-color: #dddddd;
+	text-align: center;
 }

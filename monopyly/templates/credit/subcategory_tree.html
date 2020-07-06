@@ -1,12 +1,16 @@
 {% for category in categories %}
 
 	<li class="category">
-		{{ category }}
-		<ul class="subcategories">
-			{% with categories = categories[category] %}
-				{% include 'credit/subcategory_tree.html' %}
-			{% endwith %}
-		</ul>
+		<div class="tag-name">{{ category }}</div>
+
+		{% if categories[category] %}
+			<ul class="subcategories">
+				{% with categories = categories[category] %}
+					{% include 'credit/subcategory_tree.html' %}
+				{% endwith %}
+			</ul>
+		{% endif %}
+
 	</li>
 
 {% endfor %}

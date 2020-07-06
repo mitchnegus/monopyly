@@ -35,7 +35,9 @@
 				<h2>Other Tags</h2>
 				<ul>	
 				{% for tag in tags_heirarchy['tags'] %}
-					<li>{{ tag }}</li> 
+					<li>
+						<div class="tag-name">{{ tag }}</div>
+					</li> 
 				{% endfor %}
 				</ul>
 			{% endif %}
