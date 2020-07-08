@@ -387,7 +387,8 @@ class TagHandler(DatabaseHandler):
             tag = self.find_tag(tag_name, fields=('tag_name',))
             # Create the tag if it does not already exist in the database
             if not tag:
-                tag_data = {'user_id': self.user_id,
+                tag_data = {'parent_id': None,
+                            'user_id': self.user_id,
                             'tag_name': tag_name}
                 tag = self.add_entry(tag_data)
             # Link the tag to the transaction
