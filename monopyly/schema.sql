@@ -62,13 +62,15 @@ CREATE TABLE credit_tags (
 	id INTEGER,
 	parent_id INTEGER,
 	user_id INTEGER NOT NULL,
-	tag_name TEXT NOT NULL,
+	tag_name TEXT NOT NULL COLLATE NOCASE,
 	PRIMARY KEY (id),
 	FOREIGN KEY (parent_id) REFERENCES credit_tags (id)
 		ON DELETE CASCADE,
 	FOREIGN KEY (user_id) REFERENCES users (id),
 	UNIQUE (user_id, tag_name)
 );
+/* Add a root tag to allow 0 as a 'parent_id' for all users */
+INSERT INTO credit_tags VALUES (0, 0, 0, root);
 
 /* Associate credit transactions with tags in a link table */
 CREATE TABLE credit_tag_links (

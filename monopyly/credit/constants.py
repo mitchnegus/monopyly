@@ -36,6 +36,7 @@ TRANSACTION_FIELDS = (
 )
 # Define database fields for credit transactions tags (without the 'id' field)
 TAG_FIELDS = (
+    'parent_id',
     'user_id',
     'tag_name'
 )
