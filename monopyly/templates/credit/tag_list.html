@@ -1,0 +1,18 @@
+{% if tags %}
+
+	<ul class="tags">	
+	
+		{% for tag in tags %}
+			<li class="tag-container">
+				<div class="tag">{{ tag }}</div>
+			</li> 
+		{% endfor %}
+	
+		<input class="new-tag" type="text" name="tag" />
+	
+	</ul>
+
+{% endif %}
+
+<img class="root new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
+

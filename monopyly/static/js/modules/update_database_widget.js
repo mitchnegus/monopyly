@@ -14,7 +14,7 @@ import { updateDisplayAjaxRequest } from './update_display_ajax.js';
 function updateDBWidget(endpoint, $widget) {
 
 	// Identify the key elements of the widget
-	const $button = $widget.find('.widget-edit-icon');
+	const $button = $widget.find('.widget-edit-button');
 	const $display = $widget.find('.widget-display');
 	const $input = $widget.find('.widget-input');
 

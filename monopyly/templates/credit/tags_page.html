@@ -15,35 +15,39 @@
 {% block content %}
 
 	<div id="transaction-tags">
+	
+		<h2>Categories</h2>
 
-		<div id="categories">
-	
-			{% if tags_heirarchy['categories'] %}
-				<h2>Categories</h2>
-				<ul>
-					{% with categories = tags_heirarchy['categories'] %}
-						{% include 'credit/subcategory_tree.html' %}
-					{% endwith %}
-				</ul>
-			{% endif %}
-	
+		<div id="categories-container" class="tag-container">
+
+			{% with categories = tags_heirarchy['categories'] %}
+				{% include 'credit/category_tree.html' %}
+			{% endwith %}
+
 		</div>
-	
-		<div id="tags">
-	
-			{% if tags_heirarchy['tags'] %}
-				<h2>Other Tags</h2>
-				<ul>	
-				{% for tag in tags_heirarchy['tags'] %}
-					<li>
-						<div class="tag-name">{{ tag }}</div>
-					</li> 
-				{% endfor %}
-				</ul>
-			{% endif %}
-	
+
+
+		<h2>Other Tags</h2>
+
+		<div id="tags-container" class="tag-container">
+
+			{% with tags = tags_heirarchy['tags'] %}
+				{% include 'credit/tag_list.html' %}
+			{% endwith %}
+
 		</div>
 
 	</div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+	<script>
+		const NEW_TAG_ENDPOINT = "{{ url_for('credit.new_tag') }}";
+	</script>
+	<script type="module" src="{{ url_for('static', filename='js/add_tags.js') }}">
+	</script>
 
 {% endblock %}

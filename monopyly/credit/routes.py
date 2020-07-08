@@ -3,7 +3,9 @@ Routes for credit card financials.
 """
 from collections import Counter
 
-from flask import redirect, render_template, flash, request, url_for, jsonify
+from flask import (
+    g, redirect, render_template, flash, request, url_for, jsonify
+)
 from werkzeug.exceptions import abort
 
 from monopyly.db import get_db
@@ -167,7 +169,7 @@ def update_statements_display():
 def load_statement(statement_id):
     statement_db = StatementHandler()
     transaction_db = TransactionHandler()
-    tags_db = TagHandler()
+    tag_db = TagHandler()
     # Get the statement information from the database
     statement_fields = ('account_id', 'card_id', 'bank', 'last_four_digits',
                         'issue_date', 'due_date', 'balance', 'payment_date')
@@ -178,9 +180,9 @@ def load_statement(statement_id):
     transactions = transaction_db.get_entries(statement_ids=(statement['id'],),
                                               sort_order=sort_order,
                                               fields=transaction_fields)
-    tag_totals = tags_db.get_totals(statement_ids=(statement['id'],))
+    tag_totals = tag_db.get_totals(statement_ids=(statement['id'],))
     tag_totals = {row['tag_name']: row['total'] for row in tag_totals}
-    tag_avgs = tags_db.get_statement_average_totals()
+    tag_avgs = tag_db.get_statement_average_totals()
     tag_avgs = {row['tag_name']: row['average_total'] for row in tag_avgs}
     return render_template('credit/statement_page.html',
                            statement=statement,
@@ -357,11 +359,42 @@ def delete_transaction(transaction_id):
 @credit.route('/tags')
 @login_required
 def load_tags():
-    tags_db = TagHandler()
+    tag_db = TagHandler()
     # Get the tag heirarchy from the database
-    heirarchy = tags_db.get_heirarchy()
+    heirarchy = tag_db.get_heirarchy()
     return render_template('credit/tags_page.html',
                            tags_heirarchy=heirarchy)
+
+@credit.route('/_new_tag', methods=('POST',))
+@login_required
+def new_tag():
+    tag_db = TagHandler()
+    # Get the new tag (and potentially parent category) from the AJAX request
+    post_args = request.get_json()
+    tag_name = post_args['tag_name']
+    parent_name = post_args.get('parent')
+    # Check that the tag name does not already exist
+    if tag_db.get_entries(tag_names=(tag_name,)):
+        raise ValueError('The given tag name already exists. Tag names must '
+                         'be unique.')
+    if parent_name == 'root':
+        parent_id = 0
+    elif parent_name:
+        parent_id = tag_db.find_tag(parent_name, fields=())['id']
+    else:
+        parent_id = None
+    tag_data = {'parent_id': parent_id,
+                'user_id': g.user['id'],
+                'tag_name': tag_name}
+    tag_db.add_entry(tag_data)
+    if parent_id is not None:
+        categories = tag_db.get_heirarchy()['categories']
+        return render_template('credit/category_tree.html',
+                               categories=categories)
+    else:
+        tags = tag_db.get_heirarchy()['tags']
+        return render_template('credit/tag_list.html',
+                               tags=tags)
 
 
 @credit.route('/_suggest_autocomplete', methods=('POST',))

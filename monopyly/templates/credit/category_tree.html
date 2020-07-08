@@ -1,0 +1,13 @@
+{% if categories %}
+
+	<ul class="tags">
+	
+		{% include 'credit/subcategory_tree.html' %}
+	
+		<input class="new-tag" type="text" name="category" />
+	
+	</ul>
+
+{% endif %}
+
+<img class="root new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />

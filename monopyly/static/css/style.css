@@ -391,7 +391,7 @@ form .autocomplete-box .item.active {
 	font-weight: inherit;
 }
 
-.update-db-widget .widget-edit-icon {
+.update-db-widget .widget-edit-button {
 	height: 20px;
 	width: 20px;
 	margin-left: 5px;
@@ -399,7 +399,7 @@ form .autocomplete-box .item.active {
 	visibility: hidden;
 }
 
-.update-db-widget:hover .widget-edit-icon {
+.update-db-widget:hover .widget-edit-button {
 	visibility: visible;
 }
 
@@ -513,8 +513,8 @@ form .autocomplete-box .item.active {
 	width: 70px;
 	box-sizing: border-box;
 	padding: 5px;
-	border-radius: 20px;
 	background-color: gray;
+	border-radius: 20px;
 	transition: inherit;
 	cursor: pointer;
 }
@@ -1740,23 +1740,73 @@ form#transaction #last-four-digits-field {
  * Customization for the 'Transaction Tags' page
  */
 #transaction-tags ul {
+	display: flex;
+	flex-direction: column;
 	list-style-type: none;
 	margin: 5px 0;
 	padding-left: 10px;
 }
 
-#transaction-tags .subcategories {
-	margin: 0 0 15px 10px;
-	padding-left: 40px;
-	border-left: 1px solid #dddddd;
+#transaction-tags .button {
+	height: 20px;
+	width: 20px;
 }
 
-#transaction-tags .tag-name {
+#transaction-tags input.new-tag {
+	display: none;
+	width: 200px;
+	margin: 5px 0;
+	padding: 2px 15px;
+	border: 0 solid #85bb65;
+	border-radius: 20px;
+	outline: none;
+	text-align: center;
+	caret-color: #cccccc;
+	transition: border 0.1s ease;
+}
+
+#transaction-tags input.new-tag.visible {
+	border: 1.5px solid #85bb65;
+}
+
+#transaction-tags .tag {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 25px;
 	width: min-content;
 	min-width: 200px;
+	box-sizing: border-box;
 	margin: 5px 0;
 	padding: 2px 15px;
 	border-radius: 20px;
 	background-color: #dddddd;
-	text-align: center;
+	z-index: 99;
+}
+
+#transaction-tags .root.new-tag.button {
+	margin: 5px 0 0 10px;
+}
+
+#transaction-tags .category {
+	display: flex;
+	align-items: center;
+	width: min-content;
+}
+
+#transaction-tags .category .new-tag.button {
+	margin-left: -30px;
+	transition: margin-left 0.2s ease 0.1s;
+}
+
+#transaction-tags .category:hover .button {
+	margin-left: 5px;
+	margin-right: 5px;
+	transition-delay: 0.3s;
+}
+
+#transaction-tags .subcategories {
+	margin: 0 0 0 10px;
+	padding-left: 40px;
+	border-left: 1px solid #dddddd;
 }

@@ -1,15 +1,22 @@
 {% for category in categories %}
 
-	<li class="category">
-		<div class="tag-name">{{ category }}</div>
+	<li class="tag-container">
+		<div class="category">
+			<div class="tag">{{ category }}</div>
+			<img class="new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
+		</div>
 
-		{% if categories[category] %}
-			<ul class="subcategories">
+		<ul class="tags subcategories">
+			<input class="new-tag" type="text" name="category" />
+
+			{% if categories[category] %}
+
 				{% with categories = categories[category] %}
 					{% include 'credit/subcategory_tree.html' %}
 				{% endwith %}
-			</ul>
-		{% endif %}
+
+			{% endif %}
+		</ul>
 
 	</li>
 
