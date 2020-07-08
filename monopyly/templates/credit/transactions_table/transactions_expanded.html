@@ -40,7 +40,7 @@
 		{% if 'statement_id' in transaction.keys() %}
 			<div class="statement">
 				<a href="{{ url_for('credit.load_statement', statement_id=transaction['statement_id']) }}">
-					<img src="{{ url_for('static', filename='img/statement.png') }}">
+					<img src="{{ url_for('static', filename='img/statement.png') }}" />
 					<div class="date">
 						<div class="month">{{ transaction['issue_date'].strftime('%b')|upper }}</div>
 						<div class="year">{{ transaction['issue_date'].year }}</div>
