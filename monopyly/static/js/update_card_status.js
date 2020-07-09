@@ -8,7 +8,9 @@
  * the card is given a class of inactive.
  */
 
-import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
+import {
+	replaceDisplayContentsAjaxRequest
+} from './modules/update_display_ajax.js';
 
 
 (function() {
@@ -28,7 +30,7 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 			'input_id': $checkbox[0].id,
 			'active': cardActive
 		};
-		updateDisplayAjaxRequest(endpoint, rawData, $cardFront);
+		replaceDisplayContentsAjaxRequest(endpoint, rawData, $cardFront);
 		if (cardActive) {
 			$card.removeClass('inactive');
 		} else {

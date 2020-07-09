@@ -8,55 +8,63 @@
  * was provided, no request occurs.
  */
 
-import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
+import { executeAjaxRequest } from './modules/update_display_ajax.js';
 
 
 (function() {
 
 	const endpoint = NEW_TAG_ENDPOINT;
 	// Identify the plus icons
-	const $iconsNewTag = $('#transaction-tags .new-tag.button'); 
-	const $inputs = $('input.new-tag');
+	const $buttons = $('#transaction-tags .new-tag.button'); 
 
-	$iconsNewTag.on('click', function() {
-		const $container = $(this).closest('.tag-container');
-		const $tags = $container.children('ul.tags');
-		const $input = $tags.children('input.new-tag');
-		// Reveal the input
-		$input.slideDown(300, function() {
-			$(this).addClass('visible');
-			$(this).focus();
+	bindTagCreator($buttons);
+
+	function bindTagCreator($buttons) {
+		$buttons.on('click', function() {
+			const $container = $(this).closest('.tag-container');
+			const $tags = $container.children('ul.tags');
+			const $input = $tags.children('input.new-tag');
+			// Reveal the input
+			$input.slideDown(300, function() {
+				$input.addClass('visible');
+				$input.focus();
+			});
+			// Perform actions when focus is lost
+			$input.on('blur', function() {
+				addNewTag($input, $container, $tags)
+			});
 		});
-	});
+	}
 
-	$inputs.on('blur', function() {
-		const $input = $(this);
-		const $container = $input.closest('.tag-container');
-		// Hide the input
-		$input.removeClass('visible')
-		$input.slideUp(300);
-		// Save the input value and add it to the database as a tag
+	function addNewTag($input, $container, $tags) {
+		// Save the input value and prepared to add it to the database as a tag
 		const newTagName = $input.val();
 		if (newTagName) {
-			const rawData = {'tag_name': newTagName};
-			if ($input.attr('name') == 'category') {
-				// Category input (find the parent)
-				const $parentCategoryObject = $container.children('.category');
-				const parentCategory = $parentCategoryObject.find('.tag').text();
-				if (parentCategory) {
-					rawData['parent'] = parentCategory;
-				} else {
-					rawData['parent'] = 'root';
-				}
-				// Update the categories
-				const $display = $('#categories-container');
-				updateDisplayAjaxRequest(endpoint, rawData, $display);
-			} else {
-				// Tag input; update the tags
-				const $display = $('#tags-container');
-				updateDisplayAjaxRequest(endpoint, rawData, $display);
+			const parentTag = $container.children('.tag-area').find('.tag').text()
+			const rawData = {
+				'tag_name': newTagName,
+				'parent': parentTag
+			};
+			// Execute the AJAX request and display update
+			function addTag(response) {
+				// Add the AJAX request response to the DOM before the input
+				$input.before(response);
+				// Hide the input again
+				$input.hide();
+				$input.removeClass('visible');
+				// Bind the button for the newly added tag
+				const $button = $input.prev().find('.new-tag.button');
+				bindTagCreator($button);
 			}
+			executeAjaxRequest(endpoint, rawData, addTag);
+		} else {
+			// Hide the input gracefully
+			$input.removeClass('visible');
+			$input.slideUp(300);
 		}
-	});
+		// Clear the input
+		$input.val('');
+	}
+
 
 })();

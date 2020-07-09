@@ -69,8 +69,6 @@ CREATE TABLE credit_tags (
 	FOREIGN KEY (user_id) REFERENCES users (id),
 	UNIQUE (user_id, tag_name)
 );
-/* Add a root tag to allow 0 as a 'parent_id' for all users */
-INSERT INTO credit_tags VALUES (0, 0, 0, root);
 
 /* Associate credit transactions with tags in a link table */
 CREATE TABLE credit_tag_links (

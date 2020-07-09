@@ -1788,24 +1788,25 @@ form#transaction #last-four-digits-field {
 	margin: 5px 0 0 10px;
 }
 
-#transaction-tags .category {
+#transaction-tags .tag-area {
+
 	display: flex;
 	align-items: center;
 	width: min-content;
 }
 
-#transaction-tags .category .new-tag.button {
+#transaction-tags .tag-area .new-tag.button {
 	margin-left: -30px;
 	transition: margin-left 0.2s ease 0.1s;
 }
 
-#transaction-tags .category:hover .button {
+#transaction-tags .tag-area:hover .button {
 	margin-left: 5px;
 	margin-right: 5px;
 	transition-delay: 0.3s;
 }
 
-#transaction-tags .subcategories {
+#transaction-tags .subtags {
 	margin: 0 0 0 10px;
 	padding-left: 40px;
 	border-left: 1px solid #dddddd;

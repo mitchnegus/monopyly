@@ -377,9 +377,7 @@ def new_tag():
     if tag_db.get_entries(tag_names=(tag_name,)):
         raise ValueError('The given tag name already exists. Tag names must '
                          'be unique.')
-    if parent_name == 'root':
-        parent_id = 0
-    elif parent_name:
+    if parent_name:
         parent_id = tag_db.find_tag(parent_name, fields=())['id']
     else:
         parent_id = None
@@ -387,14 +385,8 @@ def new_tag():
                 'user_id': g.user['id'],
                 'tag_name': tag_name}
     tag_db.add_entry(tag_data)
-    if parent_id is not None:
-        categories = tag_db.get_heirarchy()['categories']
-        return render_template('credit/category_tree.html',
-                               categories=categories)
-    else:
-        tags = tag_db.get_heirarchy()['tags']
-        return render_template('credit/tag_list.html',
-                               tags=tags)
+    return render_template('credit/subtag_tree.html',
+                           tag=tag_name, tags_heirarchy={})
 
 
 @credit.route('/_suggest_autocomplete', methods=('POST',))

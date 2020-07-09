@@ -1,0 +1,13 @@
+<ul class="tags">
+
+	{% for tag in tags_heirarchy %}
+		{% with tags_heirarchy = tags_heirarchy[tag] %}
+			{% include 'credit/subtag_tree.html' %}
+		{% endwith %}
+	{% endfor %}
+
+	<input class="new-tag" type="text" />
+
+</ul>
+
+<img class="root new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />

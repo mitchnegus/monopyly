@@ -16,24 +16,11 @@
 
 	<div id="transaction-tags">
 	
-		<h2>Categories</h2>
-
-		<div id="categories-container" class="tag-container">
-
-			{% with categories = tags_heirarchy['categories'] %}
-				{% include 'credit/category_tree.html' %}
-			{% endwith %}
-
-		</div>
-
-
-		<h2>Other Tags</h2>
+		<h2>Tags</h2>
 
 		<div id="tags-container" class="tag-container">
 
-			{% with tags = tags_heirarchy['tags'] %}
-				{% include 'credit/tag_list.html' %}
-			{% endwith %}
+			{% include 'credit/tag_tree.html' %}
 
 		</div>
 

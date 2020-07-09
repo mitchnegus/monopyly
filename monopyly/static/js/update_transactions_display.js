@@ -13,7 +13,9 @@
  * 	  or descending order.
  */
 
-import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
+import {
+	replaceDisplayContentsAjaxRequest
+} from './modules/update_display_ajax.js';
 
 
 (function() {
@@ -58,7 +60,7 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 			'filter_ids': filterIDs,
 			'sort_order': sortOrder
 		};
-		updateDisplayAjaxRequest(endpoint, rawData, $container);
+		replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
 	}
 	
 })();
