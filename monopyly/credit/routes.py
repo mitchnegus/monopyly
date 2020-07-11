@@ -353,7 +353,7 @@ def delete_transaction(transaction_id):
     transaction_db = TransactionHandler()
     # Remove the transaction from the database
     transaction_db.delete_entries((transaction_id,))
-    return redirect(url_for('credit.show_transactions'))
+    return redirect(url_for('credit.load_transactions'))
 
 
 @credit.route('/tags')
@@ -384,9 +384,19 @@ def new_tag():
     tag_data = {'parent_id': parent_id,
                 'user_id': g.user['id'],
                 'tag_name': tag_name}
-    tag_db.add_entry(tag_data)
+    tag = tag_db.add_entry(tag_data)
     return render_template('credit/subtag_tree.html',
-                           tag=tag_name, tags_heirarchy={})
+                           tag=(tag['id'], tag['tag_name']),
+                           tags_heirarchy={})
+
+
+@credit.route('/delete_tag/<int:tag_id>')
+@login_required
+def delete_tag(tag_id):
+    tag_db = TagHandler()
+    # Remove the tag from the database
+    tag_db.delete_entries((tag_id,))
+    return redirect(url_for('credit.load_tags'))
 
 
 @credit.route('/_suggest_autocomplete', methods=('POST',))

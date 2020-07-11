@@ -321,11 +321,13 @@ class TagHandler(DatabaseHandler):
         Returns
         –––––––
         heirarchy : dict
-            The dictionary representing the user's tags.
+            The dictionary representing the user's tags. Keys are a
+            tuple of tag IDs and tag names.
         """
         heirarchy = {}
         for tag in self.get_subtags(parent_id):
-            heirarchy[tag['tag_name']] = self.get_heirarchy(tag['id'])
+            tag_key = (tag['id'], tag['tag_name'])
+            heirarchy[tag_key] = self.get_heirarchy(tag['id'])
         return heirarchy
 
     def update_tags(self, transaction_id, tag_names):

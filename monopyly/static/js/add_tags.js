@@ -48,6 +48,7 @@ import { executeAjaxRequest } from './modules/update_display_ajax.js';
 			// Execute the AJAX request and display update
 			function addTag(response) {
 				// Add the AJAX request response to the DOM before the input
+				console.log($input);
 				$input.before(response);
 				// Hide the input again
 				$input.hide();
