@@ -1700,6 +1700,16 @@ form#pay #make-payment[type="button"] .icon {
 	height: 60%;
 }
 
+#statement-statistics {
+	margin: 50px 0;
+}
+
+#statement-statistics table th,
+#statement-statistics table td {
+	text-align: right;
+	padding: 3px 15px;
+}
+
 
 /*
  * Customization for the 'Transactions' page
