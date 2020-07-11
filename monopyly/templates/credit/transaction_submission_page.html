@@ -51,11 +51,11 @@
 
 		{% if g.user %}
 			<br>
-			<a href="{{ url_for('credit.show_statement', statement_id=transaction['statement_id']) }}">
+			<a href="{{ url_for('credit.load_statement', statement_id=transaction['statement_id']) }}">
 				See the statement for this transaction
 			</a>
 			<br>
-			<a href="{{ url_for('credit.show_transactions') }}">
+			<a href="{{ url_for('credit.load_transactions') }}">
 				See transaction history
 			</a>
 			<br>
@@ -65,6 +65,10 @@
 			<br>
 			<a href="{{ url_for('credit.new_transaction') }}">
 				Create a new transaction
+			</a>
+			<br>
+			<a href="{{ url_for('credit.new_transaction', statement_id=transaction['statement_id']) }}">
+				Create a new transaction on this statement
 			</a>
 		{% endif %}
 

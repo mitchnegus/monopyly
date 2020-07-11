@@ -16,70 +16,73 @@
 
 	<div id="account-details" class="details-container">
 
-		<div class="details-content">
-
-			<div id="account-info">
+		<div id="account-info">
 	
-				<div class="info-row">
-					<div class="info-title">Bank</div>
-					<div>{{ account['bank'] }}</div>
-				</div>
-	
-				<div class="info-row">
-					<div class="info-title">Cards</div>
-					<div class="cards-container">
-						{% for card in cards %}
-						
-							<div class="credit-card-block">
-								<div class="credit-card {{'inactive' if not card['active'] else '' }}">
-	
-									<div class="card-face front">
-										{% include 'credit/card_front.html' %}
-									</div>
-									<div class="card-face back">
-										{% include 'credit/card_back.html' %}
-									</div>
-	
-								</div>
-							</div>
-						
-						{% endfor %}
-					</div>
-				</div>
-	
-				<div class="info-row">
-					<div class="info-title">Statement Issue Day</div>
-					<div>
-						<div id="statement-issue-day" class="update-db-widget key-day">
-							<div class="widget-text">
-								<div class="widget-display">
-									{{- account['statement_issue_day'] -}}
-								</div>
-								<input class="widget-input" type="text" name="issue_day" value="{{ account['statement_issue_day'] }}" />
-							</div>
-							<img class="widget-edit-icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
-						</div>
-					</div>
-				</div>
-	
-				<div class="info-row">
-					<div class="info-title">Statement Due Day</div>
-					<div>
-						<div id="statement-due-day" class="update-db-widget key-day">
-							<div class="widget-text">
-								<div class="widget-display">
-									{{- account['statement_due_day'] -}}
-								</div>
-								<input class="widget-input" type="text" name="due_day" value="{{ account['statement_due_day'] }}" />
-							</div>
-							<img class="widget-edit-icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
-						</div>
-					</div>
-				</div>
-	
+			<div class="info-row">
+				<div class="info-title">Bank</div>
+				<div>{{ account['bank'] }}</div>
 			</div>
-
+	
+			<div class="info-row">
+				<div class="info-title">Cards</div>
+				<div class="cards-container">
+					{% for card in cards %}
+					
+						<div class="credit-card-block">
+							<div class="credit-card {{'inactive' if not card['active'] else '' }}">
+	
+								<div class="card-face front">
+									{% include 'credit/card_front.html' %}
+								</div>
+								<div class="card-face back">
+									{% include 'credit/card_back.html' %}
+								</div>
+	
+							</div>
+						</div>
+					
+					{% endfor %}
+				</div>
+			</div>
+	
+			<div class="info-row">
+				<div class="info-title">Statement Issue Day</div>
+				<div>
+					<div id="statement-issue-day" class="update-db-widget key-day">
+						<div class="widget-text">
+							<div class="widget-display">
+								{{- account['statement_issue_day'] -}}
+							</div>
+							<input class="widget-input" type="text" name="issue_day" value="{{ account['statement_issue_day'] }}" />
+						</div>
+						<img class="widget-edit-button" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+					</div>
+				</div>
+			</div>
+	
+			<div class="info-row">
+				<div class="info-title">Statement Due Day</div>
+				<div>
+					<div id="statement-due-day" class="update-db-widget key-day">
+						<div class="widget-text">
+							<div class="widget-display">
+								{{- account['statement_due_day'] -}}
+							</div>
+							<input class="widget-input" type="text" name="due_day" value="{{ account['statement_due_day'] }}" />
+						</div>
+						<img class="widget-edit-button" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+					</div>
+				</div>
+			</div>
+	
 		</div>
+
+	</div>
+
+{% endblock %}
+
+
+{% block right_sidebar %}
 
 		<div class="details-menu">
 
@@ -96,8 +99,6 @@
 
 		</div>
 	
-	</div>
-
 {% endblock %}
 
 

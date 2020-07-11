@@ -4,8 +4,6 @@ import time
 import subprocess
 import webbrowser
 
-from backup_db import backup
-
 
 # Set the Flask system variables
 os.environ['FLASK_APP'] = 'monopyly'
@@ -17,7 +15,7 @@ BASE_DIR = os.path.dirname(SCRIPT_DIR)
 INSTANCE_DIR = os.path.join(BASE_DIR, 'var/monopyly-instance')
 
 # Initialize the database if it does not exist yet
-if not os.path.isfile(os.path.join(INSTANCE_DIR, 'monopyly.sql')):
+if not os.path.isfile(os.path.join(INSTANCE_DIR, 'monopyly.sqlite')):
     os.system('flask init-db')
 
 # Run Flask

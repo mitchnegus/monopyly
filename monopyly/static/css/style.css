@@ -118,7 +118,8 @@ select {
 #page {
 	display: flex;
 	justify-content: space-between;
-	padding-top: 60px;
+	margin-top: 50px;
+	padding-top: 50px;
 	padding-bottom: 30px;
 }
 
@@ -133,10 +134,13 @@ aside.sidebar {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	margin-top: 80px; /* Account for content header */
 }
 
 #content-header h1 {
-  margin: 40px 0 30px;
+	height: 50px;
+	box-sizing: border-box;
+  margin: 0 0 30px 0;
 	padding-bottom: 10px;
 	border-bottom: 1px solid #dddddd;
   text-align: center;
@@ -184,19 +188,14 @@ aside.sidebar {
 
 .details-container {
 	display: flex;
-	justify-content: space-between;
+	flex-direction: column;
 	width: 100%;
 }
 
-.details-container .details-content {
-	display: flex;
-	justify-content: space-between;
-	width: 90%;
-}
-
-.details-container .details-menu {
+.details-menu {
 	display: flex;
 	flex-direction: column;
+	align-self: flex-start;
 	height: min-content;
 	width: 30px;
 	margin-left: 20px;
@@ -205,21 +204,21 @@ aside.sidebar {
 	border-radius: 10px;
 }
 
-.details-container .details-menu div:first-of-type {
+.details-menu div:first-of-type {
 	margin-top: 5px;
 }
 
-.details-container .details-menu div:last-of-type {
+.details-menu div:last-of-type {
 	margin-bottom: 5px;
 }
 
-.details-container .details-menu .button {
+.details-menu .button {
 	height: 30px;
 	width: 30px;
 	margin: 7.5px 0;
 }
 
-.details-container .details-menu .action {
+.details-menu .action {
 	display: inline-block;
 	height: 30px;
 	width: 30px;
@@ -227,7 +226,7 @@ aside.sidebar {
 	filter: brightness(0.9);
 }
 
-.details-container .details-menu .action.delete:hover {
+.details-menu .action.delete:hover {
 	filter: none;
 }
 
@@ -392,7 +391,7 @@ form .autocomplete-box .item.active {
 	font-weight: inherit;
 }
 
-.update-db-widget .widget-edit-icon {
+.update-db-widget .widget-edit-button {
 	height: 20px;
 	width: 20px;
 	margin-left: 5px;
@@ -400,7 +399,7 @@ form .autocomplete-box .item.active {
 	visibility: hidden;
 }
 
-.update-db-widget:hover .widget-edit-icon {
+.update-db-widget:hover .widget-edit-button {
 	visibility: visible;
 }
 
@@ -512,10 +511,10 @@ form .autocomplete-box .item.active {
 .toggle-switch-gadget .option .slider {
 	height: 40px;
 	width: 70px;
-	padding: 5px;
 	box-sizing: border-box;
-	border-radius: 20px;
+	padding: 5px;
 	background-color: gray;
+	border-radius: 20px;
 	transition: inherit;
 	cursor: pointer;
 }
@@ -719,8 +718,8 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .column {
-	padding: 0 10px;
 	box-sizing: border-box;
+	padding: 0 10px;
 }
 
 .transactions-table .date.column {
@@ -830,7 +829,7 @@ form .autocomplete-box .item.active {
 	z-index: 99;
 }
 
-.transactions-table .transaction .buttons .button {
+.transactions-table .transaction .button {
 	height: 20px;
 	width: 20px;
 	background-size: 20px 20px;
@@ -859,7 +858,7 @@ form .autocomplete-box .item.active {
 	height: 100%;
 	width: 100%;
 	opacity: 1;
-	transition: opacity 0.2s ease;
+	transition: opacity 0.2s ease, background-color 0.1s ease;
 }
 
 .transactions-table .transaction .condensed.summary:hover {
@@ -1106,8 +1105,8 @@ form .autocomplete-box .item.active {
 .transactions-table .expanded.summary .payment .card {
 	position: relative;
 	height: 60%;
-	margin-left: 3%;
 	box-sizing: border-box;
+	margin-left: 3%;
 	line-height: 0;
 	transition: all 0.3s;
 }
@@ -1307,7 +1306,6 @@ div.panel .category h4 {
  * Customization for the 'Account Details' page
  */
 #account-info {
-	width: 100%;
 	font-size: 18pt;
 }
 
@@ -1491,26 +1489,39 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the 'Statement Details' page
  */
-@media screen and (max-width: 1400px) {
-	#statement-details .details-content {
+@media screen and (max-width: 1600px) {
+	#statement-summary {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 	}
 }
 
+#statement-summary {
+	display: flex;
+	justify-content: space-around;
+	width: 100%;
+}
+
 #statement-details #statement-info-container {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	flex-basis: 50%;
+	align-items: flex-start;
+	margin: 0 20px 50px 0;
+}
+@media screen and (max-width: 1600px) {
+	#statement-details #statement-info-container {
+		margin: 0 0 50px 0;
+	}
 }
 
 #statement-details #statement-info {
 	display: flex;
 	flex-direction: column;
 	width: min-content;
-	margin-right: 50px;
+	padding: 40px 50px 60px;
+	background-color: #f8f8f8;
+	border-radius: 25px;
 }
 
 #statement-details #statement-info #card {
@@ -1559,7 +1570,7 @@ form#pay {
 	position: relative;
 	height: 60px;
 	width: 300px;
-	margin: 100px auto 10px;
+	margin: 50px auto 0px;
 	border-radius: 5px;
 }
 
@@ -1635,9 +1646,6 @@ form#pay #make-payment[type="button"] .icon {
 	display: none;
 }
 
-#statement-details #statement-transactions-container {
-	flex-basis: 50%;
-}
 @media screen and (max-width: 1400px) {
 	#statement-details #statement-transactions-container {
 		margin-top: 100px;
@@ -1692,6 +1700,16 @@ form#pay #make-payment[type="button"] .icon {
 	height: 60%;
 }
 
+#statement-statistics {
+	margin: 50px 0;
+}
+
+#statement-statistics table th,
+#statement-statistics table td {
+	text-align: right;
+	padding: 3px 15px;
+}
+
 
 /*
  * Customization for the 'Transactions' page
@@ -1699,40 +1717,6 @@ form#pay #make-payment[type="button"] .icon {
 #transactions-container .transactions {
 	width: 100%;
 	margin: 0 auto;
-}
-
-
-/*
- * Customization for the 'Transaction Details' page
- */
-#transaction-details {
-	width: 50%;
-	min-width: 400px;
-	margin: 20px auto;
-}
-
-#transaction-info {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-#transaction-info th,
-#transaction-info td {
-	padding: 5px 10px;
-	vertical-align: top;
-}
-
-#transaction-info th {
-	text-align: right;
-}
-
-#transaction-info td {
-	text-align: left;
-}
-
-#transaction-details form {
-	width: 80%;
-	min-width: 350px;
 }
 
 
@@ -1759,4 +1743,99 @@ form#transaction #last-four-digits-field {
 
 #receipt-title {
 	text-align: center;
+}
+
+
+/*
+ * Customization for the 'Transaction Tags' page
+ */
+#transaction-tags ul {
+	display: flex;
+	flex-direction: column;
+	list-style-type: none;
+	margin: 5px 0;
+	padding-left: 10px;
+}
+
+#transaction-tags .buttons {
+	display: flex;
+}
+
+#transaction-tags .button {
+	height: 20px;
+	width: 20px;
+	background-size: 20px 20px;
+	cursor: pointer;
+}
+
+#transaction-tags .buttons .button {
+	margin: 0 3px;
+}
+
+#transaction-tags input.new-tag {
+	display: none;
+	width: 200px;
+	margin: 5px 0;
+	padding: 2px 15px;
+	border: 0 solid #85bb65;
+	border-radius: 20px;
+	outline: none;
+	text-align: center;
+	caret-color: #cccccc;
+	transition: border 0.1s ease;
+}
+
+#transaction-tags input.new-tag.visible {
+	border: 1.5px solid #85bb65;
+}
+
+#transaction-tags .tag {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 25px;
+	width: min-content;
+	min-width: 200px;
+	box-sizing: border-box;
+	margin: 5px 0;
+	padding: 2px 15px;
+	border-radius: 20px;
+	background-color: #dddddd;
+	z-index: 99;
+}
+
+#transaction-tags .root.new-tag.button {
+	margin: 5px 0 0 10px;
+}
+
+#transaction-tags .tag-area {
+	display: flex;
+	align-items: center;
+	width: min-content;
+}
+
+#transaction-tags .tag-area .buttons {
+	margin-left: -60px;
+	transition: margin-left 0.2s ease 0.1s;
+}
+
+#transaction-tags .tag-area:hover .buttons {
+	margin-left: 5px;
+	transition-delay: 0.3s;
+}
+
+#transaction-tags .buttons .action.delete {
+	/* Set background image to allow color change on hover */
+	background-image: url('../img/icons/delete-thick.png');
+}
+
+#transaction-tags .buttons .action.delete:hover {
+	background-image: url('../img/icons/delete-orange-thick.png');
+	filter: none;
+}
+
+#transaction-tags .subtags {
+	margin: 0 0 0 10px;
+	padding-left: 40px;
+	border-left: 1px solid #dddddd;
 }

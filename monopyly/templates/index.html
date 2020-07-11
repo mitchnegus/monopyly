@@ -19,8 +19,13 @@
 				<ul class="category">
 					<h4>Cards</h4>
 					<li>
-						<a href="{{ url_for('credit.show_cards') }}">
+						<a href="{{ url_for('credit.load_cards') }}">
 							Manage accounts
+						</a>
+					</li>
+					<li>
+						<a href="{{ url_for('credit.new_card') }}">
+							Add a new card
 						</a>
 					</li>
 				</ul>
@@ -28,7 +33,7 @@
 				<ul class="category">
 					<h4>Statements</h4>
 					<li>
-						<a href="{{ url_for('credit.show_statements') }}">
+						<a href="{{ url_for('credit.load_statements') }}">
 							See statement history
 						</a>
 					</li>
@@ -37,13 +42,18 @@
 				<ul class="category">
 					<h4>Transactions</h4>
 					<li>
-						<a href="{{ url_for('credit.show_transactions') }}">
+						<a href="{{ url_for('credit.load_transactions') }}">
 							See transaction history
 						</a>
 					</li>
 					<li>
 						<a href="{{ url_for('credit.new_transaction') }}">
 							Create a new transaction
+						</a>
+					</li>
+					<li>
+						<a href="{{ url_for('credit.load_tags') }}">
+							Manage transaction tags
 						</a>
 					</li>
 				</ul>

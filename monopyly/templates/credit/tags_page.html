@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+
+
+{% block header %}
+
+	<h1>
+		{% block title %}
+			Transaction Tags
+		{% endblock %}
+	</h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+	<div id="transaction-tags">
+	
+		<h2>Tags</h2>
+
+		<div id="tags-container" class="tag-container">
+
+			{% include 'credit/tag_tree.html' %}
+
+		</div>
+
+	</div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+	<script>
+		const NEW_TAG_ENDPOINT = "{{ url_for('credit.new_tag') }}";
+	</script>
+	<script type="module" src="{{ url_for('static', filename='js/add_tags.js') }}">
+	</script>
+
+{% endblock %}

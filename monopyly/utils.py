@@ -57,12 +57,26 @@ class DatabaseHandler(ABC):
                                   'a `get_entries` method in a subclass.')
 
     def _query_entries(self, query=None, placeholders=None):
-        """Execute a query to return a single entry from the database."""
+        """
+        Execute a query to return entries from the database.
+
+        Accepts an optional query for selecting entries from the
+        database. If no query is provided, a default query getting all
+        database fields is used.
+
+        Parameters
+        ––––––––––
+        query : str, optional
+            A query to use in selecting entries. The query may include
+            placeholders.
+        placeholders : tuple, optional
+            Placeholders to be substituted into the query safely.
+        """
         if not query:
             query = (f"SELECT * "
                      f"  FROM {self.table_name} "
                       " WHERE user_id = ?")
-            placeholders = (entry_ids, self.user_id)
+            placeholders = (self.user_id,)
         entries = self.cursor.execute(query, placeholders).fetchall()
         return entries
 
@@ -87,13 +101,18 @@ class DatabaseHandler(ABC):
             abort(404, abort_msg)
         return entry
 
-    def new_entry(self, mapping):
+    def add_entry(self, mapping):
         """
         Create a new entry in the database given a mapping for fields.
 
         Accept a mapping relating given inputs to database fields. This
         mapping is used to insert a new entry into the database. All
-        fields are sanitized prior to insertion.
+        fields are sanitized prior to insertion. In general it is
+        preferable to use a handler specific method as it will perform
+        entry-specific inferences and preprocessing. This method should
+        be used only when given a mapping that exactly corresponds to
+        the new database entry.
+
 
         Parameters
         ––––––––––
@@ -284,6 +303,19 @@ def filter_items(items, db_item_name, prefix=""):
     if items is None:
         return ""
     return f"{prefix} {db_item_name} IN ({reserve_places(items)})"
+
+
+def filter_dates(start_date, end_date, db_date_name, prefix=""):
+    """Create a filter for a date range."""
+    start_filter, end_filter = "", ""
+    if start_date is None and end_date is None:
+        return ""
+    if isinstance(start_date, datetime.date):
+        start_filter = f"{db_date_name} >= {start_date}"
+    if isinstance(end_date, datetime.date):
+        end_filter = f"{db_date_name} <= {end_date}"
+    date_filter = ' AND '.join([_ for _ in (start_filter, end_filter) if _])
+    return f"{prefix} {date_filter}"
 
 
 def check_sort_order(sort_order):

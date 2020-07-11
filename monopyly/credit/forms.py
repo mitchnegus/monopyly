@@ -13,7 +13,7 @@ from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
 from .accounts import AccountHandler
 from .cards import CardHandler
-from .statements import StatementHandler, determine_statement_due_date
+from .statements import StatementHandler
 
 
 class TransactionForm(FlaskForm):
@@ -37,21 +37,30 @@ class TransactionForm(FlaskForm):
     )
     notes = TextField('Notes', [DataRequired()])
     issue_date = TextField('Statement Date', filters=[parse_date])
+    tags = TextField('Tags')
     submit = SubmitField('Save Transaction')
 
     @property
-    def database_data(self):
+    def transaction_data(self):
         """Produce a dictionary corresponding to a database transaction."""
         statement = self.get_transaction_statement()
-        database_data = {'statement_id': statement['id']}
+        transaction_data = {'statement_id': statement['id']}
         for field in ('transaction_date', 'vendor', 'amount', 'notes'):
-            database_data[field] = self[field].data
-        return database_data
+            transaction_data[field] = self[field].data
+        return transaction_data
+
+    @property
+    def tag_data(self):
+        """Produce a list of tags corresponding to the transaction."""
+        # RETURN AN EMPTY LIST NOT A LIST WITH EMPTY STRING
+        raw_tag_data = self['tags'].data.split(',')
+        tag_data = [tag.strip() for tag in raw_tag_data if tag]
+        return tag_data
 
     def get_transaction_card(self):
         """Get the credit card associated with the transaction."""
-        ch = CardHandler()
-        card = ch.find_card(self.bank.data, self.last_four_digits.data)
+        card_db = CardHandler()
+        card = card_db.find_card(self.bank.data, self.last_four_digits.data)
         return card
 
     def get_transaction_statement(self):
@@ -60,15 +69,19 @@ class TransactionForm(FlaskForm):
         card = self.get_transaction_card()
         if not card:
             abort(404, 'A card matching the criteria was not found.')
-        sh = StatementHandler()
+        statement_db = StatementHandler()
         # Get the statement corresponding to the card and issue date
         issue_date = self.issue_date.data
         if issue_date:
-            statement = sh.find_statement(card['id'], issue_date)
+            statement = statement_db.find_statement(card, issue_date)
+            # Create the statement if it doesn't exist
+            if not statement:
+                statement = statement_db.add_statement(card, issue_date)
         else:
-            statement = sh.infer_statement(card,
-                                           self.transaction_date.data,
-                                           creation=True)
+            # No issue date was given, so the statement must be inferred
+            statement = statement_db.infer_statement(card,
+                                                     self.transaction_date.data,
+                                                     creation=True)
         return statement
 
 
@@ -86,29 +99,29 @@ class CardForm(FlaskForm):
     submit = SubmitField('Save Card')
 
     @property
-    def database_data(self):
+    def card_data(self):
         """Produce a dictionary corresponding to a database card."""
         account = self.get_card_account()
-        database_data = {'account_id': account['id']}
+        card_data = {'account_id': account['id']}
         for field in ('last_four_digits', 'active'):
-            database_data[field] = self[field].data
-        return database_data
+            card_data[field] = self[field].data
+        return card_data
 
     def get_card_account(self, account_creation=True):
         """Get the account associated with the credit card."""
-        ah = AccountHandler()
+        account_db = AccountHandler()
         # Check if the account exists and potentially create it if not
         if self.account_id.data == 0:
             if account_creation:
                 account_data = {
-                    'user_id': ah.user_id,
+                    'user_id': account_db.user_id,
                     'bank': self.bank.data,
                     'statement_issue_day': self.statement_issue_day.data,
                     'statement_due_day': self.statement_due_day.data
                 }
-                account = ah.new_entry(account_data)
+                account = account_db.add_entry(account_data)
             else:
                 account = None
         else:
-            account = ah.get_entry(self.account_id.data)
+            account = account_db.get_entry(self.account_id.data)
         return account

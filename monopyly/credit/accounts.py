@@ -82,42 +82,6 @@ class AccountHandler(DatabaseHandler):
         account = self._query_entry(account_id, query, abort_msg)
         return account
 
-    def process_account_form(self, form, account_id=None):
-        """
-        Process credit account information submitted on a form.
-
-        Collect all credit account information submitted through the
-        form. This aggregates all credit account data from the form,
-        fills in defaults and makes inferrals when necessary, and then
-        returns a dictionary mapping of the account information.
-
-        Parameters
-        ––––––––––
-        form : CardForm
-            An object containing the submitted form information.
-        account_id : int, optional
-            If given, the ID of the card to be updated. If left as
-            `None`, a new credit card is created.
-
-        Returns
-        –––––––
-        account : sqlite3.Row
-            The saved account.
-        """
-        # Iterate through the account submission and create the dictionary
-        mapping = {}
-        for field in self.table_fields:
-            if field == 'user_id':
-                mapping[field] = self.user_id
-            else:
-                mapping[field] = form[field].data
-        # Either create a new entry or update an existing entry
-        if not account_id:
-            account = self.new_entry(mapping)
-        else:
-            account = self.update_entry(account_id, mapping)
-        return account
-
     def delete_entries(self, entry_ids):
         """
         Delete credit card accounts from the database.
@@ -132,9 +96,9 @@ class AccountHandler(DatabaseHandler):
             The IDs of accounts to be deleted.
         """
         # Delete all cards corresponding to these accounts
-        ch = CardHandler()
-        cards = ch.get_entries(fields=(), account_ids=entry_ids)
+        card_db = CardHandler()
+        cards = card_db.get_entries(fields=(), account_ids=entry_ids)
         card_ids = [card['id'] for card in cards]
-        ch.delete_entries(card_ids)
+        card_db.delete_entries(card_ids)
         # Delete the given accounts
         super().delete_entries(entry_ids)

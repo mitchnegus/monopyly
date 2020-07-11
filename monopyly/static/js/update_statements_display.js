@@ -8,7 +8,9 @@
  * transactions from that card.
  */
 
-import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
+import {
+	replaceDisplayContentsAjaxRequest
+} from './modules/update_display_ajax.js';
 
 
 (function() {
@@ -22,10 +24,10 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 	const $filters = $filterContainer.find('.card');
 	$filters.on('click', function() {
 		// Add or remove the selected tag when clicked
-		updateDisplay();
+		replaceDisplay();
 	});
 	
-	function updateDisplay() {
+	function replaceDisplay() {
 		// Determine the selected credit cards to use from the filters
 		const $selectedFilters = $filterContainer.find('.card.selected');
 		const filterIDs = [];
@@ -33,7 +35,7 @@ import { updateDisplayAjaxRequest } from './modules/update_display_ajax.js';
 		// Update the display with the filters
 		const endpoint = FILTER_ENDPOINT;
 		const rawData = {'filter_ids': filterIDs};
-		updateDisplayAjaxRequest(endpoint, rawData, $container);
+		replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
 	}
 	
 })();
