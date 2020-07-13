@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 from monopyly import create_app
-from monopyly.db import get_db, init_db
+from monopyly.db import db
 
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
@@ -20,8 +20,8 @@ def app():
     })
     # Initialize the test database
     with app.app_context():
-        init_db()
-        get_db().execute_script(_data_sql)
+        db.init_db()
+        db.get_db().executescript(_data_sql)
 
     yield app
 
@@ -37,3 +37,23 @@ def client(app):
 @pytest.fixture
 def runner(app):
     return app.test_cli_runner()
+
+
+class AuthActions:
+
+    def __init__(self, client):
+        self._client = client
+
+    def login(self, username='test', password='test'):
+        return self._client.post(
+            '/auth/login',
+            data={'username': username, 'password': password}
+        )
+
+    def logout(self):
+        return self._client.get('/auth/logout')
+
+
+@pytest.fixture
+def auth(client):
+    return AuthActions(client)
