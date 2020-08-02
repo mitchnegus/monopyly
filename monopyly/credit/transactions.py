@@ -182,7 +182,7 @@ class TagHandler(DatabaseHandler):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_entries(self, tag_names=None, transaction_ids=None,
-                    fields=TAG_FIELDS):
+                    fields=TAG_FIELDS, ancestors=True):
         """
         Get credit card transaction tags from the database.
 
@@ -202,6 +202,10 @@ class TagHandler(DatabaseHandler):
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
             the 'credit_tags' table.
+        ancestors : bool, optional
+            A flag indicating whether the query should include tags
+            that are ancestors of other tags in the list of returned
+            tags. The default is `True` (ancestor tags are returned).
 
         Returns
         –––––––
@@ -220,6 +224,12 @@ class TagHandler(DatabaseHandler):
         placeholders = (self.user_id, *fill_places(tag_names),
                         *fill_places(transaction_ids))
         tags = self._query_entries(query, placeholders)
+        # If specified, remove ancestors from the list of tags
+        if not ancestors:
+            for tag in tags:
+                for ancestor in self.get_ancestors(tag['id']):
+                    if ancestor in tags:
+                        tags.remove(ancestor)
         return tags
 
     def get_entry(self, tag_id, fields=None):
@@ -250,15 +260,15 @@ class TagHandler(DatabaseHandler):
 
     def get_subtags(self, tag_id, fields=None):
         """
-        Get subcategories of a credit transaction tag given its tag ID.
+        Get subcategories of a credit transaction tag.
 
         Accesses a set of fields for children of a given tag. By
         default, all fields for a tag are returned.
 
         Parameters
         ––––––––––
-        tag_id : int, None
-            The ID of the tag to be found.
+        tag_id : int
+            The ID of the tag for which to find subtags.
         fields : tuple of str, optional
             The fields (in the tags table) to be returned.
 
@@ -273,6 +283,36 @@ class TagHandler(DatabaseHandler):
                   " WHERE parent_id IS ? AND user_id = ?")
         subtags = self._query_entries(query, (tag_id, self.user_id))
         return subtags
+
+    def get_supertag(self, tag_id, fields=None):
+        """
+        Get the supercategory (parent) of a credit transaction tag.
+
+        Accesses a set of fields for the parent of a given tag. By
+        default, all fields for a tag are returned.
+
+        Parameters
+        ––––––––––
+        tag_id : int
+            The ID of the tag for which to find supertags.
+        fields : tuple of str, optional
+            The fields (in the tags table) to be returned.
+
+        Returns
+        –––––––
+        supertag : sqlite3.Row, None
+            The credit card transaction tag that is the parent category
+            of the given tag. Returns `None` if no parent tag is found.
+        """
+        tag = self._query_entry(tag_id)
+        if tag['parent_id']:
+            query = (f"SELECT {select_fields(fields, 't.id')} "
+                      "  FROM credit_tags AS t "
+                      " WHERE id = ? AND user_id = ?")
+            supertag = self._query_entry(tag['parent_id'], query)
+        else:
+            supertag = None
+        return supertag
 
     def find_tag(self, tag_name, fields=None):
         """
@@ -321,18 +361,41 @@ class TagHandler(DatabaseHandler):
         Returns
         –––––––
         heirarchy : dict
-            The dictionary representing the user's tags. Keys are a
-            tuple of tag IDs and tag names.
+            The dictionary representing the user's tags. Keys are
+            sqlite3.Row objects.
         """
         heirarchy = {}
         for tag in self.get_subtags(parent_id):
-            tag_key = (tag['id'], tag['tag_name'])
-            heirarchy[tag_key] = self.get_heirarchy(tag['id'])
+            heirarchy[tag] = self.get_heirarchy(tag['id'])
         return heirarchy
 
-    def update_tags(self, transaction_id, tag_names):
+    def get_ancestors(self, tag_id):
         """
-        Update the tags for a transaction in the database.
+        Get the ancestor tags of a given tag.
+
+        Traverses the heirarchy, starting from the given tag and returns
+        a list of all tags that are ancestors of the given tag.
+
+        Parameters
+        ––––––––––
+        tag_id : int
+            The ID of the tag for which to find ancestors.
+
+        Returns
+        –––––––
+        ancestors : list of sqlite3.Row
+            The ancestors of the given tag.
+        """
+        ancestors = []
+        ancestor = self.get_supertag(tag_id, fields=('tag_name',))
+        while ancestor:
+            ancestors.append(ancestor)
+            ancestor = self.get_supertag(ancestor['id'], fields=('tag_name',))
+        return ancestors
+
+    def update_tag_links(self, transaction_id, tag_names):
+        """
+        Update the tag links for a transaction in the database.
 
         Given a transaction and a list of tag names, each tag is applied
         to the transaction. Then, each existing tag that is not in the
@@ -347,15 +410,13 @@ class TagHandler(DatabaseHandler):
         tag_names : tuple of str
             Tag names to be assigned to the given transactions.
         """
-        # Get all of the current tags for the transaction
-        current_tags = self.get_entries(transaction_ids=(transaction_id,))
-        current_tag_names = [tag['tag_name'] for tag in current_tags]
-        # Determine tags to be added and tags to be removed
-        new_tag_names = [name for name in tag_names
-                         if name not in current_tag_names]
-        old_tag_names = [name for name in current_tag_names
-                         if name not in tag_names]
-        for tag_name in new_tag_names:
+        # Remove existing tags
+        for tag in self.get_entries(transaction_ids=(transaction_id,)):
+            # Unlink the tag from the transaction
+            self.unlink(tag['id'], transaction_id)
+        # Add the new tags
+        linked_tags = []
+        for tag_name in tag_names:
             # Get the matching tag
             tag = self.find_tag(tag_name, fields=('tag_name',))
             # Create the tag if it does not already exist in the database
@@ -365,12 +426,14 @@ class TagHandler(DatabaseHandler):
                             'tag_name': tag_name}
                 tag = self.add_entry(tag_data)
             # Link the tag to the transaction
-            self.link(tag['id'], transaction_id)
-        for tag_name in old_tag_names:
-            # Get the matching tag
-            tag = self.find_tag(tag_name, fields=())
-            # Unlink the tag from the transaction
-            self.unlink(tag['id'], transaction_id)
+            if tag not in linked_tags:
+                # Link all ancestor tags with this tag
+                for ancestor in self.get_ancestors(tag['id']):
+                    if ancestor not in linked_tags:
+                        self.link(ancestor['id'], transaction_id)
+                        linked_tags.append(ancestor)
+                self.link(tag['id'], transaction_id)
+                linked_tags.append(tag)
 
     def link(self, tag_id, transaction_id):
         """Add a tag to the given transaction."""

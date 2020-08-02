@@ -257,7 +257,7 @@ def show_transaction_tags():
     tag_db = TagHandler()
     # Get the transaction ID from the AJAX request
     transaction_id = request.get_json().split('-')[-1]
-    # Get tags for the transaction
+    # Get tags for the transaction (including ancestors)
     tags = tag_db.get_entries(transaction_ids=(transaction_id,),
                               fields=('tag_name',))
     return render_template('credit/transactions_table/tags.html', tags=tags)
@@ -305,7 +305,7 @@ def new_transaction(statement_id):
             transaction_db, tag_db = TransactionHandler(), TagHandler()
             # Insert the new transaction into the database
             transaction = transaction_db.add_entry(form.transaction_data)
-            tag_db.update_tags(transaction['id'], form.tag_data)
+            tag_db.update_tag_links(transaction['id'], form.tag_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:
@@ -324,7 +324,7 @@ def update_transaction(transaction_id):
     # Get the transaction information from the database
     transaction = transaction_db.get_entry(transaction_id)
     tags = tag_db.get_entries(transaction_ids=(transaction_id,),
-                              fields=('tag_name',))
+                              fields=('tag_name',), ancestors=False)
     tag_list = ', '.join([tag['tag_name'] for tag in tags])
     form_data = {**transaction, 'tags': tag_list}
     # Define a form for a transaction
@@ -335,7 +335,7 @@ def update_transaction(transaction_id):
             # Update the database with the updated transaction
             transaction = transaction_db.update_entry(transaction_id,
                                                       form.transaction_data)
-            tag_db.update_tags(transaction['id'], form.tag_data)
+            tag_db.update_tag_links(transaction['id'], form.tag_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=True)
         else:
@@ -386,7 +386,7 @@ def new_tag():
                 'tag_name': tag_name}
     tag = tag_db.add_entry(tag_data)
     return render_template('credit/subtag_tree.html',
-                           tag=(tag['id'], tag['tag_name']),
+                           tag=tag,
                            tags_heirarchy={})
 
 
