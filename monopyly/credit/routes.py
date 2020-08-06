@@ -396,9 +396,11 @@ def delete_tag():
     tag_db = TagHandler()
     # Get the tag to be deleted from the AJAX request
     post_args = request.get_json()
+    tag_name = post_args['tag_name']
+    tag = tag_db.find_tag(tag_name)
     # Remove the tag from the database
-    tag_db.delete_entries((tag_id,))
-    return redirect(url_for('credit.load_tags'))
+    tag_db.delete_entries((tag['id'],))
+    return ''
 
 
 @credit.route('/_suggest_autocomplete', methods=('POST',))

@@ -8,7 +8,7 @@
  * resuls of the request.
  */
 
-function executeAjaxRequest(endpoint, rawData, action) {
+function executeAjaxRequest(endpoint, rawData, action = function(){} ) {
 
 	// Execute the action using the response of the AJAX request
 	$.ajax({
