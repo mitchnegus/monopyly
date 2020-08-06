@@ -390,10 +390,12 @@ def new_tag():
                            tags_heirarchy={})
 
 
-@credit.route('/delete_tag/<int:tag_id>')
+@credit.route('/_delete_tag/', methods=('POST',))
 @login_required
-def delete_tag(tag_id):
+def delete_tag():
     tag_db = TagHandler()
+    # Get the tag to be deleted from the AJAX request
+    post_args = request.get_json()
     # Remove the tag from the database
     tag_db.delete_entries((tag_id,))
     return redirect(url_for('credit.load_tags'))
