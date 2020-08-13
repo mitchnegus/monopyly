@@ -31,7 +31,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-
     # Allow the databases to be initialized from the command line
     db.init_app(app)
 
