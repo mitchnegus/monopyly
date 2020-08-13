@@ -3,12 +3,12 @@ Run a development server for the Monopyly app.
 """
 import os
 from flask import Flask
-from flask import render_template, request
 
 import monopyly.db as db
 from monopyly.core import core
 from monopyly.auth import auth
 from monopyly.credit import credit
+
 
 def create_app(test_config=None):
     # Create and configure the app
@@ -19,7 +19,7 @@ def create_app(test_config=None):
     )
 
     if test_config is None:
-        # Load the instance config if it exists (when not testing)
+        # Load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
     else:
         # Load the test config if that is passed instead
