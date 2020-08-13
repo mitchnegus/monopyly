@@ -1,5 +1,5 @@
 """
-Connect to the SQLite authentication database.
+Connect to the SQLite database.
 """
 import sqlite3
 
