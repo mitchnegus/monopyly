@@ -2,6 +2,8 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS credit_cards;
 DROP TABLE IF EXISTS credit_statements;
 DROP TABLE IF EXISTS credit_transactions;
+DROP TABLE IF EXISTS credit_tags;
+DROP TABLE IF EXISTS credit_tag_links;
 
 /* Store user information */
 CREATE TABLE users (
