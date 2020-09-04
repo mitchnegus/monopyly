@@ -176,7 +176,7 @@ def load_statement(statement_id):
     statement = statement_db.get_entry(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
-    transaction_fields = ('transaction_date', 'vendor', 'amount', 'notes')
+    transaction_fields = ('transaction_date', 'vendor', 'total', 'notes')
     transactions = transaction_db.get_entries(statement_ids=(statement['id'],),
                                               sort_order=sort_order,
                                               fields=transaction_fields)
@@ -221,8 +221,8 @@ def make_payment(card_id, statement_id):
     transaction_db.add_transaction(statement_id=statement['id'],
                                    transaction_date=payment_date,
                                    vendor=card['bank'],
-                                   amount=-payment_amount,
-                                   notes='Card payment')
+                                   subtotal=-payment_amount,
+                                   note='Card payment')
     # Get the statement information from the database
     fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')
@@ -240,7 +240,7 @@ def load_transactions():
     # Get all of the user's transactions for active cards from the database
     sort_order = 'DESC'
     transaction_fields = ('account_id', 'bank', 'last_four_digits',
-                          'transaction_date', 'vendor', 'amount', 'notes',
+                          'transaction_date', 'vendor', 'total', 'notes',
                           'statement_id', 'issue_date')
     transactions = transaction_db.get_entries(active=True,
                                               sort_order=sort_order,
@@ -275,7 +275,7 @@ def update_transactions_display():
     cards = [card_db.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected transactions from the database
     transaction_fields = ('account_id', 'bank', 'last_four_digits',
-                          'transaction_date', 'vendor', 'amount', 'notes',
+                          'transaction_date', 'vendor', 'total', 'notes',
                           'statement_id', 'issue_date')
     transactions = transaction_db.get_entries([card['id'] for card in cards],
                                               sort_order=sort_order,
@@ -297,15 +297,17 @@ def new_transaction(statement_id):
         statement_db = StatementHandler()
         # Get the necessary fields from the database
         statement_fields = ('bank', 'last_four_digits', 'issue_date')
-        statement = statement_db.get_entry(statement_id, fields=statement_fields)
+        statement = statement_db.get_entry(statement_id,
+                                           fields=statement_fields)
         form.process(data=statement)
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
             transaction_db, tag_db = TransactionHandler(), TagHandler()
             # Insert the new transaction into the database
-            transaction = transaction_db.add_entry(form.transaction_data)
-            tag_db.update_tag_links(transaction['id'], form.tag_data)
+            transaction_data, tag_data = form.transaction_data, form.tag_data
+            transaction = transaction_db.add_transaction(*transaction_data)
+            tag_db.update_tag_links(transaction['id'], tag_data)
             return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction, update=False)
         else:

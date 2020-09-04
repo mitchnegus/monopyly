@@ -29,13 +29,13 @@ class TransactionForm(FlaskForm):
         filters=[parse_date]
     )
     vendor = TextField('Vendor', [DataRequired()])
-    amount = DecimalField(
+    subtotal = DecimalField(
         'Amount',
         validators=[DataRequired()],
         filters=[lambda x: float(round(x, 2)) if x else None],
         places=2
     )
-    notes = TextField('Notes', [DataRequired()])
+    note = TextField('Note', [DataRequired()])
     issue_date = TextField('Statement Date', filters=[parse_date])
     tags = TextField('Tags')
     submit = SubmitField('Save Transaction')
@@ -45,7 +45,7 @@ class TransactionForm(FlaskForm):
         """Produce a dictionary corresponding to a database transaction."""
         statement = self.get_transaction_statement()
         transaction_data = {'statement_id': statement['id']}
-        for field in ('transaction_date', 'vendor', 'amount', 'notes'):
+        for field in ('transaction_date', 'vendor', 'subtotal', 'note'):
             transaction_data[field] = self[field].data
         return transaction_data
 

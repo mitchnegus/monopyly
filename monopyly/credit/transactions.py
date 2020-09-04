@@ -7,7 +7,10 @@ from sqlite3 import IntegrityError
 from ..utils import (
     DatabaseHandler, fill_places, filter_items, filter_dates, check_sort_order
 )
-from .constants import TRANSACTION_FIELDS, TAG_FIELDS
+from .constants import (
+    TRANSACTION_FIELDS, TRANSACTION_VIEW_FIELDS, SUBTRANSACTION_FIELDS,
+    TAG_FIELDS
+)
 from .tools import select_fields
 
 
@@ -44,7 +47,8 @@ class TransactionHandler(DatabaseHandler):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_entries(self, card_ids=None, statement_ids=None, active=False,
-                    sort_order='DESC', fields=TRANSACTION_FIELDS):
+                    sort_order='DESC',
+                    fields=(*TRANSACTION_FIELDS, *TRANSACTION_VIEW_FIELDS)):
         """
         Get credit card transactions from the database.
 
@@ -87,7 +91,7 @@ class TransactionHandler(DatabaseHandler):
         statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 't.id')} "
-                  "  FROM credit_transactions AS t "
+                  "  FROM credit_transactions_view AS t "
                   "       INNER JOIN credit_statements AS s "
                   "          ON s.id = t.statement_id "
                   "       INNER JOIN credit_cards AS c "
@@ -96,6 +100,7 @@ class TransactionHandler(DatabaseHandler):
                   "          ON a.id = c.account_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {statement_filter} {active_filter} "
+                  " GROUP BY t.id "
                  f" ORDER BY transaction_date {sort_order}")
         placeholders = (self.user_id, *fill_places(card_ids),
                         *fill_places(statement_ids))
@@ -137,16 +142,89 @@ class TransactionHandler(DatabaseHandler):
         transaction = self._query_entry(transaction_id, query, abort_msg)
         return transaction
 
-    def add_transaction(self, statement_id, transaction_date, vendor, amount,
-                        notes):
+    def get_subtransactions(self, transaction_id, fields=None):
+        """
+        Get all subtransactions for a credit transaction.
+
+        Accesses a set of fields for subtransactions of a given
+        transaction. By default, all fields for a subtransaction are
+        returned.
+
+        Parameters
+        ––––––––––
+        transaction_id : int
+            The ID of the transaction for which to retrieve
+            subtransactions.
+        fields : tuple of str, optional
+            The fields (in either the transactions, subtransactions,
+            statements, cards, or accounts tables) to be returned.
+
+        Returns
+        –––––––
+        subtransactions : list of sqlite3.Row
+            A list of credit card subtransactions that are associated
+            with the given transaction.
+        """
+        query = (f"SELECT {select_fields(fields, 's_t.id')} "
+                  "  FROM credit_subtransactions AS s_t "
+                  "       INNER JOIN credit_transactions AS t "
+                  "          ON t.id = s_t.transaction_id "
+                  "       INNER JOIN credit_statements AS s "
+                  "          ON s.id = t.statement_id "
+                  "       INNER JOIN credit_cards AS c "
+                  "          ON c.id = s.card_id "
+                  "       INNER JOIN credit_accounts AS a "
+                  "          ON a.id = c.account_id "
+                  " WHERE t.id = ? AND user_id = ?")
+        abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
+                      'user.')
+        transaction = self._query_entries(transaction_id, query, abort_msg)
+        return subtransactions
+
+    def add_transaction(self, statement_id, transaction_date, vendor, subtotal,
+                        note):
         """Add a transaction to the database."""
+        # Override the default `add_entry` method to account for subtransaction
         transaction_data = {'statement_id': statement_id,
                             'transaction_date': transaction_date,
-                            'vendor': vendor,
-                            'amount': amount,
-                            'notes': notes}
-        transaction = self.add_entry(transaction_data)
+                            'vendor': vendor}
+        # Create a new transaction
+        transaction_fields = tuple(transaction_data.keys())
+        self.cursor.execute(
+            f"INSERT INTO credit_transactions {transaction_fields} "
+            f"       VALUES ({reserve_places(transaction_data.values())})",
+            (*transaction_data.values(),)
+        )
+        transaction_id = self.cursor.lastrowid
+        self.db.commit()
+        # Create a corresponding subtransaction
+        self.add_subtransaction(transaction_id, subtotal, note)
+        transaction = self.get_entry(transaction_id)
         return transaction
+
+    def add_subtransaction(self, transaction_id, subtotal, note):
+        """Add a subtransaction to the database."""
+        subtransaction_data = {'transaction_id': transaction_id,
+                               'subtotal': subtotal,
+                               'note': note}
+        subtransaction_fields = tuple(subtransaction_data.keys())
+        self.cursor.execute(
+            f"INSERT INTO credit_subtransactions {subtransaction_fields} "
+            f"       VALUES ({reserve_places(subtransaction_data.values())})",
+            (*transaction_data.values(),)
+        )
+        self.db.commit
+
+
+
+    def update_transaction(self, entry_id, statement_id, transaction_date,
+                           vendor, subtotal, note):
+        """Update a transaction (and subtransaction) in the database."""
+        transaction_data = {'statement_id', statement_id,
+                            'transaction_date', transaction_date,
+                            'vendor', vendor}
+        # Update the transactions
+
 
 
 class TagHandler(DatabaseHandler):
@@ -182,7 +260,8 @@ class TagHandler(DatabaseHandler):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_entries(self, tag_names=None, transaction_ids=None,
-                    fields=TAG_FIELDS, ancestors=True):
+                    subtransaction_ids=None, fields=TAG_FIELDS,
+                    ancestors=True):
         """
         Get credit card transaction tags from the database.
 
@@ -198,6 +277,9 @@ class TagHandler(DatabaseHandler):
         transaction_ids : tuple of int, optional
             A sequence of transaction IDs for which tags will be
             selected (if `None`, all transaction tags will be selected).
+        subtransaction_ids : tuple of int, optional
+            A sequence of subtransaction IDs for which tags will be
+            selected (if `None`, all subtransaction tags will be selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
@@ -216,11 +298,17 @@ class TagHandler(DatabaseHandler):
         transaction_filter = filter_items(transaction_ids,
                                           'transaction_id',
                                           'AND')
-        query = (f"SELECT {select_fields(fields, 'DISTINCT t.id')} "
-                  "  FROM credit_tags AS t "
+        subtransaction_filter = filter_items(subtransaction_ids,
+                                             'subtransaction_id',
+                                             'AND')
+        query = (f"SELECT {select_fields(fields, 'DISTINCT tags.id')} "
+                  "  FROM credit_tags AS tags "
                   "       LEFT OUTER JOIN credit_tag_links AS l "
-                  "          ON l.tag_id = t.id "
-                 f" WHERE user_id = ? {name_filter} {transaction_filter}")
+                  "          ON l.tag_id = tags.id "
+                  "       INNER JOIN credit_subtransactions AS s_t "
+                  "          ON s_t.id = tags.subtransaction_id "
+                 f" WHERE user_id = ? {name_filter} "
+                 f"       {transaction_filter} {subtransaction_filter}")
         placeholders = (self.user_id, *fill_places(tag_names),
                         *fill_places(transaction_ids))
         tags = self._query_entries(query, placeholders)
@@ -251,9 +339,9 @@ class TagHandler(DatabaseHandler):
         tag : sqlite3.Row
             The tag information from the database.
         """
-        query = (f"SELECT {select_fields(fields, 't.id')} "
-                  "  FROM credit_tags AS t "
-                  " WHERE t.id = ? AND user_id = ?")
+        query = (f"SELECT {select_fields(fields, 'tags.id')} "
+                  "  FROM credit_tags AS tags "
+                  " WHERE tags.id = ? AND user_id = ?")
         abort_msg = (f'Tag ID {tag_id} does not exist for the user.')
         tag = self._query_entry(tag_id, query, abort_msg)
         return tag
@@ -278,8 +366,8 @@ class TagHandler(DatabaseHandler):
             A list of credit card transaction tags that are
             subcategories of the given tag.
         """
-        query = (f"SELECT {select_fields(fields, 't.id')} "
-                  "  FROM credit_tags AS t "
+        query = (f"SELECT {select_fields(fields, 'tags.id')} "
+                  "  FROM credit_tags AS tags "
                   " WHERE parent_id IS ? AND user_id = ?")
         subtags = self._query_entries(query, (tag_id, self.user_id))
         return subtags
@@ -306,8 +394,8 @@ class TagHandler(DatabaseHandler):
         """
         tag = self._query_entry(tag_id)
         if tag['parent_id']:
-            query = (f"SELECT {select_fields(fields, 't.id')} "
-                      "  FROM credit_tags AS t "
+            query = (f"SELECT {select_fields(fields, 'tags.id')} "
+                      "  FROM credit_tags AS tags "
                       " WHERE id = ? AND user_id = ?")
             supertag = self._query_entry(tag['parent_id'], query)
         else:
@@ -334,8 +422,8 @@ class TagHandler(DatabaseHandler):
             The tag entry matching the given criteria. If no matching
             tag is found, returns `None`.
         """
-        query = (f"SELECT {select_fields(fields, 't.id')} "
-                  "  FROM credit_tags AS t "
+        query = (f"SELECT {select_fields(fields, 'tags.id')} "
+                  "  FROM credit_tags AS tags "
                  f" WHERE user_id = ? AND tag_name = ?")
         placeholders = (self.user_id, tag_name)
         tag = self.cursor.execute(query, placeholders).fetchone()
@@ -393,27 +481,28 @@ class TagHandler(DatabaseHandler):
             ancestor = self.get_supertag(ancestor['id'], fields=('tag_name',))
         return ancestors
 
-    def update_tag_links(self, transaction_id, tag_names):
+    def update_tag_links(self, subtransaction_id, tag_names):
         """
         Update the tag links for a transaction in the database.
 
-        Given a transaction and a list of tag names, each tag is applied
-        to the transaction. Then, each existing tag that is not in the
-        list of tag names is disassociated with the transaction. Tag
-        names that do not already have database entries are created.
+        Given a subtransaction and a list of tag names, each tag is
+        applied to the subtransaction. Then, each existing tag that is
+        not in the list of tag names is disassociated with the
+        subtransaction. Tag names that do not already have database
+        entries are created.
 
         Parameters
         ––––––––––
-        transaction_id : int
-            The ID of a transaction database entry that will be assigned
-            the tags.
+        subtransaction_id : int
+            The ID of a subtransaction database entry that will be
+            assigned the tags.
         tag_names : tuple of str
             Tag names to be assigned to the given transactions.
         """
         # Remove existing tags
-        for tag in self.get_entries(transaction_ids=(transaction_id,)):
-            # Unlink the tag from the transaction
-            self.unlink(tag['id'], transaction_id)
+        for tag in self.get_entries(subtransaction_ids=(subtransaction_id,)):
+            # Unlink the tag from the subtransaction
+            self.unlink(tag['id'], subtransaction_id)
         # Add the new tags
         linked_tags = []
         for tag_name in tag_names:
@@ -430,33 +519,33 @@ class TagHandler(DatabaseHandler):
                 # Link all ancestor tags with this tag
                 for ancestor in self.get_ancestors(tag['id']):
                     if ancestor not in linked_tags:
-                        self.link(ancestor['id'], transaction_id)
+                        self.link(ancestor['id'], subtransaction_id)
                         linked_tags.append(ancestor)
-                self.link(tag['id'], transaction_id)
+                self.link(tag['id'], subtransaction_id)
                 linked_tags.append(tag)
 
-    def link(self, tag_id, transaction_id):
-        """Add a tag to the given transaction."""
-        # Add the transaction-tag link if the two are not already associated
+    def link(self, tag_id, subtransaction_id):
+        """Add a tag to the given subtransaction."""
+        # Add the subtransaction-tag link if the two are not already associated
         try:
             self.cursor.execute(
-                "INSERT INTO credit_tag_links (transaction_id, tag_id) "
+                "INSERT INTO credit_tag_links (subtransaction_id, tag_id) "
                f"     VALUES (?, ?)",
-                (transaction_id, tag_id)
+                (subtransaction_id, tag_id)
             )
             self.db.commit()
         except IntegrityError:
             # The tag link already exists
             pass
 
-    def unlink(self, tag_id, transaction_id):
-        """Remove a tag from the given transaction."""
-        # Delete the transaction-tag link
+    def unlink(self, tag_id, subtransaction_id):
+        """Remove a tag from the given subtransaction."""
+        # Delete the subtransaction-tag link
         self.cursor.execute(
             "DELETE "
             "  FROM credit_tag_links "
-            " WHERE transaction_id = ? AND tag_id = ? ",
-            (transaction_id, tag_id)
+            " WHERE subtransaction_id = ? AND tag_id = ? ",
+            (subtransaction_id, tag_id)
         )
         self.db.commit()
 
@@ -499,7 +588,7 @@ class TagHandler(DatabaseHandler):
         statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
         date_filter = filter_dates(start_date, end_date, 'transaction_date',
                                    'AND')
-        fields = ['SUM(amount) total', 'tag_name']
+        fields = ['SUM(subtotal) total', 'tag_name']
         groups = ['tags.id']
         if group_statements:
             fields.append('t.statement_id')
@@ -508,8 +597,10 @@ class TagHandler(DatabaseHandler):
                   "  FROM credit_tags AS tags "
                   "       INNER JOIN credit_tag_links AS l "
                   "          ON l.tag_id = tags.id "
+                  "       INNER JOIN credit_subtransactions AS s_t "
+                  "          ON s_t.id = l.subtransaction_id "
                   "       INNER JOIN credit_transactions AS t "
-                  "          ON t.id = l.transaction_id "
+                  "          ON t.id = s_t.transaction_id "
                   "       INNER JOIN credit_statements AS s "
                   "          ON s.id = t.statement_id "
                   " WHERE tags.user_id = ? "
@@ -554,12 +645,14 @@ class TagHandler(DatabaseHandler):
                    f" WHERE a.user_id = ? {statement_filter}")
         tag_filter = filter_items(tag_ids, 'tag_id', 'AND')
         statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
-        query = (f"SELECT SUM(amount) / ({subquery}) average_total, tag_name "
+        query = (f"SELECT SUM(subtotal) / ({subquery}) average_total, tag_name "
                  "  FROM credit_tags AS tags "
                  "       INNER JOIN credit_tag_links AS l "
                  "          ON l.tag_id = tags.id "
+                 "       INNER JOIN credit_subtransactions AS s_t "
+                 "          ON s_t.id = l.subtransaction_id "
                  "       INNER JOIN credit_transactions AS t "
-                 "          ON t.id = l.transaction_id "
+                 "          ON t.id = s_t.transaction_id "
                  "       INNER JOIN credit_statements AS s "
                  "          ON s.id = t.statement_id "
                 f" WHERE tags.user_id = ? {tag_filter} {statement_filter} "
