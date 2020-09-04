@@ -62,8 +62,8 @@ CREATE TABLE credit_transactions (
 CREATE TABLE credit_subtransactions (
 	id INTEGER,
 	transaction_id INTEGER NOT NULL,
-	amount REAL NOT NULL,
-	notes TEXT NOT NULL,
+	subtotal REAL NOT NULL,
+	note TEXT NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (transaction_id) REFERENCES credit_transactions (id)
 	  ON DELETE CASCADE
@@ -93,6 +93,20 @@ CREATE TABLE credit_tag_links (
 		ON DELETE CASCADE
 );
 
+/* Prepare a view giving consolidated credit card transaction information */
+CREATE VIEW credit_transactions_view AS
+SELECT
+  t.id,
+	statement_id,
+	transaction_date,
+	vendor,
+	SUM(subtotal) total,
+	GROUP_CONCAT(note, '; ') notes
+FROM credit_transactions AS t
+  INNER JOIN credit_subtransactions AS s_t
+	  ON s_t.transaction_id = t.id
+GROUP BY t.id;
+
 /* Prepare a view giving enhanced credit card statement information */
 CREATE VIEW credit_statements_view AS
 WITH view AS (
@@ -106,7 +120,7 @@ WITH view AS (
 			t.transaction_date,
 			/* Determine the balance on an account for each statement */
 			COALESCE(
-				SUM(amounts) OVER (PARTITION BY account_id ORDER BY issue_date),
+				SUM(subtotals) OVER (PARTITION BY account_id ORDER BY issue_date),
 				0
 			) statement_balance,
 			/* Determine the total charges on an account for each statement */
@@ -124,9 +138,9 @@ WITH view AS (
 	      SELECT
 					statement_id,
 					transaction_date,
-					SUM(amount) amounts,
-	        CASE WHEN SUM(amount) >= 0 THEN SUM(amount) END charges,
-	        CASE WHEN SUM(amount) < 0 THEN SUM(amount) END payments
+					SUM(subtotal) subtotals,
+	        CASE WHEN SUM(subtotal) >= 0 THEN SUM(subtotal) END charges,
+	        CASE WHEN SUM(subtotal) < 0 THEN SUM(subtotal) END payments
 				FROM credit_transactions
 					INNER JOIN credit_subtransactions
 					  ON credit_subtransactions.transaction_id = credit_transactions.id
@@ -140,7 +154,7 @@ WITH view AS (
 	GROUP BY id, daily_payment_total
 	ORDER BY transaction_date
 )
-SELECT 
+SELECT
 	s.*,
 	v1.statement_balance balance,
 	v2.payment_date
@@ -162,4 +176,4 @@ FROM credit_statements s
 		ORDER BY v1.transaction_date
 	) v2
 		ON v2.id = s.id
-GROUP BY s.id
+GROUP BY s.id;
