@@ -2,10 +2,9 @@
 Tools for interacting with credit cards in the database.
 """
 from ..utils import (
-    DatabaseHandler, fill_place, fill_places, filter_item, filter_items
+    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
+    select_fields
 )
-from .constants import CARD_FIELDS
-from .tools import select_fields
 from .statements import StatementHandler
 
 
@@ -26,7 +25,7 @@ class CardHandler(DatabaseHandler):
 
     Attributes
     ––––––––––
-    table_name : str
+    table : str
         The name of the database table that this handler manages.
     db : sqlite3.Connection
         A connection to the database for interfacing.
@@ -35,8 +34,7 @@ class CardHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    table_name = 'credit_cards'
-    table_fields = CARD_FIELDS
+    _table = 'credit_cards'
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
@@ -97,7 +95,7 @@ class CardHandler(DatabaseHandler):
 
     def get_entry(self, card_id, fields=None):
         """
-        Get a credit card from the database given its card ID.
+        Get a credit card from the database given its ID.
 
         Accesses a set of fields for a given card. By default, all
         fields for a credit card and the corresponding account are
@@ -121,8 +119,9 @@ class CardHandler(DatabaseHandler):
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
                   " WHERE c.id = ? AND user_id = ?")
+        placeholders = (card_id, self.user_id)
         abort_msg = f'Card ID {card_id} does not exist for the user.'
-        card = self._query_entry(card_id, query, abort_msg)
+        card = self._query_entry(query, placeholders, abort_msg)
         return card
 
     def find_card(self, bank=None, last_four_digits=None, fields=None):

@@ -2,10 +2,9 @@
 Tools for interacting with credit accounts in the database.
 """
 from ..utils import (
-    DatabaseHandler, fill_place, fill_places, filter_item, filter_items
+    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
+    select_fields
 )
-from .constants import ACCOUNT_FIELDS
-from .tools import select_fields
 from .cards import CardHandler
 
 
@@ -26,7 +25,7 @@ class AccountHandler(DatabaseHandler):
 
     Attributes
     ––––––––––
-    table_name : str
+    table : str
         The name of the database table that this handler manages.
     db : sqlite3.Connection
         A connection to the database for interfacing.
@@ -35,8 +34,7 @@ class AccountHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    table_name = 'credit_accounts'
-    table_fields = ACCOUNT_FIELDS
+    _table = 'credit_accounts'
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
@@ -74,12 +72,13 @@ class AccountHandler(DatabaseHandler):
         return accounts
 
     def get_entry(self, account_id, fields=None):
-        """Get a credit account from the database given its account ID."""
+        """Get a credit account from the database given its ID."""
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
                   " WHERE a.id = ? AND user_id = ?")
+        placeholders = (account_id, self.user_id)
         abort_msg = f'Account ID {account_id} does not exist for the user.'
-        account = self._query_entry(account_id, query, abort_msg)
+        account = self._query_entry(query, placholders, abort_msg)
         return account
 
     def delete_entries(self, entry_ids):

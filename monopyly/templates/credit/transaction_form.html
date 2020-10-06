@@ -21,29 +21,26 @@
 		{{ form.transaction_date }}
 	</div>
 
-	<div class="form-field autocomplete">
-		{{ form.vendor.label }}
-		{{ form.vendor }}
-	</div>
-
-	<div class="form-field">
-		{{ form.amount.label }}
-		{{ form.amount }}
-	</div>
-
-	<div class="form-field autocomplete">
-		{{ form.notes.label }}
-		{{ form.notes }}
-	</div>
-
 	<div class="form-field">
 		{{ form.issue_date.label }}
 		{{ form.issue_date }}
 	</div>
 
-	<div class="form-field">
-		{{ form.tags.label }}
-		{{ form.tags }}
+	<div class="form-field autocomplete">
+		{{ form.vendor.label }}
+		{{ form.vendor }}
+	</div>
+
+
+	<div id="subtransactions">
+		{% for sub_form in form.subtransactions %}
+			{% include 'credit/subtransaction_form.html' %}
+		{% endfor %}
+	</div>
+
+
+	<div id="new-subtransaction" class="button">
+		<b>+</b>
 	</div>
 
 	<div class="form-field">

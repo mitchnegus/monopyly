@@ -2,13 +2,17 @@
 General utility objects.
 """
 from abc import ABC, abstractmethod
+from collections import Counter
 import itertools as it
 import datetime
 
 from flask import g
 from werkzeug.exceptions import abort
 
-from monopyly.db import get_db
+from .db import DATABASE_FIELDS, get_db
+
+
+ALL_FIELDS = [field for fields in DATABASE_FIELDS.values() for field in fields]
 
 
 class DatabaseHandler(ABC):
@@ -34,6 +38,8 @@ class DatabaseHandler(ABC):
 
     Attributes
     ––––––––––
+    table : str
+        The name of the database table that this handler manages.
     db : sqlite3.Connection
         A connection to the database for interfacing.
     cursor : sqlite.Cursor
@@ -41,57 +47,80 @@ class DatabaseHandler(ABC):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    table_name = None
-    table_fields = ()
 
     def __init__(self, db=None, user_id=None, check_user=True):
+        # Set the fields for the handler
+        self._table_fields = DATABASE_FIELDS[self.table]
+        # Process arguments
         self.db = db if db else get_db()
         self.cursor = self.db.cursor()
         self.user_id = user_id if user_id else g.user['id']
         if check_user and self.user_id != g.user['id']:
             abort(403)
 
+    @property
+    def table(self):
+        # Ensure that the `_table` attribute is defined
+        try:
+            return self._table
+        except AttributeError:
+            raise AttributeError('The handler must have a defined table.')
+
     @abstractmethod
     def get_entries(self, fields=None):
-        raise NotImplementedError('This is an Abstract Base Class. Define '
-                                  'a `get_entries` method in a subclass.')
-
-    def _query_entries(self, query=None, placeholders=None):
         """
-        Execute a query to return entries from the database.
+        Retrieve a set of entries from the database.
 
-        Accepts an optional query for selecting entries from the
-        database. If no query is provided, a default query getting all
-        database fields is used.
+        Executes a default simple for selecting the table entries from
+        the database. By default, all database fields for the entries
+        are returned.
 
         Parameters
         ––––––––––
-        query : str, optional
-            A query to use in selecting entries. The query may include
-            placeholders.
-        placeholders : tuple, optional
-            Placeholders to be substituted into the query safely.
+        fields : tuple of str
+            The fields (in the specified table) to be returned.
         """
-        if not query:
-            query = (f"SELECT * "
-                     f"  FROM {self.table_name} "
-                      " WHERE user_id = ?")
-            placeholders = (self.user_id,)
+        query = (f"SELECT {select_fields(fields)} "
+                 f"  FROM {self.table} "
+                  " WHERE user_id = ? ")
+        placeholders = (self.user_id,)
+        entries = self._query_entries(query, placeholders)
+        return entries
+
+
+    def _query_entries(self, query, placeholders):
+        """Execute a query to return entries from the database."""
         entries = self.cursor.execute(query, placeholders).fetchall()
         return entries
 
-    @abstractmethod
     def get_entry(self, entry_id, fields=None):
-        raise NotImplementedError('This is an Abstract Base Class. Define '
-                                  'a `get_entry` method in a subclass.')
+        """
+        Retrieve a single entry from the database.
 
-    def _query_entry(self, entry_id, query=None, abort_msg=None):
-        """Execute a query to return a single entry from the database."""
-        if not query:
-            query = (f"SELECT * "
-                     f"  FROM {self.table_name} "
-                      " WHERE id = ? AND user_id = ?")
+        Executes a default simple query from the database to get a
+        single entry. By default, all fields for the entry are returned.
+
+        Parameters
+        ––––––––––
+        entry_id : int
+            The ID of the entry to be found.
+        fields : tuple of str, optional
+            The fields (in the specified table) to be returned.
+
+        Returns
+        –––––––
+        entry : sqlite3.Row
+            The entry information from the database.
+        """
+        query = (f"SELECT {select_fields(fields)} "
+                 f"  FROM {self.table} "
+                  " WHERE id = ? AND user_id = ?")
         placeholders = (entry_id, self.user_id)
+        entry = self._query_entry(entry_id, query, placeholders)
+        return entry
+
+    def _query_entry(self, query, placeholders, abort_msg=None):
+        """Execute a query to return a single entry from the database."""
         entry = self.cursor.execute(query, placeholders).fetchone()
         # Check that an entry was found
         if not entry:
@@ -113,7 +142,6 @@ class DatabaseHandler(ABC):
         be used only when given a mapping that exactly corresponds to
         the new database entry.
 
-
         Parameters
         ––––––––––
         mapping : dict
@@ -125,13 +153,15 @@ class DatabaseHandler(ABC):
         entry : sqlite3.Row
             The saved entry.
         """
-        if tuple(self.table_fields) !=  tuple(mapping.keys()):
+        # Use default table name and query if not provided
+        if self._table_fields !=  tuple(mapping.keys()):
             raise ValueError('The fields given in the mapping '
                             f'{tuple(mapping.keys())} do not match the fields '
                              'in the database. The fields must be the '
-                            f'following: {", ".join(self.table_fields)}.')
+                             'following (in order): '
+                            f'{", ".join(self._table_fields)}.')
         self.cursor.execute(
-            f"INSERT INTO {self.table_name} {tuple(self.table_fields)} "
+            f"INSERT INTO {self.table} {self._table_fields} "
             f"     VALUES ({reserve_places(mapping.values())})",
             (*mapping.values(),)
         )
@@ -161,13 +191,13 @@ class DatabaseHandler(ABC):
         entry : sqlite3.Row
             The saved entry.
         """
-        if not all(key in self.table_fields for key in mapping.keys()):
+        if not all(key in self._table_fields for key in mapping.keys()):
             raise ValueError('The mapping contains at least one field that '
                              'not match the database. Fields must be one of '
-                            f'the following: {", ".join(self.table_fields)}.')
+                            f'the following: {", ".join(self._table_fields)}.')
         update_fields = ', '.join([f'{field} = ?' for field in mapping])
         self.cursor.execute(
-            f"UPDATE {self.table_name} "
+            f"UPDATE {self.table} "
             f"   SET {update_fields} "
              " WHERE id = ?",
             (*mapping.values(), entry_id)
@@ -183,7 +213,7 @@ class DatabaseHandler(ABC):
             self.get_entry(entry_id)
         self.cursor.execute(
             "DELETE "
-           f"  FROM {self.table_name} "
+           f"  FROM {self.table} "
            f" WHERE id IN ({reserve_places(entry_ids)})",
             entry_ids
         )
@@ -318,7 +348,51 @@ def filter_dates(start_date, end_date, db_date_name, prefix=""):
     return f"{prefix} {date_filter}"
 
 
+def query_date(field):
+    """Return a query string specifically indicating date types."""
+    # Use sqlite3 converters to get the field as a date
+    return f'{field} "{field} [date]"'
+
+
 def check_sort_order(sort_order):
     """Ensure that a valid sort order was provided."""
     if sort_order not in ('ASC', 'DESC'):
         raise ValueError('Provide a valid sort order.')
+
+
+def check_field(field):
+    """Check that a named field matches database field."""
+    field = strip_function(field)
+    if field.split('.', 1)[-1] not in ALL_FIELDS:
+        raise ValueError(f"The field '{field}' does not exist in the "
+                          "database.")
+
+
+def select_fields(fields, id_field=None):
+    """
+    Create a list of a given set of fields.
+
+    Given a set of fields, create a list from the sequence to use when
+    querying the database. If the fields parameter is set to `None`,
+    then all fields in the database are returned. An optional 'id_field'
+    can be provided to ensure that that field will always be returned,
+    regardless of which other fields are provided.
+
+    Parameters
+    ––––––––––
+    fields : tuple of str, None
+        A list of fields to arrrange as a string for database querying.
+    id_field : str, optional
+        A field that will always be returned, regardless of the other fields
+        provided.
+    """
+    if fields is None:
+        return "*"
+    query_fields = [id_field] if id_field else []
+    for field in fields:
+        check_field(field)
+        if field[-5:] == '_date':
+            query_fields.append(query_date(field))
+        else:
+            query_fields.append(field)
+    return f"{', '.join(query_fields)}"

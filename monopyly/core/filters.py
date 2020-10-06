@@ -1,7 +1,7 @@
 """
 Filters defined for the application.
 """
-from monopyly.core import core
+from . import core
 
 
 @core.app_template_filter('currency')

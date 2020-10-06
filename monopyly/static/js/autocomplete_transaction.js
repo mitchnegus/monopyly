@@ -33,8 +33,10 @@
 	});
 	
 	function autocompleteAjaxRequest(inputElement, vendor = null) {
+		const inputID = inputElement.id.split('-');
+		const field = inputID[inputID.length-1];
 		const rawData = {
-			'field': inputElement.id,
+			'field': field,
 			'vendor': $vendor.val()
 		};
 		// Return a set of autocomplete suggestions from the database

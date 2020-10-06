@@ -5,10 +5,9 @@ from dateutil.relativedelta import relativedelta
 
 from ..utils import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
-    check_sort_order
+    check_sort_order, select_fields
 )
-from .constants import STATEMENT_FIELDS
-from .tools import select_fields
+from ..db import DATABASE_FIELDS
 from .transactions import TransactionHandler
 
 
@@ -29,7 +28,7 @@ class StatementHandler(DatabaseHandler):
 
     Attributes
     ––––––––––
-    table_name : str
+    table : str
         The name of the database table that this handler manages.
     db : sqlite3.Connection
         A connection to the database for interfacing.
@@ -38,14 +37,14 @@ class StatementHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    table_name = 'credit_statements'
-    table_fields = STATEMENT_FIELDS
+    _table = 'credit_statements'
+    _table_view = 'credit_statements_view'
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_entries(self, card_ids=None, banks=None, active=False,
-                    sort_order='DESC', fields=STATEMENT_FIELDS):
+                    sort_order='DESC', fields=DATABASE_FIELDS[_table]):
         """
         Get credit card statements from the database.
 
@@ -101,7 +100,7 @@ class StatementHandler(DatabaseHandler):
 
     def get_entry(self, statement_id, fields=None):
         """
-        Get a credit statement from the database given its statement ID.
+        Get a credit statement from the database given its ID.
 
         Accesses a set of fields for a given statement. By default, all
         fields for a statement and the corresponding credit card/account
@@ -127,9 +126,10 @@ class StatementHandler(DatabaseHandler):
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
                   " WHERE s.id = ? AND user_id = ?")
+        placeholders = (statement_id, self.user_id)
         abort_msg = (f'Statement ID {statement_id} does not exist for the '
                       'user.')
-        statement = self._query_entry(statement_id, query, abort_msg)
+        statement = self._query_entry(query, placeholders, abort_msg)
         return statement
 
     def find_statement(self, card, issue_date=None, fields=None):

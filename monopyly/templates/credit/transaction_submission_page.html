@@ -34,15 +34,19 @@
 			{{ transaction['vendor'] }}
 		</p>
 
-		<p>
-			<b>Amount: </b>
-			{{ '${:,.2f}'.format(transaction['amount']) }}
-		</p>
+		{% for subtransaction in subtransactions %}
 
-		<p>
-			<b>Notes: </b>
-			{{ transaction['notes'] }}
-		</p>
+			<p>
+				<b>Amount: </b>
+				{{ '${:,.2f}'.format(subtransaction['subtotal']) }}
+			</p>
+	
+			<p>
+				<b>Note: </b>
+				{{ subtransaction['note'] }}
+			</p>
+
+		{% endfor %}
 
 		<p>
 			<b>Statement Date: </b>

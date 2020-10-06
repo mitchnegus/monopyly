@@ -8,18 +8,18 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 
-from monopyly.db import get_db
-from monopyly.utils import parse_date, dedelimit_float
-from monopyly.auth.tools import login_required
-from monopyly.credit import credit
-from monopyly.credit.forms import *
-from monopyly.credit.accounts import AccountHandler
-from monopyly.credit.cards import CardHandler
-from monopyly.credit.statements import (
+from ..db import get_db
+from ..utils import parse_date, dedelimit_float
+from ..auth.tools import login_required
+from . import credit
+from .forms import *
+from .accounts import AccountHandler
+from .cards import CardHandler
+from .statements import (
     StatementHandler, determine_statement_issue_date,
     determine_statement_issue_date
 )
-from monopyly.credit.transactions import TransactionHandler, TagHandler
+from .transactions import TransactionHandler, SubtransactionHandler, TagHandler
 
 
 # Define a custom form error messaage
@@ -303,13 +303,15 @@ def new_transaction(statement_id):
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
-            transaction_db, tag_db = TransactionHandler(), TagHandler()
+            transaction_db = TransactionHandler()
             # Insert the new transaction into the database
-            transaction_data, tag_data = form.transaction_data, form.tag_data
-            transaction = transaction_db.add_transaction(*transaction_data)
-            tag_db.update_tag_links(transaction['id'], tag_data)
+            transaction_data = form.transaction_data
+            entry = transaction_db.add_entry(transaction_data)
+            transaction, subtransactions = entry
             return render_template('credit/transaction_submission_page.html',
-                                   transaction=transaction, update=False)
+                                   transaction=transaction,
+                                   subtransactions=subtransactions,
+                                   update=False)
         else:
             # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
@@ -325,21 +327,30 @@ def update_transaction(transaction_id):
     transaction_db, tag_db = TransactionHandler(), TagHandler()
     # Get the transaction information from the database
     transaction = transaction_db.get_entry(transaction_id)
-    tags = tag_db.get_entries(transaction_ids=(transaction_id,),
-                              fields=('tag_name',), ancestors=False)
-    tag_list = ', '.join([tag['tag_name'] for tag in tags])
-    form_data = {**transaction, 'tags': tag_list}
+    subtransactions = transaction_db.get_subtransactions(transaction_id)
+    subtransactions_data = []
+    for subtransaction in subtransactions:
+        tags = tag_db.get_entries(subtransaction_ids=(subtransaction['id'],),
+                                  fields=('tag_name',), ancestors=False)
+        tag_list = ', '.join([tag['tag_name'] for tag in tags])
+        subtransaction_data = {**subtransaction}
+        subtransaction_data['tags'] = tag_list
+        subtransactions_data.append(subtransaction_data)
+    form_data = {**transaction, 'subtransactions': subtransactions_data}
     # Define a form for a transaction
     form = TransactionForm(data=form_data)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated transaction
-            transaction = transaction_db.update_entry(transaction_id,
-                                                      form.transaction_data)
-            tag_db.update_tag_links(transaction['id'], form.tag_data)
+            transaction_data = form.transaction_data
+            entry = transaction_db.update_entry(transaction_id,
+                                                transaction_data)
+            transaction, subtransactions = entry
             return render_template('credit/transaction_submission_page.html',
-                                   transaction=transaction, update=True)
+                                   transaction=transaction,
+                                   subtransactions=subtransactions,
+                                   update=True)
         else:
             # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
@@ -348,6 +359,17 @@ def update_transaction(transaction_id):
     return render_template('credit/transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
 
+@credit.route('/_add_subtransaction_field', methods=('POST',))
+@login_required
+def add_subtransaction_field():
+    post_args = request.get_json()
+    new_index = post_args['subtransaction_count']
+    # Redefine the form for the transaction (including using entered info)
+    form_id = f'subtransactions-{new_index}'
+    sub_form = TransactionForm.SubtransactionForm(prefix=form_id)
+    sub_form.id = form_id
+    return render_template('credit/subtransaction_form.html',
+                           sub_form=sub_form)
 
 @credit.route('/delete_transaction/<int:transaction_id>')
 @login_required
@@ -408,31 +430,33 @@ def delete_tag():
 @credit.route('/_suggest_autocomplete', methods=('POST',))
 @login_required
 def suggest_autocomplete():
-    transaction_db = TransactionHandler()
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
     vendor = post_args['vendor']
-    if field not in ('bank', 'last_four_digits', 'vendor', 'notes'):
+    if field not in ('bank', 'last_four_digits', 'vendor', 'note'):
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
-    if field != 'notes':
-        transactions = transaction_db.get_entries(fields=(field,))
+    if field != 'note':
+        transaction_db = TransactionHandler()
+        entries = transaction_db.get_entries(fields=(field,))
     else:
-        transactions = transaction_db.get_entries(fields=('vendor', 'notes'))
+        subtransaction_db = SubtransactionHandler()
+        fields = ('vendor', 'note')
+        entries = subtransaction_db.get_entries(fields=fields)
         # Generate a map of notes for the current vendor
         note_by_vendor = {}
-        for transaction in transactions:
-            note = transaction['notes']
+        for entry in entries:
+            note = entry['note']
             if not note_by_vendor.get(note):
-                note_by_vendor[note] = (transaction['vendor'] == vendor)
-    items = [row[field] for row in transactions]
+                note_by_vendor[note] = (entry['vendor'] == vendor)
+    items = [entry[field] for entry in entries]
     # Order the returned values by their frequency in the database
     item_counts = Counter(items)
     unique_items = set(items)
     suggestions = sorted(unique_items, key=item_counts.get, reverse=True)
     # Also sort note fields by vendor
-    if field == 'notes':
+    if field == 'note':
         suggestions.sort(key=note_by_vendor.get, reverse=True)
     return jsonify(suggestions)
 

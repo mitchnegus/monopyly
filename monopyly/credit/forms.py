@@ -1,16 +1,18 @@
 """
 Generate forms for the user to fill out.
 """
+from flask import url_for
 from flask_wtf import FlaskForm
 from werkzeug.exceptions import abort
 from wtforms.fields import (
     FormField, DecimalField, IntegerField, TextField, BooleanField,
-    SelectField, SubmitField, HiddenField
+    SelectField, SubmitField, HiddenField, FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
 
 from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
+from . import credit
 from .accounts import AccountHandler
 from .cards import CardHandler
 from .statements import StatementHandler
@@ -18,44 +20,68 @@ from .statements import StatementHandler
 
 class TransactionForm(FlaskForm):
     """Form to input/edit transactions."""
+
+    class SubtransactionForm(FlaskForm):
+        """Form to input/edit subtransactions."""
+        def __init__(self, *args, **kwargs):
+            # Deactivates CSRF as a subform
+            super().__init__(meta={'csrf': False}, *args, **kwargs)
+
+        subtotal = DecimalField(
+            'Amount',
+            validators=[DataRequired()],
+            filters=[lambda x: float(round(x, 2)) if x else None],
+            places=2
+        )
+        note = TextField('Note', [DataRequired()])
+        tags = TextField('Tags')
+
+    # Fields to identify the card/bank information for the transaction
     bank = TextField('Bank')
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
     )
+    issue_date = TextField('Statement Date', filters=[parse_date])
+    # Fields pertaining to the transaction
     transaction_date = TextField(
         'Transaction Date',
         validators=[DataRequired()],
         filters=[parse_date]
     )
     vendor = TextField('Vendor', [DataRequired()])
-    subtotal = DecimalField(
-        'Amount',
-        validators=[DataRequired()],
-        filters=[lambda x: float(round(x, 2)) if x else None],
-        places=2
-    )
-    note = TextField('Note', [DataRequired()])
-    issue_date = TextField('Statement Date', filters=[parse_date])
-    tags = TextField('Tags')
+    # Subtransaction fields (must be at least 1 subtransaction)
+    subtransactions = FieldList(FormField(SubtransactionForm), min_entries=1)
     submit = SubmitField('Save Transaction')
 
     @property
     def transaction_data(self):
-        """Produce a dictionary corresponding to a database transaction."""
+        """
+        Produce a dictionary corresponding to a database transaction.
+
+        Creates a dictionary of transaction fields and values, in a
+        format that can be added directly to the database as a new
+        transaction. The dictionary also includes subtransactions (along
+        with tags associated with each subtransaction).
+        """
         statement = self.get_transaction_statement()
         transaction_data = {'statement_id': statement['id']}
-        for field in ('transaction_date', 'vendor', 'subtotal', 'note'):
+        # Loop over the transaction-specific fields
+        for field in ('transaction_date', 'vendor',):
             transaction_data[field] = self[field].data
+        # Aggregate subtransaction information for the transaction
+        transaction_data['subtransactions'] = []
+        for form in self['subtransactions']:
+            subtransaction_data = {}
+            # Loop over the subtransaction-specific fields
+            for field in ('subtotal', 'note'):
+                subtransaction_data[field] = form[field].data
+            # RETURN AN EMPTY LIST NOT A LIST WITH EMPTY STRING
+            raw_tag_data = form['tags'].data.split(',')
+            tag_data = [tag.strip() for tag in raw_tag_data if tag]
+            subtransaction_data['tags'] = tag_data
+            transaction_data['subtransactions'].append(subtransaction_data)
         return transaction_data
-
-    @property
-    def tag_data(self):
-        """Produce a list of tags corresponding to the transaction."""
-        # RETURN AN EMPTY LIST NOT A LIST WITH EMPTY STRING
-        raw_tag_data = self['tags'].data.split(',')
-        tag_data = [tag.strip() for tag in raw_tag_data if tag]
-        return tag_data
 
     def get_transaction_card(self):
         """Get the credit card associated with the transaction."""
