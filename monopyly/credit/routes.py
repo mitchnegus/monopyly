@@ -308,7 +308,8 @@ def new_transaction(statement_id):
             transaction_data = form.transaction_data
             entry = transaction_db.add_entry(transaction_data)
             transaction, subtransactions = entry
-            return render_template('credit/transaction_submission_page.html',
+            return render_template('credit/transaction_form/'
+                                   'transaction_submission_page.html',
                                    transaction=transaction,
                                    subtransactions=subtransactions,
                                    update=False)
@@ -317,17 +318,20 @@ def new_transaction(statement_id):
             flash(form_err_msg)
             print(form.errors)
     # Display the form for accepting user input
-    return render_template('credit/transaction_form_page_new.html', form=form)
+    return render_template('credit/transaction_form/'
+                           'transaction_form_page_new.html', form=form)
 
 
 @credit.route('/update_transaction/<int:transaction_id>',
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    transaction_db, tag_db = TransactionHandler(), TagHandler()
+    transaction_db = TransactionHandler()
+    subtransaction_db = SubtransactionHandler()
+    tag_db = TagHandler()
     # Get the transaction information from the database
     transaction = transaction_db.get_entry(transaction_id)
-    subtransactions = transaction_db.get_subtransactions(transaction_id)
+    subtransactions = subtransaction_db.get_entries((transaction_id,))
     subtransactions_data = []
     for subtransaction in subtransactions:
         tags = tag_db.get_entries(subtransaction_ids=(subtransaction['id'],),
@@ -356,7 +360,8 @@ def update_transaction(transaction_id):
             flash(form_err_msg)
             print(form.errors)
     # Display the form for accepting user input
-    return render_template('credit/transaction_form_page_update.html',
+    return render_template('credit/transaction_form/'
+                           'transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
 
 @credit.route('/_add_subtransaction_field', methods=('POST',))
@@ -368,7 +373,7 @@ def add_subtransaction_field():
     form_id = f'subtransactions-{new_index}'
     sub_form = TransactionForm.SubtransactionForm(prefix=form_id)
     sub_form.id = form_id
-    return render_template('credit/subtransaction_form.html',
+    return render_template('credit/transaction_form/subtransaction_form.html',
                            sub_form=sub_form)
 
 @credit.route('/delete_transaction/<int:transaction_id>')

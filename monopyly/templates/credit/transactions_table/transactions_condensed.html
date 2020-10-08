@@ -10,7 +10,7 @@
 
 	<div class="amount column">
 		<span class="dollar-sign">$</span>
-		<span>{{ transaction['amount']|currency }}</span>
+		<span>{{ transaction['total']|currency }}</span>
 	</div>
 
 	{% if 'statement_id' in transaction.keys() %}

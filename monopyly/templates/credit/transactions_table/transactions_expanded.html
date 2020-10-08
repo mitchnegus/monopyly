@@ -34,7 +34,7 @@
 	<div class="payment">
 
 		<div class="amount">
-			${{ transaction['amount']|currency }}
+			${{ transaction['total']|currency }}
 		</div>
 
 		{% if 'statement_id' in transaction.keys() %}

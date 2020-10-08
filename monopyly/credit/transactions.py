@@ -181,7 +181,7 @@ class TransactionHandler(DatabaseHandler):
         subtransaction_db = SubtransactionHandler()
         # Override the default method to account for subtransactions
         subtransactions_data = mapping.pop('subtransactions')
-        transaction = super().update_transaction(entry_id, mapping)
+        transaction = super().update_entry(entry_id, mapping)
         # Replace subtransactions when updating
         subtransactions = subtransaction_db.get_entries((transaction['id'],))
         subtransaction_db.delete_entries(
@@ -192,7 +192,7 @@ class TransactionHandler(DatabaseHandler):
             # Complete the mapping and update the subtransaction
             sub_mapping = {'transaction_id': transaction['id'],
                            **subtransaction_data}
-            subtransaction = subtransaction_db.add_entry(mapping)
+            subtransaction = subtransaction_db.add_entry(sub_mapping)
             subtransactions.append(subtransaction)
         return transaction, subtransactions
 
