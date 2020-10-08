@@ -78,7 +78,7 @@ class AccountHandler(DatabaseHandler):
                   " WHERE a.id = ? AND user_id = ?")
         placeholders = (account_id, self.user_id)
         abort_msg = f'Account ID {account_id} does not exist for the user.'
-        account = self._query_entry(query, placholders, abort_msg)
+        account = self._query_entry(query, placeholders, abort_msg)
         return account
 
     def delete_entries(self, entry_ids):
