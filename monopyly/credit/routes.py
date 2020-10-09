@@ -35,9 +35,9 @@ def load_cards():
     return render_template('credit/cards_page.html', cards=cards)
 
 
-@credit.route('/new_card', methods=('GET', 'POST'))
+@credit.route('/add_card', methods=('GET', 'POST'))
 @login_required
-def new_card():
+def add_card():
     # Define a form for a credit card
     form = CardForm()
     form.account_id.choices = prepare_account_choices()
@@ -285,11 +285,11 @@ def update_transactions_display():
                            transactions=transactions)
 
 
-@credit.route('/new_transaction', defaults={'statement_id': None},
+@credit.route('/add_transaction', defaults={'statement_id': None},
           methods=('GET', 'POST'))
-@credit.route('/new_transaction/<int:statement_id>', methods=('GET', 'POST'))
+@credit.route('/add_transaction/<int:statement_id>', methods=('GET', 'POST'))
 @login_required
-def new_transaction(statement_id):
+def add_transaction(statement_id):
     # Define a form for a transaction
     form = TransactionForm()
     # Load statement parameters if the request came from a specific statement
@@ -308,8 +308,7 @@ def new_transaction(statement_id):
             transaction_data = form.transaction_data
             entry = transaction_db.add_entry(transaction_data)
             transaction, subtransactions = entry
-            return render_template('credit/transaction_form/'
-                                   'transaction_submission_page.html',
+            return render_template('credit/transaction_submission_page.html',
                                    transaction=transaction,
                                    subtransactions=subtransactions,
                                    update=False)
@@ -394,9 +393,9 @@ def load_tags():
     return render_template('credit/tags_page.html',
                            tags_heirarchy=heirarchy)
 
-@credit.route('/_new_tag', methods=('POST',))
+@credit.route('/_add_tag', methods=('POST',))
 @login_required
-def new_tag():
+def add_tag():
     tag_db = TagHandler()
     # Get the new tag (and potentially parent category) from the AJAX request
     post_args = request.get_json()
