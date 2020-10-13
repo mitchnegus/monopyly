@@ -34,11 +34,16 @@
 			{{ transaction['vendor'] }}
 		</p>
 
+		<p>
+			<b>Total: </b>
+			${{ transaction['total']|currency }}
+		</p>
+
 		{% for subtransaction in subtransactions %}
 
 			<p>
 				<b>Amount: </b>
-				{{ '${:,.2f}'.format(subtransaction['subtotal']) }}
+				${{ subtransaction['subtotal']|currency }}
 			</p>
 	
 			<p>

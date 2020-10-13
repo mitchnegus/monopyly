@@ -125,7 +125,7 @@ class TransactionHandler(DatabaseHandler):
             The transaction information from the database.
         """
         query = (f"SELECT {select_fields(fields, 't.id')} "
-                  "  FROM credit_transactions AS t "
+                  "  FROM credit_transactions_view AS t "
                   "       INNER JOIN credit_statements AS s "
                   "          ON s.id = t.statement_id "
                   "       INNER JOIN credit_cards AS c "
