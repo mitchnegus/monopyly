@@ -251,16 +251,22 @@ def load_transactions():
                            transactions=transactions)
 
 
-@credit.route('/_show_transaction_tags', methods=('POST',))
+@credit.route('/_expand_transaction', methods=('POST',))
 @login_required
-def show_transaction_tags():
-    tag_db = TagHandler()
+def expand_transaction():
+    subtransaction_db, tag_db = SubtransactionHandler(), TagHandler()
     # Get the transaction ID from the AJAX request
     transaction_id = request.get_json().split('-')[-1]
-    # Get tags for the transaction (including ancestors)
-    tags = tag_db.get_entries(transaction_ids=(transaction_id,),
-                              fields=('tag_name',))
-    return render_template('credit/transactions_table/tags.html', tags=tags)
+    # Get the subtransactions
+    subtransactions = []
+    for subtransaction in subtransaction_db.get_entries((transaction_id,)):
+        # Collect the subtransaction information and pair it with matching tags 
+        tags = tag_db.get_entries(subtransaction_ids=(subtransaction['id'],),
+                                  fields=('tag_name',))
+        tag_names = [tag['tag_name'] for tag in tags]
+        subtransactions.append({**subtransaction, 'tags': tag_names})
+    return render_template('credit/transactions_table/subtransactions.html',
+                           subtransactions=subtransactions)
 
 
 @credit.route('/_update_transactions_display', methods=('POST',))
