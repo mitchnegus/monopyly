@@ -103,7 +103,7 @@ SELECT
 	SUM(subtotal) total,
 	GROUP_CONCAT(note, '; ') notes
 FROM credit_transactions AS t
-  INNER JOIN credit_subtransactions AS s_t
+  LEFT OUTER JOIN credit_subtransactions AS s_t
 	  ON s_t.transaction_id = t.id
 GROUP BY t.id;
 

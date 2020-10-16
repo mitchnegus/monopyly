@@ -167,13 +167,10 @@ class TransactionHandler(DatabaseHandler):
         # Override the default method to account for subtransactions
         subtransactions_data = mapping.pop('subtransactions')
         transaction = super().add_entry(mapping)
-        subtransactions = []
-        for subtransaction_data in subtransactions_data:
-            # Complete the mapping and add the subtransaction to the database
-            sub_mapping = {'transaction_id': transaction['id'],
-                           **subtransaction_data}
-            subtransaction = subtransaction_db.add_entry(sub_mapping)
-            subtransactions.append(subtransaction)
+        subtransaction = self._add_subtransactions(transaction['id'],
+                                                   subtransactions_data)
+        # Refresh the transaction information
+        transaction = self.get_entry(transaction['id'])
         return transaction, subtransactions
 
     def update_entry(self, entry_id, mapping):
@@ -187,14 +184,24 @@ class TransactionHandler(DatabaseHandler):
         subtransaction_db.delete_entries(
             [subtransaction['id'] for subtransaction in subtransactions]
         )
+        subtransaction = self._add_subtransactions(transaction['id'],
+                                                   subtransactions_data)
+        # Refresh the transaction information
+        transaction = self.get_entry(transaction['id'])
+        return transaction, subtransactions
+
+    def _add_subtransactions(self, transaction_id, subtransactions_data):
+        """Add subtransactions to the database for the data given."""
+        subtransaction_db = SubtransactionHandler()
+        # Assemble mappings to add subtransactions
         subtransactions = []
         for subtransaction_data in subtransactions_data:
-            # Complete the mapping and update the subtransaction
-            sub_mapping = {'transaction_id': transaction['id'],
+            # Complete the mapping and add the subtransaction to the database
+            sub_mapping = {'transaction_id': transaction_id,
                            **subtransaction_data}
             subtransaction = subtransaction_db.add_entry(sub_mapping)
             subtransactions.append(subtransaction)
-        return transaction, subtransactions
+        return subtransactions
 
 
 class SubtransactionHandler(DatabaseHandler):
