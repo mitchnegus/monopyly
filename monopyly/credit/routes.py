@@ -373,7 +373,7 @@ def update_transaction(transaction_id):
 @login_required
 def add_subtransaction_field():
     post_args = request.get_json()
-    new_index = post_args['subtransaction_count']
+    new_index = post_args['subtransaction_count'] + 1
     # Redefine the form for the transaction (including using entered info)
     form_id = f'subtransactions-{new_index}'
     sub_form = TransactionForm.SubtransactionForm(prefix=form_id)

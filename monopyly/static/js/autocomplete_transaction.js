@@ -12,27 +12,33 @@
 
 	// Identify all input elements in the form
 	const $inputElements = $('form input');
-	// Identify the vendor input box (used when suggesting notes)
-	const $vendor = $('form input#vendor');
 	// Set global variables for selection movement
 	let matches;
 	let displayStart, displayCount;
 	let currentFocus;
+
+	setAutocomplete();
 	
-	// Get possible values for fields with autocomplete
-	$('div.autocomplete input').on('focus', function() {
-		let inputElement = this;
-		// Smart autocomplete factors in the transaction vendor
-		autocompleteAjaxRequest(inputElement, vendor);
-	});
+	function setAutocomplete() {
+
+		// Use a delegated event handler to use autocomplete
+		$('form').on('focus', '.autocomplete input', function() {
+			const inputElement = this;
+			// Identify the vendor input box (used when suggesting notes)
+			const $vendor = $('form input#vendor');
+			// Smart autocomplete factors in the transaction vendor
+			autocompleteAjaxRequest(inputElement, $vendor);
+		});
 	
-	$('div.autocomplete input').on('blur', function() {
-		let inputElement = this
-		unbindUpdate(inputElement);
-		closeAutocomplete(inputElement);
-	});
+		$('form').on('blur', '.autocomplete input', function() {
+			const inputElement = this
+			unbindUpdate(inputElement);
+			closeAutocomplete(inputElement);
+		});
+
+	}
 	
-	function autocompleteAjaxRequest(inputElement, vendor = null) {
+	function autocompleteAjaxRequest(inputElement, $vendor = null) {
 		const inputID = inputElement.id.split('-');
 		const field = inputID[inputID.length-1];
 		const rawData = {

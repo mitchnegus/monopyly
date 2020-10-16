@@ -167,8 +167,8 @@ class TransactionHandler(DatabaseHandler):
         # Override the default method to account for subtransactions
         subtransactions_data = mapping.pop('subtransactions')
         transaction = super().add_entry(mapping)
-        subtransaction = self._add_subtransactions(transaction['id'],
-                                                   subtransactions_data)
+        subtransactions = self._add_subtransactions(transaction['id'],
+                                                    subtransactions_data)
         # Refresh the transaction information
         transaction = self.get_entry(transaction['id'])
         return transaction, subtransactions
@@ -184,8 +184,8 @@ class TransactionHandler(DatabaseHandler):
         subtransaction_db.delete_entries(
             [subtransaction['id'] for subtransaction in subtransactions]
         )
-        subtransaction = self._add_subtransactions(transaction['id'],
-                                                   subtransactions_data)
+        subtransactions = self._add_subtransactions(transaction['id'],
+                                                    subtransactions_data)
         # Refresh the transaction information
         transaction = self.get_entry(transaction['id'])
         return transaction, subtransactions
