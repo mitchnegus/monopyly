@@ -218,11 +218,17 @@ def make_payment(card_id, statement_id):
     # Add the paymnet as a transaction in the database
     card = card_db.get_entry(card_id)
     statement = statement_db.infer_statement(card, payment_date, creation=True)
-    transaction_db.add_transaction(statement_id=statement['id'],
-                                   transaction_date=payment_date,
-                                   vendor=card['bank'],
-                                   subtotal=-payment_amount,
-                                   note='Card payment')
+    mapping = {
+        'statement_id': statement['id'],
+        'transaction_date': payment_date,
+        'vendor': card['bank'],
+        'subtransactions': [{
+            'subtotal': -payment_amount,
+            'note': 'Card payment',
+            'tags': ['Payments'],
+        }],
+    }
+    transaction_db.add_entry(mapping)
     # Get the statement information from the database
     fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')
