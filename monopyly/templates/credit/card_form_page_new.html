@@ -8,7 +8,7 @@
 
 {% block content %}
 
-	{% with submission_url = url_for('credit.new_card') %}
+	{% with submission_url = url_for('credit.add_card') %}
 		{% include 'credit/card_form.html' %}
 	{% endwith %}
 

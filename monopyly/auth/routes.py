@@ -4,9 +4,9 @@ Routes for site authentication.
 from flask import flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from monopyly.db import get_db
-from monopyly.auth.tools import get_username_and_password
-from monopyly.auth import auth
+from ..db import get_db
+from .tools import get_username_and_password
+from . import auth
 
 
 @auth.route('/register', methods=('GET', 'POST'))

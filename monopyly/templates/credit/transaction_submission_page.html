@@ -35,14 +35,23 @@
 		</p>
 
 		<p>
-			<b>Amount: </b>
-			{{ '${:,.2f}'.format(transaction['amount']) }}
+			<b>Total: </b>
+			${{ transaction['total']|currency }}
 		</p>
 
-		<p>
-			<b>Notes: </b>
-			{{ transaction['notes'] }}
-		</p>
+		{% for subtransaction in subtransactions %}
+
+			<p>
+				<b>Amount: </b>
+				${{ subtransaction['subtotal']|currency }}
+			</p>
+	
+			<p>
+				<b>Note: </b>
+				{{ subtransaction['note'] }}
+			</p>
+
+		{% endfor %}
 
 		<p>
 			<b>Statement Date: </b>
@@ -63,11 +72,11 @@
 				Update this transaction
 			</a>
 			<br>
-			<a href="{{ url_for('credit.new_transaction') }}">
+			<a href="{{ url_for('credit.add_transaction') }}">
 				Create a new transaction
 			</a>
 			<br>
-			<a href="{{ url_for('credit.new_transaction', statement_id=transaction['statement_id']) }}">
+			<a href="{{ url_for('credit.add_transaction', statement_id=transaction['statement_id']) }}">
 				Create a new transaction on this statement
 			</a>
 		{% endif %}

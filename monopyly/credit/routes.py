@@ -8,18 +8,18 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 
-from monopyly.db import get_db
-from monopyly.utils import parse_date, dedelimit_float
-from monopyly.auth.tools import login_required
-from monopyly.credit import credit
-from monopyly.credit.forms import *
-from monopyly.credit.accounts import AccountHandler
-from monopyly.credit.cards import CardHandler
-from monopyly.credit.statements import (
+from ..db import get_db
+from ..utils import parse_date, dedelimit_float
+from ..auth.tools import login_required
+from . import credit
+from .forms import *
+from .accounts import AccountHandler
+from .cards import CardHandler
+from .statements import (
     StatementHandler, determine_statement_issue_date,
     determine_statement_issue_date
 )
-from monopyly.credit.transactions import TransactionHandler, TagHandler
+from .transactions import TransactionHandler, SubtransactionHandler, TagHandler
 
 
 # Define a custom form error messaage
@@ -35,9 +35,9 @@ def load_cards():
     return render_template('credit/cards_page.html', cards=cards)
 
 
-@credit.route('/new_card', methods=('GET', 'POST'))
+@credit.route('/add_card', methods=('GET', 'POST'))
 @login_required
-def new_card():
+def add_card():
     # Define a form for a credit card
     form = CardForm()
     form.account_id.choices = prepare_account_choices()
@@ -176,7 +176,7 @@ def load_statement(statement_id):
     statement = statement_db.get_entry(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
-    transaction_fields = ('transaction_date', 'vendor', 'amount', 'notes')
+    transaction_fields = ('transaction_date', 'vendor', 'total', 'notes')
     transactions = transaction_db.get_entries(statement_ids=(statement['id'],),
                                               sort_order=sort_order,
                                               fields=transaction_fields)
@@ -218,11 +218,17 @@ def make_payment(card_id, statement_id):
     # Add the paymnet as a transaction in the database
     card = card_db.get_entry(card_id)
     statement = statement_db.infer_statement(card, payment_date, creation=True)
-    transaction_db.add_transaction(statement_id=statement['id'],
-                                   transaction_date=payment_date,
-                                   vendor=card['bank'],
-                                   amount=-payment_amount,
-                                   notes='Card payment')
+    mapping = {
+        'statement_id': statement['id'],
+        'transaction_date': payment_date,
+        'vendor': card['bank'],
+        'subtransactions': [{
+            'subtotal': -payment_amount,
+            'note': 'Card payment',
+            'tags': ['Payments'],
+        }],
+    }
+    transaction_db.add_entry(mapping)
     # Get the statement information from the database
     fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')
@@ -240,7 +246,7 @@ def load_transactions():
     # Get all of the user's transactions for active cards from the database
     sort_order = 'DESC'
     transaction_fields = ('account_id', 'bank', 'last_four_digits',
-                          'transaction_date', 'vendor', 'amount', 'notes',
+                          'transaction_date', 'vendor', 'total', 'notes',
                           'statement_id', 'issue_date')
     transactions = transaction_db.get_entries(active=True,
                                               sort_order=sort_order,
@@ -251,16 +257,22 @@ def load_transactions():
                            transactions=transactions)
 
 
-@credit.route('/_show_transaction_tags', methods=('POST',))
+@credit.route('/_expand_transaction', methods=('POST',))
 @login_required
-def show_transaction_tags():
-    tag_db = TagHandler()
+def expand_transaction():
+    subtransaction_db, tag_db = SubtransactionHandler(), TagHandler()
     # Get the transaction ID from the AJAX request
     transaction_id = request.get_json().split('-')[-1]
-    # Get tags for the transaction
-    tags = tag_db.get_entries(transaction_ids=(transaction_id,),
-                              fields=('tag_name',))
-    return render_template('credit/transactions_table/tags.html', tags=tags)
+    # Get the subtransactions
+    subtransactions = []
+    for subtransaction in subtransaction_db.get_entries((transaction_id,)):
+        # Collect the subtransaction information and pair it with matching tags 
+        tags = tag_db.get_entries(subtransaction_ids=(subtransaction['id'],),
+                                  fields=('tag_name',))
+        tag_names = [tag['tag_name'] for tag in tags]
+        subtransactions.append({**subtransaction, 'tags': tag_names})
+    return render_template('credit/transactions_table/subtransactions.html',
+                           subtransactions=subtransactions)
 
 
 @credit.route('/_update_transactions_display', methods=('POST',))
@@ -275,7 +287,7 @@ def update_transactions_display():
     cards = [card_db.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected transactions from the database
     transaction_fields = ('account_id', 'bank', 'last_four_digits',
-                          'transaction_date', 'vendor', 'amount', 'notes',
+                          'transaction_date', 'vendor', 'total', 'notes',
                           'statement_id', 'issue_date')
     transactions = transaction_db.get_entries([card['id'] for card in cards],
                                               sort_order=sort_order,
@@ -285,11 +297,11 @@ def update_transactions_display():
                            transactions=transactions)
 
 
-@credit.route('/new_transaction', defaults={'statement_id': None},
+@credit.route('/add_transaction', defaults={'statement_id': None},
           methods=('GET', 'POST'))
-@credit.route('/new_transaction/<int:statement_id>', methods=('GET', 'POST'))
+@credit.route('/add_transaction/<int:statement_id>', methods=('GET', 'POST'))
 @login_required
-def new_transaction(statement_id):
+def add_transaction(statement_id):
     # Define a form for a transaction
     form = TransactionForm()
     # Load statement parameters if the request came from a specific statement
@@ -297,55 +309,83 @@ def new_transaction(statement_id):
         statement_db = StatementHandler()
         # Get the necessary fields from the database
         statement_fields = ('bank', 'last_four_digits', 'issue_date')
-        statement = statement_db.get_entry(statement_id, fields=statement_fields)
+        statement = statement_db.get_entry(statement_id,
+                                           fields=statement_fields)
         form.process(data=statement)
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
-            transaction_db, tag_db = TransactionHandler(), TagHandler()
+            transaction_db = TransactionHandler()
             # Insert the new transaction into the database
-            transaction = transaction_db.add_entry(form.transaction_data)
-            tag_db.update_tags(transaction['id'], form.tag_data)
+            transaction_data = form.transaction_data
+            entry = transaction_db.add_entry(transaction_data)
+            transaction, subtransactions = entry
             return render_template('credit/transaction_submission_page.html',
-                                   transaction=transaction, update=False)
+                                   transaction=transaction,
+                                   subtransactions=subtransactions,
+                                   update=False)
         else:
             # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
             print(form.errors)
     # Display the form for accepting user input
-    return render_template('credit/transaction_form_page_new.html', form=form)
+    return render_template('credit/transaction_form/'
+                           'transaction_form_page_new.html', form=form)
 
 
 @credit.route('/update_transaction/<int:transaction_id>',
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    transaction_db, tag_db = TransactionHandler(), TagHandler()
+    transaction_db = TransactionHandler()
+    subtransaction_db = SubtransactionHandler()
+    tag_db = TagHandler()
     # Get the transaction information from the database
     transaction = transaction_db.get_entry(transaction_id)
-    tags = tag_db.get_entries(transaction_ids=(transaction_id,),
-                              fields=('tag_name',))
-    tag_list = ', '.join([tag['tag_name'] for tag in tags])
-    form_data = {**transaction, 'tags': tag_list}
+    subtransactions = subtransaction_db.get_entries((transaction_id,))
+    subtransactions_data = []
+    for subtransaction in subtransactions:
+        tags = tag_db.get_entries(subtransaction_ids=(subtransaction['id'],),
+                                  fields=('tag_name',), ancestors=False)
+        tag_list = ', '.join([tag['tag_name'] for tag in tags])
+        subtransaction_data = {**subtransaction}
+        subtransaction_data['tags'] = tag_list
+        subtransactions_data.append(subtransaction_data)
+    form_data = {**transaction, 'subtransactions': subtransactions_data}
     # Define a form for a transaction
     form = TransactionForm(data=form_data)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
         if form.validate():
             # Update the database with the updated transaction
-            transaction = transaction_db.update_entry(transaction_id,
-                                                      form.transaction_data)
-            tag_db.update_tags(transaction['id'], form.tag_data)
+            transaction_data = form.transaction_data
+            entry = transaction_db.update_entry(transaction_id,
+                                                transaction_data)
+            transaction, subtransactions = entry
             return render_template('credit/transaction_submission_page.html',
-                                   transaction=transaction, update=True)
+                                   transaction=transaction,
+                                   subtransactions=subtransactions,
+                                   update=True)
         else:
             # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
             print(form.errors)
     # Display the form for accepting user input
-    return render_template('credit/transaction_form_page_update.html',
+    return render_template('credit/transaction_form/'
+                           'transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
 
+@credit.route('/_add_subtransaction_field', methods=('POST',))
+@login_required
+def add_subtransaction_field():
+    post_args = request.get_json()
+    new_index = post_args['subtransaction_count'] + 1
+    # Redefine the form for the transaction (including using entered info)
+    form_id = f'subtransactions-{new_index}'
+    sub_form = TransactionForm.SubtransactionForm(prefix=form_id)
+    sub_form.id = form_id
+    return render_template('credit/transaction_form/subtransaction_form.html',
+                           sub_form=sub_form)
 
 @credit.route('/delete_transaction/<int:transaction_id>')
 @login_required
@@ -365,9 +405,9 @@ def load_tags():
     return render_template('credit/tags_page.html',
                            tags_heirarchy=heirarchy)
 
-@credit.route('/_new_tag', methods=('POST',))
+@credit.route('/_add_tag', methods=('POST',))
 @login_required
-def new_tag():
+def add_tag():
     tag_db = TagHandler()
     # Get the new tag (and potentially parent category) from the AJAX request
     post_args = request.get_json()
@@ -386,47 +426,53 @@ def new_tag():
                 'tag_name': tag_name}
     tag = tag_db.add_entry(tag_data)
     return render_template('credit/subtag_tree.html',
-                           tag=(tag['id'], tag['tag_name']),
+                           tag=tag,
                            tags_heirarchy={})
 
 
-@credit.route('/delete_tag/<int:tag_id>')
+@credit.route('/_delete_tag/', methods=('POST',))
 @login_required
-def delete_tag(tag_id):
+def delete_tag():
     tag_db = TagHandler()
+    # Get the tag to be deleted from the AJAX request
+    post_args = request.get_json()
+    tag_name = post_args['tag_name']
+    tag = tag_db.find_tag(tag_name)
     # Remove the tag from the database
-    tag_db.delete_entries((tag_id,))
-    return redirect(url_for('credit.load_tags'))
+    tag_db.delete_entries((tag['id'],))
+    return ''
 
 
 @credit.route('/_suggest_autocomplete', methods=('POST',))
 @login_required
 def suggest_autocomplete():
-    transaction_db = TransactionHandler()
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
     vendor = post_args['vendor']
-    if field not in ('bank', 'last_four_digits', 'vendor', 'notes'):
+    if field not in ('bank', 'last_four_digits', 'vendor', 'note'):
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
-    if field != 'notes':
-        transactions = transaction_db.get_entries(fields=(field,))
+    if field != 'note':
+        transaction_db = TransactionHandler()
+        entries = transaction_db.get_entries(fields=(field,))
     else:
-        transactions = transaction_db.get_entries(fields=('vendor', 'notes'))
+        subtransaction_db = SubtransactionHandler()
+        fields = ('vendor', 'note')
+        entries = subtransaction_db.get_entries(fields=fields)
         # Generate a map of notes for the current vendor
         note_by_vendor = {}
-        for transaction in transactions:
-            note = transaction['notes']
+        for entry in entries:
+            note = entry['note']
             if not note_by_vendor.get(note):
-                note_by_vendor[note] = (transaction['vendor'] == vendor)
-    items = [row[field] for row in transactions]
+                note_by_vendor[note] = (entry['vendor'] == vendor)
+    items = [entry[field] for entry in entries]
     # Order the returned values by their frequency in the database
     item_counts = Counter(items)
     unique_items = set(items)
     suggestions = sorted(unique_items, key=item_counts.get, reverse=True)
     # Also sort note fields by vendor
-    if field == 'notes':
+    if field == 'note':
         suggestions.sort(key=note_by_vendor.get, reverse=True)
     return jsonify(suggestions)
 

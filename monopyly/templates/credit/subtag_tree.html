@@ -1,9 +1,9 @@
 <li class="tag-container">
 	<div class="tag-area">
-		<div class="tag">{{ tag[1] }}</div>
+		<div class="tag">{{ tag['tag_name'] }}</div>
 		<div class="buttons">
 			<img class="new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
-			<a class="action button delete" href="{{ url_for('credit.delete_tag', tag_id=tag[0]) }}" onclick="return confirm('Are you sure you want to delete this tag?');">
+			<a class="action button delete">
 			</a>
 		</div>
 	</div>

@@ -3,7 +3,7 @@ Routes for core functionality.
 """
 from flask import render_template
 
-from monopyly.core import core
+from . import core
 
 
 @core.route('/')

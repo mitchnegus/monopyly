@@ -3,7 +3,7 @@ Filters defined for the application.
 """
 from datetime import date
 
-from monopyly.core import core
+from . import core
 
 
 @core.app_context_processor

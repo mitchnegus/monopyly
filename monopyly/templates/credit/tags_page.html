@@ -32,9 +32,12 @@
 {% block javascript %}
 
 	<script>
-		const NEW_TAG_ENDPOINT = "{{ url_for('credit.new_tag') }}";
+		const ADD_TAG_ENDPOINT = "{{ url_for('credit.add_tag') }}";
+		const REMOVE_TAG_ENDPOINT = "{{ url_for('credit.delete_tag') }}";
 	</script>
-	<script type="module" src="{{ url_for('static', filename='js/add_tags.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/add_tag.js') }}">
+	</script>
+	<script type="module" src="{{ url_for('static', filename='js/remove_tag.js') }}">
 	</script>
 
 {% endblock %}

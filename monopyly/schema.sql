@@ -2,6 +2,9 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS credit_cards;
 DROP TABLE IF EXISTS credit_statements;
 DROP TABLE IF EXISTS credit_transactions;
+DROP TABLE IF EXISTS credit_subtransactions;
+DROP TABLE IF EXISTS credit_tags;
+DROP TABLE IF EXISTS credit_tag_links;
 
 /* Store user information */
 CREATE TABLE users (
@@ -50,11 +53,20 @@ CREATE TABLE credit_transactions (
 	statement_id INTEGER NOT NULL,
 	transaction_date TEXT NOT NULL,
 	vendor TEXT NOT NULL,
-	amount REAL NOT NULL,
-	notes TEXT NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (statement_id) REFERENCES credit_statements (id)
 		ON DELETE CASCADE
+);
+
+/* Store subtransaction breakdown of transaction */
+CREATE TABLE credit_subtransactions (
+	id INTEGER,
+	transaction_id INTEGER NOT NULL,
+	subtotal REAL NOT NULL,
+	note TEXT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (transaction_id) REFERENCES credit_transactions (id)
+	  ON DELETE CASCADE
 );
 
 /* Store credit card transaction tags */
@@ -72,14 +84,28 @@ CREATE TABLE credit_tags (
 
 /* Associate credit transactions with tags in a link table */
 CREATE TABLE credit_tag_links (
-	transaction_id INTEGER NOT NULL,
+	subtransaction_id INTEGER NOT NULL,
 	tag_id INTEGER NOT NULL,
-	PRIMARY KEY (transaction_id, tag_id),
-	FOREIGN KEY (transaction_id) REFERENCES credit_transactions (id)
+	PRIMARY KEY (subtransaction_id, tag_id),
+	FOREIGN KEY (subtransaction_id) REFERENCES credit_subtransactions (id)
 		ON DELETE CASCADE,
 	FOREIGN KEY (tag_id) REFERENCES credit_tags (id)
 		ON DELETE CASCADE
 );
+
+/* Prepare a view giving consolidated credit card transaction information */
+CREATE VIEW credit_transactions_view AS
+SELECT
+  t.id,
+	statement_id,
+	transaction_date,
+	vendor,
+	SUM(subtotal) total,
+	GROUP_CONCAT(note, '; ') notes
+FROM credit_transactions AS t
+  LEFT OUTER JOIN credit_subtransactions AS s_t
+	  ON s_t.transaction_id = t.id
+GROUP BY t.id;
 
 /* Prepare a view giving enhanced credit card statement information */
 CREATE VIEW credit_statements_view AS
@@ -94,7 +120,7 @@ WITH view AS (
 			t.transaction_date,
 			/* Determine the balance on an account for each statement */
 			COALESCE(
-				SUM(amount) OVER (PARTITION BY account_id ORDER BY issue_date),
+				SUM(subtotals) OVER (PARTITION BY account_id ORDER BY issue_date),
 				0
 			) statement_balance,
 			/* Determine the total charges on an account for each statement */
@@ -110,10 +136,15 @@ WITH view AS (
 			) daily_payment_total
 	    FROM (
 	      SELECT
-					statement_id, transaction_date, amount,
-	        CASE WHEN amount >= 0 THEN amount END charges,
-	        CASE WHEN amount < 0 THEN amount END payments
+					statement_id,
+					transaction_date,
+					SUM(subtotal) subtotals,
+	        CASE WHEN SUM(subtotal) >= 0 THEN SUM(subtotal) END charges,
+	        CASE WHEN SUM(subtotal) < 0 THEN SUM(subtotal) END payments
 				FROM credit_transactions
+					INNER JOIN credit_subtransactions
+					  ON credit_subtransactions.transaction_id = credit_transactions.id
+				GROUP BY transaction_id
 			) t
 				LEFT OUTER JOIN credit_statements s
 					ON s.id = t.statement_id 
@@ -123,7 +154,7 @@ WITH view AS (
 	GROUP BY id, daily_payment_total
 	ORDER BY transaction_date
 )
-SELECT 
+SELECT
 	s.*,
 	v1.statement_balance balance,
 	v2.payment_date
@@ -145,4 +176,4 @@ FROM credit_statements s
 		ORDER BY v1.transaction_date
 	) v2
 		ON v2.id = s.id
-GROUP BY s.id
+GROUP BY s.id;

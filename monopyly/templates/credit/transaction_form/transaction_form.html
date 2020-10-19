@@ -2,7 +2,7 @@
 
 	{{ form.hidden_tag() }}
 
-	<div id="card-info" class="form-line">
+	<div class="form-line">
 
 		<div id="bank-field" class="form-field autocomplete">
 			{{ form.bank.label }}
@@ -21,30 +21,28 @@
 		{{ form.transaction_date }}
 	</div>
 
-	<div class="form-field autocomplete">
-		{{ form.vendor.label }}
-		{{ form.vendor }}
-	</div>
-
-	<div class="form-field">
-		{{ form.amount.label }}
-		{{ form.amount }}
-	</div>
-
-	<div class="form-field autocomplete">
-		{{ form.notes.label }}
-		{{ form.notes }}
-	</div>
-
 	<div class="form-field">
 		{{ form.issue_date.label }}
 		{{ form.issue_date }}
 	</div>
 
-	<div class="form-field">
-		{{ form.tags.label }}
-		{{ form.tags }}
+	<div class="form-field autocomplete">
+		{{ form.vendor.label }}
+		{{ form.vendor }}
 	</div>
+
+
+	<div id="subtransactions">
+		{% for sub_form in form.subtransactions %}
+			{% include 'credit/transaction_form/subtransaction_form.html' %}
+		{% endfor %}
+	</div>
+
+	<div id="new-subtransaction" class="button">
+		+ Add Subtransaction
+	</div>
+
+
 
 	<div class="form-field">
 		{{ form.submit(class_="button") }}

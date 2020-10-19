@@ -13,7 +13,7 @@
 			</li>
 
 			<li>
-				<a class="action button" href="{{ url_for('credit.new_transaction') }}">
+				<a class="action button" href="{{ url_for('credit.add_transaction') }}">
 					<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
 				</a>
 			</li>
@@ -74,7 +74,7 @@
 	</script>
 	<script>
 		const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
-		const TRANSACTION_TAGS_ENDPOINT = "{{ url_for('credit.show_transaction_tags') }}";
+		const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
 	</script>
 	<script type="module" src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
 	</script>

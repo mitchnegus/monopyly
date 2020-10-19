@@ -5,8 +5,8 @@ import functools
 
 from flask import g, redirect, session, url_for
 
-from monopyly.auth import auth
-from monopyly.db import get_db
+from ..db import get_db
+from . import auth
 
 
 def get_username_and_password(form):

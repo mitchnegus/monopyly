@@ -1,0 +1,15 @@
+{% extends "credit/transaction_form/transaction_form_page.html" %}
+
+
+{% block title %}
+	New Transaction
+{% endblock %}
+
+
+{% block content %}
+
+	{% with submission_url = url_for('credit.add_transaction') %}
+		{% include 'credit/transaction_form/transaction_form.html' %}
+	{% endwith %}
+
+{% endblock %}

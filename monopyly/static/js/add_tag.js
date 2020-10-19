@@ -1,11 +1,12 @@
 /*
- * Add transaction tags on the 'Transaction Tags' page.
+ * Add a transaction tag on the 'Transaction Tags' page.
  *
  * Adds a transaction tag under the tag or category corresponding to the
  * plus icon that is clicked. Clicking the plus icon adds a tag shaped
  * input box that accepts a new tag name. Once the input loses focus,
- * an AJAX request is executed and the page is updated. If no tag name
- * was provided, no request occurs.
+ * an AJAX request is executed, the database is updated and the tree of
+ * transactions is partially refreshed to allow further additions. If no
+ * tag name was provided, no request occurs.
  */
 
 import { executeAjaxRequest } from './modules/update_display_ajax.js';
@@ -13,7 +14,7 @@ import { executeAjaxRequest } from './modules/update_display_ajax.js';
 
 (function() {
 
-	const endpoint = NEW_TAG_ENDPOINT;
+	const endpoint = ADD_TAG_ENDPOINT;
 	// Identify the plus icons
 	const $buttons = $('#transaction-tags .new-tag.button'); 
 
@@ -31,12 +32,12 @@ import { executeAjaxRequest } from './modules/update_display_ajax.js';
 			});
 			// Perform actions when focus is lost
 			$input.on('blur', function() {
-				addNewTag($input, $container, $tags)
+				addNewTag($input, $container)
 			});
 		});
 	}
 
-	function addNewTag($input, $container, $tags) {
+	function addNewTag($input, $container) {
 		// Save the input value and prepared to add it to the database as a tag
 		const newTagName = $input.val();
 		if (newTagName) {
@@ -48,7 +49,6 @@ import { executeAjaxRequest } from './modules/update_display_ajax.js';
 			// Execute the AJAX request and display update
 			function addTag(response) {
 				// Add the AJAX request response to the DOM before the input
-				console.log($input);
 				$input.before(response);
 				// Hide the input again
 				$input.hide();

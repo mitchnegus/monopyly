@@ -1,0 +1,22 @@
+<div id="{{ sub_form.id }}" class="subtransaction-form">
+
+	<div class="form-line">
+
+		<div class="form-field subtotal-field">
+			{{ sub_form.subtotal.label }}
+			{{ sub_form.subtotal }}
+		</div>
+	
+		<div class="form-field autocomplete note-field">
+			{{ sub_form.note.label }}
+			{{ sub_form.note }}
+		</div>
+	
+	</div>
+
+	<div class="form-field">
+		{{ sub_form.tags.label }}
+		{{ sub_form.tags }}
+	</div>
+
+</div>
