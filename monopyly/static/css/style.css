@@ -78,8 +78,8 @@ select {
 
 .monopyly-logo {
   margin: 0;
-  font-size: 1.7em;
   color: white;
+  font-size: 1.7em;
   text-transform: uppercase;
 }
 
@@ -154,6 +154,7 @@ aside.sidebar {
  */
 .button:hover {
 	filter: brightness(0.85);
+	cursor: pointer;
 }
 
 .button .icon {
@@ -236,7 +237,12 @@ form .form-line {
 }
 
 form .form-field {
-	margin: 0 5px;
+	margin-left: 0;
+}
+
+form .form-line .form-field ~ .form-field {
+	/* Only set margin for fields other than the first on a line */
+	margin-left: 5px;
 }
 
 form .form-line .form-field {
@@ -290,7 +296,6 @@ form input.button {
 form button:hover,
 form input.button:hover {
 	filter: brightness(0.98);
-  cursor: pointer;
 }
 
 form button .icon {
@@ -576,7 +581,7 @@ form .autocomplete-box .item.active {
 
 #card-filter .card.selected {
 	background-color: #444444;
-	color: #efefef;
+	color: #eeeeee;
 }
 
 #card-filter .card.selected:hover {
@@ -863,7 +868,6 @@ form .autocomplete-box .item.active {
 	height: 20px;
 	width: 20px;
 	background-size: 20px 20px;
-	cursor: pointer;
 }
 
 .transactions-table .transaction .buttons .action.delete {
@@ -1282,7 +1286,7 @@ div.panel .category h4 {
 	width: 50%;
 	min-width: min-content;
 	margin: 25px 0 10px;
-	border-bottom: 2px solid #eaeaea;
+	border-bottom: 2px solid #eeeeee;
 }
 
 #bank.panel,
@@ -1817,15 +1821,42 @@ form#pay #make-payment[type="button"] .icon {
 /*
  * Customization for the 'New Transaction' & 'Update Transaction' pages
  */
+form#transaction {
+	min-width: 250px;
+}
+
 form#transaction #bank-field {
-	flex-basis: 70%;
+	flex: 3;
 }
 
 form#transaction #last-four-digits-field {
-	flex-basis: 30%;
+	flex: 1;
 	min-width: 150px;
 }
 
+form#transaction .subtransaction-form {
+	margin-top: 20px;
+	border-top: 1px solid #eaeaea;
+}
+
+form#transaction .subtotal-field {
+	flex: 1;
+}
+
+form#transaction .note-field {
+	flex: 3;
+}
+
+form#transaction #new-subtransaction.button {
+	width: 150px;
+	margin: 15px 0 20px;
+	padding: 3px;
+	border-radius: 15px;
+	background-color: #444444;
+	text-align: center;
+	color: #eeeeee;
+	font-size: 9pt;
+}
 
 /*
  * Customization for the transaction submission page
@@ -1859,7 +1890,6 @@ form#transaction #last-four-digits-field {
 	height: 20px;
 	width: 20px;
 	background-size: 20px 20px;
-	cursor: pointer;
 }
 
 #transaction-tags .buttons .button {

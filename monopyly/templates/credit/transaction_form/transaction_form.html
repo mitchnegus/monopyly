@@ -2,7 +2,7 @@
 
 	{{ form.hidden_tag() }}
 
-	<div id="card-info" class="form-line">
+	<div class="form-line">
 
 		<div id="bank-field" class="form-field autocomplete">
 			{{ form.bank.label }}
@@ -38,10 +38,11 @@
 		{% endfor %}
 	</div>
 
-
 	<div id="new-subtransaction" class="button">
-		<b>+</b>
+		+ Add Subtransaction
 	</div>
+
+
 
 	<div class="form-field">
 		{{ form.submit(class_="button") }}
