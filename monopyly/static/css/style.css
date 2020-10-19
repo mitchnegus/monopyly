@@ -728,7 +728,7 @@ form .autocomplete-box .item.active {
 .transactions-table .row-content {
 	display: flex;
 	align-items: center;
-	flex-basis: 100%;
+	width: 100%;
 	height: 100%;
 }
 
@@ -738,25 +738,25 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .date.column {
-	flex-basis: 10%;
+	flex: 1;
 	min-width: 100px;
 	text-align: center;
 }
 
 .transactions-table .vendor.column {
-	flex-basis: 30%;
+	flex: 3;
 	min-width: 180px;
 }
 
 .transactions-table .amount.column {
-	flex-basis: 10%;
+	flex: 1;
 	min-width: 100px;
 	text-align: right;
 	white-space: nowrap;
 }
 
 .transactions-table .notes.column {
-	flex-basis: 40%;
+	flex: 4;
 	min-width: 175px;
 	white-space: nowrap;
 	overflow: auto;
@@ -769,7 +769,7 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .card.column {
-	flex-basis: 10%;
+	flex: 1;
 	min-width: 110px;
 	text-align: right;
 }
@@ -890,25 +890,30 @@ form .autocomplete-box .item.active {
 
 .transactions-table .setting {
 	display: flex;
-	flex-basis: 75%;
+	flex: 3;
 }
 @media screen and (max-width: 1000px) {
 	/* Mobile layout */
 	.transactions-table .setting {
 		flex-direction: column;
 		align-items: flex-start;
-		flex-basis: 90%;
+		flex: 9;
 	}
 }
-
 
 .transactions-table .setting .date {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	flex-basis: 13.3%;
+	flex: 2;
 	padding-top: 3px;
 	font-weight: bold;
+}
+@media screen and (max-width: 1000px) {
+	/* Mobile layout */
+	.transactions-table .setting .date {
+		align-items: flex-start;
+	}
 }
 
 @media screen and (max-width: 1000px) {
@@ -948,7 +953,7 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .setting .description {
-	flex-basis: 86.7%;
+	flex: 13;
 	min-width: 250px;
 	padding: 0 10px;
 }
@@ -990,14 +995,14 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .setting .transaction-details .vendor {
-	flex-basis: 80%;
+	flex: 4;
 	box-sizing: border-box;
 	padding-right: 10px;
 	font-weight: 600;
 }
 
 .transactions-table .setting .transaction-details .total {
-	flex-basis: 20%;
+	flex: 1;
 	text-align: right;
 	font-weight: bold;
 }
@@ -1011,16 +1016,16 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .setting .subtransaction-details .notes {
-	flex-basis: 80%;
+	flex: 4;
 	padding-right: 10px;
 }
 
 .transactions-table .setting .subtransaction-details .subtotal {
-	flex-basis: 20%;
+	flex: 1;
 	text-align: right;
 }
 
-.transactions-table .expanded .subtransaction-details .tags-container {
+.transactions-table .setting .subtransaction-details .tags-container {
 	width: 100%;
 	max-height: 80%;
 	margin: 5px 0;
@@ -1046,7 +1051,7 @@ form .autocomplete-box .item.active {
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
-	flex-basis: 25%;
+	flex: 1;
 	height: 100%;
 	padding-right: 10px;
 }
@@ -1062,7 +1067,7 @@ form .autocomplete-box .item.active {
 		flex-direction: column;
 		justify-content: center;
 		align-items: flex-end;
-		flex-basis: 10%;
+		flex: 1;
 		margin-top: 15px;
 	}
 }
@@ -1525,7 +1530,7 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the 'Statement Details' page
  */
-@media screen and (max-width: 1600px) {
+@media screen and (max-width: 1500px) {
 	#statement-summary {
 		display: flex;
 		flex-direction: column;
@@ -1545,7 +1550,7 @@ form#card #statement-due-day-field  {
 	align-items: flex-start;
 	margin: 0 20px 50px 0;
 }
-@media screen and (max-width: 1600px) {
+@media screen and (max-width: 1500px) {
 	#statement-details #statement-info-container {
 		margin: 0 0 50px 0;
 	}
@@ -1683,12 +1688,11 @@ form#pay #make-payment[type="button"] .icon {
 }
 
 #statement-details #statement-transactions-container {
-	flex-grow: 1;
-	max-width: 50%;
+	width: 50%;
 }
-@media screen and (max-width: 1400px) {
+@media screen and (max-width: 1500px) {
 	#statement-details #statement-transactions-container {
-		margin-top: 100px;
+		margin-top: 50px;
 	}
 }
 
@@ -1697,21 +1701,21 @@ form#pay #make-payment[type="button"] .icon {
 }
 
 #statement-details .transactions-table .date.column {
-	flex-basis: 10%;
+	flex: 1;
 }
 
 #statement-details .transactions-table .vendor.column {
-	flex-basis: 40%;
+	flex: 4;
 	min-width: 150px;
 }
 
 #statement-details .transactions-table .amount.column {
-	flex-basis: 10%;
+	flex: 1;
 	margin-left: auto;
 }
 
 #statement-details .transactions-table .notes.column {
-	flex-basis: 40%;
+	flex: 4;
 	min-width: 100px;
 	white-space: nowrap;
 	overflow: auto;
@@ -1721,22 +1725,72 @@ form#pay #make-payment[type="button"] .icon {
 	min-width: 40px;
 }
 
-#statement-details .transactions-table .expanded.row .setting {
-	flex-basis: 70%;
+#statement-details .transactions-table .setting {
+	width: 100%;
 }
-
-#statement-details .transactions-table .expanded.row .payment {
-	flex-basis: 20%;
-}
-
-@media screen and (max-width: 1200px) {
-	#statement-details .transactions-table .expanded.row .payment .amount {
-		margin: 5px 0 0;
-		transition: all 0.3s;
+@media screen and (max-width: 1500px) {
+	/* Mobile layout */
+	#statement-details .transactions-table .setting {
+		flex-direction: column;
+		align-items: flex-start;
 	}
 }
 
-#statement-details .transactions-table .expanded.row .buttons {
+@media screen and (max-width: 1500px) {
+	/* Mobile layout */
+	#statement-details .transactions-table .setting .date {
+		align-items: flex-start;
+	}
+}
+
+@media screen and (max-width: 1500px) {
+	#statement-details .transactions-table .setting .date .month,
+	#statement-details .transactions-table .setting .date .day,
+	#statement-details .transactions-table .setting .date .year {
+		display: none;
+	}
+}
+
+@media screen and (max-width: 1500px) {
+	/* Mobile layout */
+	#statement-details .transactions-table .setting .date .full {
+		display: block;
+	}
+}
+
+@media screen and (max-width: 1500px) {
+	/* Mobile layout */
+	#statement-details .transactions-table .setting .description {
+		width: 100%;
+		margin-top: 5px;
+	}
+}
+
+@media screen and (max-width: 1800px) {
+	/* Statement disappear */
+	#statement-details .transactions-table .setting .transaction-details {
+		font-size: 22pt;
+	}
+}
+@media screen and (max-width: 1550px) {
+	/* Disable transitions for mobile switch */
+	#statement-details .transactions-table .setting .transaction-details {
+		transition: all 0s;
+	}
+}
+@media screen and (max-width: 1500px) {
+	/* Statement disappear */
+	#statement-details .transactions-table .setting .transaction-details {
+		font-size: 20pt;
+	}
+}
+
+#statement-details .transactions-table .expanded .payment {
+	flex: 0;
+	padding: 0;
+}
+
+#statement-details .transactions-table .expanded .buttons {
 	height: 60%;
 }
 
