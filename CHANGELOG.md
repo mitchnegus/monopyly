@@ -38,4 +38,6 @@
 
 ## 1.0.5 (in progress)
 
+- Transactions may be split into an arbitrary number of subtransactions, each with a separate subtotal and note
 - Backend properly handles duplicate/ancestor tags; all tags are saved in the database, but only the lowest-level child tag must be entered
+
