@@ -70,8 +70,8 @@ target/
 .DS_Store
 
 # Image creation files
-monopyly/static/img/*.pptx
-monopyly/static/img/*.xcf
+monopyly/static/img/**/*.pptx
+monopyly/static/img/**/*.xcf
 monopyly/static/favicon/*.ai
 
 # Flask instance files/data
