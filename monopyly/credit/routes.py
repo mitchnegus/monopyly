@@ -171,8 +171,9 @@ def load_statement(statement_id):
     transaction_db = TransactionHandler()
     tag_db = TagHandler()
     # Get the statement information from the database
-    statement_fields = ('account_id', 'card_id', 'bank', 'last_four_digits',
-                        'issue_date', 'due_date', 'balance', 'payment_date')
+    statement_fields = ('account_id', 'card_id', 'bank_name',
+                        'last_four_digits', 'issue_date', 'due_date',
+                        'balance', 'payment_date')
     statement = statement_db.get_entry(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
@@ -221,7 +222,7 @@ def make_payment(card_id, statement_id):
     mapping = {
         'statement_id': statement['id'],
         'transaction_date': payment_date,
-        'vendor': card['bank'],
+        'vendor': card['bank_name'],
         'subtransactions': [{
             'subtotal': -payment_amount,
             'note': 'Card payment',
@@ -230,7 +231,7 @@ def make_payment(card_id, statement_id):
     }
     transaction_db.add_entry(mapping)
     # Get the statement information from the database
-    fields = ('card_id', 'bank', 'last_four_digits', 'issue_date',
+    fields = ('card_id', 'bank_name', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')
     statement = statement_db.get_entry(statement_id, fields=fields)
     return render_template('credit/statement_info.html',
@@ -245,7 +246,7 @@ def load_transactions():
     cards = card_db.get_entries()
     # Get all of the user's transactions for active cards from the database
     sort_order = 'DESC'
-    transaction_fields = ('account_id', 'bank', 'last_four_digits',
+    transaction_fields = ('account_id', 'bank_name', 'last_four_digits',
                           'transaction_date', 'vendor', 'total', 'notes',
                           'statement_id', 'issue_date')
     transactions = transaction_db.get_entries(active=True,
@@ -286,7 +287,7 @@ def update_transactions_display():
     # Determine the card IDs from the arguments of POST method
     cards = [card_db.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected transactions from the database
-    transaction_fields = ('account_id', 'bank', 'last_four_digits',
+    transaction_fields = ('account_id', 'bank_name', 'last_four_digits',
                           'transaction_date', 'vendor', 'total', 'notes',
                           'statement_id', 'issue_date')
     transactions = transaction_db.get_entries([card['id'] for card in cards],
@@ -308,7 +309,7 @@ def add_transaction(statement_id):
     if statement_id:
         statement_db = StatementHandler()
         # Get the necessary fields from the database
-        statement_fields = ('bank', 'last_four_digits', 'issue_date')
+        statement_fields = ('bank_name', 'last_four_digits', 'issue_date')
         statement = statement_db.get_entry(statement_id,
                                            fields=statement_fields)
         form.process(data=statement)
@@ -450,7 +451,7 @@ def suggest_autocomplete():
     post_args = request.get_json()
     field = post_args['field']
     vendor = post_args['vendor']
-    if field not in ('bank', 'last_four_digits', 'vendor', 'note'):
+    if field not in ('bank_name', 'last_four_digits', 'vendor', 'note'):
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
     if field != 'note':
@@ -483,7 +484,7 @@ def infer_card():
     card_db = CardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    bank = post_args['bank']
+    bank_name = post_args['bank_name']
     if 'digits' in post_args:
         last_four_digits = post_args['digits']
         # Try to infer card from digits alone
@@ -491,17 +492,17 @@ def infer_card():
                                active=True)
         if len(cards) != 1:
             # Infer card from digits and bank if necessary
-            cards = card_db.get_entries(banks=(bank,),
+            cards = card_db.get_entries(bank_names=(bank_name,),
                                         last_four_digits=(last_four_digits,),
                                         active=True)
-    elif 'bank' in post_args:
+    elif 'bank_name' in post_args:
         # Try to infer card from bank alone
-        cards = card_db.get_entries(banks=(bank,), active=True)
+        cards = card_db.get_entries(bank_names=(bank_name,), active=True)
     # Return an inferred card if a single card is identified
     if len(cards) == 1:
         # Return the card info if its is found
         card = cards[0]
-        response = {'bank': card['bank'],
+        response = {'bank_name': card['bank_name'],
                     'digits': card['last_four_digits']}
         return jsonify(response)
     else:
@@ -514,11 +515,11 @@ def infer_statement():
     card_db = CardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    bank = post_args['bank']
+    bank_name = post_args['bank_name']
     last_four_digits = post_args['digits']
     transaction_date = parse_date(post_args['transaction_date'])
     # Determine the card used for the transaction from the given info
-    cards = card_db.get_entries(banks=(bank,),
+    cards = card_db.get_entries(bank_names=(bank_name,),
                                 last_four_digits=(last_four_digits,))
     if len(cards) == 1 and transaction_date:
         statement_db = StatementHandler()
@@ -543,7 +544,7 @@ def infer_bank():
     account = account_db.get_entry(account_id)
     if not account:
         abort(404, 'An account with the given ID was not found.')
-    return account['bank']
+    return account['bank_name']
 
 
 def prepare_account_choices():
@@ -556,6 +557,6 @@ def prepare_account_choices():
         cards = card_db.get_entries(account_ids=(account['id'],))
         digits = [f"*{card['last_four_digits']}" for card in cards]
         # Create a description for the account using the bank and card digits
-        description = f"{account['bank']} (cards: {', '.join(digits)})"
+        description = f"{account['bank_name']} (cards: {', '.join(digits)})"
         choices.append((account['id'], description))
     return choices

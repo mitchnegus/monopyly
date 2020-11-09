@@ -38,7 +38,7 @@ class TransactionForm(FlaskForm):
         tags = TextField('Tags')
 
     # Fields to identify the card/bank information for the transaction
-    bank = TextField('Bank')
+    bank_name = TextField('Bank')
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
@@ -87,7 +87,8 @@ class TransactionForm(FlaskForm):
     def get_transaction_card(self):
         """Get the credit card associated with the transaction."""
         card_db = CardHandler()
-        card = card_db.find_card(self.bank.data, self.last_four_digits.data)
+        card = card_db.find_card(self.bank_name.data,
+                                 self.last_four_digits.data)
         return card
 
     def get_transaction_statement(self):
@@ -115,7 +116,7 @@ class TransactionForm(FlaskForm):
 class CardForm(FlaskForm):
     """Form to input/edit credit cards."""
     account_id = SelectField('Account', [SelectionNotBlank()], coerce=int)
-    bank = TextField('Bank')
+    bank_name = TextField('Bank')
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
@@ -141,12 +142,12 @@ class CardForm(FlaskForm):
         if self.account_id.data == 0:
             if account_creation:
                 # Add the bank to the database if it does not already exist
-                bank_name = self.bank.data
-                matching_banks = bank_db.get_entries(banks=(bank_name,))
+                bank_name = self.bank_name.data
+                matching_banks = bank_db.get_entries(bank_names=(bank_name,))
                 if not matching_banks:
                     bank_data = {
                         'user_id': bank_db.user_id,
-                        'bank': bank_name,
+                        'bank_name': bank_name,
                     }
                     bank = bank_db.add_entry(bank_data)
                 else:

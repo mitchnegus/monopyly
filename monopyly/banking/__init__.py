@@ -35,7 +35,7 @@ class BankHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_entries(self, banks=None, fields=None):
+    def get_entries(self, bank_names=None, fields=None):
         """
         Get banks from the database.
 
@@ -44,9 +44,9 @@ class BankHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        banks : tuple of str, optional
-            A sequence of banks for which cards will be selected (if
-            `None`, all banks will be selected).
+        bank_names : tuple of str, optional
+            A sequence of bank names for which cards will be selected
+            (if `None`, all banks will be selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
@@ -57,12 +57,12 @@ class BankHandler(DatabaseHandler):
         banks : list of sqlite3.Row
             A list of banks matching the criteria.
         """
-        bank_filter = filter_items(banks, 'bank', 'AND')
+        bank_filter = filter_items(bank_names, 'bank_name', 'AND')
         query = (f"SELECT {select_fields(fields, 'b.id')} "
                   "  FROM banks AS b "
                   " WHERE user_id = ? "
                  f"       {bank_filter} ")
-        placeholders = (self.user_id, *fill_places(banks))
+        placeholders = (self.user_id, *fill_places(bank_names))
         banks = self._query_entries(query, placeholders)
         return banks
 

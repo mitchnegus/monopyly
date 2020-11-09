@@ -43,7 +43,7 @@ class StatementHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_entries(self, card_ids=None, banks=None, active=False,
+    def get_entries(self, card_ids=None, bank_names=None, active=False,
                     sort_order='DESC', fields=DATABASE_FIELDS[_table]):
         """
         Get credit card statements from the database.
@@ -58,8 +58,8 @@ class StatementHandler(DatabaseHandler):
         card_ids : tuple of int, optional
             A sequence of card IDs for which statements will be selected
             (if `None`, all cards will be selected).
-        banks : tuple of str, optional
-            A sequence of banks for which statements will be selected (if
+        bank_names : tuple of str, optional
+            A sequence of bank names for which statements will be selected (if
             `None`, all banks will be selected).
         active : bool, optional
             A flag indicating whether only statements for active cards
@@ -82,7 +82,7 @@ class StatementHandler(DatabaseHandler):
         """
         check_sort_order(sort_order)
         card_filter = filter_items(card_ids, 'card_id', 'AND')
-        bank_filter = filter_items(banks, 'bank', 'AND')
+        bank_filter = filter_items(bank_names, 'bank_name', 'AND')
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
@@ -96,7 +96,7 @@ class StatementHandler(DatabaseHandler):
                  f"       {card_filter} {bank_filter} {active_filter} "
                  f" ORDER BY issue_date {sort_order}, active DESC")
         placeholders = (self.user_id, *fill_places(card_ids),
-                       *fill_places(banks))
+                       *fill_places(bank_names))
         statements = self._query_entries(query, placeholders)
         return statements
 

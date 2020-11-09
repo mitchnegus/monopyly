@@ -13,17 +13,17 @@
 	// Identify all input elements in the form
 	const $inputElements = $('form input');
 	// Identify inputs for card information
-	const $inputBank = $inputElements.filter('input#bank');
-	const $inputDigits = $inputElements.filter('input#last_four_digits');
+	const $inputBank = $inputElements.filter('#bank_name');
+	const $inputDigits = $inputElements.filter('#last_four_digits');
 	
 	// Set triggers for checking about inferences
 	$inputBank.on('blur', function() {
-		const rawData = {'bank': $(this).val()};
+		const rawData = {'bank_name': $(this).val()};
 		inferCardAjaxRequest(rawData);
 	});
 	$inputDigits.on('blur', function() {
 		const rawData = {
-			'bank': $inputBank.val(),
+			'bank_name': $inputBank.val(),
 			'digits': $(this).val()
 		};
 		inferCardAjaxRequest(rawData);
@@ -39,7 +39,7 @@
 			success: function(response) {
 				if (response != '') {
 					// A card can be inferred, so populate the fields with its info
-					$inputBank.val(response['bank']);
+					$inputBank.val(response['bank_name']);
 					$inputDigits.val(response['digits']);
 					const nextInputIndex = $inputElements.index($inputDigits[0])+1;
 					$inputElements.eq(nextInputIndex).focus();

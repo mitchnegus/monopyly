@@ -22,9 +22,9 @@
 				</div>
 			{% endif %}
 		
-			{% if 'bank' in transaction.keys() %}
+			{% if 'bank_name' in transaction.keys() %}
 				<div class="card column">
-					<span class="bank">{{ transaction['bank'] }}</span>
+					<span class="bank">{{ transaction['bank_name'] }}</span>
 					-{{ transaction['last_four_digits'] }}
 				</div>
 			{% endif %}

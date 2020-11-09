@@ -20,10 +20,10 @@ CREATE TABLE users (
 CREATE TABLE banks (
 	id INTEGER,
 	user_id INTEGER NOT NULL,
-	bank TEXT NOT NULL,
+	bank_name TEXT NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES users (id),
-	UNIQUE (bank)
+	UNIQUE (bank_name)
 );
 	
 /* Store credit account information */

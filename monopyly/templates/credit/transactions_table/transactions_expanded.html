@@ -54,7 +54,7 @@
 				{% if 'account_id' in transaction.keys() %}
 					<div class="card">
 						<a href="{{ url_for('credit.load_account', account_id=transaction['account_id']) }}">
-							<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ transaction['bank'].lower() }}-card.png">
+							<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ transaction['bank_name'].lower() }}-card.png">
 							<div class="card-number">
 								{{ transaction['last_four_digits'] }}
 							</div>

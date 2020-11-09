@@ -16,7 +16,7 @@ DATABASE_FIELDS = {
     ),
     'banks': (
         'user_id',
-        'bank',
+        'bank_name',
     ),
     'credit_accounts': (
         'bank_id',

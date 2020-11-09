@@ -40,7 +40,7 @@ class AccountHandler(DatabaseHandler):
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
-    def get_entries(self, banks=None, fields=None):
+    def get_entries(self, bank_names=None, fields=None):
         """
         Get credit accounts from the database.
 
@@ -50,8 +50,8 @@ class AccountHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        banks : tuple of str, optional
-            A sequence of banks for which accounts will be selected (if
+        bank_names : tuple of str, optional
+            A sequence of bank names for which accounts will be selected (if
             `None`, all banks will be selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
@@ -63,14 +63,14 @@ class AccountHandler(DatabaseHandler):
         accounts : list of sqlite3.Row
             A list of credit accounts matching the criteria.
         """
-        bank_filter = filter_items(banks, 'bank', 'AND')
+        bank_filter = filter_items(bank_names, 'bank_name', 'AND')
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} ")
-        placeholders = (self.user_id, *fill_places(banks))
+        placeholders = (self.user_id, *fill_places(bank_names))
         accounts = self._query_entries(query, placeholders)
         return accounts
 

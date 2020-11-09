@@ -15,14 +15,14 @@
 	// Identify all input elements in the form
 	const $inputElements = $('form input');
 	// Identify inputs for card information
-	const $inputBank = $inputElements.filter('#bank');
+	const $inputBank = $inputElements.filter('#bank_name');
 	const $inputDigits = $inputElements.filter('#last_four_digits');
 	const $inputTransactionDate = $inputElements.filter('#transaction_date');
 	const $inputStatementDate = $inputElements.filter('#issue_date');
 	
 	$inputTransactionDate.on('blur', function() {
 		const rawData = {
-			'bank': $inputBank.val(),
+			'bank_name': $inputBank.val(),
 			'digits': $inputDigits.val(),
 			'transaction_date': $inputTransactionDate.val()
 		};
