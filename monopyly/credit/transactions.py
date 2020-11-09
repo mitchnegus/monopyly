@@ -75,7 +75,7 @@ class TransactionHandler(DatabaseHandler):
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
             the 'credit_transactions', credit_statements',
-            'credit_cards', or 'credit_accounts' tables.
+            'credit_cards', 'credit_accounts', or 'banks' tables.
 
         Returns
         –––––––
@@ -94,6 +94,8 @@ class TransactionHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {statement_filter} {active_filter} "
                   " GROUP BY t.id "
@@ -117,7 +119,7 @@ class TransactionHandler(DatabaseHandler):
             The ID of the transaction to be found.
         fields : tuple of str, optional
             The fields (in either the transactions, statements, cards,
-            or accounts tables) to be returned.
+            accounts, or banks tables) to be returned.
 
         Returns
         –––––––
@@ -132,6 +134,8 @@ class TransactionHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE t.id = ? AND user_id = ?")
         placeholders = (transaction_id, self.user_id)
         abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
@@ -271,6 +275,8 @@ class SubtransactionHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                  f" WHERE user_id = ? {transaction_filter}")
         placeholders = (self.user_id, *fill_places(transaction_ids))
         subtransactions = self._query_entries(query, placeholders)
@@ -307,6 +313,8 @@ class SubtransactionHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE s_t.id = ? AND user_id = ?")
         placeholders = (subtransaction_id, self.user_id,)
         abort_msg = (f'Subtransaction ID {subtransaction_id} does not exist '
@@ -758,7 +766,9 @@ class TagHandler(DatabaseHandler):
                     "             ON c.id = s.card_id "
                     "       INNER JOIN credit_accounts AS a "
                     "             ON a.id = c.account_id "
-                   f" WHERE a.user_id = ? {statement_filter}")
+                    "       INNER JOIN banks AS b "
+                    "             ON b.id = a.bank_id "
+                   f" WHERE b.user_id = ? {statement_filter}")
         tag_filter = filter_items(tag_ids, 'tag_id', 'AND')
         statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
         query = (f"SELECT SUM(subtotal) / ({subquery}) average_total, tag_name "

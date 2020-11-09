@@ -66,7 +66,7 @@ class CardHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
-            'credit_cards' or 'credit_accounts' tables.
+            'credit_cards', 'credit_accounts', or 'banks' tables.
 
         Returns
         –––––––
@@ -82,6 +82,8 @@ class CardHandler(DatabaseHandler):
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {account_filter} {bank_filter} "
                  f"       {digit_filter} {active_filter} "
@@ -106,8 +108,8 @@ class CardHandler(DatabaseHandler):
         card_id : int
             The ID of the card to be found.
         fields : tuple of str, optional
-            The fields (in either the cards or accounts tables) to be
-            returned
+            The fields (in either the cards, accounts, or banks tables)
+            to be returned.
 
         Returns
         –––––––
@@ -118,6 +120,8 @@ class CardHandler(DatabaseHandler):
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE c.id = ? AND user_id = ?")
         placeholders = (card_id, self.user_id)
         abort_msg = f'Card ID {card_id} does not exist for the user.'
@@ -160,6 +164,8 @@ class CardHandler(DatabaseHandler):
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} {digit_filter}")
         placeholders = (self.user_id, *fill_place(bank),

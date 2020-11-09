@@ -5,6 +5,7 @@ from ..utils import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
     select_fields
 )
+from ..banking import BankHandler
 from .cards import CardHandler
 
 
@@ -50,12 +51,12 @@ class AccountHandler(DatabaseHandler):
         Parameters
         ––––––––––
         banks : tuple of str, optional
-            A sequence of banks for which cards will be selected (if
+            A sequence of banks for which accounts will be selected (if
             `None`, all banks will be selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
-            'credit_accounts' table.
+            'credit_accounts' or 'banks' tables.
 
         Returns
         –––––––
@@ -65,6 +66,8 @@ class AccountHandler(DatabaseHandler):
         bank_filter = filter_items(banks, 'bank', 'AND')
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} ")
         placeholders = (self.user_id, *fill_places(banks))
@@ -75,6 +78,8 @@ class AccountHandler(DatabaseHandler):
         """Get a credit account from the database given its ID."""
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE a.id = ? AND user_id = ?")
         placeholders = (account_id, self.user_id)
         abort_msg = f'Account ID {account_id} does not exist for the user.'

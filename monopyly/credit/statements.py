@@ -72,8 +72,8 @@ class StatementHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
-            the 'credit_statements', 'credit_cards', or 'credit_accounts'
-            tables.
+            the 'credit_statements', 'credit_cards', 'credit_accounts'
+            or 'banks' tables.
 
         Returns
         –––––––
@@ -90,6 +90,8 @@ class StatementHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {bank_filter} {active_filter} "
                  f" ORDER BY issue_date {sort_order}, active DESC")
@@ -111,8 +113,8 @@ class StatementHandler(DatabaseHandler):
         statement_id : int
             The ID of the statement to be found.
         fields : tuple of str, optional
-            The fields (in either the statements, cards, or accounts
-            tables) to be returned.
+            The fields (in either the statements, cards, accounts, or
+            banks tables) to be returned.
 
         Returns
         –––––––
@@ -125,6 +127,8 @@ class StatementHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE s.id = ? AND user_id = ?")
         placeholders = (statement_id, self.user_id)
         abort_msg = (f'Statement ID {statement_id} does not exist for the '
@@ -151,8 +155,8 @@ class StatementHandler(DatabaseHandler):
             statement to be found (if `None`, the most recent statement
             will be found).
         fields : tuple of str, optional
-            The fields (in either the statements, cards, or accounts
-            tables) to be returned.
+            The fields (in either the statements, cards, accounts, or
+            banks tables) to be returned.
 
         Returns
         –––––––
@@ -167,6 +171,8 @@ class StatementHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                  f" WHERE user_id = ? AND card_id = ? {date_filter} "
                   " ORDER BY issue_date DESC")
         placeholders = (self.user_id, card['id'], *fill_place(issue_date))

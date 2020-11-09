@@ -14,9 +14,12 @@ DATABASE_FIELDS = {
         'username',
         'password',
     ),
-    'credit_accounts': (
+    'banks': (
         'user_id',
         'bank',
+    ),
+    'credit_accounts': (
+        'bank_id',
         'statement_issue_day',
         'statement_due_day',
     ),

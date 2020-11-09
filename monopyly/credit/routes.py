@@ -520,7 +520,7 @@ def infer_statement():
     # Determine the card used for the transaction from the given info
     cards = card_db.get_entries(banks=(bank,),
                                 last_four_digits=(last_four_digits,))
-    if len(cards) == 1:
+    if len(cards) == 1 and transaction_date:
         statement_db = StatementHandler()
         # Determine the statement corresponding to the card and date
         card = cards[0]

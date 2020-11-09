@@ -1,4 +1,6 @@
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS banks;
+DROP TABLE IF EXISTS credit_accounts;
 DROP TABLE IF EXISTS credit_cards;
 DROP TABLE IF EXISTS credit_statements;
 DROP TABLE IF EXISTS credit_transactions;
@@ -14,15 +16,25 @@ CREATE TABLE users (
 	PRIMARY KEY (id)
 );
 
-/* Store credit account information */
-CREATE TABLE credit_accounts (
+/* Store information about banks */
+CREATE TABLE banks (
 	id INTEGER,
 	user_id INTEGER NOT NULL,
 	bank TEXT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (user_id) REFERENCES users (id),
+	UNIQUE (bank)
+);
+	
+/* Store credit account information */
+CREATE TABLE credit_accounts (
+	id INTEGER,
+	bank_id INTEGER NOT NULL,
 	statement_issue_day INTEGER NOT NULL,
 	statement_due_day INTEGER NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id) REFERENCES users(id)
+	FOREIGN KEY (bank_id) REFERENCES banks (id)
+		ON DELETE CASCADE
 );
 
 /* Store credit card information */

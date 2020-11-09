@@ -12,6 +12,7 @@ from wtforms.validators import Optional, DataRequired, Length
 
 from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
+from ..banking import BankHandler
 from . import credit
 from .accounts import AccountHandler
 from .cards import CardHandler
@@ -135,15 +136,26 @@ class CardForm(FlaskForm):
 
     def get_card_account(self, account_creation=True):
         """Get the account associated with the credit card."""
-        account_db = AccountHandler()
+        bank_db, account_db = BankHandler(), AccountHandler()
         # Check if the account exists and potentially create it if not
         if self.account_id.data == 0:
             if account_creation:
+                # Add the bank to the database if it does not already exist
+                bank_name = self.bank.data
+                matching_banks = bank_db.get_entries(banks=(bank_name,))
+                if not matching_banks:
+                    bank_data = {
+                        'user_id': bank_db.user_id,
+                        'bank': bank_name,
+                    }
+                    bank = bank_db.add_entry(bank_data)
+                else:
+                    bank = matching_banks[0]
+                # Add the account to the database
                 account_data = {
-                    'user_id': account_db.user_id,
-                    'bank': self.bank.data,
+                    'bank_id': bank['id'],
                     'statement_issue_day': self.statement_issue_day.data,
-                    'statement_due_day': self.statement_due_day.data
+                    'statement_due_day': self.statement_due_day.data,
                 }
                 account = account_db.add_entry(account_data)
             else:
