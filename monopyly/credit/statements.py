@@ -8,10 +8,10 @@ from ..utils import (
     check_sort_order, select_fields
 )
 from ..db import DATABASE_FIELDS
-from .transactions import TransactionHandler
+from .transactions import CreditTransactionHandler
 
 
-class StatementHandler(DatabaseHandler):
+class CreditStatementHandler(DatabaseHandler):
     """
     A database handler for managing credit card statements.
 
@@ -240,7 +240,7 @@ class StatementHandler(DatabaseHandler):
             The IDs of statements to be deleted.
         """
         # Delete all transactions corresponding to these statements
-        transaction_db = TransactionHandler()
+        transaction_db = CreditTransactionHandler()
         transactions = transaction_db.get_entries(statement_ids=entry_ids,
                                                   fields=())
         transaction_ids = [transaction['id'] for transaction in transactions]

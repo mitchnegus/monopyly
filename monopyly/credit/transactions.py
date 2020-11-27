@@ -11,7 +11,7 @@ from ..utils import (
 )
 
 
-class TransactionHandler(DatabaseHandler):
+class CreditTransactionHandler(DatabaseHandler):
     """
     A database handler for accessing credit transactions.
 
@@ -167,7 +167,7 @@ class TransactionHandler(DatabaseHandler):
         subtransactions : list of sqlite3.Row
             A list of subtransactions belonging to the saved transaction.
         """
-        subtransaction_db = SubtransactionHandler()
+        subtransaction_db = CreditSubtransactionHandler()
         # Override the default method to account for subtransactions
         subtransactions_data = mapping.pop('subtransactions')
         transaction = super().add_entry(mapping)
@@ -179,7 +179,7 @@ class TransactionHandler(DatabaseHandler):
 
     def update_entry(self, entry_id, mapping):
         """Update a transaction (and its subtransactions) in the database."""
-        subtransaction_db = SubtransactionHandler()
+        subtransaction_db = CreditSubtransactionHandler()
         # Override the default method to account for subtransactions
         subtransactions_data = mapping.pop('subtransactions')
         transaction = super().update_entry(entry_id, mapping)
@@ -196,7 +196,7 @@ class TransactionHandler(DatabaseHandler):
 
     def _add_subtransactions(self, transaction_id, subtransactions_data):
         """Add subtransactions to the database for the data given."""
-        subtransaction_db = SubtransactionHandler()
+        subtransaction_db = CreditSubtransactionHandler()
         # Assemble mappings to add subtransactions
         subtransactions = []
         for subtransaction_data in subtransactions_data:
@@ -208,7 +208,7 @@ class TransactionHandler(DatabaseHandler):
         return subtransactions
 
 
-class SubtransactionHandler(DatabaseHandler):
+class CreditSubtransactionHandler(DatabaseHandler):
     """
     A database handler for accessing credit subtransactions.
 
@@ -343,7 +343,7 @@ class SubtransactionHandler(DatabaseHandler):
         subtransaction : sqlite3.Row
             The saved transaction.
         """
-        tag_db = TagHandler()
+        tag_db = CreditTagHandler()
         # Override the default method to account for tags
         tags = mapping.pop('tags')
         subtransaction = super().add_entry(mapping)
@@ -352,7 +352,7 @@ class SubtransactionHandler(DatabaseHandler):
         return subtransaction
 
 
-class TagHandler(DatabaseHandler):
+class CreditTagHandler(DatabaseHandler):
     """
     A database handler for managing credit transaction tags.
 

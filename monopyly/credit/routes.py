@@ -13,13 +13,15 @@ from ..utils import parse_date, dedelimit_float
 from ..auth.tools import login_required
 from . import credit
 from .forms import *
-from .accounts import AccountHandler
-from .cards import CardHandler
+from .accounts import CreditAccountHandler
+from .cards import CreditCardHandler
 from .statements import (
-    StatementHandler, determine_statement_issue_date,
+    CreditStatementHandler, determine_statement_issue_date,
     determine_statement_issue_date
 )
-from .transactions import TransactionHandler, SubtransactionHandler, TagHandler
+from .transactions import (
+    CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler
+)
 
 
 # Define a custom form error messaage
@@ -29,7 +31,7 @@ form_err_msg = 'There was an improper value in your form. Please try again.'
 @credit.route('/cards')
 @login_required
 def load_cards():
-    card_db = CardHandler()
+    card_db = CreditCardHandler()
     # Get all of the user's credit cards from the database
     cards = card_db.get_entries()
     return render_template('credit/cards_page.html', cards=cards)
@@ -44,7 +46,7 @@ def add_card():
     # Check if a card was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
-            card_db = CardHandler()
+            card_db = CreditCardHandler()
             # Insert the new credit card into the database
             card = card_db.add_entry(form.card_data)
             return redirect(url_for('credit.load_account',
@@ -58,7 +60,8 @@ def add_card():
 @credit.route('/account/<int:account_id>')
 @login_required
 def load_account(account_id):
-    account_db, card_db = AccountHandler(), CardHandler()
+    account_db = CreditAccountHandler()
+    card_db = CreditCardHandler()
     # Get the account information from the database
     account = account_db.get_entry(account_id)
     # Get all cards with active cards at the end of the list
@@ -71,7 +74,7 @@ def load_account(account_id):
 @credit.route('/_update_card_status', methods=('POST',))
 @login_required
 def update_card_status():
-    card_db = CardHandler()
+    card_db = CreditCardHandler()
     # Get the field from the AJAX request
     post_args = request.get_json()
     input_id = post_args['input_id']
@@ -88,7 +91,7 @@ def update_card_status():
 @credit.route('/delete_card/<int:card_id>')
 @login_required
 def delete_card(card_id):
-    card_db = CardHandler()
+    card_db = CreditCardHandler()
     account_id = card_db.get_entry(card_id)['account_id']
     # Remove the credit card from the database
     card_db.delete_entries((card_id,))
@@ -99,7 +102,7 @@ def delete_card(card_id):
           methods=('POST',))
 @login_required
 def update_account_statement_issue_day(account_id):
-    account_db = AccountHandler()
+    account_db = CreditAccountHandler()
     # Get the field from the AJAX request
     issue_day = request.get_json()
     # Update the account in the database
@@ -112,7 +115,7 @@ def update_account_statement_issue_day(account_id):
           methods=('POST',))
 @login_required
 def update_account_statement_due_day(account_id):
-    account_db = AccountHandler()
+    account_db = CreditAccountHandler()
     # Get the field from the AJAX request
     due_day = request.get_json()
     # Update the account in the database
@@ -124,7 +127,7 @@ def update_account_statement_due_day(account_id):
 @credit.route('/delete_account/<int:account_id>')
 @login_required
 def delete_account(account_id):
-    account_db = AccountHandler()
+    account_db = CreditAccountHandler()
     # Remove the account from the database
     account_db.delete_entries((account_id,))
     return redirect(url_for('credit.load_cards'))
@@ -133,7 +136,8 @@ def delete_account(account_id):
 @credit.route('/statements')
 @login_required
 def load_statements():
-    card_db, statement_db = CardHandler(), StatementHandler()
+    card_db = CreditCardHandler()
+    statement_db = CreditStatementHandler()
     # Get all of the user's credit cards from the database
     all_cards = card_db.get_entries()
     active_cards = card_db.get_entries(active=True)
@@ -149,7 +153,8 @@ def load_statements():
 @credit.route('/_update_statements_display', methods=('POST',))
 @login_required
 def update_statements_display():
-    card_db, statement_db = CardHandler(), StatementHandler()
+    card_db = CreditCardHandler()
+    statement_db = CreditStatementHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     filter_ids = post_args['filter_ids']
@@ -167,9 +172,9 @@ def update_statements_display():
 @credit.route('/statement/<int:statement_id>')
 @login_required
 def load_statement(statement_id):
-    statement_db = StatementHandler()
-    transaction_db = TransactionHandler()
-    tag_db = TagHandler()
+    statement_db = CreditStatementHandler()
+    transaction_db = CreditTransactionHandler()
+    tag_db = CreditTagHandler()
     # Get the statement information from the database
     statement_fields = ('account_id', 'card_id', 'bank_name',
                         'last_four_digits', 'issue_date', 'due_date',
@@ -196,7 +201,7 @@ def load_statement(statement_id):
               methods=('POST',))
 @login_required
 def update_statement_due_date(statement_id):
-    statement_db = StatementHandler()
+    statement_db = CreditStatementHandler()
     # Get the field from the AJAX request
     due_date = request.get_json()
     # Update the statement in the database
@@ -209,9 +214,9 @@ def update_statement_due_date(statement_id):
               methods=('POST',))
 @login_required
 def make_payment(card_id, statement_id):
-    card_db = CardHandler()
-    statement_db = StatementHandler()
-    transaction_db = TransactionHandler()
+    card_db = CreditCardHandler()
+    statement_db = CreditStatementHandler()
+    transaction_db = CreditTransactionHandler()
     # Get the field from the AJAX request
     post_args = request.get_json()
     payment_amount = dedelimit_float(post_args['payment_amount'])
@@ -238,22 +243,31 @@ def make_payment(card_id, statement_id):
                            statement=statement)
 
 
-@credit.route('/transactions')
+@credit.route('/transactions', defaults={'card_id': None})
+@credit.route('/transactions/<int:card_id>', methods=('GET', 'POST'))
 @login_required
-def load_transactions():
-    card_db, transaction_db = CardHandler(), TransactionHandler()
-    # Get all of the user's credit cards from the database
+def load_transactions(card_id):
+    card_db = CreditCardHandler()
+    transaction_db = CreditTransactionHandler()
+    # Get all of the user's credit cards from the database (for the filter)
     cards = card_db.get_entries()
-    # Get all of the user's transactions for active cards from the database
+    # Identify cards to be selected in the filter on page load
+    if card_id:
+        selected_card_ids = [card_id]
+    else:
+        active_cards = card_db.get_entries(active=True)
+        selected_card_ids = [card['id'] for card in active_cards]
+    # Get all of the user's transactions for the selected cards
     sort_order = 'DESC'
     transaction_fields = ('account_id', 'bank_name', 'last_four_digits',
                           'transaction_date', 'vendor', 'total', 'notes',
                           'statement_id', 'issue_date')
-    transactions = transaction_db.get_entries(active=True,
+    transactions = transaction_db.get_entries(card_ids=selected_card_ids,
                                               sort_order=sort_order,
                                               fields=transaction_fields)
     return render_template('credit/transactions_page.html',
                            filter_cards=cards,
+                           selected_card_ids=selected_card_ids,
                            sort_order=sort_order,
                            transactions=transactions)
 
@@ -261,7 +275,8 @@ def load_transactions():
 @credit.route('/_expand_transaction', methods=('POST',))
 @login_required
 def expand_transaction():
-    subtransaction_db, tag_db = SubtransactionHandler(), TagHandler()
+    subtransaction_db = CreditSubtransactionHandler()
+    tag_db = CreditTagHandler()
     # Get the transaction ID from the AJAX request
     transaction_id = request.get_json().split('-')[-1]
     # Get the subtransactions
@@ -279,7 +294,8 @@ def expand_transaction():
 @credit.route('/_update_transactions_display', methods=('POST',))
 @login_required
 def update_transactions_display():
-    card_db, transaction_db = CardHandler(), TransactionHandler()
+    card_db = CreditCardHandler()
+    transaction_db = CreditTransactionHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     filter_ids = post_args['filter_ids']
@@ -298,25 +314,37 @@ def update_transactions_display():
                            transactions=transactions)
 
 
-@credit.route('/add_transaction', defaults={'statement_id': None},
-          methods=('GET', 'POST'))
-@credit.route('/add_transaction/<int:statement_id>', methods=('GET', 'POST'))
+@credit.route('/add_transaction',
+              defaults={'card_id': None, 'statement_id': None})
+@credit.route('/add_transaction/<int:card_id>/',
+              defaults={'statement_id': None})
+@credit.route('/add_transaction/<int:card_id>/<int:statement_id>',
+              methods=('GET', 'POST'))
 @login_required
-def add_transaction(statement_id):
+def add_transaction(card_id, statement_id):
     # Define a form for a transaction
     form = TransactionForm()
-    # Load statement parameters if the request came from a specific statement
-    if statement_id:
-        statement_db = StatementHandler()
+    # Prepare known form entries if card is known
+    if card_id:
+        card_db = CreditCardHandler()
         # Get the necessary fields from the database
-        statement_fields = ('bank_name', 'last_four_digits', 'issue_date')
-        statement = statement_db.get_entry(statement_id,
-                                           fields=statement_fields)
-        form.process(data=statement)
+        card_fields = ('bank_name', 'last_four_digits')
+        card = card_db.get_entry(card_id, fields=card_fields)
+        data = {field: card[field] for field in card_fields}
+        # Prepare known form entries if statement is known
+        if statement_id:
+             statement_db = CreditStatementHandler()
+             # Get the necessary fields from the database
+             statement_fields = ('issue_date',)
+             statement = statement_db.get_entry(statement_id,
+                                                fields=statement_fields)
+             for field in statement_fields:
+                 data[field] = statement[field]
+        form.process(data=data)
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
-            transaction_db = TransactionHandler()
+            transaction_db = CreditTransactionHandler()
             # Insert the new transaction into the database
             transaction_data = form.transaction_data
             entry = transaction_db.add_entry(transaction_data)
@@ -338,9 +366,9 @@ def add_transaction(statement_id):
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    transaction_db = TransactionHandler()
-    subtransaction_db = SubtransactionHandler()
-    tag_db = TagHandler()
+    transaction_db = CreditTransactionHandler()
+    subtransaction_db = CreditSubtransactionHandler()
+    tag_db = CreditTagHandler()
     # Get the transaction information from the database
     transaction = transaction_db.get_entry(transaction_id)
     subtransactions = subtransaction_db.get_entries((transaction_id,))
@@ -391,7 +419,7 @@ def add_subtransaction_field():
 @credit.route('/delete_transaction/<int:transaction_id>')
 @login_required
 def delete_transaction(transaction_id):
-    transaction_db = TransactionHandler()
+    transaction_db = CreditTransactionHandler()
     # Remove the transaction from the database
     transaction_db.delete_entries((transaction_id,))
     return redirect(url_for('credit.load_transactions'))
@@ -400,7 +428,7 @@ def delete_transaction(transaction_id):
 @credit.route('/tags')
 @login_required
 def load_tags():
-    tag_db = TagHandler()
+    tag_db = CreditTagHandler()
     # Get the tag heirarchy from the database
     heirarchy = tag_db.get_heirarchy()
     return render_template('credit/tags_page.html',
@@ -409,7 +437,7 @@ def load_tags():
 @credit.route('/_add_tag', methods=('POST',))
 @login_required
 def add_tag():
-    tag_db = TagHandler()
+    tag_db = CreditTagHandler()
     # Get the new tag (and potentially parent category) from the AJAX request
     post_args = request.get_json()
     tag_name = post_args['tag_name']
@@ -434,7 +462,7 @@ def add_tag():
 @credit.route('/_delete_tag/', methods=('POST',))
 @login_required
 def delete_tag():
-    tag_db = TagHandler()
+    tag_db = CreditTagHandler()
     # Get the tag to be deleted from the AJAX request
     post_args = request.get_json()
     tag_name = post_args['tag_name']
@@ -455,10 +483,10 @@ def suggest_autocomplete():
         raise ValueError(f"'{field}' does not support autocompletion.")
     # Get information from the database to use for autocompletion
     if field != 'note':
-        transaction_db = TransactionHandler()
+        transaction_db = CreditTransactionHandler()
         entries = transaction_db.get_entries(fields=(field,))
     else:
-        subtransaction_db = SubtransactionHandler()
+        subtransaction_db = CreditSubtransactionHandler()
         fields = ('vendor', 'note')
         entries = subtransaction_db.get_entries(fields=fields)
         # Generate a map of notes for the current vendor
@@ -481,7 +509,7 @@ def suggest_autocomplete():
 @credit.route('/_infer_card', methods=('POST',))
 @login_required
 def infer_card():
-    card_db = CardHandler()
+    card_db = CreditCardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     bank_name = post_args['bank_name']
@@ -512,7 +540,7 @@ def infer_card():
 @credit.route('/_infer_statement', methods=('POST',))
 @login_required
 def infer_statement():
-    card_db = CardHandler()
+    card_db = CreditCardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     bank_name = post_args['bank_name']
@@ -522,7 +550,7 @@ def infer_statement():
     cards = card_db.get_entries(bank_names=(bank_name,),
                                 last_four_digits=(last_four_digits,))
     if len(cards) == 1 and transaction_date:
-        statement_db = StatementHandler()
+        statement_db = CreditStatementHandler()
         # Determine the statement corresponding to the card and date
         card = cards[0]
         statement = statement_db.infer_statement(card, transaction_date)
@@ -537,7 +565,7 @@ def infer_statement():
 @credit.route('/_infer_bank', methods=('POST',))
 @login_required
 def infer_bank():
-    account_db = AccountHandler()
+    account_db = CreditAccountHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     account_id = post_args['account_id']
@@ -549,7 +577,8 @@ def infer_bank():
 
 def prepare_account_choices():
     """Prepare account choices for the card form dropdown."""
-    account_db, card_db = AccountHandler(), CardHandler()
+    account_db = CreditAccountHandler()
+    card_db = CreditCardHandler()
     # Collect all available user accounts
     user_accounts = account_db.get_entries()
     choices = [(-1, '-'), (0, 'New account')]

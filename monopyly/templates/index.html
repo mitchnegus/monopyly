@@ -9,15 +9,57 @@
 	{% if g.user %}
 		<div id="homepage-panels">
 
-			<div id="bank" class="panel">
-				<h2>Coming soon!</h2>
+			<div id="banking" class="panel">
+
+				<h2>Bank Accounts</h2>
+
+				<ul class="category">
+					<h4>Profile</h4>
+					<li>
+						<a href="">
+							Manage accounts
+						</a>
+					</li>
+					<li>
+						<a href="">
+							Add a new account
+						</a>
+					</li>
+				</ul>
+
+				<h3>Banks</h3>
+
+				{% for bank in banks %}
+					<ul class="category">
+
+						<h4>{{ bank['bank_name'] }}</h4>
+						<li>
+							<a href="">
+								See account summary
+							</a>
+						</li>
+						<li>
+							<a href="">
+								See transaction history
+							</a>
+						</li>
+						<li>
+							<a href="">
+								Create a new transaction
+							</a>
+						</li>
+
+					</ul>
+				{% endfor %}
+
 			</div>
 	
 			<div id="credit" class="panel">
+
 				<h2>Credit Cards</h2>
 	
 				<ul class="category">
-					<h4>Cards</h4>
+					<h4>Profile</h4>
 					<li>
 						<a href="{{ url_for('credit.load_cards') }}">
 							Manage accounts
@@ -28,19 +70,20 @@
 							Add a new card
 						</a>
 					</li>
-				</ul>
-	
-				<ul class="category">
-					<h4>Statements</h4>
 					<li>
-						<a href="{{ url_for('credit.load_statements') }}">
-							See statement history
+						<a href="{{ url_for('credit.load_tags') }}">
+							Manage transaction tags
 						</a>
 					</li>
 				</ul>
 	
 				<ul class="category">
-					<h4>Transactions</h4>
+					<h4>History</h4>
+					<li>
+						<a href="{{ url_for('credit.load_statements') }}">
+							See statement history
+						</a>
+					</li>
 					<li>
 						<a href="{{ url_for('credit.load_transactions') }}">
 							See transaction history
@@ -51,13 +94,34 @@
 							Create a new transaction
 						</a>
 					</li>
-					<li>
-						<a href="{{ url_for('credit.load_tags') }}">
-							Manage transaction tags
-						</a>
-					</li>
 				</ul>
-	
+
+				<h3>Cards</h3>
+
+				{% for card in cards %}
+					<ul class="category">
+
+						<h4>{{ card['bank_name'] }} {{ card['last_four_digits'] }}</h4>
+						<li>
+							<a href="{{ url_for('credit.load_statement', statement_id=card['last_statement_id']) }}">
+								See most recent statement
+							</a>
+						</li>
+						<li>
+							<a href="{{ url_for('credit.load_transactions', card_id=card['id']) }}">
+								See transaction history
+							</a>
+						</li>
+						<li>
+							<a href="{{ url_for('credit.add_transaction', card_id=card['id']) }}">
+								Create a new transaction
+							</a>
+						</li>
+
+					</ul>
+				{% endfor %}
+
+
 			</div>
 	
 			<div id="investments" class="panel">

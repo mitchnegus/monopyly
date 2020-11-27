@@ -12,11 +12,11 @@ from wtforms.validators import Optional, DataRequired, Length
 
 from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
-from ..banking import BankHandler
+from ..banking.banks import BankHandler
 from . import credit
-from .accounts import AccountHandler
-from .cards import CardHandler
-from .statements import StatementHandler
+from .accounts import CreditAccountHandler
+from .cards import CreditCardHandler
+from .statements import CreditStatementHandler
 
 
 class TransactionForm(FlaskForm):
@@ -86,7 +86,7 @@ class TransactionForm(FlaskForm):
 
     def get_transaction_card(self):
         """Get the credit card associated with the transaction."""
-        card_db = CardHandler()
+        card_db = CreditCardHandler()
         card = card_db.find_card(self.bank_name.data,
                                  self.last_four_digits.data)
         return card
@@ -97,7 +97,7 @@ class TransactionForm(FlaskForm):
         card = self.get_transaction_card()
         if not card:
             abort(404, 'A card matching the criteria was not found.')
-        statement_db = StatementHandler()
+        statement_db = CreditStatementHandler()
         # Get the statement corresponding to the card and issue date
         issue_date = self.issue_date.data
         if issue_date:
@@ -137,7 +137,7 @@ class CardForm(FlaskForm):
 
     def get_card_account(self, account_creation=True):
         """Get the account associated with the credit card."""
-        bank_db, account_db = BankHandler(), AccountHandler()
+        bank_db, account_db = BankHandler(), CreditAccountHandler()
         # Check if the account exists and potentially create it if not
         if self.account_id.data == 0:
             if account_creation:

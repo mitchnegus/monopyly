@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+
+{% block left_sidebar %}
+
+	<nav id="sidebar-nav-menu">
+		<ul>
+
+			<li>
+				<a class="button" href="#top">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/arrow-up.png') }}" />
+				</a>
+			</li>
+
+			<li>
+				<a class="action button" href="{{ url_for('banking.add_transaction') }}">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+				</a>
+			</li>
+
+			<li>
+				<a class="action button" href="{{ url_for('banking.load_transactions') }}">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/refresh.png') }}" />
+				</a>
+			</li>
+
+			<li>
+				<a class="button" href="#bottom">
+					<img class="icon" src="{{ url_for('static', filename='img/icons/arrow-down.png') }}" />
+				</a>
+			</li>
+
+		</ul>
+	</nav>
+
+{% endblock %}
+
+
+{% block header %}
+
+	<a name="top"></a>
+
+	<h1>
+		{% block title %}Transactions{% endblock %}
+	</h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+	<!--<div id="transactions-container">
+		{% include 'credit/transactions_table/transactions.html' %}
+	</div>-->
+
+	<a name="bottom"></a>
+
+{% endblock %}
+
+
+{% block javascript %}
+{% endblock %}

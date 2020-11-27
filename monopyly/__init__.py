@@ -8,6 +8,7 @@ import monopyly.db as db
 from monopyly.core import core
 from monopyly.auth import auth
 from monopyly.credit import credit
+from monopyly.banking import banking
 
 
 def create_app(test_config=None):
@@ -39,6 +40,9 @@ def create_app(test_config=None):
 
     # Register the authentication blueprint
     app.register_blueprint(auth)
+
+    # Register the banking financials blueprint
+    app.register_blueprint(banking)
 
     # Register the credit card financials blueprint
     app.register_blueprint(credit)

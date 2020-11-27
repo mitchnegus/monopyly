@@ -1,13 +1,13 @@
 """
-Tools for interacting with credit accounts in the database.
+Tools for interacting with bank accounts in the database.
 """
 from ..utils import DatabaseHandler, fill_places, filter_items, select_fields
-from .cards import CreditCardHandler
+from .banks import BankHandler
 
 
-class CreditAccountHandler(DatabaseHandler):
+class BankAccountHandler(DatabaseHandler):
     """
-    A database handler for managing credit accounts.
+    A database handler for managing bank accounts.
 
     Parameters
     ––––––––––
@@ -31,16 +31,16 @@ class CreditAccountHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'credit_accounts'
+    _table = 'bank_accounts'
 
     def __init__(self, db=None, user_id=None, check_user=True):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_entries(self, bank_names=None, fields=None):
         """
-        Get credit accounts from the database.
+        Get bank accounts from the database.
 
-        Query the database to select credit account fields. Accounts can
+        Query the database to select bank account fields. Accounts can
         be filtered by the issuing bank. All fields for all accounts are
         shown by default.
 
@@ -52,16 +52,16 @@ class CreditAccountHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
-            'credit_accounts' or 'banks' tables.
+            'bank_accounts' or 'banks' tables.
 
         Returns
         –––––––
         accounts : list of sqlite3.Row
-            A list of credit accounts matching the criteria.
+            A list of bank accounts matching the criteria.
         """
         bank_filter = filter_items(bank_names, 'bank_name', 'AND')
         query = (f"SELECT {select_fields(fields, 'a.id')} "
-                  "  FROM credit_accounts AS a "
+                  "  FROM bank_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
@@ -71,9 +71,9 @@ class CreditAccountHandler(DatabaseHandler):
         return accounts
 
     def get_entry(self, account_id, fields=None):
-        """Get a credit account from the database given its ID."""
+        """Get a bank account from the database given its ID."""
         query = (f"SELECT {select_fields(fields, 'a.id')} "
-                  "  FROM credit_accounts AS a "
+                  "  FROM bank_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   " WHERE a.id = ? AND user_id = ?")
@@ -84,21 +84,15 @@ class CreditAccountHandler(DatabaseHandler):
 
     def delete_entries(self, entry_ids):
         """
-        Delete credit card accounts from the database.
+        Delete bank accounts from the database.
 
-        Given a set of account IDs, delete the credit card accounts from
-        the database. Deleting an account will also delete all credit
-        cards (and statements, transactions) for that account.
+        Given a set of account IDs, delete the bank accounts from the
+        database.
 
         Parameters
         ––––––––––
         entry_ids : list of int
             The IDs of accounts to be deleted.
         """
-        # Delete all cards corresponding to these accounts
-        card_db = CreditCardHandler()
-        cards = card_db.get_entries(fields=(), account_ids=entry_ids)
-        card_ids = [card['id'] for card in cards]
-        card_db.delete_entries(card_ids)
         # Delete the given accounts
         super().delete_entries(entry_ids)

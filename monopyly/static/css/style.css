@@ -6,8 +6,8 @@ body {
 	width: 100%;
 	margin: 0;
 	padding: 0;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	color: #444444;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 a {
@@ -31,8 +31,8 @@ form {
 
 input {
 	color: inherit;
-	font-family: inherit;
 	font-size: inherit;
+	font-family: inherit;
 }
 
 input[type="text"],
@@ -53,16 +53,16 @@ select {
 #masthead {
 	position: fixed;
 	top: 0;
+	z-index: 99;
 	display: flex;
 	align-items: center;
   height: 50px;
   width: 100%;
-  background-color: #2b2b2b;
+	border-width: 0 0 4px 3px;
 	border-style: solid;
 	border-color: #85bb65;
-	border-width: 0 0 4px 3px;
+  background-color: #2b2b2b;
   opacity: 0.9;
-	z-index: 99;
 }
 
 #masthead a {
@@ -128,12 +128,12 @@ select {
 }
 
 aside.sidebar {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
 	height: 100%;
 	width: 10%;
 	min-width: 50px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
 	margin-top: 50px; /* Account for content header */
 }
 
@@ -201,8 +201,8 @@ aside.sidebar {
 	width: 30px;
 	margin-left: 20px;
 	padding: 10px;
-	background-color: #f8f8f8;
 	border-radius: 10px;
+	background-color: #f8f8f8;
 }
 
 .details-menu div:first-of-type {
@@ -260,8 +260,8 @@ form input,
 form select {
 	width: 100%;
 	box-sizing: border-box;
-  background-color: #fafafa;
   border-radius: 3px;
+  background-color: #fafafa;
 	font-size: 1.1em;
 	filter: none; /*removes FireFox autofill background*/
 }
@@ -285,12 +285,12 @@ form input.button {
 	align-items: center;
 	margin-top: 20px; 
 	padding: 10px;
+  border:1px solid #d8d8d8;
   background-color: #fbfbfb;
   background-image: linear-gradient(#fbfbfb, #efefef);
-  border:1px solid #d8d8d8;
-  text-align: center; 
   color: #333333;
   font-weight:bold; 
+  text-align: center; 
 }
 
 form button:hover,
@@ -318,11 +318,11 @@ form .autocomplete-box {
 	position: absolute;
 	top: 98%;
 	left: 0;
+	z-index: 99;
 	width: 100%;
 	padding-right: 10px;
-	background-color: white;
   border: 1px solid #cccccc;
-	z-index: 99;
+	background-color: white;
 }
 
 form .autocomplete-box .item {
@@ -491,10 +491,9 @@ form .autocomplete-box .item.active {
 
 .toggle-switch-gadget input {
 	/* Hide the default checkbox */
-	opacity: 0;
 	height: 0;
 	width: 0;
-	
+	opacity: 0;
 }
 
 .toggle-switch-gadget .option {
@@ -518,8 +517,8 @@ form .autocomplete-box .item.active {
 	width: 70px;
 	box-sizing: border-box;
 	padding: 5px;
-	background-color: gray;
 	border-radius: 20px;
+	background-color: gray;
 	transition: inherit;
 	cursor: pointer;
 }
@@ -530,8 +529,8 @@ form .autocomplete-box .item.active {
 	width: 50%;
 	height: 100%;
 	box-sizing: border-box;
-	background-color: #eeeeee;
 	border-radius: 50%;
+	background-color: #eeeeee;
 	transition: inherit;
 }
 
@@ -562,11 +561,11 @@ form .autocomplete-box .item.active {
 	position: relative;
 	margin: 0 3px;
 	padding: 1px 10px;
-	background-color: #eeeeee;
 	border-radius: 10px;
-	text-align: center;
+	background-color: #eeeeee;
 	color: inherit;
 	font-size: 8pt;
+	text-align: center;
 	cursor: pointer;
 }
 
@@ -637,9 +636,9 @@ form .autocomplete-box .item.active {
 .credit-card .card-face.back {
 	display: flex;
 	flex-direction: column;
-	color: gray;
 	border-color: gray;
 	background-color: #eeeeee;
+	color: gray;
 	transform: rotateY(180deg);
 }
 
@@ -705,9 +704,9 @@ form .autocomplete-box .item.active {
 	position: absolute;
 	bottom: 2em;
 	width: 100%;
-	text-align: center;
 	font-size: 0.5em;
 	letter-spacing: 2px;
+	text-align: center;
 }
 
 
@@ -733,8 +732,8 @@ form .autocomplete-box .item.active {
 .transactions-table .row-content {
 	display: flex;
 	align-items: center;
-	width: 100%;
 	height: 100%;
+	width: 100%;
 }
 
 .transactions-table .column {
@@ -860,8 +859,8 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .transaction:hover .buttons {
-	visibility: visible;
 	z-index: 99;
+	visibility: visible;
 }
 
 .transactions-table .transaction .button {
@@ -1047,8 +1046,8 @@ form .autocomplete-box .item.active {
 	padding: 2px 15px;
 	border-radius: 10px;
 	background-color: #dddddd;
-	text-align: center;
 	font-size: 10pt;
+	text-align: center;
 }
 
 .transactions-table .expanded .payment {
@@ -1108,9 +1107,9 @@ form .autocomplete-box .item.active {
 	display: block;
 	width: 100%;
 	padding: 0;
-	text-align: center;
 	color: #bbbbbb;
 	font-weight: bold;
+	text-align: center;
 	transition: all 0.3s;
 }
 
@@ -1229,18 +1228,18 @@ form .autocomplete-box .item.active {
 
 #homepage-block h2 {
   margin-top: 40px;
-  text-align: center;
   font-size: 3em;
   letter-spacing: -2px;
+  text-align: center;
 }
 
 #homepage-block h3 {
   margin-top: 30px;
-  text-align: center;
   color: #777777;
   font-size: 1.7em;
   font-weight: 100;
 	letter-spacing: 0.5px;
+  text-align: center;
 }
 
 #homepage-panels {
@@ -1249,7 +1248,7 @@ form .autocomplete-box .item.active {
 	width: 100%;
 }
 
-div.panel {
+#homepage-panels .panel {
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
@@ -1260,32 +1259,46 @@ div.panel {
 	box-shadow: 2px 2px 5px #cccccc;
 }
 
-div.panel:first-of-type {
+#homepage-panels div:first-of-type {
 	margin-left: 0;
 }
 
-div.panel:last-of-type {
+#homepage-panels div:last-of-type {
 	margin-right: 0;
 }
 
-div.panel h2 {
-	margin: 0 0 5px;
+#homepage-panels .panel h2 {
+	margin: 0 0 15px;
 }
 
-div.panel .category {
+#homepage-panels .panel h3 {
+	margin: 20px 0 10px;
+	color: #bbbbbb;
+	font-size: 12pt;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+}
+
+#homepage-panels .panel ul {
+	margin: 0 0 15px;
+}
+
+#homepage-panels .panel ul:last-of-type {
 	margin: 0;
+}
+
+#homepage-panels .panel .category {
 	padding: 0;
 	list-style-type: none;
 }
 
-div.panel .category li {
+#homepage-panels .panel .category li {
 	margin: 5px 0;
 }
 
-div.panel .category h4 {
+#homepage-panels .category h4 {
 	width: 50%;
-	min-width: min-content;
-	margin: 25px 0 10px;
+	margin: 10px 0;
 	border-bottom: 2px solid #eeeeee;
 }
 
@@ -1311,9 +1324,9 @@ div.panel .category h4 {
 
 #about .signature {
 	margin-bottom: 100px;
-	text-align: right;
 	font-weight: bold;
 	font-style: oblique;
+	text-align: right;
 }
 
 
@@ -1363,8 +1376,8 @@ div.panel .category h4 {
 	width: 10%;
 	min-width: 250px;
 	margin-right: 20px;
-	text-align: right;
 	font-weight: bold;
+	text-align: right;
 }
 
 #account-info .cards-container {
@@ -1469,11 +1482,11 @@ form#card #statement-due-day-field  {
 	height: min-content;
 	margin: 15px 10px;
 	padding: 20px;
-  background-color: #e5fbd8;
   border-radius: 15px;
 	box-shadow: 0 0 20px #eeeeee;
-	text-align: center;
+  background-color: #e5fbd8;
 	text-transform: uppercase;
+	text-align: center;
 	font-size: 1.1em;
 }
 
@@ -1488,11 +1501,11 @@ form#card #statement-due-day-field  {
 	width: 275px;
 	margin: 10px;
 	padding: 45px 50px;
-  background-color: #eeeeee;
-	background-image: linear-gradient(#eeeeee, #e6e6e6);
 	border: 1px solid #dddddd;
   border-radius: 10px;
 	box-shadow: 1px 1px 3px #bbbbbb;
+  background-color: #eeeeee;
+	background-image: linear-gradient(#eeeeee, #e6e6e6);
 	color: inherit;
 }
 
@@ -1582,10 +1595,10 @@ form#card #statement-due-day-field  {
 	display: flex;
 	justify-content: space-between;
 	margin: 20px 0;
-	text-align: center;
 	font-size: 72pt;
 	font-weight: bold;
 	letter-spacing: 1px;
+	text-align: center;
 }
 
 #statement-details #statement-info #payment {
@@ -1631,11 +1644,11 @@ form#pay .form-line {
 	position: relative;
 	height: 100%;
 	width: 80%;
-	box-sizing: border-box;
 	border: 1px solid #cccccc;
 	border-radius: inherit;
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
+	box-sizing: border-box;
 }
 
 form#pay .form-line .dollar-sign {
@@ -1804,8 +1817,8 @@ form#pay #make-payment[type="button"] .icon {
 
 #statement-statistics table th,
 #statement-statistics table td {
-	text-align: right;
 	padding: 3px 15px;
+	text-align: right;
 }
 
 
@@ -1853,9 +1866,9 @@ form#transaction #new-subtransaction.button {
 	padding: 3px;
 	border-radius: 15px;
 	background-color: #444444;
-	text-align: center;
 	color: #eeeeee;
 	font-size: 9pt;
+	text-align: center;
 }
 
 /*
@@ -1903,8 +1916,8 @@ form#transaction #new-subtransaction.button {
 	padding: 2px 15px;
 	border: 0 solid #85bb65;
 	border-radius: 20px;
-	outline: none;
 	text-align: center;
+	outline: none;
 	caret-color: #cccccc;
 	transition: border 0.1s ease;
 }
@@ -1914,18 +1927,18 @@ form#transaction #new-subtransaction.button {
 }
 
 #transaction-tags .tag {
+	z-index: 99;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	height: 25px;
 	width: min-content;
 	min-width: 200px;
-	box-sizing: border-box;
 	margin: 5px 0;
 	padding: 2px 15px;
+	box-sizing: border-box;
 	border-radius: 20px;
 	background-color: #dddddd;
-	z-index: 99;
 }
 
 #transaction-tags .root.new-tag.button {

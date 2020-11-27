@@ -5,10 +5,10 @@ from ..utils import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
     select_fields
 )
-from .statements import StatementHandler
+from .statements import CreditStatementHandler
 
 
-class CardHandler(DatabaseHandler):
+class CreditCardHandler(DatabaseHandler):
     """
     A database handler for managing credit cards.
 
@@ -187,7 +187,7 @@ class CardHandler(DatabaseHandler):
             The IDs of credit cards to be deleted.
         """
         # Delete all statements corresponding to these cards
-        statement_db = StatementHandler()
+        statement_db = CreditStatementHandler()
         statements = statement_db.get_entries(fields=(), card_ids=entry_ids)
         statement_ids = [statement['id'] for statement in statements]
         statement_db.delete_entries(statement_ids)
