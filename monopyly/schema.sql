@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS banks;
+DROP TABLE IF EXISTS bank_accounts;
+DROP TABLE IF EXISTS bank_transactions;
 DROP TABLE IF EXISTS credit_accounts;
 DROP TABLE IF EXISTS credit_cards;
 DROP TABLE IF EXISTS credit_statements;
@@ -26,6 +28,28 @@ CREATE TABLE banks (
 	UNIQUE (bank_name)
 );
 	
+/* Store bank account information */
+CREATE TABLE bank_accounts (
+	id INTEGER,
+	bank_id INTEGER NOT NULL,
+	last_four_digits TEXT NOT NULL,
+	type TEXT,
+	active INTEGER NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (bank_id) REFERENCES banks (id)
+);
+
+/* Store bank transaction information */
+CREATE TABLE bank_transactions (
+	id INTEGER,
+	account_id INTEGER NOT NULL,
+	transaction_date TEXT NOT NULL,
+	total REAL NOT NULL,
+	note TEXT NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (account_id) REFERENCES bank_accounts (id)
+);
+
 /* Store credit account information */
 CREATE TABLE credit_accounts (
 	id INTEGER,
