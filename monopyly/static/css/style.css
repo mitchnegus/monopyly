@@ -193,7 +193,7 @@ aside.sidebar {
 	width: 100%;
 }
 
-.details-menu {
+.sidebar-menu {
 	display: flex;
 	flex-direction: column;
 	align-self: flex-start;
@@ -205,21 +205,21 @@ aside.sidebar {
 	background-color: #f8f8f8;
 }
 
-.details-menu div:first-of-type {
+.sidebar-menu div:first-of-type {
 	margin-top: 5px;
 }
 
-.details-menu div:last-of-type {
+.sidebar-menu div:last-of-type {
 	margin-bottom: 5px;
 }
 
-.details-menu .button {
+.sidebar-menu .button {
 	height: 30px;
 	width: 30px;
 	margin: 7.5px 0;
 }
 
-.details-menu .action {
+.sidebar-menu .action {
 	display: inline-block;
 	height: 30px;
 	width: 30px;
@@ -227,7 +227,7 @@ aside.sidebar {
 	filter: brightness(0.9);
 }
 
-.details-menu .action.delete:hover {
+.sidebar-menu .action.delete:hover {
 	filter: none;
 }
 
@@ -1331,48 +1331,87 @@ form .autocomplete-box .item.active {
 
 
 /*
+ * Customization for the 'Bank Accounts' page
+ */
+#bank-container .bank-block {
+	margin: 10px 0;
+}
+
+#bank-container .account-block {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px;
+	border: 1px solid #dddddd;
+  border-radius: 10px;
+	box-shadow: 1px 1px 3px #bbbbbb;
+  background-color: #eeeeee;
+	background-image: linear-gradient(#eeeeee, #e6e6e6);
+	color: inherit;
+}
+
+#bank-container .account-block:hover .icon-button {
+	opacity: 1;
+}
+
+#bank-container .icon-button {
+	height: 25px;
+	width: 25px;
+	margin: 0 15px;
+	background-size: 25px;
+	opacity: 0;
+	filter: brightness(0.8);
+	transition: opacity 0.1s ease;
+}
+
+#bank-container .icon-button:hover {
+	filter: none;
+}
+
+
+/*
  * Customization for the 'Cards' page
  */
-#cards-container {
+#credit-cards-container {
 	display: flex;
 	flex-wrap: wrap;
 	width: 420px;
 	margin: auto;
 }
 @media screen and (min-width: 1060px) {
-	#cards-container {
+	#credit-cards-container {
 		width: 840px;
 	}
 }
 @media screen and (min-width: 1580px) {
-	#cards-container {
+	#credit-cards-container {
 		width: 1260px;
 	}
 }
 @media screen and (min-width: 2100px) {
-	#cards-container {
+	#credit-cards-container {
 		width: 1680px;
 	}
 }
 
-#cards-container .credit-card-block {
+#credit-cards-container .credit-card-block {
 	margin: 10px;
 }
 
 
 /*
- * Customization for the 'Account Details' page
+ * Customization for the 'Credit Account Details' page
  */
-#account-info {
+#credit-account-info {
 	font-size: 18pt;
 }
 
-#account-info .info-row {
+#credit-account-info .info-row {
 	display: flex;
 	margin: 15px 0;
 }
 
-#account-info .info-title {
+#credit-account-info .info-title {
 	width: 10%;
 	min-width: 250px;
 	margin-right: 20px;
@@ -1380,7 +1419,7 @@ form .autocomplete-box .item.active {
 	text-align: right;
 }
 
-#account-info .cards-container {
+#credit-account-info .cards-container {
 	display: flex;
 	flex-direction: row-reverse;
 	flex-wrap: nowrap;
@@ -1391,36 +1430,36 @@ form .autocomplete-box .item.active {
 	overflow: auto;
 }
 
-#account-info div.credit-card-block {
+#credit-account-info div.credit-card-block {
 	margin-left: -375px;
 	transition: margin-left 0.2s;
 	perspective: 1200px;
 }
 
-#account-info div.credit-card-block:hover {
+#credit-account-info div.credit-card-block:hover {
 	margin-left: 0;
 	padding-left: 15px;
 }
 
-#account-info div.credit-card-block:first-of-type {
+#credit-account-info div.credit-card-block:first-of-type {
 	padding-right: 10px;
 }
 
-#account-info div.credit-card-block:last-of-type {
+#credit-account-info div.credit-card-block:last-of-type {
 	margin-left: 0;
 	padding-left: 0;
 }
 
-#account-info .credit-card .card-face {
+#credit-account-info .credit-card .card-face {
 	cursor: pointer;
 }
 
-#account-info .key-day .widget-text {
+#credit-account-info .key-day .widget-text {
 	min-width: 40px;
 }
 
-#account-info .key-day .widget-text .widget-display,
-#account-info .key-day .widget-text .widget-input {
+#credit-account-info .key-day .widget-text .widget-display,
+#credit-account-info .key-day .widget-text .widget-input {
 	text-align: right;
 }
 
@@ -1467,16 +1506,16 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the 'Statements' page
  */
-#statements-container {
+#credit-statements-container {
 	width: 100%;
 }
 
-#statements {
+#credit-statements {
 	display: flex;
 	justify-content: space-around;
 }
 
-#statements .card-column {
+#credit-statements .card-column {
   display: flex;
   flex-direction: column;
 	height: min-content;
@@ -1490,11 +1529,11 @@ form#card #statement-due-day-field  {
 	font-size: 1.1em;
 }
 
-#statements-container .card-column .digits {
+#credit-statements-container .card-column .digits {
 	color: #888888;
 }
 
-.statement-block {
+#credit-statements .statement-block {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -1509,71 +1548,72 @@ form#card #statement-due-day-field  {
 	color: inherit;
 }
 
-.statement-block:hover {
+#credit-statements .statement-block:hover {
 	filter: brightness(0.98);
 	text-decoration: none;
 }
 
-.statement-block:focus {
+#credit-statements .statement-block:focus {
 	color: inherit;
 }
 
-.statement-block .date,
-.statement-block .payment {
+#credit-statements .statement-block .date,
+#credit-statements .statement-block .payment {
   display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 
-.statement-block .date .month {
+#credit-statements .statement-block .date .month {
 	font-size: 22pt;
   letter-spacing: -1px;
 }
 
-.statement-block .date .year {
+#credit-statements .statement-block .date .year {
 	font-size: 16pt;
   letter-spacing: 1px;
 }
 
-.statement-block .payment .balance {
+#credit-statements .statement-block .payment .balance {
 	font-size: 30pt;
 	font-weight: bold;
 }
 
-.statement-block .payment .paid-notice {
+#credit-statements .statement-block .payment .paid-notice {
 	font-size: 10pt;
 }
+
 
 /*
  * Customization for the 'Statement Details' page
  */
 @media screen and (max-width: 1500px) {
-	#statement-summary {
+	#credit-statement-summary {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 	}
 }
 
-#statement-summary {
+#credit-statement-summary {
 	display: flex;
 	justify-content: space-around;
 	width: 100%;
 }
 
-#statement-details #statement-info-container {
+#credit-statement-details #statement-info-container {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	margin: 0 20px 50px 0;
 }
 @media screen and (max-width: 1500px) {
-	#statement-details #statement-info-container {
+	#credit-statement-details #statement-info-container {
 		margin: 0 0 50px 0;
 	}
 }
 
-#statement-details #statement-info {
+#credit-statement-details #statement-info {
 	display: flex;
 	flex-direction: column;
 	width: min-content;
@@ -1582,16 +1622,16 @@ form#card #statement-due-day-field  {
 	border-radius: 25px;
 }
 
-#statement-details #statement-info #card {
+#credit-statement-details #statement-info #card {
 	margin-bottom: 10px;
 	color: #888888;
 }
 
-#statement-details #statement-info #issue-date {
+#credit-statement-details #statement-info #issue-date {
 	font-size: 28pt;
 }
 
-#statement-details #statement-info #balance {
+#credit-statement-details #statement-info #balance {
 	display: flex;
 	justify-content: space-between;
 	margin: 20px 0;
@@ -1601,25 +1641,25 @@ form#card #statement-due-day-field  {
 	text-align: center;
 }
 
-#statement-details #statement-info #payment {
+#credit-statement-details #statement-info #payment {
 	width: 100%;
 	min-width: 325px;
 	font-size: 12pt;
 }
 
-#statement-details #statement-info #due {
+#credit-statement-details #statement-info #due {
 	float: left;
 	display: flex;
 	width: 175px;
 }
 
-#statement-details #statement-info #due-date {
+#credit-statement-details #statement-info #due-date {
 	margin-top: -0.5px;
 	margin-left: 5px;
 	font-weight: bold;
 }
 
-#statement-details #statement-info #paid {
+#credit-statement-details #statement-info #paid {
 	float: right;
 }
 
@@ -1704,50 +1744,50 @@ form#pay #make-payment[type="button"] .icon {
 	display: none;
 }
 
-#statement-details #statement-transactions-container {
+#credit-statement-details #statement-transactions-container {
 	width: 50%;
 }
 @media screen and (max-width: 1500px) {
-	#statement-details #statement-transactions-container {
+	#credit-statement-details #statement-transactions-container {
 		margin-top: 50px;
 	}
 }
 
-#statement-details .transactions-table {
+#credit-statement-details .transactions-table {
 	width: 100%;
 }
 
-#statement-details .transactions-table .date.column {
+#credit-statement-details .transactions-table .date.column {
 	flex: 1;
 }
 
-#statement-details .transactions-table .vendor.column {
+#credit-statement-details .transactions-table .vendor.column {
 	flex: 4;
 	min-width: 150px;
 }
 
-#statement-details .transactions-table .amount.column {
+#credit-statement-details .transactions-table .amount.column {
 	flex: 1;
 	margin-left: auto;
 }
 
-#statement-details .transactions-table .notes.column {
+#credit-statement-details .transactions-table .notes.column {
 	flex: 4;
 	min-width: 100px;
 	white-space: nowrap;
 	overflow: auto;
 }
 
-#statement-details .transactions-table .buttons.column {
+#credit-statement-details .transactions-table .buttons.column {
 	min-width: 40px;
 }
 
-#statement-details .transactions-table .setting {
+#credit-statement-details .transactions-table .setting {
 	width: 100%;
 }
 @media screen and (max-width: 1500px) {
 	/* Mobile layout */
-	#statement-details .transactions-table .setting {
+	#credit-statement-details .transactions-table .setting {
 		flex-direction: column;
 		align-items: flex-start;
 	}
@@ -1755,29 +1795,29 @@ form#pay #make-payment[type="button"] .icon {
 
 @media screen and (max-width: 1500px) {
 	/* Mobile layout */
-	#statement-details .transactions-table .setting .date {
+	#credit-statement-details .transactions-table .setting .date {
 		align-items: flex-start;
 	}
 }
 
 @media screen and (max-width: 1500px) {
-	#statement-details .transactions-table .setting .date .month,
-	#statement-details .transactions-table .setting .date .day,
-	#statement-details .transactions-table .setting .date .year {
+	#credit-statement-details .transactions-table .setting .date .month,
+	#credit-statement-details .transactions-table .setting .date .day,
+	#credit-statement-details .transactions-table .setting .date .year {
 		display: none;
 	}
 }
 
 @media screen and (max-width: 1500px) {
 	/* Mobile layout */
-	#statement-details .transactions-table .setting .date .full {
+	#credit-statement-details .transactions-table .setting .date .full {
 		display: block;
 	}
 }
 
 @media screen and (max-width: 1500px) {
 	/* Mobile layout */
-	#statement-details .transactions-table .setting .description {
+	#credit-statement-details .transactions-table .setting .description {
 		width: 100%;
 		margin-top: 5px;
 	}
@@ -1785,29 +1825,29 @@ form#pay #make-payment[type="button"] .icon {
 
 @media screen and (max-width: 1800px) {
 	/* Statement disappear */
-	#statement-details .transactions-table .setting .transaction-details {
+	#credit-statement-details .transactions-table .setting .transaction-details {
 		font-size: 22pt;
 	}
 }
 @media screen and (max-width: 1550px) {
 	/* Disable transitions for mobile switch */
-	#statement-details .transactions-table .setting .transaction-details {
+	#credit-statement-details .transactions-table .setting .transaction-details {
 		transition: all 0s;
 	}
 }
 @media screen and (max-width: 1500px) {
 	/* Statement disappear */
-	#statement-details .transactions-table .setting .transaction-details {
+	#credit-statement-details .transactions-table .setting .transaction-details {
 		font-size: 20pt;
 	}
 }
 
-#statement-details .transactions-table .expanded .payment {
+#credit-statement-details .transactions-table .expanded .payment {
 	flex: 0;
 	padding: 0;
 }
 
-#statement-details .transactions-table .expanded .buttons {
+#credit-statement-details .transactions-table .expanded .buttons {
 	height: 60%;
 }
 

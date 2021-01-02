@@ -18,6 +18,12 @@ DATABASE_FIELDS = {
         'user_id',
         'bank_name',
     ),
+    'bank_accounts': (
+        'bank_id',
+        'last_four_digits',
+        'account_type',
+        'active',
+    ),
     'credit_accounts': (
         'bank_id',
         'statement_issue_day',

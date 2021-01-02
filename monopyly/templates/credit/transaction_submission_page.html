@@ -76,7 +76,7 @@
 				Create a new transaction
 			</a>
 			<br>
-			<a href="{{ url_for('credit.add_transaction', statement_id=transaction['statement_id']) }}">
+			<a href="{{ url_for('credit.add_transaction', card_id=transaction['card_id'], statement_id=transaction['statement_id']) }}">
 				Create a new transaction on this statement
 			</a>
 		{% endif %}

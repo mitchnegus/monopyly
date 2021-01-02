@@ -25,7 +25,7 @@ CREATE TABLE banks (
 	bank_name TEXT NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES users (id),
-	UNIQUE (bank_name)
+	UNIQUE (user_id, bank_name)
 );
 	
 /* Store bank account information */
@@ -33,10 +33,11 @@ CREATE TABLE bank_accounts (
 	id INTEGER,
 	bank_id INTEGER NOT NULL,
 	last_four_digits TEXT NOT NULL,
-	type TEXT,
+	account_type TEXT,
 	active INTEGER NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (bank_id) REFERENCES banks (id)
+	FOREIGN KEY (bank_id) REFERENCES banks (id),
+	UNIQUE (last_four_digits, account_type)
 );
 
 /* Store bank transaction information */

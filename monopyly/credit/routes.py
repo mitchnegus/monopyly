@@ -9,8 +9,9 @@ from flask import (
 from werkzeug.exceptions import abort
 
 from ..db import get_db
-from ..utils import parse_date, dedelimit_float
 from ..auth.tools import login_required
+from ..utils import parse_date, dedelimit_float
+from ..form_utils import form_err_msg
 from . import credit
 from .forms import *
 from .accounts import CreditAccountHandler
@@ -22,10 +23,6 @@ from .statements import (
 from .transactions import (
     CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler
 )
-
-
-# Define a custom form error messaage
-form_err_msg = 'There was an improper value in your form. Please try again.'
 
 
 @credit.route('/cards')
@@ -41,8 +38,8 @@ def load_cards():
 @login_required
 def add_card():
     # Define a form for a credit card
-    form = CardForm()
-    form.account_id.choices = prepare_account_choices()
+    form = CreditCardForm()
+    form.account_id.choices = prepare_credit_account_id_choices()
     # Check if a card was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
@@ -315,15 +312,17 @@ def update_transactions_display():
 
 
 @credit.route('/add_transaction',
-              defaults={'card_id': None, 'statement_id': None})
+              defaults={'card_id': None, 'statement_id': None},
+              methods=('GET', 'POST'))
 @credit.route('/add_transaction/<int:card_id>/',
-              defaults={'statement_id': None})
+              defaults={'statement_id': None},
+              methods=('GET', 'POST'))
 @credit.route('/add_transaction/<int:card_id>/<int:statement_id>',
               methods=('GET', 'POST'))
 @login_required
 def add_transaction(card_id, statement_id):
     # Define a form for a transaction
-    form = TransactionForm()
+    form = CreditTransactionForm()
     # Prepare known form entries if card is known
     if card_id:
         card_db = CreditCardHandler()
@@ -382,7 +381,7 @@ def update_transaction(transaction_id):
         subtransactions_data.append(subtransaction_data)
     form_data = {**transaction, 'subtransactions': subtransactions_data}
     # Define a form for a transaction
-    form = TransactionForm(data=form_data)
+    form = CreditTransactionForm(data=form_data)
     # Check if a transaction was updated and update it in the database
     if request.method == 'POST':
         if form.validate():
@@ -411,7 +410,7 @@ def add_subtransaction_field():
     new_index = post_args['subtransaction_count'] + 1
     # Redefine the form for the transaction (including using entered info)
     form_id = f'subtransactions-{new_index}'
-    sub_form = TransactionForm.SubtransactionForm(prefix=form_id)
+    sub_form = CreditTransactionForm.CreditSubtransactionForm(prefix=form_id)
     sub_form.id = form_id
     return render_template('credit/transaction_form/subtransaction_form.html',
                            sub_form=sub_form)
@@ -575,7 +574,7 @@ def infer_bank():
     return account['bank_name']
 
 
-def prepare_account_choices():
+def prepare_credit_account_id_choices():
     """Prepare account choices for the card form dropdown."""
     account_db = CreditAccountHandler()
     card_db = CreditCardHandler()

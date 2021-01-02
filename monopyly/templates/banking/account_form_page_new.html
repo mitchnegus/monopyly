@@ -1,0 +1,15 @@
+{% extends "credit/card_form_page.html" %}
+
+
+{% block title %}
+	New Bank Account
+{% endblock %}
+
+
+{% block content %}
+
+	{% with submission_url = url_for('banking.add_account') %}
+		{% include 'banking/account_form.html' %}
+	{% endwith %}
+
+{% endblock %}

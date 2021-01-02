@@ -1,7 +1,6 @@
 """
-Generate forms for the user to fill out.
+Generate credit card forms for the user to complete.
 """
-from flask import url_for
 from flask_wtf import FlaskForm
 from werkzeug.exceptions import abort
 from wtforms.fields import (
@@ -19,11 +18,11 @@ from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
 
 
-class TransactionForm(FlaskForm):
-    """Form to input/edit transactions."""
+class CreditTransactionForm(FlaskForm):
+    """Form to input/edit credit card transactions."""
 
-    class SubtransactionForm(FlaskForm):
-        """Form to input/edit subtransactions."""
+    class CreditSubtransactionForm(FlaskForm):
+        """Form to input/edit credit card subtransactions."""
         def __init__(self, *args, **kwargs):
             # Deactivates CSRF as a subform
             super().__init__(meta={'csrf': False}, *args, **kwargs)
@@ -52,7 +51,8 @@ class TransactionForm(FlaskForm):
     )
     vendor = TextField('Vendor', [DataRequired()])
     # Subtransaction fields (must be at least 1 subtransaction)
-    subtransactions = FieldList(FormField(SubtransactionForm), min_entries=1)
+    subtransactions = FieldList(FormField(CreditSubtransactionForm),
+                                min_entries=1)
     submit = SubmitField('Save Transaction')
 
     @property
@@ -113,7 +113,7 @@ class TransactionForm(FlaskForm):
         return statement
 
 
-class CardForm(FlaskForm):
+class CreditCardForm(FlaskForm):
     """Form to input/edit credit cards."""
     account_id = SelectField('Account', [SelectionNotBlank()], coerce=int)
     bank_name = TextField('Bank')

@@ -6,6 +6,7 @@
 		<h3>A homemade personal finance manager, built in Flask.</h3>
 	</div>
 	<br>
+
 	{% if g.user %}
 		<div id="homepage-panels">
 
@@ -16,12 +17,12 @@
 				<ul class="category">
 					<h4>Profile</h4>
 					<li>
-						<a href="">
+						<a href="{{ url_for('banking.load_accounts') }}">
 							Manage accounts
 						</a>
 					</li>
 					<li>
-						<a href="">
+						<a href="{{ url_for('banking.add_account') }}">
 							Add a new account
 						</a>
 					</li>
@@ -39,7 +40,7 @@
 							</a>
 						</li>
 						<li>
-							<a href="">
+							<a href="{{ url_for('banking.load_transactions') }}">
 								See transaction history
 							</a>
 						</li>

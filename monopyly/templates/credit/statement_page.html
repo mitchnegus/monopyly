@@ -14,9 +14,9 @@
 
 {% block content %}
 
-	<div id="statement-details" class="details-container">
+	<div id="credit-statement-details" class="details-container">
 
-		<div id="statement-summary">
+		<div id="credit-statement-summary">
 
 			<div id="statement-info-container">
 				{% include 'credit/statement_info.html' %}
@@ -62,7 +62,7 @@
 
 {% block right_sidebar %}
 
-		<div class="details-menu">
+		<div class="sidebar-menu">
 
 			<div class="button">
 				<a class="action" href="{{ url_for('credit.add_transaction', card_id=statement['card_id'], statement_id=statement['id']) }}">

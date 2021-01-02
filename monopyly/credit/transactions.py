@@ -147,9 +147,9 @@ class CreditTransactionHandler(DatabaseHandler):
         """
         Add a transaction to the database.
 
-        Uses a mapping produced by a `TransactionForm` to add a new
-        transaction into the database. The mapping includes information
-        for the transaction, along with information for all
+        Uses a mapping produced by a `CreditTransactionForm` to add a
+        new transaction into the database. The mapping includes
+        information for the transaction, along with information for all
         subtransactions (including tags associated with each
         subtransaction).
 
@@ -326,8 +326,8 @@ class CreditSubtransactionHandler(DatabaseHandler):
         """
         Add a subtransaction to the database.
 
-        Uses a mapping produced by a `TransactionForm` to add a new
-        subtransaction into the database. The mapping includes
+        Uses a mapping produced by a `CreditTransactionForm` to add a
+        new subtransaction into the database. The mapping includes
         information for the subtransaction, including the corresponding
         transaction. The mapping also provides a list of tags that have
         been assigned to the new subtransaction.
