@@ -67,12 +67,27 @@ def add_transaction():
     return 'Add transaction'
 
 
+@banking.route('/_suggest_account_autocomplete', methods=('POST',))
+@login_required
+def suggest_account_autocomplete():
+    # Get the autocomplete field from the AJAX request
+    post_args = request.get_json()
+    field = post_args['field']
+    if field not in ('bank_name'):
+        raise ValueError(f"'{field}' does not support autocompletion.")
+    # Get information from the database to use for autocompletion
+    bank_db = BankHandler()
+    banks = bank_db.get_entries(fields=(field,))
+    suggestions = [bank['bank_name'] for bank in banks]
+    return jsonify(suggestions)
+
+
 def prepare_bank_id_choices():
     """Prepare account choices for the bank account form dropdown."""
     bank_db = BankHandler()
     # Colect all available user banks
     user_banks = bank_db.get_entries()
-    choices = [(-1, '-')]
+    choices = [(-1, '-'), (0, 'New bank')]
     for bank in user_banks:
         choices.append((bank['id'], bank['bank_name']))
     return choices

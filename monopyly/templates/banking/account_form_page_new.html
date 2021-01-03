@@ -13,3 +13,9 @@
 	{% endwith %}
 
 {% endblock %}
+
+
+{% block javascript %}
+	<script src="{{ url_for('static', filename='js/display_new_bank_inputs.js') }}">
+	</script>
+{% endblock %}

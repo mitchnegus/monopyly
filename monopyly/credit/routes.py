@@ -12,6 +12,7 @@ from ..db import get_db
 from ..auth.tools import login_required
 from ..utils import parse_date, dedelimit_float
 from ..form_utils import form_err_msg
+from ..banking.banks import BankHandler
 from . import credit
 from .forms import *
 from .accounts import CreditAccountHandler
@@ -471,9 +472,9 @@ def delete_tag():
     return ''
 
 
-@credit.route('/_suggest_autocomplete', methods=('POST',))
+@credit.route('/_suggest_transaction_autocomplete', methods=('POST',))
 @login_required
-def suggest_autocomplete():
+def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
@@ -502,6 +503,21 @@ def suggest_autocomplete():
     # Also sort note fields by vendor
     if field == 'note':
         suggestions.sort(key=note_by_vendor.get, reverse=True)
+    return jsonify(suggestions)
+
+
+@credit.route('/_suggest_card_autocomplete', methods=('POST',))
+@login_required
+def suggest_card_autocomplete():
+    # Get the autocomplete field from the AJAX request
+    post_args = request.get_json()
+    field = post_args['field']
+    if field not in ('bank_name'):
+        raise ValueError(f"'{field}' does not support autocompletion.")
+    # Get information from the database to use for autocompletion
+    bank_db = BankHandler()
+    banks = bank_db.get_entries(fields=(field,))
+    suggestions = [bank['bank_name'] for bank in banks]
     return jsonify(suggestions)
 
 

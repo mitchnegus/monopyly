@@ -11,9 +11,9 @@
 {% block javascript %}
 
 	<script>
-		const AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_autocomplete') }}";
+		const AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_card_autocomplete') }}";
 	</script>
-	<script src="{{ url_for('static', filename='js/autocomplete_transaction.js') }}">
+	<script src="{{ url_for('static', filename='js/autocomplete_card.js') }}">
 	</script>
 
 {% endblock %}

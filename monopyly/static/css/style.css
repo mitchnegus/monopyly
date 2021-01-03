@@ -1368,6 +1368,12 @@ form .autocomplete-box .item.active {
 	filter: none;
 }
 
+/*
+ * Customization for the 'New Bank Account' & 'Update Bank Account' pages
+ */
+form#bank-account .hidden {
+	display: none;
+}
 
 /*
  * Customization for the 'Cards' page

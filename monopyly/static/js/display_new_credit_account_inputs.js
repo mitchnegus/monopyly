@@ -1,4 +1,4 @@
-/* Display inputs for account information when collecting new card info.
+/* Display inputs for account information when collecting new credit card info.
  */
 
 (function() {
@@ -9,7 +9,7 @@
 	let $secondaryInfo = $('form#card #secondary-info');
 
 	$inputAccount.on('change', function() {
-		$account = $(this).val();
+		const $account = $(this).val();
 		if ($account == 0) {
 			$inputBank.prop('readonly', false);
 			$secondaryInfo.removeClass('hidden');
