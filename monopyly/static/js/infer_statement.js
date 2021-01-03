@@ -10,6 +10,9 @@
  * issue date field is populated.
  */
 
+import { executeAjaxRequest } from './modules/ajax.js';
+
+
 (function() {
 
 	// Identify all input elements in the form
@@ -31,23 +34,15 @@
 	
 	function inferStatementAjaxRequest(rawData) {
 		// Return a single statement matching the criteria of the raw data
-		$.ajax({
-			url: INFER_STATEMENT_ENDPOINT,
-			type: 'POST',
-			data: JSON.stringify(rawData),
-			contentType: 'application/json; charset=UTF-8',
-			success: function(response) {
-				if (response != '') {
-					// A statement can be inferred, so populate the fields with its info
-					$inputStatementDate.val(response);
-					const nextInputIndex = $inputElements.index($inputTransactionDate[0])+1;
-					$inputElements.eq(nextInputIndex).focus();
-				}
-			},
-			error: function(xhr) {
-				console.log('There was an error in the Ajax request.');
+		function inferenceAction(response) {
+			if (response != '') {
+				// A statement can be inferred, so populate the fields with its info
+				$inputStatementDate.val(response);
+				const nextInputIndex = $inputElements.index($inputTransactionDate[0])+1;
+				$inputElements.eq(nextInputIndex).focus();
 			}
-		});
+		}
+		executeAjaxRequest(INFER_STATEMENT_ENDPOINT, rawData, inferenceAction);
 	}
 
 })();

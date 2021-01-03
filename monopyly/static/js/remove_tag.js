@@ -7,7 +7,7 @@
  * is removed from the database.
  */
 
-import { executeAjaxRequest } from './modules/update_display_ajax.js';
+import { executeAjaxRequest } from './modules/ajax.js';
 
 
 (function() {

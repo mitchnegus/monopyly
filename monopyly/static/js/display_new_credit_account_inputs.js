@@ -1,6 +1,9 @@
 /* Display inputs for account information when collecting new credit card info.
  */
 
+import { executeAjaxRequest } from './modules/ajax.js';
+
+
 (function() {
 
 	// Identify the account selection box for a new card
@@ -23,18 +26,10 @@
 	function inferBankAjaxRequest($account) {
 		let rawData = {'account_id': $account};
 		// Return a the bank matching the account
-		$.ajax({
-			url: INFER_BANK_ENDPOINT,
-			type: 'POST',
-			data: JSON.stringify(rawData),
-			contentType: 'application/json; charset=UTF-8',
-			success: function(response) {
-				$inputBank.val(response);
-			},
-			error: function(xhr) {
-				console.log('There was an error in the Ajax request.');
-			}
-		});
+		function inferenceAction(response) {
+			$inputBank.val(response);
+		}
+		executeAjaxRequest(INFER_BANK_ENDPOINT, rawData, inferenceAction);
 	}
 
 })();

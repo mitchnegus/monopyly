@@ -8,6 +8,9 @@
  * current input text after the input field is changed.
  */
 
+import { executeAjaxRequest } from './modules/ajax.js';
+
+
 (function() {
 
 	// Identify all input elements in the form
@@ -46,24 +49,16 @@
 			'vendor': $vendor.val()
 		};
 		// Return a set of autocomplete suggestions from the database
-		$.ajax({
-			url: AUTOCOMPLETE_ENDPOINT,
-			type: 'POST',
-			data: JSON.stringify(rawData),
-			contentType: 'application/json; charset=UTF-8',
-			success: function(response) {
-				// Define variables for the user input and its database matches
-				const userInput = $(inputElement).val().toLowerCase();
-				// Refresh the set of matches and update the menu
-				refreshMatches(userInput, response);
-				updateAutocomplete(inputElement, userInput);
-				// Bind keyup to also perform update, arrow keys to navigate
-				bindUpdate(inputElement, response);
-			},
-			error: function(xhr) {
-				console.log('There was an error in the Ajax request.');
-			}
-		});
+		function autocompleteAction(response) {
+			// Define variables for the user input and its database matches
+			const userInput = $(inputElement).val().toLowerCase();
+			// Refresh the set of matches and update the menu
+			refreshMatches(userInput, response);
+			updateAutocomplete(inputElement, userInput);
+			// Bind keyup to also perform update, arrow keys to navigate
+			bindUpdate(inputElement, response);
+		}
+		executeAjaxRequest(AUTOCOMPLETE_ENDPOINT, rawData, autocompleteAction);
 	}
 	
 	function unbindUpdate(inputElement) {

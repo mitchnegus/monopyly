@@ -19,8 +19,8 @@
 		const AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_card_autocomplete') }}";
 		const INFER_BANK_ENDPOINT = "{{ url_for('credit.infer_bank') }}";
 	</script>
-	<script src="{{ url_for('static', filename='js/autocomplete_card.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/autocomplete_card.js') }}">
 	</script>
-	<script src="{{ url_for('static', filename='js/display_new_credit_account_inputs.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/display_new_credit_account_inputs.js') }}">
 	</script>
 {% endblock %}

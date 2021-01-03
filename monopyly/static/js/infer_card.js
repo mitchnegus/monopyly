@@ -8,6 +8,9 @@
  * remaining information is populated.
  */
 
+import { executeAjaxRequest } from './modules/ajax.js';
+
+
 (function() {
 
 	// Identify all input elements in the form
@@ -31,24 +34,16 @@
 	
 	function inferCardAjaxRequest(rawData) {
 		// Return a single card matching the criteria of the raw data
-		$.ajax({
-			url: INFER_CARD_ENDPOINT,
-			type: 'POST',
-			data: JSON.stringify(rawData),
-			contentType: 'application/json; charset=UTF-8',
-			success: function(response) {
-				if (response != '') {
-					// A card can be inferred, so populate the fields with its info
-					$inputBank.val(response['bank_name']);
-					$inputDigits.val(response['digits']);
-					const nextInputIndex = $inputElements.index($inputDigits[0])+1;
-					$inputElements.eq(nextInputIndex).focus();
-				}
-			},
-			error: function(xhr) {
-				console.log('There was an error in the Ajax request.');
+		function inferenceAction(response) {
+			if (response != '') {
+				// A card can be inferred, so populate the fields with its info
+				$inputBank.val(response['bank_name']);
+				$inputDigits.val(response['digits']);
+				const nextInputIndex = $inputElements.index($inputDigits[0])+1;
+				$inputElements.eq(nextInputIndex).focus();
 			}
-		});
+		}
+		executeAjaxRequest(INFER_CARD_ENDPOINT, rawData, inferenceAction);
 	}
 
 })();

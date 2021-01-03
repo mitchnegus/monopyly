@@ -10,7 +10,7 @@
  * is updated with the new field information.
  */
 
-import { executeAjaxRequest } from './modules/update_display_ajax.js';
+import { executeAjaxRequest } from './modules/ajax.js';
 
 
 (function() {

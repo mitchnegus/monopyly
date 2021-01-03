@@ -9,7 +9,7 @@
  * tag name was provided, no request occurs.
  */
 
-import { executeAjaxRequest } from './modules/update_display_ajax.js';
+import { executeAjaxRequest } from './modules/ajax.js';
 
 
 (function() {

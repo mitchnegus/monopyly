@@ -12,6 +12,9 @@
  * returned to its initial state.
  */
 
+import { executeAjaxRequest } from './modules/ajax.js';
+
+
 (function() {
 
 	// Identify the key elements
@@ -58,23 +61,15 @@
 	
 	function updateStatementPaymentAjaxRequest(rawData) {
 		// Return the newly updated statement payment info
-		$.ajax({
-			url: MAKE_PAYMENT_ENDPOINT,
-			type: 'POST',
-			data: JSON.stringify(rawData),
-			contentType: 'application/json; charset=UTF-8',
-			success: function(response) {
-				$container.html(response)
-				// Bind the buttons/inputs again
-				$buttonPay = $('#make-payment[type="button"]');
-				$inputPayAmount = $('#pay-amount');
-				$inputPayDate = $('#pay-date');
-		 		bindButtonChange($buttonPay, $inputPayAmount, $inputPayDate);
-			},
-			error: function(xhr) {
-				console.log('There was an error in the Ajax request.');
-			}
-		});
+		function updateAction(response) {
+			$container.html(response)
+			// Bind the buttons/inputs again
+			$buttonPay = $('#make-payment[type="button"]');
+			$inputPayAmount = $('#pay-amount');
+			$inputPayDate = $('#pay-date');
+		 	bindButtonChange($buttonPay, $inputPayAmount, $inputPayDate);
+		}
+		executeAjaxRequest(MAKE_PAYMENT_ENDPOINT, rawData, updateAction);
 	}
 
 })();
