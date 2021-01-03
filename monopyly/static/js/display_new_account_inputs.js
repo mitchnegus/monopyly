@@ -5,7 +5,7 @@
 
 	// Identify the account selection box for a new card
 	let $inputAccount = $('form#card #account_id');
-	let $inputBank = $('form#card #bank');
+	let $inputBank = $('form#card #bank_name');
 	let $secondaryInfo = $('form#card #secondary-info');
 
 	$inputAccount.on('change', function() {
