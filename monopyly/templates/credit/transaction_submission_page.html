@@ -34,10 +34,12 @@
 			{{ transaction['vendor'] }}
 		</p>
 
-		<p>
-			<b>Total: </b>
-			${{ transaction['total']|currency }}
-		</p>
+		{% if subtransactions|length > 1 %}
+			<p>
+				<b>Total: </b>
+				${{ transaction['total']|currency }}
+			</p>
+		{% endif %}
 
 		{% for subtransaction in subtransactions %}
 
