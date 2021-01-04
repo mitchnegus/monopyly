@@ -35,9 +35,7 @@
 		const ADD_TAG_ENDPOINT = "{{ url_for('credit.add_tag') }}";
 		const REMOVE_TAG_ENDPOINT = "{{ url_for('credit.delete_tag') }}";
 	</script>
-	<script type="module" src="{{ url_for('static', filename='js/add_tag.js') }}">
-	</script>
-	<script type="module" src="{{ url_for('static', filename='js/remove_tag.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/bind_tag_actions.js') }}">
 	</script>
 
 {% endblock %}

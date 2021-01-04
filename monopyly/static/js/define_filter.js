@@ -16,6 +16,7 @@
 	const inactiveCardFilters = $filterContainer.find('.inactive.card');
 	let defaultText;
 	inactiveCardFilters.hover(
+		// Change text when hovering over the filter
 		function () {
 			const $this = $(this);
 			const defaultWidth = $this.width();
@@ -25,6 +26,7 @@
 			$this.width(defaultWidth);
 		},
 		function() {
+			// Replace the changed text
 			const $this = $(this);
 			$this.text(defaultText);
 		}

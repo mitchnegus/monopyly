@@ -21,7 +21,6 @@ import {
 	const fadeTime = 200;
 	const slideTime = 250;
 
-
 	$iconsMoreInfo.on('click', function() {
 		// Get the transaction object
 		const $transaction = $(this).closest('.transaction');

@@ -82,7 +82,7 @@
 		const MAKE_PAYMENT_ENDPOINT = "{{ url_for('credit.make_payment', card_id=statement['card_id'], statement_id=statement['id']) }}";
 		const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
 	</script>
-	<script type="module" src="{{ url_for('static', filename='js/update_statement_due_date.js') }}">
+	<script type="module" src="{{ url_for('static', filename='js/update_statement_parameters.js') }}">
 	</script>
 	<script type="module" src="{{ url_for('static', filename='js/make_payment.js') }}">
 	</script>
