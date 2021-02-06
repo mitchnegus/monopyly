@@ -144,19 +144,19 @@ class CreditCardHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        bank_name : str
+        bank_name : str, optional
             The bank of the card to find.
-        last_four_digits : int
+        last_four_digits : int, optional
             The last four digits of the card to find.
         fields : tuple of str, optional
-            The fields (in either the cards or accounts tables) to be
-            returned
+            The fields (in either the credit accounts or credit cards
+            tables) to be returned.
 
         Returns
         –––––––
         card : sqlite3.Row
             A credit card entry matching the given criteria. If no
-            matching statement is found, returns `None`.
+            matching card is found, returns `None`.
         """
         bank_filter = filter_item(bank_name, 'bank_name', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')

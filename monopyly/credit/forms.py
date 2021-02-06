@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from werkzeug.exceptions import abort
 from wtforms.fields import (
     FormField, DecimalField, IntegerField, TextField, BooleanField,
-    SelectField, SubmitField, HiddenField, FieldList
+    SelectField, SubmitField, FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
 
@@ -62,8 +62,9 @@ class CreditTransactionForm(FlaskForm):
 
         Creates a dictionary of transaction fields and values, in a
         format that can be added directly to the database as a new
-        transaction. The dictionary also includes subtransactions (along
-        with tags associated with each subtransaction).
+        credit card transaction. The dictionary also includes
+        subtransactions (along with tags associated with each
+        subtransaction).
         """
         statement = self.get_transaction_statement()
         transaction_data = {'statement_id': statement['id']}
@@ -115,6 +116,7 @@ class CreditTransactionForm(FlaskForm):
 
 class CreditCardForm(FlaskForm):
     """Form to input/edit credit cards."""
+    # Fields
     account_id = SelectField('Account', [SelectionNotBlank()], coerce=int)
     bank_name = TextField('Bank')
     last_four_digits = TextField(
