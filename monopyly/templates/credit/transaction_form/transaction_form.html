@@ -16,19 +16,23 @@
 
 	</div>
 
-	<div class="form-field">
-		{{ form.transaction_date.label }}
-		{{ form.transaction_date }}
+	<div class="form-line">
+
+		<div id="transaction-date-field" class="form-field">
+			{{ form.transaction_date.label }}
+			{{ form.transaction_date }}
+		</div>
+
+		<div id="vendor-field" class="form-field autocomplete">
+			{{ form.vendor.label }}
+			{{ form.vendor }}
+		</div>
+
 	</div>
 
 	<div class="form-field">
 		{{ form.issue_date.label }}
 		{{ form.issue_date }}
-	</div>
-
-	<div class="form-field autocomplete">
-		{{ form.vendor.label }}
-		{{ form.vendor }}
 	</div>
 
 

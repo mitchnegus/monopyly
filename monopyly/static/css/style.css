@@ -1893,6 +1893,15 @@ form#transaction #last-four-digits-field {
 	min-width: 150px;
 }
 
+form#transaction #transaction-date-field {
+	flex: 1;
+	min-width: 150px;
+}
+
+form#transaction #vendor-field {
+	flex: 2;
+}
+
 form#transaction .subtransaction-form {
 	margin-top: 20px;
 	border-top: 1px solid #eaeaea;
