@@ -1,0 +1,48 @@
+<form id="bank-transaction" action="{{ submission_url }}" method="POST" autocomplete="off">
+
+	{{ form.hidden_tag() }}
+
+	<div class="form-line">
+
+		<div id="bank-field" class="form-field autocomplete">
+			{{ form.bank_name.label }}
+			{{ form.bank_name }}
+		</div>
+
+		<div id="last-four-digits-field" class="form-field autocomplete">
+			{{ form.last_four_digits.label }}
+			{{ form.last_four_digits }}
+		</div>
+
+		<div id="account-type-field" class="form-field autocomplete">
+			{{ form.account_type.label }}
+			{{ form.account_type }}
+		</div>
+
+	</div>
+
+	<div class="form-line">
+
+		<div class="form-field">
+			{{ form.transaction_date.label }}
+			{{ form.transaction_date }}
+		</div>
+
+		<div class="form-field">
+			{{ form.total.label }}
+			{{ form.total }}
+		</div>
+
+	</div>
+
+	<div class="form-field autocomplete">
+		{{ form.note.label }}
+		{{ form.note }}
+	</div>
+
+
+	<div class="form-field">
+		{{ form.submit(class_="button") }}
+	</div>
+
+</form>

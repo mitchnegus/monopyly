@@ -1368,12 +1368,27 @@ form .autocomplete-box .item.active {
 	filter: none;
 }
 
+
 /*
  * Customization for the 'New Bank Account' & 'Update Bank Account' pages
  */
 form#bank-account .hidden {
 	display: none;
 }
+
+
+/*
+ * Customization for the 'Bank Transactions' page
+ */
+
+
+/*
+ * Customization for the 'New Bank Transaction'/
+ * 'Update Bank Transaction' pages
+ */
+form#bank-transaction {
+}
+
 
 /*
  * Customization for the 'Cards' page
@@ -1510,7 +1525,7 @@ form#card #statement-due-day-field  {
 
 
 /*
- * Customization for the 'Statements' page
+ * Customization for the 'Credit Card Statements' page
  */
 #credit-statements-container {
 	width: 100%;
@@ -1591,7 +1606,7 @@ form#card #statement-due-day-field  {
 
 
 /*
- * Customization for the 'Statement Details' page
+ * Customization for the (credit) 'Statement Details' page
  */
 @media screen and (max-width: 1500px) {
 	#credit-statement-summary {
@@ -1869,7 +1884,7 @@ form#pay #make-payment[type="button"] .icon {
 
 
 /*
- * Customization for the 'Transactions' page
+ * Customization for the 'Credit Transactions' page
  */
 #transactions-container .transactions {
 	width: 100%;
@@ -1878,44 +1893,45 @@ form#pay #make-payment[type="button"] .icon {
 
 
 /*
- * Customization for the 'New Transaction' & 'Update Transaction' pages
+ * Customization for the 'New Credit Transaction'/
+ * 'Update Credit Transaction' pages
  */
-form#transaction {
+form#credit-transaction {
 	min-width: 250px;
 }
 
-form#transaction #bank-field {
+form#credit-transaction #bank-field {
 	flex: 3;
 }
 
-form#transaction #last-four-digits-field {
+form#credit-transaction #last-four-digits-field {
 	flex: 1;
 	min-width: 150px;
 }
 
-form#transaction #transaction-date-field {
+form#credit-transaction #transaction-date-field {
 	flex: 1;
 	min-width: 150px;
 }
 
-form#transaction #vendor-field {
+form#credit-transaction #vendor-field {
 	flex: 2;
 }
 
-form#transaction .subtransaction-form {
+form#credit-transaction .subtransaction-form {
 	margin-top: 20px;
 	border-top: 1px solid #eaeaea;
 }
 
-form#transaction .subtotal-field {
+form#credit-transaction .subtotal-field {
 	flex: 1;
 }
 
-form#transaction .note-field {
+form#credit-transaction .note-field {
 	flex: 3;
 }
 
-form#transaction #new-subtransaction.button {
+form#credit-transaction #new-subtransaction.button {
 	width: 150px;
 	margin: 15px 0 20px;
 	padding: 3px;
@@ -1925,6 +1941,7 @@ form#transaction #new-subtransaction.button {
 	font-size: 9pt;
 	text-align: center;
 }
+
 
 /*
  * Customization for the transaction submission page

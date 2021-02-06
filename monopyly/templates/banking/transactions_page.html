@@ -13,13 +13,13 @@
 			</li>
 
 			<li>
-				<a class="action button" href="{{ url_for('banking.add_transaction') }}">
+				<a class="action button" href="{{ url_for('banking.add_transaction', bank_id=bank_id) }}">
 					<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
 				</a>
 			</li>
 
 			<li>
-				<a class="action button" href="{{ url_for('banking.load_transactions') }}">
+				<a class="action button" href="{{ url_for('banking.load_transactions', bank_id=bank_id) }}">
 					<img class="icon" src="{{ url_for('static', filename='img/icons/refresh.png') }}" />
 				</a>
 			</li>

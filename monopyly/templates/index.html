@@ -40,12 +40,12 @@
 							</a>
 						</li>
 						<li>
-							<a href="{{ url_for('banking.load_transactions') }}">
+							<a href="{{ url_for('banking.load_transactions', bank_id=bank['id']) }}">
 								See transaction history
 							</a>
 						</li>
 						<li>
-							<a href="">
+							<a href="{{ url_for('banking.add_transaction', bank_id=bank['id']) }}">
 								Create a new transaction
 							</a>
 						</li>

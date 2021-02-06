@@ -43,7 +43,7 @@ class BankTransactionHandler(DatabaseHandler):
         super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_entries(self, card_ids=None, statement_ids=None, active=False,
-                    sort_order='DESC', fields=DATABASE_FIELDS[_table_view]):
+                    sort_order='DESC', fields=DATABASE_FIELDS[_table]):
         """
         Get bank transactions from the database.
 

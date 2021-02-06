@@ -9,6 +9,7 @@ from . import banking
 from .forms import *
 from .banks import BankHandler
 from .accounts import BankAccountHandler
+from .transactions import BankTransactionHandler
 
 
 @banking.route('/accounts')
@@ -55,31 +56,61 @@ def delete_account(account_id):
     return redirect(url_for('banking.load_accounts'))
 
 
-@banking.route('/load_transactions')
+@banking.route('/load_transactions/<int:bank_id>')
 @login_required
-def load_transactions():
-    return render_template('banking/transactions_page.html')
+def load_transactions(bank_id):
+    return render_template('banking/transactions_page.html',
+                           bank_id=bank_id)
 
 
-@banking.route('/add_transaction')
+@banking.route('/add_transaction',
+               defaults={'bank_id': None},
+               methods=('GET', 'POST'))
+@banking.route('/add_transaction/<int:bank_id>',
+               methods=('GET', 'POST'))
 @login_required
-def add_transaction():
-    return 'Add transaction'
+def add_transaction(bank_id):
+    # Define a form for a transaction
+    form = BankTransactionForm()
+    # Prepare known form entries if bank is known
+    if bank_id:
+        bank_db = BankHandler()
+        # Get the necessary fields from the database
+        bank_fields = ('bank_name',)
+        bank = bank_db.get_entry(bank_id, fields=bank_fields)
+        data = {field: bank[field] for field in bank_fields}
+        form.process(data=data)
+    # Check if a transaction was submitted and add it to the database
+    if request.method == 'POST':
+        if form.validate():
+            transaction_db = BankTransactionHandler()
+            # Insert the new transaction into the database
+            transaction_data = form.transaction_data
+            entry = transaction_db.add_entry(transaction_data)
+            return 'Added transaction'
+        else:
+            # Show an error to the user and print the errors for the admin
+            flash(form_err_msg)
+            print(form.errors)
+    # Display the form for accepting user input
+    return render_template('banking/transaction_form/'
+                           'transaction_form_page_new.html', form=form)
 
 
-@banking.route('/_suggest_account_autocomplete', methods=('POST',))
+@banking.route('/_suggest_transaction_autocomplete', methods=('POST',))
 @login_required
-def suggest_account_autocomplete():
+def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
-    post_args = request.get_json()
-    field = post_args['field']
-    if field not in ('bank_name'):
-        raise ValueError(f"'{field}' does not support autocompletion.")
-    # Get information from the database to use for autocompletion
-    bank_db = BankHandler()
-    banks = bank_db.get_entries(fields=(field,))
-    suggestions = [bank['bank_name'] for bank in banks]
-    return jsonify(suggestions)
+    return None
+    #post_args = request.get_json()
+    #field = post_args['field']
+    #if field not in ('bank_name'):
+    #    raise ValueError(f"'{field}' does not support autocompletion.")
+    ## Get information from the database to use for autocompletion
+    #bank_db = BankHandler()
+    #banks = bank_db.get_entries(fields=(field,))
+    #suggestions = [bank['bank_name'] for bank in banks]
+    #return jsonify(suggestions)
 
 
 def prepare_bank_id_choices():

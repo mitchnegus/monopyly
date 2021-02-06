@@ -130,6 +130,17 @@ CREATE TABLE credit_tag_links (
 		ON DELETE CASCADE
 );
 
+/* Associate bank transactions and credit transactions */
+/*CREATE TABLE bank_credit_links (
+/*	bank_transaction_id INTEGER NOT NULL,
+/*	credit_transaction_id INTEGER NOT NULL,
+/*	PRIMARY KEY (bank_transaction_id, credit_transaction_id),
+/*	FOREIGN KEY (bank_transaction_id) REFERENCES bank_transactions (id)
+/*		ON DELETE CASCADE,
+/*	FOREIGN KEY (credit_transaction_id) REFERENCES credit_transactions (id)
+/*		ON DELETE CASCADE,
+/*);*/
+
 /* Prepare a view giving consolidated credit card transaction information */
 CREATE VIEW credit_transactions_view AS
 SELECT

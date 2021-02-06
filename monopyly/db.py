@@ -24,6 +24,12 @@ DATABASE_FIELDS = {
         'account_type',
         'active',
     ),
+    'bank_transactions': (
+        'account_id',
+        'transaction_date',
+        'total',
+        'note',
+    ),
     'credit_accounts': (
         'bank_id',
         'statement_issue_day',

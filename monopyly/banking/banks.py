@@ -68,7 +68,7 @@ class BankHandler(DatabaseHandler):
 
     def get_entry(self, bank_id, fields=None):
         """Get a bank from the database given its ID."""
-        query = (f"SELECT {select_fields(fields, 'a.id')} "
+        query = (f"SELECT {select_fields(fields, 'b.id')} "
                   "  FROM banks AS b "
                   " WHERE b.id = ? AND user_id = ?")
         placeholders = (bank_id, self.user_id)
