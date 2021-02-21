@@ -1,2 +1,2 @@
 # Coverage configuration
-COVERAGE_CONFIG=.coveragerc
+COVERAGE_CONFIG = .coveragerc
