@@ -36,8 +36,9 @@
 - Renamed `show_*` route functions to `load_*` to clarify that they are for loading the associated pages (as opposed to just displaying content)
 
 
-## 1.0.5 (in progress)
+## 1.0.5
 
 - Transactions may be split into an arbitrary number of subtransactions, each with a separate subtotal and note
 - Backend properly handles duplicate/ancestor tags; all tags are saved in the database, but only the lowest-level child tag must be entered
+- Removed statement level statistics display (not yet mature)
 

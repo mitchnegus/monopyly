@@ -51,16 +51,29 @@ _Monopyly_ provides an accounting system for a user's credit card transactions.
 To use this feature, begin by navigating to the 'Manage accounts' page.
 From there, the app will allow you to add credit cards and associate each with an account.
 If an account does not already exist for the card you are trying to add, a card can be added to a new account.
-This account will be associated with a specific bank, and will track all of cards for that account (card's are ID'd by the last four digits of the credit card number).
+This account will be associated with a specific bank, and will track all of the cards for that account (cards are ID'd by the last four digits of the credit card number).
 Additionally, each account must also be initialized with the date when the account issues statements and the date when those statements are due.
 
 After creating a card, you will be redirected to a page displaying the account details, including all cards for that account.
 
 <img src="img/account-details.png" alt="account details" width="800px">
 
-After adding one or more cards, head on back to the homepage and click the 'Create a new transaction' link. 
+Head on back to the homepage and click the 'Create a new transaction' link. 
 You will move to a page where you can enter credit card transaction information.
-After successfully entering the transaction information, the transaction will appear on the full transaction history page.
+The interface for adding a transaction provides some convenient automatic features.
+For example, if the form registers that you're inputting a transaction for a credit card account with only one active card, then the form will infer the card number to save you some typing.
+Likewise, given the date of the transaction and a known credit card, the form will infer the date of the statement to which the transaction belongs.
+(Of course, you may manually override this inferred statement date if you desire.)
+
+From the transaction form, transactions can be classified using a heirarchical tagging system.
+When a transaction is tagged, the app automatically applies the tag to the transaction along with all parent tags of the selected tag.
+These tags can generally be seen and managed from the 'Manage transaction tags' link off the app homepage.
+
+Since each transaction may consist of multiple components—each with it's own subtotal, notes, and tags—transactions can be split into subtransactions.
+Click the 'Add subtransaction' button on the transaction form to add a subtransaction.
+
+Once the transaction information has been successfully entered and submitted, the transaction will appear on the full transaction history page.
+From here, clicking the '+' icon on the right side of a transaction's row will drop down a more detailed summary of the transaction.
 
 <img src="img/transactions.png" alt="transaction history" width="800px">
 
