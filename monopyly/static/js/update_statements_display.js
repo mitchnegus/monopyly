@@ -18,7 +18,7 @@ import {
   // Identify the card filters
   const $filterContainer = $('#card-filter');
   // Identify the statements container
-  const $container = $('#statements-container');
+  const $container = $('#credit-statements-container');
 
   // Send the Ajax request on click
   const $filters = $filterContainer.find('.card');
