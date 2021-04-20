@@ -2,24 +2,24 @@
 
 
 {% block header %}
-	<h1>{% block title %}{% endblock %}</h1>
+  <h1>{% block title %}{% endblock %}</h1>
 {% endblock %}
 
 
 {% block javascript %}
 
-	<script>
-		const AUTOCOMPLETE_ENDPOINT = "{{ url_for('banking.suggest_transaction_autocomplete') }}";
-		//const INFER_CARD_ENDPOINT = "{{ url_for('credit.infer_card') }}";
-		//const INFER_STATEMENT_ENDPOINT = "{{ url_for('credit.infer_statement') }}";
-	</script>
-	<!--<script type="module" src="{{ url_for('static', filename='js/add_subtransaction.js') }}">-->
-	</script>
-	<script type="module" src="{{ url_for('static', filename='js/autocomplete_transaction.js') }}">
-	</script>
-	<!--<script type="module" src="{{ url_for('static', filename='js/infer_card.js') }}">
-	</script>
-	<script type="module" src="{{ url_for('static', filename='js/infer_statement.js') }}">
-	</script>-->
+  <script>
+    const AUTOCOMPLETE_ENDPOINT = "{{ url_for('banking.suggest_transaction_autocomplete') }}";
+    //const INFER_CARD_ENDPOINT = "{{ url_for('credit.infer_card') }}";
+    //const INFER_STATEMENT_ENDPOINT = "{{ url_for('credit.infer_statement') }}";
+  </script>
+  <!--<script type="module" src="{{ url_for('static', filename='js/add_subtransaction.js') }}">-->
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/autocomplete_transaction.js') }}">
+  </script>
+  <!--<script type="module" src="{{ url_for('static', filename='js/infer_card.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/infer_statement.js') }}">
+  </script>-->
 
 {% endblock %}

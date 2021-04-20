@@ -1,55 +1,55 @@
 <form id="credit-transaction" action="{{ submission_url }}" method="POST" autocomplete="off">
 
-	{{ form.hidden_tag() }}
+  {{ form.hidden_tag() }}
 
-	<div class="form-line">
+  <div class="form-line">
 
-		<div id="bank-field" class="form-field autocomplete">
-			{{ form.bank_name.label }}
-			{{ form.bank_name }}
-		</div>
+    <div id="bank-field" class="form-field autocomplete">
+      {{ form.bank_name.label }}
+      {{ form.bank_name }}
+    </div>
 
-		<div id="last-four-digits-field" class="form-field autocomplete">
-			{{ form.last_four_digits.label }}
-			{{ form.last_four_digits }}
-		</div>
+    <div id="last-four-digits-field" class="form-field autocomplete">
+      {{ form.last_four_digits.label }}
+      {{ form.last_four_digits }}
+    </div>
 
-	</div>
+  </div>
 
-	<div class="form-line">
+  <div class="form-line">
 
-		<div id="transaction-date-field" class="form-field">
-			{{ form.transaction_date.label }}
-			{{ form.transaction_date }}
-		</div>
+    <div id="transaction-date-field" class="form-field">
+      {{ form.transaction_date.label }}
+      {{ form.transaction_date }}
+    </div>
 
-		<div id="vendor-field" class="form-field autocomplete">
-			{{ form.vendor.label }}
-			{{ form.vendor }}
-		</div>
+    <div id="vendor-field" class="form-field autocomplete">
+      {{ form.vendor.label }}
+      {{ form.vendor }}
+    </div>
 
-	</div>
+  </div>
 
-	<div class="form-field">
-		{{ form.issue_date.label }}
-		{{ form.issue_date }}
-	</div>
-
-
-	<div id="subtransactions">
-		{% for sub_form in form.subtransactions %}
-			{% include 'credit/transaction_form/subtransaction_form.html' %}
-		{% endfor %}
-	</div>
-
-	<div id="new-subtransaction" class="button">
-		+ Add Subtransaction
-	</div>
+  <div class="form-field">
+    {{ form.issue_date.label }}
+    {{ form.issue_date }}
+  </div>
 
 
+  <div id="subtransactions">
+    {% for sub_form in form.subtransactions %}
+      {% include 'credit/transaction_form/subtransaction_form.html' %}
+    {% endfor %}
+  </div>
 
-	<div class="form-field">
-		{{ form.submit(class_="button") }}
-	</div>
+  <div id="new-subtransaction" class="button">
+    + Add Subtransaction
+  </div>
+
+
+
+  <div class="form-field">
+    {{ form.submit(class_="button") }}
+  </div>
 
 </form>

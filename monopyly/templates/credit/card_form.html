@@ -1,55 +1,55 @@
 <form id="card" action="{{ submission_url }}" method="post" autocomplete="off">
 
-	{{ form.hidden_tag() }}
-	
-	<div id="primary-info">
+  {{ form.hidden_tag() }}
 
-		<div id="account-field" class="form-field">
-			{{ form.account_id.label }}
-			{{ form.account_id }}
-		</div>
+  <div id="primary-info">
 
-		<div class="form-line">
+    <div id="account-field" class="form-field">
+      {{ form.account_id.label }}
+      {{ form.account_id }}
+    </div>
 
-			<div id="bank-field" class="form-field autocomplete">
-				{{ form.bank_name.label }}
-				{{ form.bank_name }}
-			</div>
-	
-			<div id="last-four-digits-field" class="form-field">
-				{{ form.last_four_digits.label }}
-				{{ form.last_four_digits }}
-			</div>
-	
-			<div id="active-field" class="form-field">
-				{{ form.active.label }}
-				{{ form.active }}
-			</div>
+    <div class="form-line">
 
-		</div>
+      <div id="bank-field" class="form-field autocomplete">
+        {{ form.bank_name.label }}
+        {{ form.bank_name }}
+      </div>
 
-		<div class="form-line">
+      <div id="last-four-digits-field" class="form-field">
+        {{ form.last_four_digits.label }}
+        {{ form.last_four_digits }}
+      </div>
 
-	</div>
+      <div id="active-field" class="form-field">
+        {{ form.active.label }}
+        {{ form.active }}
+      </div>
 
-	<div id="secondary-info" class="form-line hidden">
-		
-		<div id="statement-issue-day-field" class="form-field">
-			{{ form.statement_issue_day.label }}
-			{{ form.statement_issue_day }}
-		</div>
-	
-	
-		<div id="statement-due-day-field" class="form-field">
-			{{ form.statement_due_day.label }}
-			{{ form.statement_due_day }}
-		</div>
+    </div>
 
-	</div>
+    <div class="form-line">
 
-	<div id="submit-field" class="form-field">
-		{{ form.submit(class_="button") }}
-	</div>
+  </div>
+
+  <div id="secondary-info" class="form-line hidden">
+
+    <div id="statement-issue-day-field" class="form-field">
+      {{ form.statement_issue_day.label }}
+      {{ form.statement_issue_day }}
+    </div>
+
+
+    <div id="statement-due-day-field" class="form-field">
+      {{ form.statement_due_day.label }}
+      {{ form.statement_due_day }}
+    </div>
+
+  </div>
+
+  <div id="submit-field" class="form-field">
+    {{ form.submit(class_="button") }}
+  </div>
 
 
 </form>

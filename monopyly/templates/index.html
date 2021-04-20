@@ -1,134 +1,134 @@
 {% extends "layout.html" %}
 
 {% block content %}
-	<div id="homepage-block">
-		<h2>Don't go broke!</h2>
-		<h3>A homemade personal finance manager, built in Flask.</h3>
-	</div>
-	<br>
+  <div id="homepage-block">
+    <h2>Don't go broke!</h2>
+    <h3>A homemade personal finance manager, built in Flask.</h3>
+  </div>
+  <br>
 
-	{% if g.user %}
-		<div id="homepage-panels">
+  {% if g.user %}
+    <div id="homepage-panels">
 
-			<div id="banking" class="panel">
+      <div id="banking" class="panel">
 
-				<h2>Bank Accounts</h2>
+        <h2>Bank Accounts</h2>
 
-				<ul class="category">
-					<h4>Profile</h4>
-					<li>
-						<a href="{{ url_for('banking.load_accounts') }}">
-							Manage accounts
-						</a>
-					</li>
-					<li>
-						<a href="{{ url_for('banking.add_account') }}">
-							Add a new account
-						</a>
-					</li>
-				</ul>
+        <ul class="category">
+          <h4>Profile</h4>
+          <li>
+            <a href="{{ url_for('banking.load_accounts') }}">
+              Manage accounts
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('banking.add_account') }}">
+              Add a new account
+            </a>
+          </li>
+        </ul>
 
-				<h3>Banks</h3>
+        <h3>Banks</h3>
 
-				{% for bank in banks %}
-					<ul class="category">
+        {% for bank in banks %}
+          <ul class="category">
 
-						<h4>{{ bank['bank_name'] }}</h4>
-						<li>
-							<a href="">
-								See account summary
-							</a>
-						</li>
-						<li>
-							<a href="{{ url_for('banking.load_transactions', bank_id=bank['id']) }}">
-								See transaction history
-							</a>
-						</li>
-						<li>
-							<a href="{{ url_for('banking.add_transaction', bank_id=bank['id']) }}">
-								Create a new transaction
-							</a>
-						</li>
+            <h4>{{ bank['bank_name'] }}</h4>
+            <li>
+              <a href="">
+                See account summary
+              </a>
+            </li>
+            <li>
+              <a href="{{ url_for('banking.load_transactions', bank_id=bank['id']) }}">
+                See transaction history
+              </a>
+            </li>
+            <li>
+              <a href="{{ url_for('banking.add_transaction', bank_id=bank['id']) }}">
+                Create a new transaction
+              </a>
+            </li>
 
-					</ul>
-				{% endfor %}
+          </ul>
+        {% endfor %}
 
-			</div>
-	
-			<div id="credit" class="panel">
+      </div>
 
-				<h2>Credit Cards</h2>
-	
-				<ul class="category">
-					<h4>Profile</h4>
-					<li>
-						<a href="{{ url_for('credit.load_cards') }}">
-							Manage accounts
-						</a>
-					</li>
-					<li>
-						<a href="{{ url_for('credit.add_card') }}">
-							Add a new card
-						</a>
-					</li>
-					<li>
-						<a href="{{ url_for('credit.load_tags') }}">
-							Manage transaction tags
-						</a>
-					</li>
-				</ul>
-	
-				<ul class="category">
-					<h4>History</h4>
-					<li>
-						<a href="{{ url_for('credit.load_statements') }}">
-							See statement history
-						</a>
-					</li>
-					<li>
-						<a href="{{ url_for('credit.load_transactions') }}">
-							See transaction history
-						</a>
-					</li>
-					<li>
-						<a href="{{ url_for('credit.add_transaction') }}">
-							Create a new transaction
-						</a>
-					</li>
-				</ul>
+      <div id="credit" class="panel">
 
-				<h3>Cards</h3>
+        <h2>Credit Cards</h2>
 
-				{% for card in cards %}
-					<ul class="category">
+        <ul class="category">
+          <h4>Profile</h4>
+          <li>
+            <a href="{{ url_for('credit.load_cards') }}">
+              Manage accounts
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('credit.add_card') }}">
+              Add a new card
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('credit.load_tags') }}">
+              Manage transaction tags
+            </a>
+          </li>
+        </ul>
 
-						<h4>{{ card['bank_name'] }} {{ card['last_four_digits'] }}</h4>
-						<li>
-							<a href="{{ url_for('credit.load_statement', statement_id=card['last_statement_id']) }}">
-								See most recent statement
-							</a>
-						</li>
-						<li>
-							<a href="{{ url_for('credit.load_transactions', card_id=card['id']) }}">
-								See transaction history
-							</a>
-						</li>
-						<li>
-							<a href="{{ url_for('credit.add_transaction', card_id=card['id']) }}">
-								Create a new transaction
-							</a>
-						</li>
+        <ul class="category">
+          <h4>History</h4>
+          <li>
+            <a href="{{ url_for('credit.load_statements') }}">
+              See statement history
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('credit.load_transactions') }}">
+              See transaction history
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('credit.add_transaction') }}">
+              Create a new transaction
+            </a>
+          </li>
+        </ul>
 
-					</ul>
-				{% endfor %}
+        <h3>Cards</h3>
+
+        {% for card in cards %}
+          <ul class="category">
+
+            <h4>{{ card['bank_name'] }} {{ card['last_four_digits'] }}</h4>
+            <li>
+              <a href="{{ url_for('credit.load_statement', statement_id=card['last_statement_id']) }}">
+                See most recent statement
+              </a>
+            </li>
+            <li>
+              <a href="{{ url_for('credit.load_transactions', card_id=card['id']) }}">
+                See transaction history
+              </a>
+            </li>
+            <li>
+              <a href="{{ url_for('credit.add_transaction', card_id=card['id']) }}">
+                Create a new transaction
+              </a>
+            </li>
+
+          </ul>
+        {% endfor %}
 
 
-			</div>
-	
-			<div id="investments" class="panel">
-				<h2>Coming soon!</h2>
-			</div>
+      </div>
 
-		</div>
-	{% endif %}
+      <div id="investments" class="panel">
+        <h2>Coming soon!</h2>
+      </div>
+
+    </div>
+  {% endif %}
 {% endblock %}

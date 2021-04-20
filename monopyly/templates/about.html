@@ -1,42 +1,42 @@
 {% extends "layout.html" %}
 
 {% block title %}
-	About
+  About
 {% endblock %}
 
 {% block header %}
-	<h1>Pass go and collect $200</h1>
+  <h1>Pass go and collect $200</h1>
 {% endblock %}
 
 {% block content %}
-	<div id="about">
-		<p>It started with Microsoft Excel. </p>
-	  <p>When I got my first bank account, my dad taught me how to keep track of all my finances in an Excel workbook.
-		As I acquired a handful of credit cards, investments, and other types of bank accounts, I kept adding sheets to the file. 
-		At the same time, I was finding more and more ways to include increasingly complicated analysis to track my savings and monitor my spending.
-		I had all this data, and I wanted to get as much out of it as I possibly could.
-		This all kept me satisfied until about halfway through college, when I realized that I could do way more using databases and Python.
-		I could sort and tag types of transactions, link credit card payments with bank withdrawals, and create spending reports. 
-		While all this stuff is probably doable in Excel, it definitely is not what it is designed to do—Excel gets clunky fast.
-		As I transitioned to graduate school, I also transitioned to tracking my finances in a MySQL database, accessed through Python and a set of Jupyter notebooks. 
-		That approach gave me more power and flexibilty, but I found it to be a bit too cumbersome for day to day use.</p>
-	
-		<p>My ideal situation?</p>
-	
-		<p>I ultimately wanted a system that keep track of everything (credit card transacitons, bank accounts, investments, retirement accounts, all that $) in one place. 
-		I know that there exist solutions out there already to do this—Mint, for one—but I never wanted to go that route.
-		For one thing, I wanted something without <em>all</em> the bells and whistles (and advertisements), but which still had what I considered useful functionality.
-		I also wanted something that I could customize when I didn't like a feature, or when I wanted more.</p>
-	
-		<p>That's how this app came about.
-		I started by trying to just create a GUI for my Python database interface, but I soon realized that I eventually wanted to have remote access. 
-		Why create a Tkinter GUI if eventually I'd need to go back and change the interface to work through a browser or app environment? 
-		(Tkinter is also a bit of a pain to code, and a bigger pain to test, and that certainly wouldn't do.) 
-		Anyway, I'd always wanted to create an app, and I figured this was as good a chance as any to get started. 
-		Win-win.</p>
-	
-		<p>If you're reading this, I suppose it means you're interested in the program (or maybe just curious what the hell this nutjob is wasting his time on). If the former, that makes me really happy, and I hope that if you think it's cool or interesting you give it a try, customize it the way you want, or make suggestions. I intend to always keep the basic concept open source, so play around as much as you'd like!</p>
+  <div id="about">
+    <p>It started with Microsoft Excel. </p>
+    <p>When I got my first bank account, my dad taught me how to keep track of all my finances in an Excel workbook.
+    As I acquired a handful of credit cards, investments, and other types of bank accounts, I kept adding sheets to the file.
+    At the same time, I was finding more and more ways to include increasingly complicated analysis to track my savings and monitor my spending.
+    I had all this data, and I wanted to get as much out of it as I possibly could.
+    This all kept me satisfied until about halfway through college, when I realized that I could do way more using databases and Python.
+    I could sort and tag types of transactions, link credit card payments with bank withdrawals, and create spending reports.
+    While all this stuff is probably doable in Excel, it definitely is not what it is designed to do—Excel gets clunky fast.
+    As I transitioned to graduate school, I also transitioned to tracking my finances in a MySQL database, accessed through Python and a set of Jupyter notebooks.
+    That approach gave me more power and flexibilty, but I found it to be a bit too cumbersome for day to day use.</p>
 
-		<p class="signature">-Mitch</p>
-	</div>
+    <p>My ideal situation?</p>
+
+    <p>I ultimately wanted a system that keep track of everything (credit card transacitons, bank accounts, investments, retirement accounts, all that $) in one place.
+    I know that there exist solutions out there already to do this—Mint, for one—but I never wanted to go that route.
+    For one thing, I wanted something without <em>all</em> the bells and whistles (and advertisements), but which still had what I considered useful functionality.
+    I also wanted something that I could customize when I didn't like a feature, or when I wanted more.</p>
+
+    <p>That's how this app came about.
+    I started by trying to just create a GUI for my Python database interface, but I soon realized that I eventually wanted to have remote access.
+    Why create a Tkinter GUI if eventually I'd need to go back and change the interface to work through a browser or app environment?
+    (Tkinter is also a bit of a pain to code, and a bigger pain to test, and that certainly wouldn't do.)
+    Anyway, I'd always wanted to create an app, and I figured this was as good a chance as any to get started.
+    Win-win.</p>
+
+    <p>If you're reading this, I suppose it means you're interested in the program (or maybe just curious what the hell this nutjob is wasting his time on). If the former, that makes me really happy, and I hope that if you think it's cool or interesting you give it a try, customize it the way you want, or make suggestions. I intend to always keep the basic concept open source, so play around as much as you'd like!</p>
+
+    <p class="signature">-Mitch</p>
+  </div>
 {% endblock %}

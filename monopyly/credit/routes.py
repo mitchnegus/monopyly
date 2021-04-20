@@ -280,7 +280,7 @@ def expand_transaction():
     # Get the subtransactions
     subtransactions = []
     for subtransaction in subtransaction_db.get_entries((transaction_id,)):
-        # Collect the subtransaction information and pair it with matching tags 
+        # Collect the subtransaction information and pair it with matching tags
         tags = tag_db.get_entries(subtransaction_ids=(subtransaction['id'],),
                                   fields=('tag_name',))
         tag_names = [tag['tag_name'] for tag in tags]

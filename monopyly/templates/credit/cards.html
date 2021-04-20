@@ -1,21 +1,21 @@
 {% for card in cards %}
 
-	<a class="credit-card-block" href="{{ url_for('credit.load_account', account_id=card['account_id']) }}">
-		<div class="credit-card {{'inactive' if not card['active'] else '' }}">
+  <a class="credit-card-block" href="{{ url_for('credit.load_account', account_id=card['account_id']) }}">
+    <div class="credit-card {{'inactive' if not card['active'] else '' }}">
 
-			<div class="card-face front">
-				{% include 'credit/card_front.html' %}
-			</div>
+      <div class="card-face front">
+        {% include 'credit/card_front.html' %}
+      </div>
 
-		</div>
-	</a>
+    </div>
+  </a>
 
 {% endfor %}
 
 <a class="credit-card-block" href="{{ url_for('credit.add_card') }}">
-	<div class="credit-card">
-		<div class="card-face">
-			<img class="card-background" src="{{ url_for('static', filename='img/cards/new-card.png') }}">
-		</div>
-	</div>
+  <div class="credit-card">
+    <div class="card-face">
+      <img class="card-background" src="{{ url_for('static', filename='img/cards/new-card.png') }}">
+    </div>
+  </div>
 </a>

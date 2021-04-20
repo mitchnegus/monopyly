@@ -3,17 +3,17 @@
 
 {% block header %}
 
-	<h1>{% block title %}{% endblock %}</h1>
+  <h1>{% block title %}{% endblock %}</h1>
 
 {% endblock %}
 
 
 {% block javascript %}
 
-	<script>
-		const AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_card_autocomplete') }}";
-	</script>
-	<script type="module" src="{{ url_for('static', filename='js/autocomplete_card.js') }}">
-	</script>
+  <script>
+    const AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_card_autocomplete') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/autocomplete_card.js') }}">
+  </script>
 
 {% endblock %}
