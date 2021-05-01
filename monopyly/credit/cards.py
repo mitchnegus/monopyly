@@ -36,9 +36,6 @@ class CreditCardHandler(DatabaseHandler):
     """
     _table = 'credit_cards'
 
-    def __init__(self, db=None, user_id=None, check_user=True):
-        super().__init__(db=db, user_id=user_id, check_user=check_user)
-
     def get_entries(self, account_ids=None, bank_names=None,
                     last_four_digits=None, active=False, fields=None):
         """

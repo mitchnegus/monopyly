@@ -40,9 +40,6 @@ class CreditTransactionHandler(DatabaseHandler):
     _table = 'credit_transactions'
     _table_view = 'credit_transactions_view'
 
-    def __init__(self, db=None, user_id=None, check_user=True):
-        super().__init__(db=db, user_id=user_id, check_user=check_user)
-
     def get_entries(self, card_ids=None, statement_ids=None, active=False,
                     sort_order='DESC', fields=DATABASE_FIELDS[_table_view]):
         """
@@ -235,9 +232,6 @@ class CreditSubtransactionHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     _table = 'credit_subtransactions'
-
-    def __init__(self, db=None, user_id=None, check_user=True):
-        super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_entries(self, transaction_ids=None, fields=None):
         """

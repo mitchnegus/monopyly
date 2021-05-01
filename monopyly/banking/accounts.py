@@ -36,9 +36,6 @@ class BankAccountHandler(DatabaseHandler):
     """
     _table = 'bank_accounts'
 
-    def __init__(self, db=None, user_id=None, check_user=True):
-        super().__init__(db=db, user_id=user_id, check_user=check_user)
-
     def get_entries(self, bank_names=None, fields=None):
         """
         Get bank accounts from the database.
