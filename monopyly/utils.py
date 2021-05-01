@@ -368,7 +368,7 @@ def check_field(field):
                           "database.")
 
 
-def select_fields(fields, id_field=None):
+def select_fields(fields, id_field=None, convert_dates=True):
     """
     Create a list of a given set of fields.
 
@@ -376,23 +376,30 @@ def select_fields(fields, id_field=None):
     querying the database. If the fields parameter is set to `None`,
     then all fields in the database are returned. An optional 'id_field'
     can be provided to ensure that that field will always be returned,
-    regardless of which other fields are provided.
+    regardless of which other fields are provided. Note that field names
+    ending with the string '_date' are automatically converted to Python
+    `datetime.date` objects. This behavior can be disabled by setting
+    the `convert_dates` flag to `False`.
 
     Parameters
     ––––––––––
     fields : tuple of str, None
         A list of fields to arrrange as a string for database querying.
     id_field : str, optional
-        A field that will always be returned, regardless of the other fields
-        provided.
+        A field that will always be returned, regardless of the other
+        fields provided.
+    convert_dates : bool, optional
+        A flag indicating whether field names ending with '_date' are
+        automatically converted into Python `datetime.date` objecs.
     """
     if fields is None:
         return "*"
     query_fields = [id_field] if id_field else []
     for field in fields:
         check_field(field)
-        if field[-5:] == '_date':
+        if field[-5:] == '_date' and convert_dates:
             query_fields.append(query_date(field))
         else:
             query_fields.append(field)
     return f"{', '.join(query_fields)}"
+
