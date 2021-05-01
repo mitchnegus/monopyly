@@ -8,6 +8,139 @@ from ..utils import (
 from .banks import BankHandler
 
 
+class BankAccountTypeHandler(DatabaseHandler):
+    """
+    A database handler for managing bank account types.
+
+    Parameters
+    ----------
+    db : sqlite3.Connection
+        A connection to the database for interfacing.
+    user_id : int
+        The ID of the user who is the subject of database access. If not
+        given, the handler defaults to using the logged-in user.
+    check_user : bool
+        A flag indicating whether the handler should check that the
+        provided user ID matches the logged-in user.
+
+    Attributes
+    ––––––––––
+    table : str
+        The name of the database table that this handler manages.
+    db : sqlite3.Connection
+        A connection to the database for interfacing.
+    cursor : sqlite.Cursor
+        A cursor for executing database interactions.
+    user_id : int
+        The ID of the user who is the subject of database access.
+    """
+    _table = 'bank_account_types'
+
+    def get_entries(self, type_names=None, fields=None):
+        """
+        Get bank account types from the database.
+
+        Query the database to select bank account type fields. Accounts
+        types can be filtered by name. All fields for all accounts are
+        shown by default.
+
+        Parameters
+        ––––––––––
+        type_names : tuple of str, optional
+            A sequence of bank account type names for which accounts
+            types will be selected (if `None`, all banks will be
+            selected).
+        fields : tuple of str, optional
+            A sequence of fields to select from the database (if `None`,
+            all fields will be selected). Can be any field in the
+            'bank_account_types' table.
+
+        Returns
+        –––––––
+        account_types : list of sqlite3.Row
+            A list of bank accounts types matching the criteria.
+        """
+        type_filter = filter_items(type_names, 'type_name', 'AND')
+        query = (f"SELECT {select_fields(fields, 'a.id')} "
+                  "  FROM bank_account_types "
+                  " WHERE user_id IN (0, ?) "
+                 f"       {type_filter} ")
+        placeholders = (self.user_id, *fill_places(type_names))
+        account_types = self._query_entries(query, placeholders)
+        return account_types
+
+    def get_entry(self, account_type_id, fields=None):
+        """Get a bank account type from the database given its ID."""
+        query = (f"SELECT {select_fields(fields, 'a.id')} "
+                  "  FROM bank_account_types AS types"
+                  " WHERE types.id = ? AND user_id IN (0, ?)")
+        placeholders = (account_type_id, self.user_id)
+        abort_msg = (f'Account type ID {account_type_id} does not exist for '
+                      'the user.')
+        account = self._query_entry(query, placeholders, abort_msg)
+        return account
+
+    def find_account_type(self, type_name=None, type_abbreviation=None,
+                          fields=None):
+        """
+        Find an account type using uniquely identifying characteristics.
+
+        Queries the database to find a bank account type based on the
+        provided criteria. Bank account types in the database can always
+        be identified uniquely given the user's ID and either the name
+        of an account type or the abbreviation of that name.
+
+        Parameters
+        ––––––––––
+        type_name : str, optional
+            The bank account type to find.
+        type_abbreviation : str, optional
+            The bank account type abbreviation to find.
+        fields : tuple of str, optional
+            The fields (in the bank account types table) to
+            be returned.
+
+        Returns
+        –––––––
+        account_type : sqlite3.Row
+            A bank account type entry matching the given criteria. If no
+            matching account type is found, returns `None`.
+        """
+        type_filter = filter_item(type_name, 'type_name', 'AND')
+        digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
+        abbreviation_filter = filter_item(type_abbreviation,
+                                          'type_abbreviation',
+                                          'AND')
+        query = (f"SELECT {select_fields(fields, 'types.id')} "
+                  "  FROM bank_account_types AS types "
+                  " WHERE user_id IN (0, ?) "
+                 f"       {type_filter} {abbreviation_filter}")
+        placeholders = (self.user_id, *fill_place(type_name),
+                        *fill_place(type_abbreviation))
+        account_type = self.cursor.execute(query, placeholders).fetchone()
+        return account_type
+
+    def _add_entry(self):
+        # Should prevent a user from duplicating the common entries
+        pass
+
+    def delete_entries(self, entry_ids):
+        """
+        Delete bank account types from the database.
+
+        Given a set of account type IDs, delete the bank account types
+        from the database.
+
+        Parameters
+        ––––––––––
+        entry_ids : list of int
+            The IDs of account types to be deleted.
+        """
+        # Delete the given account types
+        # Should prevent user from deleting common entries
+        super().delete_entries(entry_ids)
+
+
 class BankAccountHandler(DatabaseHandler):
     """
     A database handler for managing bank accounts.
@@ -64,7 +197,9 @@ class BankAccountHandler(DatabaseHandler):
                   "  FROM bank_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  " WHERE user_id = ? "
+                  "       INNER JOIN bank_account_types as types "
+                  "          ON types.id = a.account_type_id "
+                  " WHERE b.user_id = ? "
                  f"       {bank_filter} ")
         placeholders = (self.user_id, *fill_places(bank_names))
         accounts = self._query_entries(query, placeholders)
@@ -76,7 +211,9 @@ class BankAccountHandler(DatabaseHandler):
                   "  FROM bank_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  " WHERE a.id = ? AND user_id = ?")
+                  "       INNER JOIN bank_account_types AS types "
+                  "          ON types.id = a.account_type_id "
+                  " WHERE a.id = ? AND b.user_id = ?")
         placeholders = (account_id, self.user_id)
         abort_msg = f'Account ID {account_id} does not exist for the user.'
         account = self._query_entry(query, placeholders, abort_msg)
@@ -105,7 +242,7 @@ class BankAccountHandler(DatabaseHandler):
             The bank of the account to find.
         last_four_digits : int, optional
             The last four digits of the bank account to find.
-        account_type : str, optional
+        account_type : slqite3.Row, optional
             The type of account to find.
         fields : tuple of str, optional
             The fields (in either the banks or bank accounts tables) to
@@ -119,12 +256,14 @@ class BankAccountHandler(DatabaseHandler):
         """
         bank_filter = filter_item(bank_name, 'bank_name', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        type_filter = filter_item(account_type, 'account_type', 'AND')
+        type_filter = filter_item(account_type['id'], 'account_type_id', 'AND')
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM bank_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  " WHERE user_id = ? "
+                  "       INNER JOIN bank_account_types AS types "
+                  "          ON types.id = a.account_type_id "
+                  " WHERE b.user_id = ? "
                  f"       {bank_filter} {digit_filter} {type_filter}")
         placeholders = (self.user_id, *fill_place(bank_name),
                         *fill_place(last_four_digits),

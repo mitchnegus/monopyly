@@ -29,6 +29,24 @@ CREATE TABLE banks (
   UNIQUE (user_id, bank_name)
 );
 
+/* Store bank account type information */
+CREATE TABLE bank_account_types (
+  id INTEGER,
+  user_id INTEGER NOT NULL,
+  type_name TEXT NOT NULL,
+  type_abbreviation TEXT,
+  PRIMARY KEY (id),
+  UNIQUE (user_id, type_name),
+  UNIQUE (user_id, type_abbreviation),
+);
+/* Set some default account types (user_id=0 indicates all users) */
+INSERT INTO bank_account_types
+  (user_id, type_name, type_abbreviation)
+VALUES
+  (0, 'Savings', NULL),
+  (0, 'Checking', NULL),
+  (0, 'Certificate of Deposit', 'CD');
+
 /* Store bank account information */
 CREATE TABLE bank_accounts (
   id INTEGER,

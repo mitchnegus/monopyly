@@ -81,9 +81,11 @@ class BankTransactionHandler(DatabaseHandler):
                   "  FROM bank_transactions_view AS t "
                   "       INNER JOIN bank_accounts AS a "
                   "          ON a.id = t.account_id "
+                  "       INNER JOIN bank_account_types AS types "
+                  "          ON types.id = a.account_type_id "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  " WHERE user_id = ? "
+                  " WHERE b.user_id = ? "
                  f"       {account_filter} {active_filter} "
                   " GROUP BY t.id "
                  f" ORDER BY transaction_date {sort_order}")
@@ -116,9 +118,11 @@ class BankTransactionHandler(DatabaseHandler):
                   "  FROM bank_transactions AS t "
                   "       INNER JOIN bank_accounts AS a "
                   "          ON a.id = t.account_id "
+                  "       INNER JOIN bank_account_types AS types "
+                  "          ON types.id = a.account_type_id "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  " WHERE t.id = ? AND user_id = ?")
+                  " WHERE t.id = ? AND b.user_id = ?")
         placeholders = (transaction_id, self.user_id)
         abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
                       'user.')
