@@ -1,0 +1,14 @@
+<div class="transactions-table">
+
+  {% include 'banking/transactions_table/transaction_field_titles.html' %}
+
+  {% for transaction in transactions[:100] %}
+
+    <div id="transaction-{{ transaction['id'] }}" class="transaction">
+      {#% include 'banking/transactions_table/transactions_condensed.html' %#}
+      {#% include 'banking/transactions_table/transactions_expanded.html' %#}
+    </div>
+
+  {% endfor %}
+
+</div>

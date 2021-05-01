@@ -1,0 +1,18 @@
+<div class="titles row">
+
+  <div class="row-content">
+
+    <div class="date column">
+      Date
+      <img class="sort-button asc{{ ' selected' if sort_order == 'ASC' else '' }}" src="{{ url_for('static', filename='img/icons/sort-asc.png') }}" />
+      <img class="sort-button desc{{ ' selected' if sort_order == 'DESC' else '' }}" src="{{ url_for('static', filename='img/icons/sort-desc.png') }}" />
+    </div>
+    <div class="amount column">Amount</div>
+    <div class="balance column">Balance</div>
+    <div class="notes column">Notes</div>
+
+  </div>
+
+  <div class="buttons column"></div>
+
+</div>
