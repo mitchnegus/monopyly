@@ -37,7 +37,7 @@ CREATE TABLE bank_account_types (
   type_abbreviation TEXT,
   PRIMARY KEY (id),
   UNIQUE (user_id, type_name),
-  UNIQUE (user_id, type_abbreviation),
+  UNIQUE (user_id, type_abbreviation)
 );
 /* Set some default account types (user_id=0 indicates all users) */
 INSERT INTO bank_account_types
@@ -51,8 +51,8 @@ VALUES
 CREATE TABLE bank_accounts (
   id INTEGER,
   bank_id INTEGER NOT NULL,
-  last_four_digits TEXT NOT NULL,
   account_type_id INTEGER NOT NULL,
+  last_four_digits TEXT NOT NULL,
   active INTEGER NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (bank_id) REFERENCES banks (id),

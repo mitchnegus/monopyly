@@ -19,13 +19,14 @@ DATABASE_FIELDS = {
         'bank_name',
     ),
     'bank_account_types': (
+        'user_id',
         'type_name',
         'type_abbreviation',
     ),
     'bank_accounts': (
         'bank_id',
-        'last_four_digits',
         'account_type_id',
+        'last_four_digits',
         'active',
     ),
     'bank_transactions': (

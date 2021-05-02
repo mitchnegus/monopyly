@@ -8,7 +8,7 @@ from ..form_utils import form_err_msg
 from . import banking
 from .forms import *
 from .banks import BankHandler
-from .accounts import BankAccountHandler
+from .accounts import BankAccountTypeHandler, BankAccountHandler
 from .transactions import BankTransactionHandler
 
 
@@ -17,6 +17,7 @@ from .transactions import BankTransactionHandler
 def load_accounts():
     bank_db = BankHandler()
     account_db = BankAccountHandler()
+    account_type_db = BankAccountTypeHandler()
     # Get the user's banks from the database
     banks = bank_db.get_entries()
     # Get all of the user's bank accounts from the database
@@ -24,8 +25,11 @@ def load_accounts():
     for bank in banks:
         bank_name = bank['bank_name']
         grouped_accounts[bank_name] = account_db.get_entries((bank_name,))
+    # Get all of the user's bank account types from the database
+    account_types = account_type_db.get_entries()
     return render_template('banking/accounts_page.html',
-                           grouped_accounts=grouped_accounts)
+                           grouped_accounts=grouped_accounts,
+                           account_types=account_types)
 
 
 @banking.route('/add_account', methods=('GET', 'POST'))
@@ -34,6 +38,7 @@ def add_account():
     # Define a form for a bank account
     form = BankAccountForm()
     form.bank_id.choices = prepare_bank_id_choices()
+    form.account_type_id.choices = prepare_bank_account_type_choices()
     # Check if an account was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
@@ -121,11 +126,23 @@ def suggest_transaction_autocomplete():
 
 
 def prepare_bank_id_choices():
-    """Prepare account choices for the bank account form dropdown."""
+    """Prepare bank choices for the bank account form."""
     bank_db = BankHandler()
     # Colect all available user banks
     user_banks = bank_db.get_entries()
-    choices = [(-1, '-'), (0, 'New bank')]
+    choices = [(-1, '-')]
     for bank in user_banks:
         choices.append((bank['id'], bank['bank_name']))
+    choices.append((0, 'New bank'))
+    return choices
+
+def prepare_bank_account_type_choices():
+    """Prepare account type choices for the bank account form."""
+    account_type_db = BankAccountTypeHandler()
+    # Collect all available user account types
+    user_account_types = account_type_db.get_entries()
+    choices = [(-1, '-')]
+    for account_type in user_account_types:
+        choices.append((account_type['id'], account_type['type_name']))
+    choices.append((0, 'New account type'))
     return choices

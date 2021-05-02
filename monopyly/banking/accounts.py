@@ -61,8 +61,8 @@ class BankAccountTypeHandler(DatabaseHandler):
             A list of bank accounts types matching the criteria.
         """
         type_filter = filter_items(type_names, 'type_name', 'AND')
-        query = (f"SELECT {select_fields(fields, 'a.id')} "
-                  "  FROM bank_account_types "
+        query = (f"SELECT {select_fields(fields, 'types.id')} "
+                  "  FROM bank_account_types AS types"
                   " WHERE user_id IN (0, ?) "
                  f"       {type_filter} ")
         placeholders = (self.user_id, *fill_places(type_names))
@@ -71,7 +71,7 @@ class BankAccountTypeHandler(DatabaseHandler):
 
     def get_entry(self, account_type_id, fields=None):
         """Get a bank account type from the database given its ID."""
-        query = (f"SELECT {select_fields(fields, 'a.id')} "
+        query = (f"SELECT {select_fields(fields, 'types.id')} "
                   "  FROM bank_account_types AS types"
                   " WHERE types.id = ? AND user_id IN (0, ?)")
         placeholders = (account_type_id, self.user_id)
@@ -138,6 +138,7 @@ class BankAccountTypeHandler(DatabaseHandler):
         """
         # Delete the given account types
         # Should prevent user from deleting common entries
+        # Should ensure that this account type is deleted in all use locations
         super().delete_entries(entry_ids)
 
 

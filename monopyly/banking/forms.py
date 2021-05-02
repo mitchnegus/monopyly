@@ -11,7 +11,7 @@ from wtforms.validators import Optional, DataRequired, Length
 from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
 from .banks import BankHandler
-from .accounts import BankAccountHandler
+from .accounts import BankAccountTypeHandler, BankAccountHandler
 
 
 class BankTransactionForm(FlaskForm):
@@ -67,12 +67,13 @@ class BankAccountForm(FlaskForm):
     """Form to input/edit bank accounts."""
     bank_id = SelectField('Bank', [SelectionNotBlank()], coerce=int)
     bank_name = TextField('Bank Name')
+    account_type_id = SelectField('Account Type', [SelectionNotBlank()],
+                                  coerce=int)
+    account_type_name = TextField('Account Type Name')
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
     )
-    account_type = TextField('Account Type', [DataRequired()])
-    #type_ = SelectField('Account Type', [SelectionNotBlank()], coerce=int)
     active = BooleanField('Active', default='checked')
     submit = SubmitField('Save Account')
 
@@ -80,8 +81,10 @@ class BankAccountForm(FlaskForm):
     def account_data(self):
         """Produce a dictionary corresponding to a database bank account."""
         bank = self.get_bank()
-        account_data = {'bank_id': bank['id']}
-        for field in ('last_four_digits', 'account_type', 'active'):
+        account_type = self.get_account_type()
+        account_data = {'bank_id': bank['id'],
+                        'account_type_id': account_type['id']}
+        for field in ('last_four_digits', 'active'):
             account_data[field] = self[field].data
         return account_data
 
@@ -91,10 +94,9 @@ class BankAccountForm(FlaskForm):
         if self.bank_id.data == 0:
             if bank_creation:
                 # Add the bank to the database if it does not already exist
-                bank_name = self.bank_name.data
                 bank_data = {
                     'user_id': bank_db.user_id,
-                    'bank_name': bank_name,
+                    'bank_name': self.bank_name.data,
                 }
                 bank = bank_db.add_entry(bank_data)
             else:
@@ -102,3 +104,21 @@ class BankAccountForm(FlaskForm):
         else:
             bank = bank_db.get_entry(self.bank_id.data)
         return bank
+
+    def get_account_type(self, account_type_creation=True):
+        account_type_db = BankAccountTypeHandler()
+        # Check if the account type exists and potentially create it if not
+        if self.account_type_id.data == 0:
+            if account_type_creation:
+                # Add the type to the database if it does not already exist
+                account_type_data = {
+                    'user_id': account_type_db.user_id,
+                    'type_name': self.account_type_name.data,
+                    'type_abbreviation': None,
+                }
+                account_type = account_type_db.add_entry(account_type_data)
+            else:
+                account_type = None
+        else:
+            account_type = account_type_db.get_entry(self.account_type_id.data)
+        return account_type
