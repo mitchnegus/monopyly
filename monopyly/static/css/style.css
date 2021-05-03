@@ -3,47 +3,47 @@
 /*-------------------------------------------*/
 
 body {
-	width: 100%;
-	margin: 0;
-	padding: 0;
-	color: #444444;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: #444444;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 a {
-	color: #5e8f40;
-	text-decoration: none;
+  color: #5e8f40;
+  text-decoration: none;
 }
 
 a:hover {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 
 a:focus {
-	color: #85bb65;
-	outline: none;
+  color: #85bb65;
+  outline: none;
 }
 
 form {
-	width: 50%;
-	margin: auto;
+  width: 50%;
+  margin: auto;
 }
 
 input {
-	color: inherit;
-	font-size: inherit;
-	font-family: inherit;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
 }
 
 input[type="text"],
 select {
-	box-sizing: border-box;
+  box-sizing: border-box;
   border: 1px solid #cccccc;
   border-radius: 3px;
 }
 
 ::selection {
-	background-color: #dfdfdf;
+  background-color: #dfdfdf;
 }
 
 
@@ -51,29 +51,29 @@ select {
  * Create dark grey header with a white logo
  */
 #masthead {
-	position: fixed;
-	top: 0;
-	z-index: 99;
-	display: flex;
-	align-items: center;
+  position: fixed;
+  top: 0;
+  z-index: 99;
+  display: flex;
+  align-items: center;
   height: 50px;
   width: 100%;
-	border-width: 0 0 4px 3px;
-	border-style: solid;
-	border-color: #85bb65;
+  border-width: 0 0 4px 3px;
+  border-style: solid;
+  border-color: #85bb65;
   background-color: #2b2b2b;
   opacity: 0.9;
 }
 
 #masthead a {
-	text-decoration: none;
+  text-decoration: none;
 }
 
 #masthead .container {
-	display: flex;
-	align-items: center;
-	width: 90%;
-	margin: 0 auto;
+  display: flex;
+  align-items: center;
+  width: 90%;
+  margin: 0 auto;
 }
 
 .monopyly-logo {
@@ -92,11 +92,11 @@ select {
  * Display navigation links inline
  */
 #nav-menu {
-	margin-left: auto;
+  margin-left: auto;
 }
 
 #nav-menu li {
-	display: inline;
+  display: inline;
 }
 
 #nav-menu li + li {
@@ -116,33 +116,33 @@ select {
  * Handle the main body content area for pages
  */
 #page {
-	display: flex;
-	justify-content: space-between;
-	margin-top: 50px;
-	padding-top: 50px;
-	padding-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+  padding-top: 50px;
+  padding-bottom: 30px;
 }
 
 #page .container {
-	width: 80%;
+  width: 80%;
 }
 
 aside.sidebar {
-	display: flex;
-	align-items: center;
-	flex-direction: column;
-	height: 100%;
-	width: 10%;
-	min-width: 50px;
-	margin-top: 50px; /* Account for content header */
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  width: 10%;
+  min-width: 50px;
+  margin-top: 50px; /* Account for content header */
 }
 
 #content-header h1 {
-	height: 50px;
-	box-sizing: border-box;
+  height: 50px;
+  box-sizing: border-box;
   margin: 0 0 30px 0;
-	padding-bottom: 10px;
-	border-bottom: 1px solid #dddddd;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dddddd;
   text-align: center;
   font-size: 2em;
   letter-spacing: -2px;
@@ -153,117 +153,117 @@ aside.sidebar {
  * General object characteristics
  */
 .button:hover {
-	filter: brightness(0.85);
-	cursor: pointer;
+  filter: brightness(0.85);
+  cursor: pointer;
 }
 
 .button .icon {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
 }
 
 .action.delete {
-	/* Set background image to allow color change on hover */
-	background-image: url('../img/icons/delete.png');
+  /* Set background image to allow color change on hover */
+  background-image: url('../img/icons/delete.png');
 }
 
 .action.delete:hover {
-	background-image: url('../img/icons/delete-orange.png');
-	filter: none;
+  background-image: url('../img/icons/delete-orange.png');
+  filter: none;
 }
 
 .paid-notice {
   color: #85bb65;
-	font-weight: bold;
-	letter-spacing: 1px;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .card-background {
-	width: 100%;
+  width: 100%;
 }
 
 .card-number {
-	font-family: "Consolas", Courier, monospace;
+  font-family: "Consolas", Courier, monospace;
 }
 
 .details-container {
-	display: flex;
-	flex-direction: column;
-	width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .sidebar-menu {
-	display: flex;
-	flex-direction: column;
-	align-self: flex-start;
-	height: min-content;
-	width: 30px;
-	margin-left: 20px;
-	padding: 10px;
-	border-radius: 10px;
-	background-color: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  height: min-content;
+  width: 30px;
+  margin-left: 20px;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #f8f8f8;
 }
 
 .sidebar-menu div:first-of-type {
-	margin-top: 5px;
+  margin-top: 5px;
 }
 
 .sidebar-menu div:last-of-type {
-	margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .sidebar-menu .button {
-	height: 30px;
-	width: 30px;
-	margin: 7.5px 0;
+  height: 30px;
+  width: 30px;
+  margin: 7.5px 0;
 }
 
 .sidebar-menu .action {
-	display: inline-block;
-	height: 30px;
-	width: 30px;
-	background-size: 30px 30px;
-	filter: brightness(0.9);
+  display: inline-block;
+  height: 30px;
+  width: 30px;
+  background-size: 30px 30px;
+  filter: brightness(0.9);
 }
 
 .sidebar-menu .action.delete:hover {
-	filter: none;
+  filter: none;
 }
 
 form .form-line {
-	display: flex;
-	justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 
 form .form-field {
-	margin-left: 0;
+  margin-left: 0;
 }
 
 form .form-line .form-field ~ .form-field {
-	/* Only set margin for fields other than the first on a line */
-	margin-left: 5px;
+  /* Only set margin for fields other than the first on a line */
+  margin-left: 5px;
 }
 
 form .form-line .form-field {
-	flex-grow: 1;
+  flex-grow: 1;
 }
 
 form label {
   display: block;
-	padding: 10px 0;
-	font-size: 1.2em;
+  padding: 10px 0;
+  font-size: 1.2em;
 }
 
 form button,
 form input,
 form select {
-	width: 100%;
-	box-sizing: border-box;
+  width: 100%;
+  box-sizing: border-box;
   border-radius: 3px;
   background-color: #fafafa;
-	font-size: 1.1em;
-	filter: none; /*removes FireFox autofill background*/
+  font-size: 1.1em;
+  filter: none; /*removes FireFox autofill background*/
 }
 
 form input {
@@ -271,97 +271,97 @@ form input {
 }
 
 form select {
-	padding: 4px 5px;
+  padding: 4px 5px;
 }
 
 form input[type="checkbox"] {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 form button,
 form input.button {
   display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 20px; 
-	padding: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px;
   border:1px solid #d8d8d8;
   background-color: #fbfbfb;
   background-image: linear-gradient(#fbfbfb, #efefef);
   color: #333333;
-  font-weight:bold; 
-  text-align: center; 
+  font-weight:bold;
+  text-align: center;
 }
 
 form button:hover,
 form input.button:hover {
-	filter: brightness(0.98);
+  filter: brightness(0.98);
 }
 
 form button .icon {
-	height: 40px;
-	width: 40px;
-	margin: 0 10px;
-	filter: brightness(0.8);
+  height: 40px;
+  width: 40px;
+  margin: 0 10px;
+  filter: brightness(0.8);
 }
 
 form button.dark-background .icon {
-	filter: brightness(1.2);
-	opacity: 0.5;
+  filter: brightness(1.2);
+  opacity: 0.5;
 }
 
 form .autocomplete {
-	position: relative;
+  position: relative;
 }
 
 form .autocomplete-box {
-	position: absolute;
-	top: 98%;
-	left: 0;
-	z-index: 99;
-	width: 100%;
-	padding-right: 10px;
+  position: absolute;
+  top: 98%;
+  left: 0;
+  z-index: 99;
+  width: 100%;
+  padding-right: 10px;
   border: 1px solid #cccccc;
-	background-color: white;
+  background-color: white;
 }
 
 form .autocomplete-box .item {
-	width: 100%;
-	padding: 3px 5px;
-	cursor: pointer;
+  width: 100%;
+  padding: 3px 5px;
+  cursor: pointer;
 }
 
 form .autocomplete-box .item:hover {
-	background-color: #cccccc;
+  background-color: #cccccc;
 }
 
 form .autocomplete-box .item.active {
-	background-color: #85bb65;
-	color: black;
-	font-weight: bold;
+  background-color: #85bb65;
+  color: black;
+  font-weight: bold;
 }
 
 #sidebar-nav-menu {
-	position: fixed;
-	width: 5%;
+  position: fixed;
+  width: 5%;
 }
 
 #sidebar-nav-menu ul {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
 }
 
 #sidebar-nav-menu li {
-	display: block;
-	margin: 1px 0;
+  display: block;
+  margin: 1px 0;
 }
 
 #sidebar-nav-menu .button .icon {
-	height: 35px;
-	width: 35px;
-	margin: 3px auto;
+  height: 35px;
+  width: 35px;
+  margin: 3px auto;
 }
 
 
@@ -369,43 +369,43 @@ form .autocomplete-box .item.active {
  * Style the widget for performing "live" database updates
  */
 .update-db-widget {
-	display: flex;
-	align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .update-db-widget .widget-text {
-	position: relative;
-	font-size: inherit;
-	font-weight: inherit;
+  position: relative;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .update-db-widget .widget-display {
-	padding: 0 5px;
-	font-size: inherit;
-	font-weight: inherit;
+  padding: 0 5px;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .update-db-widget .widget-input {
-	position: absolute;
-	top: 0;
-	display: none;
-	width: 100%;
-	margin-top: -1px;
-	padding: 0 4px;
-	font-size: inherit;
-	font-weight: inherit;
+  position: absolute;
+  top: 0;
+  display: none;
+  width: 100%;
+  margin-top: -1px;
+  padding: 0 4px;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .update-db-widget .widget-edit-button {
-	height: 20px;
-	width: 20px;
-	margin-left: 5px;
-	cursor: pointer;
-	visibility: hidden;
+  height: 20px;
+  width: 20px;
+  margin-left: 5px;
+  cursor: pointer;
+  visibility: hidden;
 }
 
 .update-db-widget:hover .widget-edit-button {
-	visibility: visible;
+  visibility: visible;
 }
 
 
@@ -413,31 +413,31 @@ form .autocomplete-box .item.active {
  * Style the gadget to reveal text (sideways slide) on hover
  */
 .slide-text-gadget {
-	position: relative;
-	height: 1.2em;
-	width: 150px;
-	overflow: hidden;
+  position: relative;
+  height: 1.2em;
+  width: 150px;
+  overflow: hidden;
 }
 
 .slide-text-gadget .sleeve {
-	position: relative;
-	right: -100%;
-	width: min-content;
-	transition: 0.4s;
-} 
+  position: relative;
+  right: -100%;
+  width: min-content;
+  transition: 0.4s;
+}
 
 .slide-text-gadget:hover .sleeve {
-	transform: translateX(-100%);
+  transform: translateX(-100%);
 }
 
 .slide-text-gadget .sleeve .main {
-	position: absolute;
-	transform: translateX(-100%);
-	transition: 0.2s;
+  position: absolute;
+  transform: translateX(-100%);
+  transition: 0.2s;
 }
 
 .slide-text-gadget:hover .sleeve .main {
-	padding-right: 5px;
+  padding-right: 5px;
 }
 
 
@@ -445,147 +445,147 @@ form .autocomplete-box .item.active {
  * Style the gadget to flip text on hover
  */
 .flip-text-gadget {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 1.2em;
-	width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 1.2em;
+  width: 100px;
 }
 
 .flip-text-gadget .flip-text-inner {
-	position: relative;
-	height: 100%;
-	width: 100%;
-	text-align: center;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  text-align: center;
 }
 
 .flip-text-gadget .front,
 .flip-text-gadget .back {
-	position: absolute;
-	height: 100%;
-	width: 100%;
-	-webkit-backface-visibility: hidden;
-	backface-visibility: hidden;
-	transition: transform 0.4s;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transition: transform 0.4s;
 }
 
 .flip-text-gadget:hover .front {
-	transform: rotateX(180deg);
+  transform: rotateX(180deg);
 }
 
 .flip-text-gadget .back {
-	transform: rotateX(180deg);
+  transform: rotateX(180deg);
 }
 
 .flip-text-gadget:hover .back {
-	transform: rotateX(0deg);
+  transform: rotateX(0deg);
 }
 
 /*
  * Style the gadget to provide a sliding toggle switch
  */
 .toggle-switch-gadget {
-	display: flex;
-	align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .toggle-switch-gadget input {
-	/* Hide the default checkbox */
-	height: 0;
-	width: 0;
-	opacity: 0;
+  /* Hide the default checkbox */
+  height: 0;
+  width: 0;
+  opacity: 0;
 }
 
 .toggle-switch-gadget .option {
-	display: flex;
-	align-items: center;
-	transition: 0.4s;
+  display: flex;
+  align-items: center;
+  transition: 0.4s;
 }
 
 .toggle-switch-gadget .option .text {
-	margin: 0 5px;
-	filter: opacity(0.5);
+  margin: 0 5px;
+  filter: opacity(0.5);
 }
 
 .toggle-switch-gadget .option .slider {
-	margin: 0 5px;
-	transition: inherit;
+  margin: 0 5px;
+  transition: inherit;
 }
 
 .toggle-switch-gadget .option .slider {
-	height: 40px;
-	width: 70px;
-	box-sizing: border-box;
-	padding: 5px;
-	border-radius: 20px;
-	background-color: gray;
-	transition: inherit;
-	cursor: pointer;
+  height: 40px;
+  width: 70px;
+  box-sizing: border-box;
+  padding: 5px;
+  border-radius: 20px;
+  background-color: gray;
+  transition: inherit;
+  cursor: pointer;
 }
 
 .toggle-switch-gadget .option .slider .switch {
-	position: relative;
-	left: 0;
-	width: 50%;
-	height: 100%;
-	box-sizing: border-box;
-	border-radius: 50%;
-	background-color: #eeeeee;
-	transition: inherit;
+  position: relative;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background-color: #eeeeee;
+  transition: inherit;
 }
 
 .toggle-switch-gadget input:checked + .option .text {
-	color: #85bb65;
-	filter: none;
+  color: #85bb65;
+  filter: none;
 }
 
 .toggle-switch-gadget input:checked + .option .slider {
-	background-color: #85bb65;
+  background-color: #85bb65;
 }
 
 .toggle-switch-gadget input:checked + .option .slider .switch {
-	margin-left: 50%;
+  margin-left: 50%;
 }
 
 
-/* 
+/*
  * Style the card filter
  */
 #card-filter {
-	display: flex;
-	justify-content: center;
-	margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 #card-filter .card {
-	position: relative;
-	margin: 0 3px;
-	padding: 1px 10px;
-	border-radius: 10px;
-	background-color: #eeeeee;
-	color: inherit;
-	font-size: 8pt;
-	text-align: center;
-	cursor: pointer;
+  position: relative;
+  margin: 0 3px;
+  padding: 1px 10px;
+  border-radius: 10px;
+  background-color: #eeeeee;
+  color: inherit;
+  font-size: 8pt;
+  text-align: center;
+  cursor: pointer;
 }
 
 #card-filter .card:hover {
-	background-color: #cccccc; 
-	text-decoration: none;
+  background-color: #cccccc;
+  text-decoration: none;
 }
 
 #card-filter .inactive.card {
-	color: #999999;
+  color: #999999;
 }
 
 #card-filter .card.selected {
-	background-color: #444444;
-	color: #eeeeee;
+  background-color: #444444;
+  color: #eeeeee;
 }
 
 #card-filter .card.selected:hover {
-	background-color: #333333;
-	color: #bbbbbb;
+  background-color: #333333;
+  color: #bbbbbb;
 }
 
 
@@ -593,120 +593,120 @@ form .autocomplete-box .item.active {
  * Style blocks for displaying credit cards
  */
 .credit-card-block {
-	position: relative;
-	height: 252px;
-	width: 400px;
-	min-width: 400px;
-	color: inherit;
+  position: relative;
+  height: 252px;
+  width: 400px;
+  min-width: 400px;
+  color: inherit;
 }
 
 .credit-card-block:focus {
-	color: inherit;
+  color: inherit;
 }
 
 .credit-card-block:hover .card-background {
-	filter: brightness(0.98);
+  filter: brightness(0.98);
 }
 
 .credit-card {
-	position: relative;
-	height: 100%;
-	width: 100%;
-	font-size: 20pt;
-	transition: transform 0.4s;
-	transform-style: preserve-3d;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  font-size: 20pt;
+  transition: transform 0.4s;
+  transform-style: preserve-3d;
 }
 
 .credit-card.flipped {
-	transform: rotateY(180deg);
+  transform: rotateY(180deg);
 }
 
 
 .credit-card .card-face {
-	position: absolute;
-	height: 100%;
-	width: 100%;
-	border: 1px solid #cccccc;
-	border-radius: 20px;
-	box-shadow: 1px 1px 3px #222222;
-	text-align: center;
-	backface-visibility: hidden;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border: 1px solid #cccccc;
+  border-radius: 20px;
+  box-shadow: 1px 1px 3px #222222;
+  text-align: center;
+  backface-visibility: hidden;
 }
 
 .credit-card .card-face.back {
-	display: flex;
-	flex-direction: column;
-	border-color: gray;
-	background-color: #eeeeee;
-	color: gray;
-	transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  border-color: gray;
+  background-color: #eeeeee;
+  color: gray;
+  transform: rotateY(180deg);
 }
 
 .credit-card .card-face .card-number {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	line-height: 1em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  line-height: 1em;
 }
 
 .credit-card .card-face .card-number .digits {
-	margin: 0 0.3em;
+  margin: 0 0.3em;
 }
 
 .credit-card .card-face .card-number .digits.obscure {
-	font-size: smaller;
+  font-size: smaller;
 }
 
 .credit-card .card-face.front .card-number {
-	position: absolute;
-	top: 160px;
+  position: absolute;
+  top: 160px;
 }
 
 .credit-card .card-face.back .bank {
-	padding: 15px 0;
-	font-size: 1.5em;
-	font-weight: bold;
-	letter-spacing: 1px;
+  padding: 15px 0;
+  font-size: 1.5em;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .credit-card .card-face.back .card-number {
-	font-size: 14pt;
+  font-size: 14pt;
 }
 
 .credit-card .card-face.back .options {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	flex-grow: 1;
-	height: 100%;
-	padding: 5% 20%;
-	font-size: 0.8em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-grow: 1;
+  height: 100%;
+  padding: 5% 20%;
+  font-size: 0.8em;
 }
 
 .credit-card .card-face.back .icon-button {
-	height: 35px;
-	width: 35px;
-	margin: 0 15px;
-	background-size: 35px;
-	filter: brightness(0.8);
+  height: 35px;
+  width: 35px;
+  margin: 0 15px;
+  background-size: 35px;
+  filter: brightness(0.8);
 }
 
 .credit-card .card-face.back .icon-button:hover {
-	filter: none;
+  filter: none;
 }
 
 .credit-card.inactive .card-face.front {
-	filter: contrast(0.25) brightness(1.5);
+  filter: contrast(0.25) brightness(1.5);
 }
 
 .credit-card.inactive .card-face .notice {
-	position: absolute;
-	bottom: 2em;
-	width: 100%;
-	font-size: 0.5em;
-	letter-spacing: 2px;
-	text-align: center;
+  position: absolute;
+  bottom: 2em;
+  width: 100%;
+  font-size: 0.5em;
+  letter-spacing: 2px;
+  text-align: center;
 }
 
 
@@ -714,504 +714,504 @@ form .autocomplete-box .item.active {
  * Style tables for presenting transaction details
  */
 .transactions-table {
-	font-size: 9pt;
+  font-size: 9pt;
 }
 
 .transactions-table a {
-	color: inherit;
+  color: inherit;
 }
 
 .transactions-table .row {
-	display: flex;
-	height: 100%;
-	width: 100%;
-	align-items: center;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
 }
 
 /* Define a region with row content (separate from actions/buttons) */
 .transactions-table .row-content {
-	display: flex;
-	align-items: center;
-	height: 100%;
-	width: 100%;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
 
 .transactions-table .column {
-	box-sizing: border-box;
-	padding: 0 10px;
+  box-sizing: border-box;
+  padding: 0 10px;
 }
 
 .transactions-table .date.column {
-	flex: 1;
-	min-width: 100px;
-	text-align: center;
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
 }
 
 .transactions-table .vendor.column {
-	flex: 3;
-	min-width: 180px;
+  flex: 3;
+  min-width: 180px;
 }
 
 .transactions-table .amount.column {
-	flex: 1;
-	min-width: 100px;
-	text-align: right;
-	white-space: nowrap;
+  flex: 1;
+  min-width: 100px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .transactions-table .notes.column {
-	flex: 4;
-	min-width: 175px;
-	white-space: nowrap;
-	overflow: auto;
+  flex: 4;
+  min-width: 175px;
+  white-space: nowrap;
+  overflow: auto;
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .notes.column {
-		display: none;
-	}
+  /* Mobile layout */
+  .transactions-table .notes.column {
+    display: none;
+  }
 }
 
 .transactions-table .card.column {
-	flex: 1;
-	min-width: 110px;
-	text-align: right;
+  flex: 1;
+  min-width: 110px;
+  text-align: right;
 }
 @media screen and (max-width: 1200px) {
-	/* Statement disappear */
-	.transactions-table .card.column {
-		min-width: 60px;
-		margin-left: auto;
-	}
+  /* Statement disappear */
+  .transactions-table .card.column {
+    min-width: 60px;
+    margin-left: auto;
+  }
 }
 
 .transactions-table .buttons.column {
-	min-width: 40px;
-	margin-left: 20px;
+  min-width: 40px;
+  margin-left: 20px;
 }
 
 .transactions-table .titles,
 .transactions-table .transaction {
-	border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
 }
 
 .transactions-table .titles {
-	min-height: 25px;
-	font-weight: bold;
+  min-height: 25px;
+  font-weight: bold;
 }
 
 .transactions-table .titles .sort-button {
-	display: none;
-	height: 10px;
-	width: 10px;
-	cursor: pointer;
+  display: none;
+  height: 10px;
+  width: 10px;
+  cursor: pointer;
 }
 
 .transactions-table .titles .sort-button.selected {
-	display: inline;
+  display: inline;
 }
 
 .transactions-table .titles .card.column {
-	padding-right: 30px;
+  padding-right: 30px;
 }
 @media screen and (max-width: 1200px) {
-	/* Statement disappear */
-	.transactions-table .titles .card.column {
-		padding-right: 10px;
-	}
+  /* Statement disappear */
+  .transactions-table .titles .card.column {
+    padding-right: 10px;
+  }
 }
 
 .transactions-table .transaction {
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	transition: border 0.2s ease; 
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  transition: border 0.2s ease;
 }
 
 .transactions-table .transaction .condensed {
-	height: 25px;
-	transition: background-color 0.1s ease;
+  height: 25px;
+  transition: background-color 0.1s ease;
 }
 
 .transactions-table .transaction .condensed:hover {
-	background-color: #fafafa;
+  background-color: #fafafa;
 }
 
 .transactions-table .transaction .expanded {
-	display: none;
-	opacity: 0;
+  display: none;
+  opacity: 0;
 }
 
 .transactions-table .transaction .expanded .row {
-	align-items: flex-start;
+  align-items: flex-start;
 }
 
 .transactions-table .selected.transaction {
-	/*Make top & bottom borders approximately the same size */
-	border-width: 3px;
-	border-top: 2px solid #eeeeee;
+  /*Make top & bottom borders approximately the same size */
+  border-width: 3px;
+  border-top: 2px solid #eeeeee;
 }
 
 .transactions-table .transaction .buttons {
-	display: flex;
-	flex-direction: column;
-	visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
 }
 
 .transactions-table .transaction:hover .buttons {
-	z-index: 99;
-	visibility: visible;
+  z-index: 99;
+  visibility: visible;
 }
 
 .transactions-table .transaction .button {
-	height: 20px;
-	width: 20px;
-	background-size: 20px 20px;
+  height: 20px;
+  width: 20px;
+  background-size: 20px 20px;
 }
 
 .transactions-table .transaction .buttons .action.delete {
-	/* Set background image to allow color change on hover */
-	background-image: url('../img/icons/delete-thick.png');
+  /* Set background image to allow color change on hover */
+  background-image: url('../img/icons/delete-thick.png');
 }
 
 .transactions-table .transaction .buttons .action.delete:hover {
-	background-image: url('../img/icons/delete-orange-thick.png');
-	filter: none;
+  background-image: url('../img/icons/delete-orange-thick.png');
+  filter: none;
 }
 
 @media screen and (max-width: 1200px) {
-	/* Statement disappear */
-	.transactions-table .transaction .card .bank {
-		display: none;
-	}
+  /* Statement disappear */
+  .transactions-table .transaction .card .bank {
+    display: none;
+  }
 }
 
 .transactions-table .expanded .row-content {
-	align-items: flex-start;
-	padding: 20px 0;
+  align-items: flex-start;
+  padding: 20px 0;
 }
 
 .transactions-table .setting {
-	display: flex;
-	flex: 3;
+  display: flex;
+  flex: 3;
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .setting {
-		flex-direction: column;
-		align-items: flex-start;
-		flex: 9;
-	}
+  /* Mobile layout */
+  .transactions-table .setting {
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 9;
+  }
 }
 
 .transactions-table .setting .date {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	flex: 2;
-	padding-top: 3px;
-	font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 2;
+  padding-top: 3px;
+  font-weight: bold;
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .setting .date {
-		align-items: flex-start;
-	}
+  /* Mobile layout */
+  .transactions-table .setting .date {
+    align-items: flex-start;
+  }
 }
 
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .setting .date .month,
-	.transactions-table .setting .date .day,
-	.transactions-table .setting .date .year {
-		display: none;
-	}
+  /* Mobile layout */
+  .transactions-table .setting .date .month,
+  .transactions-table .setting .date .day,
+  .transactions-table .setting .date .year {
+    display: none;
+  }
 }
 
 .transactions-table .setting .date .month {
-	margin-bottom: -10px;
-	font-size: 18pt;
+  margin-bottom: -10px;
+  font-size: 18pt;
 }
 
 .transactions-table .setting .date .day {
-	font-size: 36pt;
+  font-size: 36pt;
 }
 
 .transactions-table .setting .date .year {
-	margin-top: -10px;
-	font-size: 14pt;
-	letter-spacing: 3px;
+  margin-top: -10px;
+  font-size: 14pt;
+  letter-spacing: 3px;
 }
 
 .transactions-table .setting .date .full {
-	display: none;
-	color: #aaaaaa;
-	font-size: 1.1em;
+  display: none;
+  color: #aaaaaa;
+  font-size: 1.1em;
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .setting .date .full {
-		display: block;
-	}
+  /* Mobile layout */
+  .transactions-table .setting .date .full {
+    display: block;
+  }
 }
 
 .transactions-table .setting .description {
-	flex: 13;
-	min-width: 250px;
-	padding: 0 10px;
+  flex: 13;
+  min-width: 250px;
+  padding: 0 10px;
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .setting .description {
-		width: 90%;
-		margin-top: 5px;
-	}
+  /* Mobile layout */
+  .transactions-table .setting .description {
+    width: 90%;
+    margin-top: 5px;
+  }
 }
 
 .transactions-table .setting .transaction-details {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-end;
-	padding-bottom: 5px;
-	margin-bottom: 10px;
-	border-bottom: 2px solid #85bb65;
-	font-size: 24pt;
-	transition: font-size 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #85bb65;
+  font-size: 24pt;
+  transition: font-size 0.3s;
 }
 @media screen and (max-width: 1200px) {
-	/* Statement disappear */
-	.transactions-table .setting .transaction-details {
-		font-size: 22pt;
-	}
+  /* Statement disappear */
+  .transactions-table .setting .transaction-details {
+    font-size: 22pt;
+  }
 }
 @media screen and (max-width: 1050px) {
-	/* Disable transitions for mobile switch */
-	.transactions-table .setting .transaction-details {
-		transition: all 0s;
-	}
+  /* Disable transitions for mobile switch */
+  .transactions-table .setting .transaction-details {
+    transition: all 0s;
+  }
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .setting .transaction-details {
-		font-size: 20pt;
-	}
+  /* Mobile layout */
+  .transactions-table .setting .transaction-details {
+    font-size: 20pt;
+  }
 }
 
 .transactions-table .setting .transaction-details .vendor {
-	flex: 4;
-	box-sizing: border-box;
-	padding-right: 10px;
-	font-weight: 600;
+  flex: 4;
+  box-sizing: border-box;
+  padding-right: 10px;
+  font-weight: 600;
 }
 
 .transactions-table .setting .transaction-details .total {
-	flex: 1;
-	text-align: right;
-	font-weight: bold;
+  flex: 1;
+  text-align: right;
+  font-weight: bold;
 }
 
 .transactions-table .setting .subtransaction-details {
-	display: flex;
-	justify-content: space-between;
-	margin: 5px 0;
-	color: #666666;
-	font-size: 12pt;
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+  color: #666666;
+  font-size: 12pt;
 }
 
 .transactions-table .setting .subtransaction-details .notes {
-	flex: 4;
-	padding-right: 10px;
+  flex: 4;
+  padding-right: 10px;
 }
 
 .transactions-table .setting .subtransaction-details .subtotal {
-	flex: 1;
-	text-align: right;
+  flex: 1;
+  text-align: right;
 }
 
 .transactions-table .setting .subtransaction-details .tags-container {
-	width: 100%;
-	max-height: 80%;
-	margin: 5px 0;
+  width: 100%;
+  max-height: 80%;
+  margin: 5px 0;
 }
 
 .transactions-table .setting .subtransaction-details .tags {
-	display: flex;
-	flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .transactions-table .setting .subtransaction-details .tags .tag {
-	min-width: 50px;
-	max-width: 200px;
-	margin: 5px 5px 5px 0;
-	padding: 2px 15px;
-	border-radius: 10px;
-	background-color: #dddddd;
-	font-size: 10pt;
-	text-align: center;
+  min-width: 50px;
+  max-width: 200px;
+  margin: 5px 5px 5px 0;
+  padding: 2px 15px;
+  border-radius: 10px;
+  background-color: #dddddd;
+  font-size: 10pt;
+  text-align: center;
 }
 
 .transactions-table .expanded .payment {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	flex: 1;
-	height: 100%;
-	padding-right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex: 1;
+  height: 100%;
+  padding-right: 10px;
 }
 @media screen and (max-width: 1200px) {
-	/* Statement disappear */
-	.transactions-table .expanded .payment {
-		justify-content: flex-end;
-	}
+  /* Statement disappear */
+  .transactions-table .expanded .payment {
+    justify-content: flex-end;
+  }
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .expanded .payment {
-		flex-direction: column;
-		justify-content: center;
-		align-items: flex-end;
-		flex: 1;
-		margin-top: 15px;
-	}
+  /* Mobile layout */
+  .transactions-table .expanded .payment {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    flex: 1;
+    margin-top: 15px;
+  }
 }
 
 .transactions-table .expanded .payment .statement {
-	position: relative;
-	height: 100px;
-	margin: 0 auto 0 auto;
-	padding-top: 1px;
-	transition: all 0.3s;
+  position: relative;
+  height: 100px;
+  margin: 0 auto 0 auto;
+  padding-top: 1px;
+  transition: all 0.3s;
 }
 @media screen and (max-width: 1500px) {
-	.transactions-table .expanded .payment .statement {
-	/* Size downshift */
-		height: 80px;
-	}
+  .transactions-table .expanded .payment .statement {
+  /* Size downshift */
+    height: 80px;
+  }
 }
 @media screen and (max-width: 1200px) {
-	/* Statement disappear */
-	.transactions-table .expanded .payment .statement {
-		display: none;
-	}
+  /* Statement disappear */
+  .transactions-table .expanded .payment .statement {
+    display: none;
+  }
 }
 
 .transactions-table .expanded .payment .statement img {
-	height: 100%;
-	width: auto;
+  height: 100%;
+  width: auto;
 }
 
 .transactions-table .expanded .payment .statement .date {
-	position: absolute;
-	top: 7%;
-	left: 0;
-	display: block;
-	width: 100%;
-	padding: 0;
-	color: #bbbbbb;
-	font-weight: bold;
-	text-align: center;
-	transition: all 0.3s;
+  position: absolute;
+  top: 7%;
+  left: 0;
+  display: block;
+  width: 100%;
+  padding: 0;
+  color: #bbbbbb;
+  font-weight: bold;
+  text-align: center;
+  transition: all 0.3s;
 }
 
 .transactions-table .expanded .payment .statement .date .month {
-	margin-bottom: -5px;
-	font-size: 2em;
-	transition: all 0.3s;
+  margin-bottom: -5px;
+  font-size: 2em;
+  transition: all 0.3s;
 }
 @media screen and (max-width: 1500px) {
-	/* Size downshift */
-	.transactions-table .expanded .payment .statement .date .month {
-		font-size: 1.6em;
-	}
+  /* Size downshift */
+  .transactions-table .expanded .payment .statement .date .month {
+    font-size: 1.6em;
+  }
 }
 
 .transactions-table .expanded .payment .statement .date .year {
-	visibility: visible;
-	margin-top: 0;
-	font-size: 1.5em;
-	letter-spacing: 2px;
-	transition: all 0.3s;
+  visibility: visible;
+  margin-top: 0;
+  font-size: 1.5em;
+  letter-spacing: 2px;
+  transition: all 0.3s;
 }
 @media screen and (max-width: 1500px) {
-	/* Size downshift */
-	.transactions-table .expanded .payment .statement .date .year {
-		font-size: 1.2em;
-	}
+  /* Size downshift */
+  .transactions-table .expanded .payment .statement .date .year {
+    font-size: 1.2em;
+  }
 }
 
 .transactions-table .expanded .payment .card {
-	position: relative;
-	height: 100px;
-	box-sizing: border-box;
-	line-height: 0;
-	transition: all 0.3s;
+  position: relative;
+  height: 100px;
+  box-sizing: border-box;
+  line-height: 0;
+  transition: all 0.3s;
 }
 @media screen and (max-width: 1500px) {
-	/* Size downshift */
-	.transactions-table .expanded .payment .card {
-		height: 80px;
-	}
+  /* Size downshift */
+  .transactions-table .expanded .payment .card {
+    height: 80px;
+  }
 }
 @media screen and (max-width: 1050px) {
-	/* Disable transitions for mobile switch */
-	.transactions-table .expanded .payment .card {
-		transition: all 0s;
-	}
+  /* Disable transitions for mobile switch */
+  .transactions-table .expanded .payment .card {
+    transition: all 0s;
+  }
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .expanded .payment .card {
-		height: 50px;
-	}
+  /* Mobile layout */
+  .transactions-table .expanded .payment .card {
+    height: 50px;
+  }
 }
 
 .transactions-table .expanded .payment .card .card-background {
-	height: 100%;
-	width: auto;
-	border-radius: 6px;
-	box-shadow: 1px 1px 2px #aaaaaa;
-	transition: all 0.3s;
+  height: 100%;
+  width: auto;
+  border-radius: 6px;
+  box-shadow: 1px 1px 2px #aaaaaa;
+  transition: all 0.3s;
 }
 
 .transactions-table .expanded .payment .card-number {
-	position: absolute;
-	top: 70%;
-	left: 0;
-	width: 100%;
-	text-align: center;
-	font-size: 1.5em;
-	transition: font-size 0.3s
+  position: absolute;
+  top: 70%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 1.5em;
+  transition: font-size 0.3s
 }
 @media screen and (max-width: 1500px) {
-	/* Size downshift */
-	.transactions-table .expanded .payment .card-number {
-		font-size: 1.2em;
-	}
+  /* Size downshift */
+  .transactions-table .expanded .payment .card-number {
+    font-size: 1.2em;
+  }
 }
 @media screen and (max-width: 1050px) {
-	/* Disable transitions for mobile switch */
-	.transactions-table .expanded .payment .card-number {
-		transition: all 0s;
-	}
+  /* Disable transitions for mobile switch */
+  .transactions-table .expanded .payment .card-number {
+    transition: all 0s;
+  }
 }
 @media screen and (max-width: 1000px) {
-	/* Mobile layout */
-	.transactions-table .expanded .payment .card-number {
-		font-size: 0.5em;
-	}
+  /* Mobile layout */
+  .transactions-table .expanded .payment .card-number {
+    font-size: 0.5em;
+  }
 }
 
 .transactions-table .expanded .buttons {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	align-self: flex-start;
-	margin-left: 20px;
-	padding: 5px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-self: flex-start;
+  margin-left: 20px;
+  padding: 5px 10px;
 }
 
 .transactions-table .expanded .buttons a.button {
-	margin: 3px 0;
+  margin: 3px 0;
 }
 
 
@@ -1221,9 +1221,9 @@ form .autocomplete-box .item.active {
 #homepage-block {
   padding: 10px 0 30px 0;
   background-color: #dddddd;
-	border: 1px solid #d8d8d8;
+  border: 1px solid #d8d8d8;
   border-radius: 6px;
-	box-shadow: 2px 2px 5px #cccccc;
+  box-shadow: 2px 2px 5px #cccccc;
 }
 
 #homepage-block h2 {
@@ -1238,78 +1238,78 @@ form .autocomplete-box .item.active {
   color: #777777;
   font-size: 1.7em;
   font-weight: 100;
-	letter-spacing: 0.5px;
+  letter-spacing: 0.5px;
   text-align: center;
 }
 
 #homepage-panels {
-	display: flex;
-	justify-content: space-between;
-	width: 100%;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }
 
 #homepage-panels .panel {
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
-	margin: 20px;
-	padding: 50px;
-	background-color: #fafafa;
-	border: 1px solid #f5f5f5;
-	box-shadow: 2px 2px 5px #cccccc;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  margin: 20px;
+  padding: 50px;
+  background-color: #fafafa;
+  border: 1px solid #f5f5f5;
+  box-shadow: 2px 2px 5px #cccccc;
 }
 
 #homepage-panels div:first-of-type {
-	margin-left: 0;
+  margin-left: 0;
 }
 
 #homepage-panels div:last-of-type {
-	margin-right: 0;
+  margin-right: 0;
 }
 
 #homepage-panels .panel h2 {
-	margin: 0 0 15px;
+  margin: 0 0 15px;
 }
 
 #homepage-panels .panel h3 {
-	margin: 20px 0 10px;
-	color: #bbbbbb;
-	font-size: 12pt;
-	letter-spacing: 1px;
-	text-transform: uppercase;
+  margin: 20px 0 10px;
+  color: #bbbbbb;
+  font-size: 12pt;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 #homepage-panels .panel ul {
-	margin: 0 0 15px;
+  margin: 0 0 15px;
 }
 
 #homepage-panels .panel ul:last-of-type {
-	margin: 0;
+  margin: 0;
 }
 
 #homepage-panels .panel .category {
-	padding: 0;
-	list-style-type: none;
+  padding: 0;
+  list-style-type: none;
 }
 
 #homepage-panels .panel .category li {
-	margin: 5px 0;
+  margin: 5px 0;
 }
 
 #homepage-panels .category h4 {
-	width: 50%;
-	margin: 10px 0;
-	border-bottom: 2px solid #eeeeee;
+  width: 50%;
+  margin: 10px 0;
+  border-bottom: 2px solid #eeeeee;
 }
 
 #bank.panel,
 #investments.panel {
-	justify-content: center;
+  justify-content: center;
 }
 
 #bank.panel h2,
 #investments.panel h2 {
-	color: #bbbbbb;
+  color: #bbbbbb;
 }
 
 
@@ -1317,16 +1317,16 @@ form .autocomplete-box .item.active {
  * Customization for the 'About' page
  */
 #about {
-	width: 75%;
-	margin: auto;
-	text-align: justify;
+  width: 75%;
+  margin: auto;
+  text-align: justify;
 }
 
 #about .signature {
-	margin-bottom: 100px;
-	font-weight: bold;
-	font-style: oblique;
-	text-align: right;
+  margin-bottom: 100px;
+  font-weight: bold;
+  font-style: oblique;
+  text-align: right;
 }
 
 
@@ -1334,38 +1334,38 @@ form .autocomplete-box .item.active {
  * Customization for the 'Bank Accounts' page
  */
 #bank-container .bank-block {
-	margin: 10px 0;
+  margin: 10px 0;
 }
 
 #bank-container .account-block {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 10px;
-	border: 1px solid #dddddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #dddddd;
   border-radius: 10px;
-	box-shadow: 1px 1px 3px #bbbbbb;
+  box-shadow: 1px 1px 3px #bbbbbb;
   background-color: #eeeeee;
-	background-image: linear-gradient(#eeeeee, #e6e6e6);
-	color: inherit;
+  background-image: linear-gradient(#eeeeee, #e6e6e6);
+  color: inherit;
 }
 
 #bank-container .account-block:hover .icon-button {
-	opacity: 1;
+  opacity: 1;
 }
 
 #bank-container .icon-button {
-	height: 25px;
-	width: 25px;
-	margin: 0 15px;
-	background-size: 25px;
-	opacity: 0;
-	filter: brightness(0.8);
-	transition: opacity 0.1s ease;
+  height: 25px;
+  width: 25px;
+  margin: 0 15px;
+  background-size: 25px;
+  opacity: 0;
+  filter: brightness(0.8);
+  transition: opacity 0.1s ease;
 }
 
 #bank-container .icon-button:hover {
-	filter: none;
+  filter: none;
 }
 
 
@@ -1373,7 +1373,7 @@ form .autocomplete-box .item.active {
  * Customization for the 'New Bank Account' & 'Update Bank Account' pages
  */
 form#bank-account .hidden {
-	display: none;
+  display: none;
 }
 
 
@@ -1394,29 +1394,29 @@ form#bank-transaction {
  * Customization for the 'Cards' page
  */
 #credit-cards-container {
-	display: flex;
-	flex-wrap: wrap;
-	width: 420px;
-	margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  width: 420px;
+  margin: auto;
 }
 @media screen and (min-width: 1060px) {
-	#credit-cards-container {
-		width: 840px;
-	}
+  #credit-cards-container {
+    width: 840px;
+  }
 }
 @media screen and (min-width: 1580px) {
-	#credit-cards-container {
-		width: 1260px;
-	}
+  #credit-cards-container {
+    width: 1260px;
+  }
 }
 @media screen and (min-width: 2100px) {
-	#credit-cards-container {
-		width: 1680px;
-	}
+  #credit-cards-container {
+    width: 1680px;
+  }
 }
 
 #credit-cards-container .credit-card-block {
-	margin: 10px;
+  margin: 10px;
 }
 
 
@@ -1424,64 +1424,64 @@ form#bank-transaction {
  * Customization for the 'Credit Account Details' page
  */
 #credit-account-info {
-	font-size: 18pt;
+  font-size: 18pt;
 }
 
 #credit-account-info .info-row {
-	display: flex;
-	margin: 15px 0;
+  display: flex;
+  margin: 15px 0;
 }
 
 #credit-account-info .info-title {
-	width: 10%;
-	min-width: 250px;
-	margin-right: 20px;
-	font-weight: bold;
-	text-align: right;
+  width: 10%;
+  min-width: 250px;
+  margin-right: 20px;
+  font-weight: bold;
+  text-align: right;
 }
 
 #credit-account-info .cards-container {
-	display: flex;
-	flex-direction: row-reverse;
-	flex-wrap: nowrap;
-	justify-content: flex-end;
-	width: 90%;
-	margin-top: -15px; /* Correct for padding increase */
-	padding: 25px 10px 25px 3px; /* Pad container to prevent clipping */
-	overflow: auto;
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  width: 90%;
+  margin-top: -15px; /* Correct for padding increase */
+  padding: 25px 10px 25px 3px; /* Pad container to prevent clipping */
+  overflow: auto;
 }
 
 #credit-account-info div.credit-card-block {
-	margin-left: -375px;
-	transition: margin-left 0.2s;
-	perspective: 1200px;
+  margin-left: -375px;
+  transition: margin-left 0.2s;
+  perspective: 1200px;
 }
 
 #credit-account-info div.credit-card-block:hover {
-	margin-left: 0;
-	padding-left: 15px;
+  margin-left: 0;
+  padding-left: 15px;
 }
 
 #credit-account-info div.credit-card-block:first-of-type {
-	padding-right: 10px;
+  padding-right: 10px;
 }
 
 #credit-account-info div.credit-card-block:last-of-type {
-	margin-left: 0;
-	padding-left: 0;
+  margin-left: 0;
+  padding-left: 0;
 }
 
 #credit-account-info .credit-card .card-face {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 #credit-account-info .key-day .widget-text {
-	min-width: 40px;
+  min-width: 40px;
 }
 
 #credit-account-info .key-day .widget-text .widget-display,
 #credit-account-info .key-day .widget-text .widget-input {
-	text-align: right;
+  text-align: right;
 }
 
 
@@ -1489,38 +1489,38 @@ form#bank-transaction {
  * Customization for the 'New Card' & 'Update Card' pages
  */
 form#card {
-	min-width: 500px;
+  min-width: 500px;
 }
 
 form#card #bank-field {
-	flex-basis: 65%;
-	min-width: 260px;
+  flex-basis: 65%;
+  min-width: 260px;
 }
 
 form#card #last-four-digits-field {
-	flex-basis: 25%;
-	min-width: 150px;
+  flex-basis: 25%;
+  min-width: 150px;
 }
 
 form#card #active-field {
-	flex-basis: 10%;
-	min-width: 60px;
+  flex-basis: 10%;
+  min-width: 60px;
 }
 
 form#card #active-field label {
-	text-align: center;
+  text-align: center;
 }
 
 form#card #secondary-info.hidden {
-	display: none;
+  display: none;
 }
 
 form#card #statement-issue-day-field {
-	flex-grow: 1;
+  flex-grow: 1;
 }
 
 form#card #statement-due-day-field  {
-	flex-grow: 1;
+  flex-grow: 1;
 }
 
 
@@ -1528,80 +1528,80 @@ form#card #statement-due-day-field  {
  * Customization for the 'Credit Card Statements' page
  */
 #credit-statements-container {
-	width: 100%;
+  width: 100%;
 }
 
 #credit-statements {
-	display: flex;
-	justify-content: space-around;
+  display: flex;
+  justify-content: space-around;
 }
 
 #credit-statements .card-column {
   display: flex;
   flex-direction: column;
-	height: min-content;
-	margin: 15px 10px;
-	padding: 20px;
+  height: min-content;
+  margin: 15px 10px;
+  padding: 20px;
   border-radius: 15px;
-	box-shadow: 0 0 20px #eeeeee;
+  box-shadow: 0 0 20px #eeeeee;
   background-color: #e5fbd8;
-	text-transform: uppercase;
-	text-align: center;
-	font-size: 1.1em;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 1.1em;
 }
 
 #credit-statements-container .card-column .digits {
-	color: #888888;
+  color: #888888;
 }
 
 #credit-statements .statement-block {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	width: 275px;
-	margin: 10px;
-	padding: 45px 50px;
-	border: 1px solid #dddddd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 275px;
+  margin: 10px;
+  padding: 45px 50px;
+  border: 1px solid #dddddd;
   border-radius: 10px;
-	box-shadow: 1px 1px 3px #bbbbbb;
+  box-shadow: 1px 1px 3px #bbbbbb;
   background-color: #eeeeee;
-	background-image: linear-gradient(#eeeeee, #e6e6e6);
-	color: inherit;
+  background-image: linear-gradient(#eeeeee, #e6e6e6);
+  color: inherit;
 }
 
 #credit-statements .statement-block:hover {
-	filter: brightness(0.98);
-	text-decoration: none;
+  filter: brightness(0.98);
+  text-decoration: none;
 }
 
 #credit-statements .statement-block:focus {
-	color: inherit;
+  color: inherit;
 }
 
 #credit-statements .statement-block .date,
 #credit-statements .statement-block .payment {
   display: flex;
-	flex-direction: column;
-	align-items: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 #credit-statements .statement-block .date .month {
-	font-size: 22pt;
+  font-size: 22pt;
   letter-spacing: -1px;
 }
 
 #credit-statements .statement-block .date .year {
-	font-size: 16pt;
+  font-size: 16pt;
   letter-spacing: 1px;
 }
 
 #credit-statements .statement-block .payment .balance {
-	font-size: 30pt;
-	font-weight: bold;
+  font-size: 30pt;
+  font-weight: bold;
 }
 
 #credit-statements .statement-block .payment .paid-notice {
-	font-size: 10pt;
+  font-size: 10pt;
 }
 
 
@@ -1609,277 +1609,277 @@ form#card #statement-due-day-field  {
  * Customization for the (credit) 'Statement Details' page
  */
 @media screen and (max-width: 1500px) {
-	#credit-statement-summary {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
+  #credit-statement-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 #credit-statement-summary {
-	display: flex;
-	justify-content: space-around;
-	width: 100%;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
 }
 
 #credit-statement-details #statement-info-container {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	margin: 0 20px 50px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0 20px 50px 0;
 }
 @media screen and (max-width: 1500px) {
-	#credit-statement-details #statement-info-container {
-		margin: 0 0 50px 0;
-	}
+  #credit-statement-details #statement-info-container {
+    margin: 0 0 50px 0;
+  }
 }
 
 #credit-statement-details #statement-info {
-	display: flex;
-	flex-direction: column;
-	width: min-content;
-	padding: 40px 50px 60px;
-	background-color: #f8f8f8;
-	border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  width: min-content;
+  padding: 40px 50px 60px;
+  background-color: #f8f8f8;
+  border-radius: 25px;
 }
 
 #credit-statement-details #statement-info #card {
-	margin-bottom: 10px;
-	color: #888888;
+  margin-bottom: 10px;
+  color: #888888;
 }
 
 #credit-statement-details #statement-info #issue-date {
-	font-size: 28pt;
+  font-size: 28pt;
 }
 
 #credit-statement-details #statement-info #balance {
-	display: flex;
-	justify-content: space-between;
-	margin: 20px 0;
-	font-size: 72pt;
-	font-weight: bold;
-	letter-spacing: 1px;
-	text-align: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+  font-size: 72pt;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: center;
 }
 
 #credit-statement-details #statement-info #payment {
-	width: 100%;
-	min-width: 325px;
-	font-size: 12pt;
+  width: 100%;
+  min-width: 325px;
+  font-size: 12pt;
 }
 
 #credit-statement-details #statement-info #due {
-	float: left;
-	display: flex;
-	width: 175px;
+  float: left;
+  display: flex;
+  width: 175px;
 }
 
 #credit-statement-details #statement-info #due-date {
-	margin-top: -0.5px;
-	margin-left: 5px;
-	font-weight: bold;
+  margin-top: -0.5px;
+  margin-left: 5px;
+  font-weight: bold;
 }
 
 #credit-statement-details #statement-info #paid {
-	float: right;
+  float: right;
 }
 
 form#pay {
-	clear: left;
-	position: relative;
-	height: 60px;
-	width: 300px;
-	margin: 50px auto 0px;
-	border-radius: 5px;
+  clear: left;
+  position: relative;
+  height: 60px;
+  width: 300px;
+  margin: 50px auto 0px;
+  border-radius: 5px;
 }
 
 form#pay button,
 form#pay input {
-	height: 100%;
-	margin: 0;
-	border: none;
-	border-radius: inherit;
+  height: 100%;
+  margin: 0;
+  border: none;
+  border-radius: inherit;
 }
 
 form#pay .form-line {
-	position: relative;
-	height: 100%;
-	width: 80%;
-	border: 1px solid #cccccc;
-	border-radius: inherit;
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
-	box-sizing: border-box;
+  position: relative;
+  height: 100%;
+  width: 80%;
+  border: 1px solid #cccccc;
+  border-radius: inherit;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  box-sizing: border-box;
 }
 
 form#pay .form-line .dollar-sign {
-	position: absolute;
-	left: 10px;
-	display: flex;
-	align-items: center;
-	height: 100%;
-	color: #666666;
+  position: absolute;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  color: #666666;
 }
 
 form#pay .form-line #pay-amount,
 form#pay .form-line #pay-date {
-	width: 50%;
-	border: none;
+  width: 50%;
+  border: none;
 }
 
 form#pay .form-line #pay-amount {
-	padding-left: 25px;
-	padding-right: 15px;
-	border-right: 2px solid #eeeeee;
-	text-align: right;
+  padding-left: 25px;
+  padding-right: 15px;
+  border-right: 2px solid #eeeeee;
+  text-align: right;
 }
 
 form#pay .form-line #pay-date {
-	text-align: center;
+  text-align: center;
 }
 
 
 form#pay #make-payment {
-	position: absolute;
-	top: 0;
-	left: 0;
-	background-color: green;
-	background-image: linear-gradient(90deg, #85bb65, #73a457);
-	color: white;
-	transition: 0.1s;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: green;
+  background-image: linear-gradient(90deg, #85bb65, #73a457);
+  color: white;
+  transition: 0.1s;
 }
 
 form#pay #make-payment[type="submit"] {
-	left: 80%;
-	width: 20%;
-	padding: 0;
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
+  left: 80%;
+  width: 20%;
+  padding: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 form#pay #make-payment[type="submit"] #prompt {
-	display: none;
+  display: none;
 }
 
 form#pay #make-payment[type="button"] .icon {
-	display: none;
+  display: none;
 }
 
 #credit-statement-details #statement-transactions-container {
-	width: 50%;
+  width: 50%;
 }
 @media screen and (max-width: 1500px) {
-	#credit-statement-details #statement-transactions-container {
-		margin-top: 50px;
-	}
+  #credit-statement-details #statement-transactions-container {
+    margin-top: 50px;
+  }
 }
 
 #credit-statement-details .transactions-table {
-	width: 100%;
+  width: 100%;
 }
 
 #credit-statement-details .transactions-table .date.column {
-	flex: 1;
+  flex: 1;
 }
 
 #credit-statement-details .transactions-table .vendor.column {
-	flex: 4;
-	min-width: 150px;
+  flex: 4;
+  min-width: 150px;
 }
 
 #credit-statement-details .transactions-table .amount.column {
-	flex: 1;
-	margin-left: auto;
+  flex: 1;
+  margin-left: auto;
 }
 
 #credit-statement-details .transactions-table .notes.column {
-	flex: 4;
-	min-width: 100px;
-	white-space: nowrap;
-	overflow: auto;
+  flex: 4;
+  min-width: 100px;
+  white-space: nowrap;
+  overflow: auto;
 }
 
 #credit-statement-details .transactions-table .buttons.column {
-	min-width: 40px;
+  min-width: 40px;
 }
 
 #credit-statement-details .transactions-table .setting {
-	width: 100%;
+  width: 100%;
 }
 @media screen and (max-width: 1500px) {
-	/* Mobile layout */
-	#credit-statement-details .transactions-table .setting {
-		flex-direction: column;
-		align-items: flex-start;
-	}
-}
-
-@media screen and (max-width: 1500px) {
-	/* Mobile layout */
-	#credit-statement-details .transactions-table .setting .date {
-		align-items: flex-start;
-	}
+  /* Mobile layout */
+  #credit-statement-details .transactions-table .setting {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media screen and (max-width: 1500px) {
-	#credit-statement-details .transactions-table .setting .date .month,
-	#credit-statement-details .transactions-table .setting .date .day,
-	#credit-statement-details .transactions-table .setting .date .year {
-		display: none;
-	}
+  /* Mobile layout */
+  #credit-statement-details .transactions-table .setting .date {
+    align-items: flex-start;
+  }
 }
 
 @media screen and (max-width: 1500px) {
-	/* Mobile layout */
-	#credit-statement-details .transactions-table .setting .date .full {
-		display: block;
-	}
+  #credit-statement-details .transactions-table .setting .date .month,
+  #credit-statement-details .transactions-table .setting .date .day,
+  #credit-statement-details .transactions-table .setting .date .year {
+    display: none;
+  }
 }
 
 @media screen and (max-width: 1500px) {
-	/* Mobile layout */
-	#credit-statement-details .transactions-table .setting .description {
-		width: 100%;
-		margin-top: 5px;
-	}
+  /* Mobile layout */
+  #credit-statement-details .transactions-table .setting .date .full {
+    display: block;
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  /* Mobile layout */
+  #credit-statement-details .transactions-table .setting .description {
+    width: 100%;
+    margin-top: 5px;
+  }
 }
 
 @media screen and (max-width: 1800px) {
-	/* Statement disappear */
-	#credit-statement-details .transactions-table .setting .transaction-details {
-		font-size: 22pt;
-	}
+  /* Statement disappear */
+  #credit-statement-details .transactions-table .setting .transaction-details {
+    font-size: 22pt;
+  }
 }
 @media screen and (max-width: 1550px) {
-	/* Disable transitions for mobile switch */
-	#credit-statement-details .transactions-table .setting .transaction-details {
-		transition: all 0s;
-	}
+  /* Disable transitions for mobile switch */
+  #credit-statement-details .transactions-table .setting .transaction-details {
+    transition: all 0s;
+  }
 }
 @media screen and (max-width: 1500px) {
-	/* Statement disappear */
-	#credit-statement-details .transactions-table .setting .transaction-details {
-		font-size: 20pt;
-	}
+  /* Statement disappear */
+  #credit-statement-details .transactions-table .setting .transaction-details {
+    font-size: 20pt;
+  }
 }
 
 #credit-statement-details .transactions-table .expanded .payment {
-	flex: 0;
-	padding: 0;
+  flex: 0;
+  padding: 0;
 }
 
 #credit-statement-details .transactions-table .expanded .buttons {
-	height: 60%;
+  height: 60%;
 }
 
 #statement-statistics {
-	margin: 50px 0;
+  margin: 50px 0;
 }
 
 #statement-statistics table th,
 #statement-statistics table td {
-	padding: 3px 15px;
-	text-align: right;
+  padding: 3px 15px;
+  text-align: right;
 }
 
 
@@ -1887,8 +1887,8 @@ form#pay #make-payment[type="button"] .icon {
  * Customization for the 'Credit Transactions' page
  */
 #transactions-container .transactions {
-	width: 100%;
-	margin: 0 auto;
+  width: 100%;
+  margin: 0 auto;
 }
 
 
@@ -1897,49 +1897,49 @@ form#pay #make-payment[type="button"] .icon {
  * 'Update Credit Transaction' pages
  */
 form#credit-transaction {
-	min-width: 250px;
+  min-width: 250px;
 }
 
 form#credit-transaction #bank-field {
-	flex: 3;
+  flex: 3;
 }
 
 form#credit-transaction #last-four-digits-field {
-	flex: 1;
-	min-width: 150px;
+  flex: 1;
+  min-width: 150px;
 }
 
 form#credit-transaction #transaction-date-field {
-	flex: 1;
-	min-width: 150px;
+  flex: 1;
+  min-width: 150px;
 }
 
 form#credit-transaction #vendor-field {
-	flex: 2;
+  flex: 2;
 }
 
 form#credit-transaction .subtransaction-form {
-	margin-top: 20px;
-	border-top: 1px solid #eaeaea;
+  margin-top: 20px;
+  border-top: 1px solid #eaeaea;
 }
 
 form#credit-transaction .subtotal-field {
-	flex: 1;
+  flex: 1;
 }
 
 form#credit-transaction .note-field {
-	flex: 3;
+  flex: 3;
 }
 
 form#credit-transaction #new-subtransaction.button {
-	width: 150px;
-	margin: 15px 0 20px;
-	padding: 3px;
-	border-radius: 15px;
-	background-color: #444444;
-	color: #eeeeee;
-	font-size: 9pt;
-	text-align: center;
+  width: 150px;
+  margin: 15px 0 20px;
+  padding: 3px;
+  border-radius: 15px;
+  background-color: #444444;
+  color: #eeeeee;
+  font-size: 9pt;
+  text-align: center;
 }
 
 
@@ -1947,12 +1947,12 @@ form#credit-transaction #new-subtransaction.button {
  * Customization for the transaction submission page
  */
 #receipt {
-	width: 31%;
-	margin: auto;
+  width: 31%;
+  margin: auto;
 }
 
 #receipt-title {
-	text-align: center;
+  text-align: center;
 }
 
 
@@ -1960,91 +1960,91 @@ form#credit-transaction #new-subtransaction.button {
  * Customization for the 'Transaction Tags' page
  */
 #transaction-tags ul {
-	display: flex;
-	flex-direction: column;
-	list-style-type: none;
-	margin: 5px 0;
-	padding-left: 10px;
+  display: flex;
+  flex-direction: column;
+  list-style-type: none;
+  margin: 5px 0;
+  padding-left: 10px;
 }
 
 #transaction-tags .buttons {
-	display: flex;
+  display: flex;
 }
 
 #transaction-tags .button {
-	height: 20px;
-	width: 20px;
-	background-size: 20px 20px;
+  height: 20px;
+  width: 20px;
+  background-size: 20px 20px;
 }
 
 #transaction-tags .buttons .button {
-	margin: 0 3px;
+  margin: 0 3px;
 }
 
 #transaction-tags input.new-tag {
-	display: none;
-	width: 200px;
-	margin: 5px 0;
-	padding: 2px 15px;
-	border: 0 solid #85bb65;
-	border-radius: 20px;
-	text-align: center;
-	outline: none;
-	caret-color: #cccccc;
-	transition: border 0.1s ease;
+  display: none;
+  width: 200px;
+  margin: 5px 0;
+  padding: 2px 15px;
+  border: 0 solid #85bb65;
+  border-radius: 20px;
+  text-align: center;
+  outline: none;
+  caret-color: #cccccc;
+  transition: border 0.1s ease;
 }
 
 #transaction-tags input.new-tag.visible {
-	border: 1.5px solid #85bb65;
+  border: 1.5px solid #85bb65;
 }
 
 #transaction-tags .tag {
-	z-index: 99;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 25px;
-	width: min-content;
-	min-width: 200px;
-	margin: 5px 0;
-	padding: 2px 15px;
-	box-sizing: border-box;
-	border-radius: 20px;
-	background-color: #dddddd;
+  z-index: 99;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 25px;
+  width: min-content;
+  min-width: 200px;
+  margin: 5px 0;
+  padding: 2px 15px;
+  box-sizing: border-box;
+  border-radius: 20px;
+  background-color: #dddddd;
 }
 
 #transaction-tags .root.new-tag.button {
-	margin: 5px 0 0 10px;
+  margin: 5px 0 0 10px;
 }
 
 #transaction-tags .tag-area {
-	display: flex;
-	align-items: center;
-	width: min-content;
+  display: flex;
+  align-items: center;
+  width: min-content;
 }
 
 #transaction-tags .tag-area .buttons {
-	margin-left: -60px;
-	transition: margin-left 0.2s ease 0.1s;
+  margin-left: -60px;
+  transition: margin-left 0.2s ease 0.1s;
 }
 
 #transaction-tags .tag-area:hover .buttons {
-	margin-left: 5px;
-	transition-delay: 0.3s;
+  margin-left: 5px;
+  transition-delay: 0.3s;
 }
 
 #transaction-tags .buttons .action.delete {
-	/* Set background image to allow color change on hover */
-	background-image: url('../img/icons/delete-thick.png');
+  /* Set background image to allow color change on hover */
+  background-image: url('../img/icons/delete-thick.png');
 }
 
 #transaction-tags .buttons .action.delete:hover {
-	background-image: url('../img/icons/delete-orange-thick.png');
-	filter: none;
+  background-image: url('../img/icons/delete-orange-thick.png');
+  filter: none;
 }
 
 #transaction-tags .subtags {
-	margin: 0 0 0 10px;
-	padding-left: 40px;
-	border-left: 1px solid #dddddd;
+  margin: 0 0 0 10px;
+  padding-left: 40px;
+  border-left: 1px solid #dddddd;
 }
