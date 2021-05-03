@@ -1225,7 +1225,7 @@ form .autocomplete-box .item.active {
  * Customization for the 'Home' page
  */
 #homepage-block {
-  padding: 10px 0 30px 0;
+  padding: 30px 0 30px 0;
   background-color: #dddddd;
   border: 1px solid #d8d8d8;
   border-radius: 6px;
@@ -1233,14 +1233,14 @@ form .autocomplete-box .item.active {
 }
 
 #homepage-block h2 {
-  margin-top: 40px;
+  margin: 25px 0;
   font-size: 3em;
   letter-spacing: -2px;
   text-align: center;
 }
 
 #homepage-block h3 {
-  margin-top: 30px;
+  margin: 25px 0;
   color: #777777;
   font-size: 1.7em;
   font-weight: 100;
