@@ -24,7 +24,9 @@ def load_accounts():
     grouped_accounts = {}
     for bank in banks:
         bank_name = bank['bank_name']
-        grouped_accounts[bank_name] = account_db.get_entries((bank_name,))
+        bank_accounts = account_db.get_entries((bank_name,))
+        if bank_accounts:
+            grouped_accounts[bank_name] = bank_accounts
     # Get all of the user's bank account types from the database
     account_types = account_type_db.get_entries()
     return render_template('banking/accounts_page.html',

@@ -17,38 +17,54 @@
   <div id="bank-container">
     {% for bank_name in grouped_accounts %}
 
-      <div class="bank-block">
-        <h2>{{ bank_name }}</h2>
+      <div class="bank-block grouping">
+        <h3>{{ bank_name }}</h3>
 
-        {% for account in grouped_accounts[bank_name] %}
-          <div class="account-block">
+        <div class="account-blocks">
+          {% for account in grouped_accounts[bank_name] %}
+            <div class="account-block">
 
-            <p>{{ account['type_name']|capitalize }} {{ account['last_four_digits'] }}</p>
-            <a class="icon-button action delete" href="{{ url_for('banking.delete_account', account_id=account['id']) }}" onclick="return confirm('Are you sure you want to delete this account?');">
-            </a>
+              <div class="account-info">
+                <span class="digits">{{ account['last_four_digits'] }}</span> <b>{{ account['type_name'] }}</b>
+              </div>
 
+              <div class="expanded">
+                <div class="options">
+                  <a class="icon-button action delete" href="{{ url_for('banking.delete_account', account_id=account['id']) }}" onclick="return confirm('Are you sure you want to delete this account?');">
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          {% endfor %}
+        </div>
+
+      </div>
+
+    {% endfor %}
+  </div>
+
+  <section id="bank-account-settings">
+
+    <div id="account-type-container">
+      <h2>Bank Account Types</h2>
+
+      <div class="account-types">
+        {% for account_type in account_types %}
+
+          <div class="account-type">
+            {{ account_type['type_full_name'] }}
+            {% if account_type['type_name'] != account_type['type_full_name'] %}
+              ({{ account_type['type_name'] }})
+            {% endif %}
           </div>
+
         {% endfor %}
-
       </div>
 
-    {% endfor %}
-  </div>
+    </div>
 
-  <div id="account-type-container">
-    <h2>Bank Account Types</h2>
-
-    {% for account_type in account_types %}
-
-      <div>
-        {{ account_type['type_name'] }}
-        {% if account_type['type_abbreviation'] %}
-          ({{ account_type['type_abbreviation'] }})
-        {% endif %}
-      </div>
-
-    {% endfor %}
-  </div>
+  </section>
 
 {% endblock %}
 
@@ -65,4 +81,10 @@
 
     </div>
 
+{% endblock %}
+
+
+{% block javascript %}
+  <script src="{{ url_for('static', filename='js/expand_bank_account.js') }}">
+  </script>
 {% endblock %}

@@ -2,43 +2,45 @@
 
   {% for card in selected_cards %}
 
-    <div class="card-column">
+    <div class="card-column grouping">
 
       <div>
         <b>{{ card['bank_name'] }}</b> <span class="digits">{{ card['last_four_digits'] }}</span>
       </div>
 
-      {% for statement in statements %}
-        {% if statement['card_id'] == card['id'] %}
-          {% if statement['balance'] is not none %}
+      <div class="statement-blocks">
+        {% for statement in statements %}
+          {% if statement['card_id'] == card['id'] %}
+            {% if statement['balance'] is not none %}
 
-            <a class="statement-block" href="{{ url_for('credit.load_statement', statement_id=statement['id']) }}">
-              <div class="date">
-                <div class="month">{{ statement['issue_date'].strftime('%b')|upper }}</div>
-                <div class="year">{{ statement['issue_date'].year }}</div>
-              </div>
-              <div class="payment">
-                <div class="balance">
-                  ${{ statement['balance']|currency }}
+              <a class="statement-block" href="{{ url_for('credit.load_statement', statement_id=statement['id']) }}">
+                <div class="date">
+                  <div class="month">{{ statement['issue_date'].strftime('%b')|upper }}</div>
+                  <div class="year">{{ statement['issue_date'].year }}</div>
                 </div>
-                {% if statement['payment_date'] %}
-                  <div class="paid-notice flip-text-gadget">
-                    <div class="flip-text-inner">
-                      <div class="front">
-                        PAID
-                      </div>
-                      <div class="back">
-                        {{ statement['payment_date'] }}
+                <div class="payment">
+                  <div class="balance">
+                    ${{ statement['balance']|currency }}
+                  </div>
+                  {% if statement['payment_date'] %}
+                    <div class="paid-notice flip-text-gadget">
+                      <div class="flip-text-inner">
+                        <div class="front">
+                          PAID
+                        </div>
+                        <div class="back">
+                          {{ statement['payment_date'] }}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                {% endif %}
-              </div>
-            </a>
+                  {% endif %}
+                </div>
+              </a>
 
+            {% endif %}
           {% endif %}
-        {% endif %}
-      {% endfor %}
+        {% endfor %}
+      </div>
 
     </div>
 
