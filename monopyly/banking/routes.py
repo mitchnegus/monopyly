@@ -63,15 +63,15 @@ def delete_account(account_id):
     return redirect(url_for('banking.load_accounts'))
 
 
-@banking.route('/load_transactions/<int:bank_id>')
+@banking.route('/account_summary/<int:bank_id>')
 @login_required
-def load_transactions(bank_id):
+def load_summary(bank_id):
     transaction_db = BankTransactionHandler()
     # Get all of the user's transactions for the selected bank and account type
     sort_order  = 'DESC'
     transaction_fields = ('transaction_date', 'amount', 'notes')
     transactions = []
-    return render_template('banking/transactions_page.html',
+    return render_template('banking/account_summary_page.html',
                            bank_id=bank_id,
                            sort_order=sort_order,
                            transactions=transactions)

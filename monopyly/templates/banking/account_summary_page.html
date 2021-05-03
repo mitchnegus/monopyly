@@ -19,7 +19,7 @@
       </li>
 
       <li>
-        <a class="action button" href="{{ url_for('banking.load_transactions', bank_id=bank_id) }}">
+        <a class="action button" href="{{ url_for('banking.load_summary', bank_id=bank_id) }}">
           <img class="icon" src="{{ url_for('static', filename='img/icons/refresh.png') }}" />
         </a>
       </li>
@@ -41,7 +41,7 @@
   <a name="top"></a>
 
   <h1>
-    {% block title %}Bank Account Transactions{% endblock %}
+    {% block title %}Bank Account Summary{% endblock %}
   </h1>
 
 {% endblock %}

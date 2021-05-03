@@ -35,13 +35,8 @@
 
             <h4>{{ bank['bank_name'] }}</h4>
             <li>
-              <a href="">
-                See account summary
-              </a>
-            </li>
-            <li>
-              <a href="{{ url_for('banking.load_transactions', bank_id=bank['id']) }}">
-                See transaction history
+              <a href="{{ url_for('banking.load_summary', bank_id=bank['id']) }}">
+                See account summaries
               </a>
             </li>
             <li>
