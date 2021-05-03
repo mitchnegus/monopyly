@@ -35,6 +35,7 @@ class BankAccountTypeHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     _table = 'bank_account_types'
+    _table_view = 'bank_account_types_view'
 
     def get_entries(self, type_names=None, fields=None):
         """
@@ -62,7 +63,7 @@ class BankAccountTypeHandler(DatabaseHandler):
         """
         type_filter = filter_items(type_names, 'type_name', 'AND')
         query = (f"SELECT {select_fields(fields, 'types.id')} "
-                  "  FROM bank_account_types AS types"
+                  "  FROM bank_account_types_view AS types"
                   " WHERE user_id IN (0, ?) "
                  f"       {type_filter} ")
         placeholders = (self.user_id, *fill_places(type_names))

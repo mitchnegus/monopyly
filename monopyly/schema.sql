@@ -161,6 +161,15 @@ CREATE TABLE credit_tag_links (
 /*    ON DELETE CASCADE,
 /*);*/
 
+/* Prepare a view giving consolidated bank account type information */
+CREATE VIEW bank_account_types_view AS
+SELECT
+  id,
+  user_id,
+  IFNULL(type_abbreviation, type_name) type_name,
+  type_name type_full_name
+FROM bank_account_types;
+
 /* Prepare a view giving consolidated credit card transaction information */
 CREATE VIEW credit_transactions_view AS
 SELECT
