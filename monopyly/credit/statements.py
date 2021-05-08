@@ -40,7 +40,7 @@ class CreditStatementHandler(DatabaseHandler):
     _table = 'credit_statements'
     _table_view = 'credit_statements_view'
 
-    def get_entries(self, card_ids=None, bank_names=None, active=False,
+    def get_entries(self, card_ids=None, bank_ids=None, active=False,
                     sort_order='DESC', fields=DATABASE_FIELDS[_table]):
         """
         Get credit card statements from the database.
@@ -55,9 +55,9 @@ class CreditStatementHandler(DatabaseHandler):
         card_ids : tuple of int, optional
             A sequence of card IDs for which statements will be selected
             (if `None`, all cards will be selected).
-        bank_names : tuple of str, optional
-            A sequence of bank names for which statements will be selected (if
-            `None`, all banks will be selected).
+        bank_ids : tuple of ints, optional
+            A sequence of bank IDs for which statements will be selected
+            (if `None`, all banks will be selected).
         active : bool, optional
             A flag indicating whether only statements for active cards
             will be returned. The default is `False` (all statements are
@@ -79,7 +79,7 @@ class CreditStatementHandler(DatabaseHandler):
         """
         check_sort_order(sort_order)
         card_filter = filter_items(card_ids, 'card_id', 'AND')
-        bank_filter = filter_items(bank_names, 'bank_name', 'AND')
+        bank_filter = filter_items(bank_ids, 'bank_id', 'AND')
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
@@ -93,7 +93,7 @@ class CreditStatementHandler(DatabaseHandler):
                  f"       {card_filter} {bank_filter} {active_filter} "
                  f" ORDER BY issue_date {sort_order}, active DESC")
         placeholders = (self.user_id, *fill_places(card_ids),
-                       *fill_places(bank_names))
+                       *fill_places(bank_ids))
         statements = self._query_entries(query, placeholders)
         return statements
 

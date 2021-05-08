@@ -17,10 +17,7 @@ from . import credit
 from .forms import *
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
-from .statements import (
-    CreditStatementHandler, determine_statement_issue_date,
-    determine_statement_issue_date
-)
+from .statements import CreditStatementHandler
 from .transactions import (
     CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler
 )
@@ -135,36 +132,45 @@ def delete_account(account_id):
 @login_required
 def load_statements():
     card_db = CreditCardHandler()
-    statement_db = CreditStatementHandler()
     # Get all of the user's credit cards from the database
     all_cards = card_db.get_entries()
     active_cards = card_db.get_entries(active=True)
     # Get all of the user's statements for active cards from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'balance', 'payment_date')
-    statements = statement_db.get_entries(active=True, fields=fields)
+    card_statements = _get_card_statements(active_cards)
     return render_template('credit/statements_page.html',
                            filter_cards=all_cards,
-                           selected_cards=active_cards,
-                           statements=statements)
+                           card_statements=card_statements)
 
 
 @credit.route('/_update_statements_display', methods=('POST',))
 @login_required
 def update_statements_display():
     card_db = CreditCardHandler()
-    statement_db = CreditStatementHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     filter_ids = post_args['filter_ids']
     # Determine the card IDs from the arguments of POST method
     cards = [card_db.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
-    fields = ('card_id', 'issue_date', 'due_date', 'balance', 'payment_date')
-    statements = statement_db.get_entries([card['id'] for card in cards],
-                                          fields=fields)
+    card_statements = _get_card_statements(cards)
     return render_template('credit/statements.html',
-                           selected_cards=cards,
-                           statements=statements)
+                           card_statements=card_statements)
+
+
+def _get_card_statements(cards, fields=None):
+    """Returns a dictionary of cards and the corresponding statements."""
+    statement_db = CreditStatementHandler()
+    # Set the default fields if not otherwise specified
+    if fields is None:
+        fields = ('card_id', 'issue_date', 'due_date',
+                  'balance', 'payment_date')
+    # Assemble the dictionary of cards and their statements
+    card_statements = {}
+    for card in cards:
+        card_ids = (card['id'],)
+        statements = statement_db.get_entries(card_ids, fields=fields)
+        card_statements[card] = statements
+    return card_statements
 
 
 @credit.route('/statement/<int:statement_id>')
@@ -324,7 +330,7 @@ def update_transactions_display():
 def add_transaction(card_id, statement_id):
     # Define a form for a transaction
     form = CreditTransactionForm()
-    # Prepare known form entries if card is known
+    # Prepare known form entries if card/statement is known
     if card_id:
         card_db = CreditCardHandler()
         # Get the necessary fields from the database

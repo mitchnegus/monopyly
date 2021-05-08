@@ -1,0 +1,21 @@
+<div id="bank-account-summaries">
+
+  {% for account_type in type_accounts %}
+    <div class="account-type-block grouping">
+
+      {% for account in type_accounts[account_type] %}
+
+        <a class="account-block button-block" href="">
+          <div class="title">
+            <span class="digits">{{ account['last_four_digits'] }}</span>
+            <b>{{ account['type_name'] }}</b>
+          </div>
+          <div class="balance">${{ 0|currency }}</div>
+        </a>
+
+      {% endfor %}
+
+    </div>
+  {% endfor %}
+
+</div>

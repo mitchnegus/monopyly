@@ -185,7 +185,7 @@ class CreditCardHandler(DatabaseHandler):
         """
         # Delete all statements corresponding to these cards
         statement_db = CreditStatementHandler()
-        statements = statement_db.get_entries(fields=(), card_ids=entry_ids)
+        statements = statement_db.get_entries(card_ids=entry_ids, fields=())
         statement_ids = [statement['id'] for statement in statements]
         statement_db.delete_entries(statement_ids)
         # Delete the given cards

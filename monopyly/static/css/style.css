@@ -173,6 +173,24 @@ aside.sidebar {
   filter: none;
 }
 
+.button-block {
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  box-shadow: 1px 1px 3px #bbbbbb;
+  background-color: #eeeeee;
+  background-image: linear-gradient(#eeeeee, #e6e6e6);
+  color: inherit;
+}
+
+.button-block:hover {
+  filter: brightness(0.98);
+  text-decoration: none;
+}
+
+.button-block:focus {
+  color: inherit;
+}
+
 .grouping {
   border-radius: 15px;
   box-shadow: 0 0 20px #eeeeee;
@@ -1340,7 +1358,7 @@ form .autocomplete-box .item.active {
  * Customization for the 'Bank Accounts' page
  */
 #bank-container .bank-block {
-  margin: 10px 0;
+  margin: 25px 0;
   padding: 30px;
 }
 
@@ -1395,7 +1413,7 @@ form .autocomplete-box .item.active {
 }
 
 #bank-account-settings {
-  margin-top: 150px;
+  margin: 50px 0 25px;
   padding: 0 25px;
 }
 
@@ -1423,6 +1441,38 @@ form .autocomplete-box .item.active {
 
 
 /*
+ * Customization for the 'Bank Account Summaries" pages
+ */
+#bank-account-summaries .account-type-block {
+  width: 60%;
+  margin: 25px auto;
+  padding: 10px 25px;
+}
+
+#bank-account-summaries .account-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 400px;
+  margin: 15px auto;
+  padding: 30px 10%;
+}
+
+#bank-account-summaries .account-block .title {
+  font-size: 18pt;
+}
+
+#bank-account-summaries .account-block .title .digits {
+  margin-right: 10px;
+}
+
+#bank-account-summaries .account-block .balance {
+  font-size: 36pt;
+  font-weight: bold;
+}
+
+
+/*
  * Customization for the 'New Bank Account' & 'Update Bank Account' pages
  */
 form#bank-account .hidden {
@@ -1431,13 +1481,7 @@ form#bank-account .hidden {
 
 
 /*
- * Customization for the 'Bank Transactions' page
- */
-
-
-/*
- * Customization for the 'New Bank Transaction'/
- * 'Update Bank Transaction' pages
+ * Customization for the 'New Bank Transaction'/'Update Bank Transaction' pages
  */
 form#bank-transaction {
 }
@@ -1611,21 +1655,6 @@ form#card #statement-due-day-field  {
   width: 275px;
   margin: 15px;
   padding: 45px 50px;
-  border: 1px solid #dddddd;
-  border-radius: 10px;
-  box-shadow: 1px 1px 3px #bbbbbb;
-  background-color: #eeeeee;
-  background-image: linear-gradient(#eeeeee, #e6e6e6);
-  color: inherit;
-}
-
-#credit-statements .statement-block:hover {
-  filter: brightness(0.98);
-  text-decoration: none;
-}
-
-#credit-statements .statement-block:focus {
-  color: inherit;
 }
 
 #credit-statements .statement-block .date,

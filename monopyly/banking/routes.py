@@ -21,26 +21,31 @@ def load_accounts():
     # Get the user's banks from the database
     banks = bank_db.get_entries()
     # Get all of the user's bank accounts from the database
-    grouped_accounts = {}
+    bank_accounts = {}
     for bank in banks:
-        bank_name = bank['bank_name']
-        bank_accounts = account_db.get_entries((bank_name,))
-        if bank_accounts:
-            grouped_accounts[bank_name] = bank_accounts
+        accounts = account_db.get_entries((bank['id'],))
+        if accounts:
+            bank_accounts[bank] = accounts
     # Get all of the user's bank account types from the database
     account_types = account_type_db.get_entries()
     return render_template('banking/accounts_page.html',
-                           grouped_accounts=grouped_accounts,
+                           bank_accounts=bank_accounts,
                            account_types=account_types)
 
 
-@banking.route('/add_account', methods=('GET', 'POST'))
+@banking.route('/add_account',
+               defaults={'bank_id': None},
+               methods=('GET', 'POST'))
+@banking.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
 @login_required
-def add_account():
+def add_account(bank_id):
     # Define a form for a bank account
     form = BankAccountForm()
     form.bank_id.choices = prepare_bank_id_choices()
     form.account_type_id.choices = prepare_bank_account_type_choices()
+    # Prepare known form entries if bank is known
+    if bank_id:
+        form.process(data={'bank_id': bank_id})
     # Check if an account was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
@@ -63,18 +68,22 @@ def delete_account(account_id):
     return redirect(url_for('banking.load_accounts'))
 
 
-@banking.route('/account_summary/<int:bank_id>')
+@banking.route('/account_summaries/<int:bank_id>')
 @login_required
-def load_summary(bank_id):
-    transaction_db = BankTransactionHandler()
-    # Get all of the user's transactions for the selected bank and account type
-    sort_order  = 'DESC'
-    transaction_fields = ('transaction_date', 'amount', 'notes')
-    transactions = []
-    return render_template('banking/account_summary_page.html',
+def load_summaries(bank_id):
+    account_type_db = BankAccountTypeHandler()
+    account_db = BankAccountHandler()
+    # Get all of the user's matching bank accounts from the database
+    bank_account_types = account_type_db.get_types_for_bank(bank_id)
+    type_accounts = {}
+    for account_type in bank_account_types:
+        bank_ids = (bank_id,)
+        type_ids = (account_type['id'],)
+        accounts = account_db.get_entries(bank_ids, type_ids)
+        type_accounts[account_type] = accounts
+    return render_template('banking/account_summaries_page.html',
                            bank_id=bank_id,
-                           sort_order=sort_order,
-                           transactions=transactions)
+                           type_accounts=type_accounts)
 
 
 @banking.route('/add_transaction',
@@ -145,6 +154,10 @@ def prepare_bank_account_type_choices():
     user_account_types = account_type_db.get_entries()
     choices = [(-1, '-')]
     for account_type in user_account_types:
-        choices.append((account_type['id'], account_type['type_name']))
+        display_name = account_type['type_full_name']
+        # Display name abbreviations in parentheses
+        if account_type['type_name'] != display_name:
+            display_name += f" ({account_type['type_name']})"
+        choices.append((account_type['id'], display_name))
     choices.append((0, 'New account type'))
     return choices

@@ -30,14 +30,23 @@
 
         <h3>Banks</h3>
 
-        {% for bank in banks %}
+        {% for bank in bank_accounts %}
           <ul class="category">
 
             <h4>{{ bank['bank_name'] }}</h4>
             <li>
-              <a href="{{ url_for('banking.load_summary', bank_id=bank['id']) }}">
+              <a href="{{ url_for('banking.load_summaries', bank_id=bank['id']) }}">
                 See account summaries
               </a>
+              <ul>
+                {% for account in bank_accounts[bank] %}
+                  <li>
+                    <a href="">
+                      {{ account['type_name'] }} {{ account['last_four_digits'] }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
             </li>
             <li>
               <a href="{{ url_for('banking.add_transaction', bank_id=bank['id']) }}">

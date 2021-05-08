@@ -15,18 +15,18 @@
 {% block content %}
 
   <div id="bank-container">
-    {% for bank_name in grouped_accounts %}
+    {% for bank in bank_accounts %}
 
       <div class="bank-block grouping">
-        <h3>{{ bank_name }}</h3>
+        <h3>{{ bank['bank_name'] }}</h3>
 
         <div class="account-blocks">
-          {% for account in grouped_accounts[bank_name] %}
+          {% for account in bank_accounts[bank] %}
             <div class="account-block">
 
               <div class="account-info">
-                <span class="digits">{{ account['last_four_digits'] }}</span> <b>{{ account['type_name'] }}</b>
-              </div>
+                <span class="digits">{{ account['last_four_digits'] }}</span> <b>{{ account['type_full_name'] }}</b>
+             </div>
 
               <div class="expanded">
                 <div class="options">

@@ -37,7 +37,7 @@ class BankAccountTypeHandler(DatabaseHandler):
     _table = 'bank_account_types'
     _table_view = 'bank_account_types_view'
 
-    def get_entries(self, type_names=None, fields=None):
+    def get_entries(self, fields=None):
         """
         Get bank account types from the database.
 
@@ -47,26 +47,20 @@ class BankAccountTypeHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        type_names : tuple of str, optional
-            A sequence of bank account type names for which accounts
-            types will be selected (if `None`, all banks will be
-            selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
-            'bank_account_types' table.
+            'banks' or 'bank_account_types' tables.
 
         Returns
         –––––––
         account_types : list of sqlite3.Row
             A list of bank accounts types matching the criteria.
         """
-        type_filter = filter_items(type_names, 'type_name', 'AND')
         query = (f"SELECT {select_fields(fields, 'types.id')} "
                   "  FROM bank_account_types_view AS types"
-                  " WHERE user_id IN (0, ?) "
-                 f"       {type_filter} ")
-        placeholders = (self.user_id, *fill_places(type_names))
+                 f" WHERE user_id IN (0, ?)")
+        placeholders = (self.user_id,)
         account_types = self._query_entries(query, placeholders)
         return account_types
 
@@ -121,6 +115,19 @@ class BankAccountTypeHandler(DatabaseHandler):
         account_type = self.cursor.execute(query, placeholders).fetchone()
         return account_type
 
+    def get_types_for_bank(self, bank_id):
+        """Return a list of the bank account type IDs that exist for a bank."""
+        query = ("SELECT DISTINCT types.* "
+                 "  FROM bank_account_types_view AS types "
+                 "       INNER JOIN bank_accounts AS a "
+                 "          ON a.account_type_id = types.id "
+                 "       INNER JOIN banks AS b "
+                 "          ON b.id = a.bank_id "
+                 " WHERE types.user_id IN (0, ?) AND b.id = ?")
+        placeholders = (self.user_id, bank_id)
+        account_types = self.cursor.execute(query, placeholders).fetchall()
+        return account_types
+
     def _add_entry(self):
         # Should prevent a user from duplicating the common entries
         pass
@@ -171,7 +178,7 @@ class BankAccountHandler(DatabaseHandler):
     """
     _table = 'bank_accounts'
 
-    def get_entries(self, bank_names=None, fields=None):
+    def get_entries(self, bank_ids=None, account_type_ids=None, fields=None):
         """
         Get bank accounts from the database.
 
@@ -181,9 +188,13 @@ class BankAccountHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        bank_names : tuple of str, optional
-            A sequence of bank names for which accounts will be selected (if
-            `None`, all banks will be selected).
+        bank_ids : tuple of int, optional
+            A sequence of bank IDs for which accounts will be selected
+            (if `None`, all banks will be selected).
+        account_type_ids : tuple of int, optional
+            A sequence of bank account type IDs for which account types
+            will be selected (if `None`, all account types will be
+            selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
@@ -194,16 +205,18 @@ class BankAccountHandler(DatabaseHandler):
         accounts : list of sqlite3.Row
             A list of bank accounts matching the criteria.
         """
-        bank_filter = filter_items(bank_names, 'bank_name', 'AND')
+        bank_filter = filter_items(bank_ids, 'b.id', 'AND')
+        type_filter = filter_items(account_type_ids, 'types.id', 'AND')
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM bank_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  "       INNER JOIN bank_account_types as types "
+                  "       INNER JOIN bank_account_types_view as types "
                   "          ON types.id = a.account_type_id "
                   " WHERE b.user_id = ? "
-                 f"       {bank_filter} ")
-        placeholders = (self.user_id, *fill_places(bank_names))
+                 f"       {bank_filter} {type_filter}")
+        placeholders = (self.user_id, *fill_places(bank_ids),
+                        *fill_places(account_type_ids))
         accounts = self._query_entries(query, placeholders)
         return accounts
 
@@ -213,7 +226,7 @@ class BankAccountHandler(DatabaseHandler):
                   "  FROM bank_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  "       INNER JOIN bank_account_types AS types "
+                  "       INNER JOIN bank_account_types_view AS types "
                   "          ON types.id = a.account_type_id "
                   " WHERE a.id = ? AND b.user_id = ?")
         placeholders = (account_id, self.user_id)
@@ -269,7 +282,7 @@ class BankAccountHandler(DatabaseHandler):
                  f"       {bank_filter} {digit_filter} {type_filter}")
         placeholders = (self.user_id, *fill_place(bank_name),
                         *fill_place(last_four_digits),
-                        *fill_place(account_type))
+                        *fill_place(account_type['id']))
         account = self.cursor.execute(query, placeholders).fetchone()
         return account
 
