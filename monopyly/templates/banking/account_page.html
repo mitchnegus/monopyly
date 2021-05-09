@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+
+
+{% block header %}
+
+  <h1>
+    {% block title %}
+      Account Details
+    {% endblock %}
+  </h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+  <div id="credit-statement-details" class="details-container">
+
+    <div id="credit-statement-summary">
+
+      <div id="statement-info-container">
+        {#% include 'credit/statement_info.html' %#}
+      </div>
+
+      <div id="statement-transactions-container">
+        {#% with transactions = statement_transactions %#}
+          {#% include 'credit/transactions_table/transactions.html' %#}
+        {#% endwith %#}
+      </div>
+
+    </div>
+
+  </div>
+
+{% endblock %}
+
+
+{% block right_sidebar %}
+
+    <div class="sidebar-menu">
+
+      <div class="button">
+        <a class="action" href="{{ url_for('banking.add_transaction', bank_id=account['bank_id'], account_id=account['id']) }}">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+        </a>
+      </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+  <script>
+    /*const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";*/
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand_transaction.js') }}">
+  </script>
+
+{% endblock %}

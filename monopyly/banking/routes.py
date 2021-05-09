@@ -88,6 +88,15 @@ def load_account_summaries(bank_id):
                            type_accounts=type_accounts)
 
 
+@banking.route('/account_details/<int:account_id>')
+@login_required
+def load_account_details(account_id):
+    account_db = BankAccountHandler()
+    # Get all of the user's matching bank accounts from the database
+    account = account_db.get_entry(account_id)
+    return render_template('banking/account_page.html', account=account)
+
+
 @banking.route('/add_transaction',
                defaults={'bank_id': None, 'account_id': None},
                methods=('GET', 'POST'))
@@ -122,8 +131,9 @@ def add_transaction(bank_id, account_id):
             transaction_db = BankTransactionHandler()
             # Insert the new transaction into the database
             transaction_data = form.transaction_data
-            entry = transaction_db.add_entry(transaction_data)
-            return 'Added transaction'
+            transaction = transaction_db.add_entry(transaction_data)
+            return redirect(url_for('banking.load_account_details',
+                                    account_id=transaction['account_id']))
         else:
             # Show an error to the user and print the errors for the admin
             flash(form_err_msg)

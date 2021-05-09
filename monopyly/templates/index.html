@@ -41,7 +41,7 @@
               <ul>
                 {% for account in bank_accounts[bank] %}
                   <li>
-                    <a href="">
+                    <a href="{{ url_for('banking.load_account_details', account_id=account['id']) }}">
                       {{ account['type_name'] }} {{ account['last_four_digits'] }}
                     </a>
                   </li>
