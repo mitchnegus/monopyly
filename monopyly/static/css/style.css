@@ -1443,23 +1443,49 @@ form .autocomplete-box .item.active {
 /*
  * Customization for the 'Bank Account Summaries" pages
  */
+#bank-account-summaries-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center
+}
+
+#bank-account-summaries-container .bank {
+  margin: 0 0 10px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#bank-account-summaries {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 #bank-account-summaries .account-type-block {
-  width: 60%;
-  margin: 25px auto;
-  padding: 10px 25px;
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  min-width: 400px;
+  margin: 10px auto;
+  padding: 25px;
 }
 
 #bank-account-summaries .account-block {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-width: 400px;
-  margin: 15px auto;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
   padding: 30px 10%;
 }
 
+#bank-account-summaries a.account-block:last-of-type {
+  margin-bottom: 0;
+}
+
 #bank-account-summaries .account-block .title {
-  font-size: 18pt;
+  font-size: 16pt;
 }
 
 #bank-account-summaries .account-block .title .digits {
@@ -1467,7 +1493,7 @@ form .autocomplete-box .item.active {
 }
 
 #bank-account-summaries .account-block .balance {
-  font-size: 36pt;
+  font-size: 24pt;
   font-weight: bold;
 }
 
