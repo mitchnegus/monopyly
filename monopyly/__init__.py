@@ -4,7 +4,7 @@ Run a development server for the Monopyly app.
 import os
 from flask import Flask
 
-import monopyly.db as db
+from monopyly.db import db
 from monopyly.core import core
 from monopyly.auth import auth
 from monopyly.credit import credit
