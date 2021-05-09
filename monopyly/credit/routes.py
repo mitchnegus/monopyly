@@ -321,7 +321,7 @@ def update_transactions_display():
 @credit.route('/add_transaction',
               defaults={'card_id': None, 'statement_id': None},
               methods=('GET', 'POST'))
-@credit.route('/add_transaction/<int:card_id>/',
+@credit.route('/add_transaction/<int:card_id>',
               defaults={'statement_id': None},
               methods=('GET', 'POST'))
 @credit.route('/add_transaction/<int:card_id>/<int:statement_id>',
@@ -330,7 +330,7 @@ def update_transactions_display():
 def add_transaction(card_id, statement_id):
     # Define a form for a transaction
     form = CreditTransactionForm()
-    # Prepare known form entries if card/statement is known
+    # Prepare known form entries if card is known
     if card_id:
         card_db = CreditCardHandler()
         # Get the necessary fields from the database

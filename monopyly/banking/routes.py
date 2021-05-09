@@ -89,12 +89,15 @@ def load_account_summaries(bank_id):
 
 
 @banking.route('/add_transaction',
-               defaults={'bank_id': None},
+               defaults={'bank_id': None, 'account_id': None},
                methods=('GET', 'POST'))
 @banking.route('/add_transaction/<int:bank_id>',
+               defaults={'account_id': None},
+               methods=('GET', 'POST'))
+@banking.route('/add_transaction/<int:bank_id>/<int:account_id>',
                methods=('GET', 'POST'))
 @login_required
-def add_transaction(bank_id):
+def add_transaction(bank_id, account_id):
     # Define a form for a transaction
     form = BankTransactionForm()
     # Prepare known form entries if bank is known
@@ -104,6 +107,14 @@ def add_transaction(bank_id):
         bank_fields = ('bank_name',)
         bank = bank_db.get_entry(bank_id, fields=bank_fields)
         data = {field: bank[field] for field in bank_fields}
+        # Prepare known form entries if account is known
+        if account_id:
+            account_db = BankAccountHandler()
+            # Get the necessary fields from the database
+            account_fields = ('last_four_digits', 'type_name')
+            account = account_db.get_entry(account_id, fields=account_fields)
+            for field in account_fields:
+                data[field] = account[field]
         form.process(data=data)
     # Check if a transaction was submitted and add it to the database
     if request.method == 'POST':

@@ -22,7 +22,7 @@ class BankTransactionForm(FlaskForm):
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
     )
-    account_type = TextField('Account Type', validators=[DataRequired()])
+    type_name = TextField('Account Type', validators=[DataRequired()])
     # Fields pertaining to the transaction
     transaction_date = TextField(
         'Transaction Date',
@@ -59,7 +59,7 @@ class BankTransactionForm(FlaskForm):
         account_db = BankAccountHandler()
         account = account_db.find_account(self.bank_name.data,
                                           self.last_four_digits.data,
-                                          self.account_type.data)
+                                          self.type_name.data)
         return account
 
 
