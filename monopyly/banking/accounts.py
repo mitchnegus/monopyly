@@ -235,7 +235,7 @@ class BankAccountHandler(DatabaseHandler):
         return account
 
     def find_account(self, bank_name=None, last_four_digits=None,
-                     account_type=None, fields=None):
+                     account_type_name=None, fields=None):
         """
         Find a bank account using uniquely identifying characteristics.
 
@@ -257,8 +257,8 @@ class BankAccountHandler(DatabaseHandler):
             The bank of the account to find.
         last_four_digits : int, optional
             The last four digits of the bank account to find.
-        account_type : slqite3.Row, optional
-            The type of account to find.
+        account_type_name : str, optional
+            The name of the account type to find.
         fields : tuple of str, optional
             The fields (in either the banks or bank accounts tables) to
             be returned.
@@ -271,18 +271,18 @@ class BankAccountHandler(DatabaseHandler):
         """
         bank_filter = filter_item(bank_name, 'bank_name', 'AND')
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        type_filter = filter_item(account_type['id'], 'account_type_id', 'AND')
+        type_filter = filter_item(account_type_name, 'type_name', 'AND')
         query = (f"SELECT {select_fields(fields, 'a.id')} "
                   "  FROM bank_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  "       INNER JOIN bank_account_types AS types "
+                  "       INNER JOIN bank_account_types_view AS types "
                   "          ON types.id = a.account_type_id "
                   " WHERE b.user_id = ? "
                  f"       {bank_filter} {digit_filter} {type_filter}")
         placeholders = (self.user_id, *fill_place(bank_name),
                         *fill_place(last_four_digits),
-                        *fill_place(account_type['id']))
+                        *fill_place(account_type_name))
         account = self.cursor.execute(query, placeholders).fetchone()
         return account
 
