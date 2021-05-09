@@ -122,3 +122,35 @@ class BankAccountForm(FlaskForm):
         else:
             account_type = account_type_db.get_entry(self.account_type_id.data)
         return account_type
+
+    def prepare_choices(self):
+        """Prepare choices to fill select fields."""
+        self._prepare_bank_choices()
+        self._prepare_account_type_choices()
+
+    def _prepare_bank_choices(self):
+        bank_db = BankHandler()
+        # Collect all available user banks
+        user_banks = bank_db.get_entries()
+        # Set bank choices
+        bank_choices = [(-1, '-')]
+        for bank in user_banks:
+            bank_choices.append((bank['id'], bank['bank_name']))
+        bank_choices.append((0, 'New bank'))
+        self.bank_id.choices = bank_choices
+
+    def _prepare_account_type_choices(self):
+        account_type_db = BankAccountTypeHandler()
+        # Collect all available user account types
+        user_account_types = account_type_db.get_entries()
+        # Set account type choices
+        account_type_choices = [(-1, '-')]
+        for account_type in user_account_types:
+            display_name = account_type['type_full_name']
+            # Display name abbreviations in parentheses
+            if account_type['type_name'] != display_name:
+                display_name += f" ({account_type['type_name']})"
+            account_type_choices.append((account_type['id'], display_name))
+        account_type_choices.append((0, 'New account type'))
+        self.account_type_id.choices = account_type_choices
+

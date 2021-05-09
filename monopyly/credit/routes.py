@@ -37,7 +37,7 @@ def load_cards():
 def add_card():
     # Define a form for a credit card
     form = CreditCardForm()
-    form.account_id.choices = prepare_credit_account_id_choices()
+    form.prepare_choices()
     # Check if a card was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
@@ -595,18 +595,3 @@ def infer_bank():
         abort(404, 'An account with the given ID was not found.')
     return account['bank_name']
 
-
-def prepare_credit_account_id_choices():
-    """Prepare account choices for the card form dropdown."""
-    account_db = CreditAccountHandler()
-    card_db = CreditCardHandler()
-    # Collect all available user accounts
-    user_accounts = account_db.get_entries()
-    choices = [(-1, '-'), (0, 'New account')]
-    for account in user_accounts:
-        cards = card_db.get_entries(account_ids=(account['id'],))
-        digits = [f"*{card['last_four_digits']}" for card in cards]
-        # Create a description for the account using the bank and card digits
-        description = f"{account['bank_name']} (cards: {', '.join(digits)})"
-        choices.append((account['id'], description))
-    return choices

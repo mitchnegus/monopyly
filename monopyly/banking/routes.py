@@ -41,8 +41,7 @@ def load_accounts():
 def add_account(bank_id):
     # Define a form for a bank account
     form = BankAccountForm()
-    form.bank_id.choices = prepare_bank_id_choices()
-    form.account_type_id.choices = prepare_bank_account_type_choices()
+    form.prepare_choices()
     # Prepare known form entries if bank is known
     if bank_id:
         form.process(data={'bank_id': bank_id})
@@ -135,29 +134,3 @@ def suggest_transaction_autocomplete():
     #suggestions = [bank['bank_name'] for bank in banks]
     #return jsonify(suggestions)
 
-
-def prepare_bank_id_choices():
-    """Prepare bank choices for the bank account form."""
-    bank_db = BankHandler()
-    # Colect all available user banks
-    user_banks = bank_db.get_entries()
-    choices = [(-1, '-')]
-    for bank in user_banks:
-        choices.append((bank['id'], bank['bank_name']))
-    choices.append((0, 'New bank'))
-    return choices
-
-def prepare_bank_account_type_choices():
-    """Prepare account type choices for the bank account form."""
-    account_type_db = BankAccountTypeHandler()
-    # Collect all available user account types
-    user_account_types = account_type_db.get_entries()
-    choices = [(-1, '-')]
-    for account_type in user_account_types:
-        display_name = account_type['type_full_name']
-        # Display name abbreviations in parentheses
-        if account_type['type_name'] != display_name:
-            display_name += f" ({account_type['type_name']})"
-        choices.append((account_type['id'], display_name))
-    choices.append((0, 'New account type'))
-    return choices

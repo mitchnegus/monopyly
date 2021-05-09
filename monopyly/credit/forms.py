@@ -166,3 +166,23 @@ class CreditCardForm(FlaskForm):
         else:
             account = account_db.get_entry(self.account_id.data)
         return account
+
+    def prepare_choices(self):
+        """Prepare choices to fill select fields."""
+        self._prepare_credit_account_choices()
+
+    def _prepare_credit_account_choices(self):
+        """Prepare account choices for the card form dropdown."""
+        account_db = CreditAccountHandler()
+        card_db = CreditCardHandler()
+        # Collect all available user accounts
+        user_accounts = account_db.get_entries()
+        account_choices = [(-1, '-')]
+        for account in user_accounts:
+            cards = card_db.get_entries(account_ids=(account['id'],))
+            digits = [f"*{card['last_four_digits']}" for card in cards]
+            # Create a description for the account using the bank and card digits
+            description = f"{account['bank_name']} (cards: {', '.join(digits)})"
+            account_choices.append((account['id'], description))
+        account_choices.append((0, 'New account'))
+        self.account_id.choices = account_choices
