@@ -69,7 +69,8 @@ def delete_account(account_id):
 
 @banking.route('/account_summaries/<int:bank_id>')
 @login_required
-def load_summaries(bank_id):
+def load_account_summaries(bank_id):
+    bank_db = BankHandler()
     account_type_db = BankAccountTypeHandler()
     account_db = BankAccountHandler()
     # Get all of the user's matching bank accounts from the database
@@ -80,8 +81,10 @@ def load_summaries(bank_id):
         type_ids = (account_type['id'],)
         accounts = account_db.get_entries(bank_ids, type_ids)
         type_accounts[account_type] = accounts
+    # Get the bank info
+    bank = bank_db.get_entry(bank_id)
     return render_template('banking/account_summaries_page.html',
-                           bank_id=bank_id,
+                           bank=bank,
                            type_accounts=type_accounts)
 
 

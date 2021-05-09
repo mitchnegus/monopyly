@@ -35,7 +35,7 @@
 
             <h4>{{ bank['bank_name'] }}</h4>
             <li>
-              <a href="{{ url_for('banking.load_summaries', bank_id=bank['id']) }}">
+              <a href="{{ url_for('banking.load_account_summaries', bank_id=bank['id']) }}">
                 See account summaries
               </a>
               <ul>
