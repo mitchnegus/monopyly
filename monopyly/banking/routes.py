@@ -83,8 +83,10 @@ def load_account_summaries(bank_id):
         type_accounts[account_type] = accounts
     # Get the bank info
     bank = bank_db.get_entry(bank_id)
+    bank_balance = account_db.get_balance(bank_id)
     return render_template('banking/account_summaries_page.html',
                            bank=bank,
+                           bank_balance=bank_balance,
                            type_accounts=type_accounts)
 
 

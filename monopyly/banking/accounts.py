@@ -287,6 +287,17 @@ class BankAccountHandler(DatabaseHandler):
         account = self.cursor.execute(query, placeholders).fetchone()
         return account
 
+    def get_balance(self, bank_id):
+        """Get the balance of all accounts at one bank."""
+        query = ("SELECT sum(balance) balance "
+                 "  FROM bank_accounts_view AS a"
+                 "  LEFT OUTER JOIN banks AS b "
+                 "    ON b.id = a.bank_id "
+                 " WHERE b.user_id = ? AND b.id = ?")
+        placeholders = (self.user_id, bank_id)
+        balance = self.cursor.execute(query, placeholders).fetchone()[0]
+        return balance
+
     def delete_entries(self, entry_ids):
         """
         Delete bank accounts from the database.

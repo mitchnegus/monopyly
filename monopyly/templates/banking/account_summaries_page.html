@@ -44,7 +44,7 @@
 {% block content %}
 
   <div id="bank-account-summaries-container">
-    <h2 class="bank">{{ bank['bank_name'] }}</h2>
+    <h2 class="bank">{{ bank['bank_name'] }} (${{ bank_balance|currency }})</h2>
 
     {% include 'banking/account_summaries.html' %}
 
