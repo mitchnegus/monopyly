@@ -1,3 +1,13 @@
+/*
+ * Views enabling enhanced database functionality without additional overhead
+ */
+ DROP VIEW IF EXISTS bank_account_types_view;
+ DROP VIEW IF EXISTS bank_accounts_view;
+ DROP VIEW IF EXISTS bank_transactions_view;
+ DROP VIEW IF EXISTS credit_transactions_view;
+ DROP VIEW IF EXISTS credit_statements_view;
+
+
 /* Prepare a view giving consolidated bank account type information */
 CREATE VIEW bank_account_types_view AS
 SELECT
@@ -6,6 +16,29 @@ SELECT
   IFNULL(type_abbreviation, type_name) type_name,
   type_name type_full_name
 FROM bank_account_types;
+
+
+/* Prepare a view giving enhanced bank account information */
+CREATE VIEW bank_accounts_view AS
+SELECT
+  a.*,
+  COALESCE(SUM(total), 0) balance
+FROM bank_accounts AS a
+  LEFT OUTER JOIN bank_transactions AS t
+    ON t.account_id = a.id
+GROUP BY a.id;
+
+
+/* Prepare a view giving enhanced bank account transaction information */
+CREATE VIEW bank_transactions_view AS
+SELECT
+  id,
+  account_id,
+  transaction_date,
+  total,
+  SUM(total) OVER (PARTITION BY account_id ORDER BY transaction_date) balance,
+  note
+FROM bank_transactions;
 
 
 /* Prepare a view giving consolidated credit card transaction information */

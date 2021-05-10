@@ -177,6 +177,7 @@ class BankAccountHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     _table = 'bank_accounts'
+    _table_view = 'bank_accounts_view'
 
     def get_entries(self, bank_ids=None, account_type_ids=None, fields=None):
         """
@@ -208,7 +209,7 @@ class BankAccountHandler(DatabaseHandler):
         bank_filter = filter_items(bank_ids, 'b.id', 'AND')
         type_filter = filter_items(account_type_ids, 'types.id', 'AND')
         query = (f"SELECT {select_fields(fields, 'a.id')} "
-                  "  FROM bank_accounts AS a "
+                  "  FROM bank_accounts_view AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   "       INNER JOIN bank_account_types_view as types "
@@ -223,7 +224,7 @@ class BankAccountHandler(DatabaseHandler):
     def get_entry(self, account_id, fields=None):
         """Get a bank account from the database given its ID."""
         query = (f"SELECT {select_fields(fields, 'a.id')} "
-                  "  FROM bank_accounts AS a "
+                  "  FROM bank_accounts_view AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   "       INNER JOIN bank_account_types_view AS types "
@@ -273,7 +274,7 @@ class BankAccountHandler(DatabaseHandler):
         digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
         type_filter = filter_item(account_type_name, 'type_name', 'AND')
         query = (f"SELECT {select_fields(fields, 'a.id')} "
-                  "  FROM bank_accounts AS a "
+                  "  FROM bank_accounts_view AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   "       INNER JOIN bank_account_types_view AS types "

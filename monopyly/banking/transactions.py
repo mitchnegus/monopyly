@@ -38,6 +38,7 @@ class BankTransactionHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     _table = 'bank_transactions'
+    _table_view = 'bank_transactions_view'
 
     def get_entries(self, account_ids=None, active=False, sort_order='DESC',
                     fields=DATABASE_FIELDS[_table]):
@@ -115,7 +116,7 @@ class BankTransactionHandler(DatabaseHandler):
             The transaction information from the database.
         """
         query = (f"SELECT {select_fields(fields, 't.id')} "
-                  "  FROM bank_transactions AS t "
+                  "  FROM bank_transactions_view AS t "
                   "       INNER JOIN bank_accounts AS a "
                   "          ON a.id = t.account_id "
                   "       INNER JOIN bank_account_types AS types "

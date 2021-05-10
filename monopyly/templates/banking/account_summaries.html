@@ -10,7 +10,7 @@
             <span class="digits">{{ account['last_four_digits'] }}</span>
             <b>{{ account['type_name'] }}</b>
           </div>
-          <div class="balance">${{ 0|currency }}</div>
+          <div class="balance">${{ account['balance']|currency }}</div>
         </a>
 
       {% endfor %}
