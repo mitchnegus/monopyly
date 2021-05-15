@@ -12,7 +12,7 @@
         {% for statement in card_statements[card] %}
           {% if statement['balance'] is not none %}
 
-            <a class="statement-block button-block" href="{{ url_for('credit.load_statement', statement_id=statement['id']) }}">
+            <a class="statement-block button-block" href="{{ url_for('credit.load_statement_details', statement_id=statement['id']) }}">
               <div class="date">
                 <div class="month">{{ statement['issue_date'].strftime('%b')|upper }}</div>
                 <div class="year">{{ statement['issue_date'].year }}</div>

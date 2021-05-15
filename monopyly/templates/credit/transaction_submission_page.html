@@ -62,7 +62,7 @@
 
     {% if g.user %}
       <br>
-      <a href="{{ url_for('credit.load_statement', statement_id=transaction['statement_id']) }}">
+      <a href="{{ url_for('credit.load_statement_details', statement_id=transaction['statement_id']) }}">
         See the statement for this transaction
       </a>
       <br>

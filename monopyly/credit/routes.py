@@ -175,7 +175,7 @@ def _get_card_statements(cards, fields=None):
 
 @credit.route('/statement/<int:statement_id>')
 @login_required
-def load_statement(statement_id):
+def load_statement_details(statement_id):
     statement_db = CreditStatementHandler()
     transaction_db = CreditTransactionHandler()
     tag_db = CreditTagHandler()
