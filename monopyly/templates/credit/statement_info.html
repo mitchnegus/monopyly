@@ -1,6 +1,6 @@
-<div id="statement-info">
+<div id="statement-info" class="balance-box">
 
-  <div id="card">
+  <div class="account">
     {{ statement['bank_name'].upper() }} {{ statement['last_four_digits'] }}
   </div>
 
@@ -8,7 +8,7 @@
     {{ statement['issue_date'].strftime('%B %Y') }}
   </div>
 
-  <div id="balance">
+  <div class="balance">
     <div>$</div>
     <div>{{ statement['balance']|currency }}</div>
   </div>

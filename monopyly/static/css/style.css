@@ -217,44 +217,32 @@ aside.sidebar {
   width: 100%;
 }
 
-.sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  align-self: flex-start;
-  height: min-content;
-  width: 30px;
-  margin-left: 20px;
-  padding: 10px;
-  border-radius: 10px;
+.balance-box {
+  width: min-content;
+  padding: 40px 50px 60px;
   background-color: #f8f8f8;
+  border-radius: 25px;
 }
 
-.sidebar-menu div:first-of-type {
-  margin-top: 5px;
+.balance-box .balance {
+  display: flex;
+  justify-content: space-between;
+  font-size: 72pt;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: center;
 }
 
-.sidebar-menu div:last-of-type {
-  margin-bottom: 5px;
+.balance-box .account {
+  margin-bottom: 10px;
+  color: #888888;
+  font-size: 14pt;
 }
 
-.sidebar-menu .button {
-  height: 30px;
-  width: 30px;
-  margin: 7.5px 0;
-}
 
-.sidebar-menu .action {
-  display: inline-block;
-  height: 30px;
-  width: 30px;
-  background-size: 30px 30px;
-  filter: brightness(0.9);
-}
-
-.sidebar-menu .action.delete:hover {
-  filter: none;
-}
-
+/*
+ * Style forms
+ */
 form .form-line {
   display: flex;
   justify-content: space-between;
@@ -334,6 +322,10 @@ form button.dark-background .icon {
   opacity: 0.5;
 }
 
+
+/*
+ * Style autocomplete boxes
+ */
 form .autocomplete {
   position: relative;
 }
@@ -365,6 +357,52 @@ form .autocomplete-box .item.active {
   font-weight: bold;
 }
 
+
+/*
+ * Style the sidebar menus
+ */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  height: min-content;
+  width: 30px;
+  margin-left: 20px;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #f8f8f8;
+}
+
+.sidebar-menu div:first-of-type {
+  margin-top: 5px;
+}
+
+.sidebar-menu div:last-of-type {
+  margin-bottom: 5px;
+}
+
+.sidebar-menu .button {
+  height: 30px;
+  width: 30px;
+  margin: 7.5px 0;
+}
+
+.sidebar-menu .action {
+  display: inline-block;
+  height: 30px;
+  width: 30px;
+  background-size: 30px 30px;
+  filter: brightness(0.9);
+}
+
+.sidebar-menu .action.delete:hover {
+  filter: none;
+}
+
+
+/*
+ * Style the sidebar navigation menus
+ */
 #sidebar-nav-menu {
   position: fixed;
   width: 5%;
@@ -1441,6 +1479,14 @@ form .autocomplete-box .item.active {
 
 
 /*
+ * Customization for the 'New Bank Account' & 'Update Bank Account' pages
+ */
+form#bank-account .hidden {
+  display: none;
+}
+
+
+/*
  * Customization for the 'Bank Account Summaries" pages
  */
 #bank-account-summaries-container {
@@ -1499,10 +1545,11 @@ form .autocomplete-box .item.active {
 
 
 /*
- * Customization for the 'New Bank Account' & 'Update Bank Account' pages
+ * Customization for the (bank) 'Account Details' page
  */
-form#bank-account .hidden {
-  display: none;
+
+#bank-account-details #account-info .account {
+  margin-top: 10px;
 }
 
 
@@ -1742,29 +1789,14 @@ form#card #statement-due-day-field  {
 #credit-statement-details #statement-info {
   display: flex;
   flex-direction: column;
-  width: min-content;
-  padding: 40px 50px 60px;
-  background-color: #f8f8f8;
-  border-radius: 25px;
-}
-
-#credit-statement-details #statement-info #card {
-  margin-bottom: 10px;
-  color: #888888;
 }
 
 #credit-statement-details #statement-info #issue-date {
   font-size: 28pt;
 }
 
-#credit-statement-details #statement-info #balance {
-  display: flex;
-  justify-content: space-between;
+#credit-statement-details #statement-info .balance {
   margin: 20px 0;
-  font-size: 72pt;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-align: center;
 }
 
 #credit-statement-details #statement-info #payment {

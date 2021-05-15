@@ -94,7 +94,7 @@ def load_account_summaries(bank_id):
 @login_required
 def load_account_details(account_id):
     account_db = BankAccountHandler()
-    # Get all of the user's matching bank accounts from the database
+    # Get the user's bank account from the database
     account = account_db.get_entry(account_id)
     return render_template('banking/account_page.html', account=account)
 

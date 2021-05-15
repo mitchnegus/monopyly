@@ -1,0 +1,12 @@
+<div id="account-info" class="balance-box">
+
+  <div class="account">
+    {{ account['bank_name'].upper() }} {{ account['last_four_digits'] }} – {{ account['type_name'].upper() }}
+  </div>
+
+  <div class="balance">
+    <div>$</div>
+    <div>{{ account['balance']|currency }}</div>
+  </div>
+
+</div>
