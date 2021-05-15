@@ -211,34 +211,6 @@ aside.sidebar {
   font-family: "Consolas", Courier, monospace;
 }
 
-.details-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.balance-box {
-  width: min-content;
-  padding: 40px 50px 60px;
-  background-color: #f8f8f8;
-  border-radius: 25px;
-}
-
-.balance-box .balance {
-  display: flex;
-  justify-content: space-between;
-  font-size: 72pt;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-align: center;
-}
-
-.balance-box .account {
-  margin-bottom: 10px;
-  color: #888888;
-  font-size: 14pt;
-}
-
 
 /*
  * Style forms
@@ -814,11 +786,19 @@ form .autocomplete-box .item.active {
   min-width: 180px;
 }
 
+.transactions-table .balance.column,
 .transactions-table .amount.column {
   flex: 1;
-  min-width: 100px;
   text-align: right;
   white-space: nowrap;
+}
+
+.transactions-table .amount.column {
+  min-width: 100px;
+}
+
+.transactions-table .balance.column {
+  min-width: 120px;
 }
 
 .transactions-table .notes.column {
@@ -1274,6 +1254,76 @@ form .autocomplete-box .item.active {
 
 .transactions-table .expanded .buttons a.button {
   margin: 3px 0;
+}
+
+
+/*
+ * Define styles for the general "Details" page layout
+ * (with balance/total and transactions)
+ */
+.details {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.details .primary-info {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+@media screen and (max-width: 1500px) {
+  .details .primary-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.details .summary-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0 20px 50px 0;
+}
+@media screen and (max-width: 1500px) {
+  .details .summary-container {
+    margin: 0 0 50px 0;
+  }
+}
+
+.details .summary-box {
+  display: flex;
+  flex-direction: column;
+  width: min-content;
+  padding: 40px 50px 60px;
+  border-radius: 25px;
+  box-shadow: 1px 1px 5px #dddddd;
+  background-color: #f8f8f8;
+}
+
+.details .summary-box .balance {
+  display: flex;
+  justify-content: space-between;
+  font-size: 72pt;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.details .summary-box .account {
+  margin-bottom: 10px;
+  color: #888888;
+  font-size: 14pt;
+}
+
+.details .transactions-container {
+  width: 50%;
+}
+@media screen and (max-width: 1500px) {
+  .details .transactions-container {
+    margin-top: 50px;
+  }
 }
 
 
@@ -1760,64 +1810,33 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the (credit) 'Statement Details' page
  */
-@media screen and (max-width: 1500px) {
-  #credit-statement-summary {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-#credit-statement-summary {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-}
-
-#credit-statement-details #statement-info-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin: 0 20px 50px 0;
-}
-@media screen and (max-width: 1500px) {
-  #credit-statement-details #statement-info-container {
-    margin: 0 0 50px 0;
-  }
-}
-
-#credit-statement-details #statement-info {
-  display: flex;
-  flex-direction: column;
-}
-
-#credit-statement-details #statement-info #issue-date {
+#credit-statement-details #statement-summary #issue-date {
   font-size: 28pt;
 }
 
-#credit-statement-details #statement-info .balance {
+#credit-statement-details #statement-summary .balance {
   margin: 20px 0;
 }
 
-#credit-statement-details #statement-info #payment {
+#credit-statement-details #statement-summary #payment {
   width: 100%;
   min-width: 325px;
   font-size: 12pt;
 }
 
-#credit-statement-details #statement-info #due {
+#credit-statement-details #statement-summary #due {
   float: left;
   display: flex;
   width: 175px;
 }
 
-#credit-statement-details #statement-info #due-date {
+#credit-statement-details #statement-summary #due-date {
   margin-top: -0.5px;
   margin-left: 5px;
   font-weight: bold;
 }
 
-#credit-statement-details #statement-info #paid {
+#credit-statement-details #statement-summary #paid {
   float: right;
 }
 
@@ -1900,15 +1919,6 @@ form#pay #make-payment[type="submit"] #prompt {
 
 form#pay #make-payment[type="button"] .icon {
   display: none;
-}
-
-#credit-statement-details #statement-transactions-container {
-  width: 50%;
-}
-@media screen and (max-width: 1500px) {
-  #credit-statement-details #statement-transactions-container {
-    margin-top: 50px;
-  }
 }
 
 #credit-statement-details .transactions-table {

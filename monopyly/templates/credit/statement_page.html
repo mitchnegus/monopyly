@@ -14,15 +14,15 @@
 
 {% block content %}
 
-  <div id="credit-statement-details" class="details-container">
+  <div id="credit-statement-details" class="details">
 
-    <div id="credit-statement-summary">
+    <div id="credit-statement-info" class="primary-info">
 
-      <div id="statement-info-container">
-        {% include 'credit/statement_info.html' %}
+      <div id="statement-summary-container" class="summary-container">
+        {% include 'credit/statement_summary.html' %}
       </div>
 
-      <div id="statement-transactions-container">
+      <div id="statement-transactions-container" class="transactions-container">
         {% with transactions = statement_transactions %}
           {% include 'credit/transactions_table/transactions.html' %}
         {% endwith %}

@@ -14,18 +14,18 @@
 
 {% block content %}
 
-  <div id="bank-account-details" class="details-container">
+  <div id="bank-account-details" class="details">
 
-    <div id="account-summary">
+    <div id="bank-account-info" class="primary-info">
 
-      <div id="account-info-container">
-        {% include 'banking/account_info.html' %}
+      <div id="account-summary-container" class="summary-container">
+        {% include 'banking/account_summary.html' %}
       </div>
 
-      <div id="statement-transactions-container">
-        {#% with transactions = statement_transactions %#}
-          {#% include 'credit/transactions_table/transactions.html' %#}
-        {#% endwith %#}
+      <div id="account-transactions-container" class="transactions-container">
+        {% with transactions = account_transactions %}
+          {% include 'banking/transactions_table/transactions.html' %}
+        {% endwith %}
       </div>
 
     </div>
