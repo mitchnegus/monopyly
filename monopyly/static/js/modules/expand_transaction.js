@@ -5,14 +5,14 @@
  * more information is clicked. The expanded row shows transactions in
  * more detail (and a larger font) than the rest of the transaction
  * table. A user can exit the expanded view by clicking the 'x' icon
- * button that is shown in the expanded view.
+ * button that is shown in the expanded view. The 'toggleTransactionRow'
+ * function takes an optional callback function which is executed after
+ * the row is expanded. The callback function receives the selected
+ * '.transaction' element as its only argument.
  */
-import {
-  replaceDisplayContentsAjaxRequest
-} from './modules/update_display_ajax.js';
 
 
-(function() {
+function toggleTransactionRow(callback = null) {
 
   // Identify the plus/minus icons
   const $iconsMoreInfo = $('.transaction .more.button');
@@ -29,11 +29,10 @@ import {
     $condensedRow.fadeTo(fadeTime, 0, function() {
       $(this).slideUp(slideTime);
     });
-    // Execute the AJAX request to get transaction/subtransaction information
-    const endpoint = EXPAND_TRANSACTION_ENDPOINT;
-    const rawData = $transaction[0].id;
-    const $container = $transaction.find('.subtransaction-container');
-    replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
+    // Execute the callback function, if given
+    if (callback != null) {
+      callback($transaction);
+    }
     $transaction.addClass('selected');
     // Show the expanded transaction summary
     const $expandedRow = $transaction.find('.expanded');
@@ -58,4 +57,7 @@ import {
     });
   });
 
-})();
+}
+
+
+export { toggleTransactionRow };

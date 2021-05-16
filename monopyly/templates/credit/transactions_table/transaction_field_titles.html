@@ -8,10 +8,10 @@
       <img class="sort-button desc{{ ' selected' if sort_order == 'DESC' else '' }}" src="{{ url_for('static', filename='img/icons/sort-desc.png') }}" />
     </div>
     <div class="vendor column">Vendor</div>
-    <div class="amount column">Amount</div>
     {% if 'statement_id' in transactions[0].keys() %}
       <div class="notes column">Notes</div>
     {% endif %}
+    <div class="amount column">Amount</div>
     {% if transactions and 'last_four_digits' in transactions[0].keys() %}
       <div class="card column">Card</div>
     {% endif %}

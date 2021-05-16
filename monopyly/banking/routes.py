@@ -90,13 +90,22 @@ def load_account_summaries(bank_id):
                            type_accounts=type_accounts)
 
 
-@banking.route('/account_details/<int:account_id>')
+@banking.route('/account/<int:account_id>')
 @login_required
 def load_account_details(account_id):
     account_db = BankAccountHandler()
+    transactions_db = BankTransactionHandler()
     # Get the user's bank account from the database
     account = account_db.get_entry(account_id)
-    return render_template('banking/account_page.html', account=account)
+    # Get all of the transactions for the statement from the database
+    sort_order = 'DESC'
+    transaction_fields = ('transaction_date', 'total', 'balance', 'note')
+    transactions = transactions_db.get_entries(account_ids=(account['id'],),
+                                               sort_order=sort_order,
+                                               fields=transaction_fields)
+    return render_template('banking/account_page.html',
+                           account=account,
+                           account_transactions=transactions)
 
 
 @banking.route('/add_transaction',
@@ -143,6 +152,24 @@ def add_transaction(bank_id, account_id):
     # Display the form for accepting user input
     return render_template('banking/transaction_form/'
                            'transaction_form_page_new.html', form=form)
+
+
+@banking.route('/update_transaction/<int:transaction_id>',
+              methods=('GET', 'POST'))
+@login_required
+def update_transaction(transaction_id):
+    return 'Updates not yet implemented'
+
+
+@banking.route('/delete_transaction/<int:transaction_id>')
+@login_required
+def delete_transaction(transaction_id):
+    transaction_db = BankTransactionHandler()
+    # Remove the transaction from the database
+    account_id = transaction_db.get_entry(transaction_id)['account_id']
+    transaction_db.delete_entries((transaction_id,))
+    return redirect(url_for('banking.load_account_details',
+                            account_id=account_id))
 
 
 @banking.route('/_suggest_transaction_autocomplete', methods=('POST',))

@@ -768,6 +768,9 @@ form .autocomplete-box .item.active {
   align-items: center;
   height: 100%;
   width: 100%;
+  overflow: hidden;
+  /* Use overflow hidden here to keep interior row cells from overflowing
+   * (See https://stackoverflow.com/a/35609992) */
 }
 
 .transactions-table .column {
@@ -853,9 +856,6 @@ form .autocomplete-box .item.active {
   display: inline;
 }
 
-.transactions-table .titles .card.column {
-  padding-right: 30px;
-}
 @media screen and (max-width: 1200px) {
   /* Statement disappear */
   .transactions-table .titles .card.column {
@@ -1039,7 +1039,8 @@ form .autocomplete-box .item.active {
   }
 }
 
-.transactions-table .setting .transaction-details .vendor {
+.transactions-table .setting .transaction-details .vendor,
+.transactions-table .setting .transaction-details .brief {
   flex: 4;
   box-sizing: border-box;
   padding-right: 10px;

@@ -11,16 +11,16 @@
         {{ transaction['vendor'] }}
       </div>
 
-      <div class="amount column">
-        <span class="dollar-sign">$</span>
-        <span>{{ transaction['total']|currency }}</span>
-      </div>
-
       {% if 'statement_id' in transaction.keys() %}
         <div class="notes text column">
           {{ transaction['notes'] }}
         </div>
       {% endif %}
+
+      <div class="amount column">
+        <span class="dollar-sign">$</span>
+        <span>{{ transaction['total']|currency }}</span>
+      </div>
 
       {% if 'bank_name' in transaction.keys() %}
         <div class="card column">
