@@ -67,7 +67,8 @@ class CreditTransactionForm(FlaskForm):
         subtransaction).
         """
         statement = self.get_transaction_statement()
-        transaction_data = {'statement_id': statement['id']}
+        transaction_data = {'internal_transaction_id': None,
+                            'statement_id': statement['id']}
         # Loop over the transaction-specific fields
         for field in ('transaction_date', 'vendor',):
             transaction_data[field] = self[field].data

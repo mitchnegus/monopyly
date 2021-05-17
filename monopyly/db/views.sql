@@ -33,6 +33,7 @@ GROUP BY a.id;
 CREATE VIEW bank_transactions_view AS
 SELECT
   id,
+  internal_transaction_id,
   account_id,
   transaction_date,
   total,
@@ -45,6 +46,7 @@ FROM bank_transactions;
 CREATE VIEW credit_transactions_view AS
 SELECT
   t.id,
+  internal_transaction_id,
   statement_id,
   transaction_date,
   vendor,

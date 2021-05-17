@@ -48,7 +48,8 @@ class BankTransactionForm(FlaskForm):
         bank transaction.
         """
         account = self.get_transaction_account()
-        transaction_data = {'account_id': account['id']}
+        transaction_data = {'internal_transaction_id': None,
+                            'account_id': account['id']}
         # Loop over the transaction-specific fields
         for field in ('transaction_date', 'total', 'note'):
             transaction_data[field] = self[field].data

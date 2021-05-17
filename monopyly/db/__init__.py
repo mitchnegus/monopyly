@@ -10,6 +10,7 @@ DATABASE_FIELDS = {
         'username',
         'password',
     ),
+    'internal_transactions': (),
     'banks': (
         'user_id',
         'bank_name',
@@ -19,16 +20,37 @@ DATABASE_FIELDS = {
         'type_name',
         'type_abbreviation',
     ),
+    'bank_account_types_view': (
+        'user_id',
+        'type_name',
+        'type_full_name',
+    ),
     'bank_accounts': (
         'bank_id',
         'account_type_id',
         'last_four_digits',
         'active',
     ),
+    'bank_accounts_view': (
+        'bank_id',
+        'account_type_id',
+        'last_four_digits',
+        'active',
+        'balance',
+    ),
     'bank_transactions': (
+        'internal_transaction_id',
         'account_id',
         'transaction_date',
         'total',
+        'note',
+    ),
+    'bank_transactions_view': (
+        'internal_transaction_id',
+        'account_id',
+        'transaction_date',
+        'total',
+        'balance',
         'note',
     ),
     'credit_accounts': (
@@ -46,7 +68,7 @@ DATABASE_FIELDS = {
         'issue_date',
         'due_date',
     ),
-    'credit_statments_view': (
+    'credit_statements_view': (
         'card_id',
         'issue_date',
         'due_date',
@@ -54,11 +76,13 @@ DATABASE_FIELDS = {
         'payment_date',
     ),
     'credit_transactions': (
+        'internal_transaction_id',
         'statement_id',
         'transaction_date',
         'vendor',
     ),
     'credit_transactions_view': (
+        'internal_transaction_id',
         'statement_id',
         'transaction_date',
         'vendor',

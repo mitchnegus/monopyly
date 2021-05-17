@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS internal_transactions;
 DROP TABLE IF EXISTS banks;
 DROP TABLE IF EXISTS bank_accounts;
 DROP TABLE IF EXISTS bank_account_types;
@@ -20,6 +21,12 @@ CREATE TABLE users (
   PRIMARY KEY (id)
 );
 
+
+/* Store a common link for paired transactions */
+CREATE TABLE internal_transactions (
+  id INTEGER,
+  PRIMARY KEY (id)
+);
 
 /* Store information about banks */
 CREATE TABLE banks (
@@ -61,11 +68,13 @@ CREATE TABLE bank_accounts (
 /* Store bank transaction information */
 CREATE TABLE bank_transactions (
   id INTEGER,
+  internal_transaction_id INTEGER DEFAULT NULL,
   account_id INTEGER NOT NULL,
   transaction_date TEXT NOT NULL,
   total REAL NOT NULL,
   note TEXT NOT NULL,
   PRIMARY KEY (id),
+  FOREIGN KEY (internal_transaction_id) REFERENCES internal_transactions (id),
   FOREIGN KEY (account_id) REFERENCES bank_accounts (id)
 );
 
@@ -109,10 +118,12 @@ CREATE TABLE credit_statements (
 /* Store credit card transaction information */
 CREATE TABLE credit_transactions (
   id INTEGER,
+  internal_transaction_id INTEGER DEFAULT NULL,
   statement_id INTEGER NOT NULL,
   transaction_date TEXT NOT NULL,
   vendor TEXT NOT NULL,
   PRIMARY KEY (id),
+  FOREIGN KEY (internal_transaction_id) REFERENCES internal_transactions (id),
   FOREIGN KEY (statement_id) REFERENCES credit_statements (id)
     ON DELETE CASCADE
 );
