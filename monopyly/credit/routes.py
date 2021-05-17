@@ -347,22 +347,13 @@ def add_transaction(card_id, statement_id):
              for field in statement_fields:
                  data[field] = statement[field]
         form.process(data=data)
-    # Check if a transaction was submitted and add it to the database
+    # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
-        if form.validate():
-            transaction_db = CreditTransactionHandler()
-            # Insert the new transaction into the database
-            transaction_data = form.transaction_data
-            entry = transaction_db.add_entry(transaction_data)
-            transaction, subtransactions = entry
-            return render_template('credit/transaction_submission_page.html',
-                                   transaction=transaction,
-                                   subtransactions=subtransactions,
-                                   update=False)
-        else:
-            # Show an error to the user and print the errors for the admin
-            flash(form_err_msg)
-            print(form.errors)
+        transaction, subtransactions = _save_transaction(form)
+        return render_template('credit/transaction_submission_page.html',
+                               transaction=transaction,
+                               subtransactions=subtransactions,
+                               update=False)
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_new.html', form=form)
@@ -389,26 +380,42 @@ def update_transaction(transaction_id):
     form_data = {**transaction, 'subtransactions': subtransactions_data}
     # Define a form for a transaction
     form = CreditTransactionForm(data=form_data)
-    # Check if a transaction was updated and update it in the database
+    # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
-        if form.validate():
-            # Update the database with the updated transaction
-            transaction_data = form.transaction_data
-            entry = transaction_db.update_entry(transaction_id,
-                                                transaction_data)
-            transaction, subtransactions = entry
-            return render_template('credit/transaction_submission_page.html',
-                                   transaction=transaction,
-                                   subtransactions=subtransactions,
-                                   update=True)
-        else:
-            # Show an error to the user and print the errors for the admin
-            flash(form_err_msg)
-            print(form.errors)
+        transaction, subtransactions = _save_transaction(form, transaction_id)
+        return render_template('credit/transaction_submission_page.html',
+                               transaction=transaction,
+                               subtransactions=subtransactions,
+                               update=True)
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
+
+def _save_transaction(form, transaction_id=None):
+    """
+    Save a transaction.
+
+    Saves a transaction in the database. If a transaction ID is given,
+    then the transaction is updated with the form information. Otherwise
+    the form information is added as a new entry.
+    """
+    if form.validate():
+        transaction_db = CreditTransactionHandler()
+        transaction_data = form.transaction_data
+        if transaction_id:
+            # Update the database with the updated transaction
+            entry = transaction_db.update_entry(transaction_id,
+                                                transaction_data)
+        else:
+            # Insert the new transaction into the database
+            entry = transaction_db.add_entry(transaction_data)
+        return entry
+    else:
+        # Show an error to the user and print the errors for the admin
+        flash(form_err_msg)
+        print(form.errors)
+
 
 @credit.route('/_add_subtransaction_field', methods=('POST',))
 @login_required

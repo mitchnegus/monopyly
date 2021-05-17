@@ -136,19 +136,11 @@ def add_transaction(bank_id, account_id):
             for field in account_fields:
                 data[field] = account[field]
         form.process(data=data)
-    # Check if a transaction was submitted and add it to the database
+    # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
-        if form.validate():
-            transaction_db = BankTransactionHandler()
-            # Insert the new transaction into the database
-            transaction_data = form.transaction_data
-            transaction = transaction_db.add_entry(transaction_data)
-            return redirect(url_for('banking.load_account_details',
-                                    account_id=transaction['account_id']))
-        else:
-            # Show an error to the user and print the errors for the admin
-            flash(form_err_msg)
-            print(form.errors)
+        transaction = _save_transaction(form)
+        return redirect(url_for('banking.load_account_details',
+                                account_id=transaction['account_id']))
     # Display the form for accepting user input
     return render_template('banking/transaction_form/'
                            'transaction_form_page_new.html', form=form)
@@ -158,7 +150,46 @@ def add_transaction(bank_id, account_id):
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    return 'Updates not yet implemented'
+    transaction_db = BankTransactionHandler()
+    # Get the transaction information from the database
+    transaction = transaction_db.get_entry(transaction_id)
+    # Define a form for a transaction
+    form_data = {**transaction}
+    form = BankTransactionForm(data=form_data)
+    # Check if a transaction was updated (and update it in the database)
+    if request.method == 'POST':
+        transaction = _save_transaction(form, transaction_id)
+        return redirect(url_for('banking.load_account_details',
+                                account_id=transaction['account_id']))
+    # Display the form for accepting user input
+    return render_template('banking/transaction_form/'
+                           'transaction_form_page_update.html',
+                           transaction_id=transaction_id, form=form)
+
+
+def _save_transaction(form, transaction_id=None):
+    """
+    Save a transaction.
+
+    Saves a transaction in the database. If a transaction ID is given,
+    then the transaction is updated with the form information. Otherwise
+    the form information is added as a new entry.
+    """
+    if form.validate():
+        transaction_db = BankTransactionHandler()
+        transaction_data = form.transaction_data
+        if transaction_id:
+            # Update the database with the updated transaction
+            transaction = transaction_db.update_entry(transaction_id,
+                                                      transaction_data)
+        else:
+            # Insert the new transaction into the database
+            transaction = transaction_db.add_entry(transaction_data)
+        return transaction
+    else:
+        # Show an error to the user and print the errors for the admin
+        flash(form_err_msg)
+        print(form.errors)
 
 
 @banking.route('/delete_transaction/<int:transaction_id>')
