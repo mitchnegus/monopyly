@@ -1306,13 +1306,19 @@ form .autocomplete-box .item.active {
 .details .summary-box .balance {
   display: flex;
   justify-content: space-between;
+  min-width: 325px;
+  margin: 20px 0;
   font-size: 72pt;
   font-weight: bold;
   letter-spacing: 1px;
   text-align: center;
 }
 
-.details .summary-box .account {
+.details .summary-box .title {
+  font-size: 28pt;
+}
+
+.details .summary-box .suptitle {
   margin-bottom: 10px;
   color: #888888;
   font-size: 14pt;
@@ -1599,10 +1605,6 @@ form#bank-account .hidden {
  * Customization for the (bank) 'Account Details' page
  */
 
-#bank-account-details #account-info .account {
-  margin-top: 10px;
-}
-
 
 /*
  * Customization for the 'New Bank Transaction'/'Update Bank Transaction' pages
@@ -1811,17 +1813,11 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the (credit) 'Statement Details' page
  */
-#credit-statement-details #statement-summary #issue-date {
-  font-size: 28pt;
-}
-
 #credit-statement-details #statement-summary .balance {
-  margin: 20px 0;
 }
 
 #credit-statement-details #statement-summary #payment {
   width: 100%;
-  min-width: 325px;
   font-size: 12pt;
 }
 

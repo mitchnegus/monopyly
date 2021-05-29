@@ -1,10 +1,10 @@
 <div id="statement-summary" class="summary-box">
 
-  <div class="account">
+  <div class="account suptitle">
     {{ statement['bank_name'].upper() }} {{ statement['last_four_digits'] }}
   </div>
 
-  <div id="issue-date">
+  <div id="issue-date" class="title">
     {{ statement['issue_date'].strftime('%B %Y') }}
   </div>
 

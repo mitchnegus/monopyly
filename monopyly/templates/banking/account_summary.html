@@ -1,7 +1,11 @@
 <div id="account-summary" class="summary-box">
 
-  <div class="account">
-    {{ account['bank_name'].upper() }} {{ account['last_four_digits'] }} – {{ account['type_name'].upper() }}
+  <div class="account suptitle">
+    {{ account['bank_name'].upper() }} {{ account['last_four_digits'] }}
+  </div>
+
+  <div class="title">
+    {{ account['type_name'].upper() }}
   </div>
 
   <div class="balance">
