@@ -69,10 +69,10 @@ WITH view AS (
       c.account_id,
       t.transaction_date,
       /* Determine the balance on an account for each statement */
-      COALESCE(
+      ROUND(COALESCE(
         SUM(subtotals) OVER (PARTITION BY account_id ORDER BY issue_date),
         0
-      ) statement_balance,
+      ), 2) statement_balance,
       /* Determine the total charges on an account for each statement */
       COALESCE(
         SUM(charges) OVER (PARTITION BY account_id ORDER BY issue_date),
@@ -80,9 +80,9 @@ WITH view AS (
       ) statement_charge_total,
       /* Determine the total payments on an account for each transaction */
       COALESCE(
-          SUM(payments)
-          OVER (PARTITION BY account_id ORDER BY transaction_date),
-          0
+        SUM(payments)
+        OVER (PARTITION BY account_id ORDER BY transaction_date),
+        0
       ) daily_payment_total
       FROM (
         SELECT
@@ -119,10 +119,8 @@ FROM credit_statements s
     WHERE
       /* Only compare balances for a single account */
       v1.account_id = v2.account_id
-      /* Get times where payments offset charges (with float tolerance)*/
-      AND v1.statement_charge_total + v2.daily_payment_total < 1E-6
-      /* Exclude times where the statement charges are zero (new statements)*/
-      AND ABS(v1.statement_balance) > 1E-6
+      /* Get times where payments offset charges */
+      AND v1.statement_charge_total + v2.daily_payment_total < 0
     ORDER BY v1.transaction_date
   ) v2
     ON v2.id = s.id
