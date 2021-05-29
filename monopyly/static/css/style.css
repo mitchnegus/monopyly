@@ -1339,6 +1339,11 @@ form .autocomplete-box .item.active {
   }
 }
 
+.details .transactions-table {
+  width: 100%;
+  min-width: 400px;
+}
+
 
 /*
  * Customization for the 'Home' page
@@ -1951,11 +1956,6 @@ form#pay #make-payment[type="submit"] {
 
 form#pay #make-payment[type="submit"] #prompt {
   display: none;
-}
-
-#credit-statement-details .transactions-table {
-  width: 100%;
-  min-width: 400px;
 }
 
 #credit-statement-details .transactions-table .date.column {
