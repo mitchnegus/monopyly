@@ -12,7 +12,9 @@ from ..db import get_db
 from ..auth.tools import login_required
 from ..utils import parse_date, dedelimit_float
 from ..form_utils import form_err_msg
+from ..core.internal_transactions import add_internal_transaction
 from ..banking.banks import BankHandler
+from ..banking.accounts import BankAccountHandler
 from . import credit
 from .forms import *
 from .accounts import CreditAccountHandler
@@ -176,6 +178,7 @@ def _get_card_statements(cards, fields=None):
 @credit.route('/statement/<int:statement_id>')
 @login_required
 def load_statement_details(statement_id):
+    bank_account_db = BankAccountHandler()
     statement_db = CreditStatementHandler()
     transaction_db = CreditTransactionHandler()
     tag_db = CreditTagHandler()
@@ -190,6 +193,9 @@ def load_statement_details(statement_id):
     transactions = transaction_db.get_entries(statement_ids=(statement['id'],),
                                               sort_order=sort_order,
                                               fields=transaction_fields)
+    # Get bank accounts for potential payments
+    bank_accounts = bank_account_db.get_entries()
+    # Statistics
     tag_totals = tag_db.get_totals(statement_ids=(statement['id'],))
     tag_totals = {row['tag_name']: row['total'] for row in tag_totals}
     tag_avgs = tag_db.get_statement_average_totals()
@@ -197,6 +203,7 @@ def load_statement_details(statement_id):
     return render_template('credit/statement_page.html',
                            statement=statement,
                            statement_transactions=transactions,
+                           bank_accounts=bank_accounts,
                            tag_totals=tag_totals,
                            tag_average_totals=tag_avgs)
 
@@ -214,10 +221,10 @@ def update_statement_due_date(statement_id):
     return str(statement['due_date'])
 
 
-@credit.route('/_make_payment/<int:card_id>/<int:statement_id>',
+@credit.route('/_make_payment/<int:statement_id>',
               methods=('POST',))
 @login_required
-def make_payment(card_id, statement_id):
+def make_payment(statement_id):
     card_db = CreditCardHandler()
     statement_db = CreditStatementHandler()
     transaction_db = CreditTransactionHandler()
@@ -225,11 +232,19 @@ def make_payment(card_id, statement_id):
     post_args = request.get_json()
     payment_amount = dedelimit_float(post_args['payment_amount'])
     payment_date = parse_date(post_args['payment_date'])
-    # Add the paymnet as a transaction in the database
+    payment_account_id = int(post_args['payment_bank_account'])
+    # Add the payment as a transaction in the database
+    card_id = statement_db.get_entry(statement_id, fields=('card_id',))[1]
     card = card_db.get_entry(card_id)
-    statement = statement_db.infer_statement(card, payment_date, creation=True)
+    payment_statement = statement_db.infer_statement(card, payment_date,
+                                                     creation=True)
+    if payment_account_id:
+        internal_transaction_id = add_internal_transaction()
+    else:
+        internal_transaction_id = None
     mapping = {
-        'statement_id': statement['id'],
+        'internal_transaction_id': internal_transaction_id,
+        'statement_id': payment_statement['id'],
         'transaction_date': payment_date,
         'vendor': card['bank_name'],
         'subtransactions': [{
@@ -239,11 +254,11 @@ def make_payment(card_id, statement_id):
         }],
     }
     transaction_db.add_entry(mapping)
-    # Get the statement information from the database
+    # Get the current statement information from the database
     fields = ('card_id', 'bank_name', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')
     statement = statement_db.get_entry(statement_id, fields=fields)
-    return render_template('credit/statement_info.html',
+    return render_template('credit/statement_summary.html',
                            statement=statement)
 
 

@@ -35,11 +35,16 @@ input {
   font-family: inherit;
 }
 
+input:focus-visible {
+  outline: #85bb65 solid medium;
+}
+
 input[type="text"],
 select {
   box-sizing: border-box;
   border: 1px solid #cccccc;
   border-radius: 3px;
+  color: inherit;
 }
 
 ::selection {
@@ -275,6 +280,7 @@ form input.button {
   color: #333333;
   font-weight:bold;
   text-align: center;
+  cursor: pointer;
 }
 
 form button:hover,
@@ -1840,29 +1846,48 @@ form#card #statement-due-day-field  {
 form#pay {
   clear: left;
   position: relative;
-  height: 60px;
   width: 300px;
   margin: 50px auto 0px;
   border-radius: 5px;
+  box-sizing: border-box;
+}
+
+form#pay button {
+  height: 100%;
+}
+
+form#pay input:focus-visible {
+  outline-offset: -2.5px;
 }
 
 form#pay button,
 form#pay input {
-  height: 100%;
   margin: 0;
   border: none;
   border-radius: inherit;
 }
 
+form#pay .form-inputs {
+  border: 1px solid #cccccc;
+  border-radius: inherit;
+}
+
+form#pay select optgroup {
+  font-size: 10pt;
+}
+
 form#pay .form-line {
   position: relative;
-  height: 100%;
   width: 80%;
-  border: 1px solid #cccccc;
   border-radius: inherit;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   box-sizing: border-box;
+}
+
+form#pay .form-line input,
+form#pay .form-line select {
+  border: none;
 }
 
 form#pay .form-line .dollar-sign {
@@ -1877,18 +1902,23 @@ form#pay .form-line .dollar-sign {
 form#pay .form-line #pay-amount,
 form#pay .form-line #pay-date {
   width: 50%;
-  border: none;
+  border-bottom: 2px solid #eeeeee;
 }
 
 form#pay .form-line #pay-amount {
   padding-left: 25px;
   padding-right: 15px;
   border-right: 2px solid #eeeeee;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
   text-align: right;
 }
 
 form#pay .form-line #pay-date {
   text-align: center;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 
@@ -1902,6 +1932,15 @@ form#pay #make-payment {
   transition: 0.1s;
 }
 
+form#pay #make-payment:hover {
+  filter: brightness(1.08);
+}
+
+form#pay #make-payment[type="button"] .icon {
+  display: none;
+}
+
+/* Format the button after it reveals parameters */
 form#pay #make-payment[type="submit"] {
   left: 80%;
   width: 20%;
@@ -1914,12 +1953,9 @@ form#pay #make-payment[type="submit"] #prompt {
   display: none;
 }
 
-form#pay #make-payment[type="button"] .icon {
-  display: none;
-}
-
 #credit-statement-details .transactions-table {
   width: 100%;
+  min-width: 400px;
 }
 
 #credit-statement-details .transactions-table .date.column {

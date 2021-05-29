@@ -38,15 +38,35 @@
     {% else %}
 
       <form id="pay" action="" method="post">
-        <div class="form-line">
-          <div class="dollar-sign">$</div>
-          <input id="pay-amount" type="text" name="pay_amount" value="{{ statement['balance']|currency }}" maxlength="8"/>
-          <input id="pay-date" type="text" name="pay_date" value="{{ date_today }}" maxlength="10"/>
+
+        <div class="form-inputs">
+
+          <div class="form-line">
+            <div class="dollar-sign">$</div>
+            <input id="pay-amount" type="text" name="pay_amount" value="{{ statement['balance']|currency }}" maxlength="8"/>
+            <input id="pay-date" type="text" name="pay_date" value="{{ date_today }}" maxlength="10"/>
+          </div>
+
+          <div class="form-line">
+            <select id="pay-bank-account" form="pay">
+              <optgroup>
+                <option value="0">Select a bank</option>
+                {% for account in bank_accounts %}
+                  <option value="{{ loop.index }}">
+                    {{ account['bank_name'] }} {{ account['type_name'] }} ({{ account['last_four_digits'] }})
+                  </option>
+                {% endfor %}
+              </optgroup>
+            </select>
+          </div>
+
         </div>
+
         <button id="make-payment" class="dark-background" type="button">
           <div id="prompt">Make a payment</div>
           <img class="icon" src="{{ url_for('static', filename='img/icons/checkmark.png') }}" />
         </button>
+
       </form>
 
     {% endif %}
