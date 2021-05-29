@@ -123,8 +123,8 @@ class BankTransactionHandler(DatabaseHandler):
                   "          ON types.id = a.account_type_id "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  " WHERE t.id = ? AND b.user_id = ?")
-        placeholders = (transaction_id, self.user_id)
+                  " WHERE b.user_id = ? AND t.id = ?")
+        placeholders = (self.user_id, transaction_id)
         abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
                       'user.')
         transaction = self._query_entry(query, placeholders, abort_msg)

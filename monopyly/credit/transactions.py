@@ -133,8 +133,8 @@ class CreditTransactionHandler(DatabaseHandler):
                   "          ON a.id = c.account_id "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  " WHERE t.id = ? AND user_id = ?")
-        placeholders = (transaction_id, self.user_id)
+                  " WHERE user_id = ? AND t.id = ?")
+        placeholders = (self.user_id, transaction_id)
         abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
                       'user.')
         transaction = self._query_entry(query, placeholders, abort_msg)
@@ -309,8 +309,8 @@ class CreditSubtransactionHandler(DatabaseHandler):
                   "          ON a.id = c.account_id "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
-                  " WHERE s_t.id = ? AND user_id = ?")
-        placeholders = (subtransaction_id, self.user_id,)
+                  " WHERE user_id = ? AND s_t.id = ?")
+        placeholders = (self.user_id, subtransaction_id)
         abort_msg = (f'Subtransaction ID {subtransaction_id} does not exist '
                       'for the user.')
         subtransaction = self._query_entry(query, placeholders, abort_msg)
@@ -460,8 +460,8 @@ class CreditTagHandler(DatabaseHandler):
         """
         query = (f"SELECT {select_fields(fields, 'tags.id')} "
                   "  FROM credit_tags AS tags "
-                  " WHERE id = ? AND user_id = ?")
-        placeholders = (tag_id, self.user_id)
+                  " WHERE user_id = ? AND id = ?")
+        placeholders = (self.user_id, tag_id)
         abort_msg = (f'Tag ID {tag_id} does not exist for the user.')
         tag = self._query_entry(query, placeholders, abort_msg)
         return tag
@@ -488,8 +488,8 @@ class CreditTagHandler(DatabaseHandler):
         """
         query = (f"SELECT {select_fields(fields, 'tags.id')} "
                   "  FROM credit_tags AS tags "
-                  " WHERE parent_id IS ? AND user_id = ?")
-        placeholders = (tag_id, self.user_id)
+                  " WHERE user_id = ? AND parent_id IS ?")
+        placeholders = (self.user_id, tag_id)
         subtags = self._query_entries(query, placeholders)
         return subtags
 
@@ -766,17 +766,17 @@ class CreditTagHandler(DatabaseHandler):
         tag_filter = filter_items(tag_ids, 'tag_id', 'AND')
         statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
         query = (f"SELECT SUM(subtotal) / ({subquery}) average_total, tag_name "
-                 "  FROM credit_tags AS tags "
-                 "       INNER JOIN credit_tag_links AS l "
-                 "          ON l.tag_id = tags.id "
-                 "       INNER JOIN credit_subtransactions AS s_t "
-                 "          ON s_t.id = l.subtransaction_id "
-                 "       INNER JOIN credit_transactions AS t "
-                 "          ON t.id = s_t.transaction_id "
-                 "       INNER JOIN credit_statements AS s "
-                 "          ON s.id = t.statement_id "
-                f" WHERE tags.user_id = ? {tag_filter} {statement_filter} "
-                f" GROUP BY tags.id")
+                  "  FROM credit_tags AS tags "
+                  "       INNER JOIN credit_tag_links AS l "
+                  "          ON l.tag_id = tags.id "
+                  "       INNER JOIN credit_subtransactions AS s_t "
+                  "          ON s_t.id = l.subtransaction_id "
+                  "       INNER JOIN credit_transactions AS t "
+                  "          ON t.id = s_t.transaction_id "
+                  "       INNER JOIN credit_statements AS s "
+                  "          ON s.id = t.statement_id "
+                 f" WHERE tags.user_id = ? {tag_filter} {statement_filter} "
+                 f" GROUP BY tags.id")
         placeholders = (self.user_id, *fill_places(statement_ids),
                         self.user_id, *fill_places(statement_ids))
         tag_average_totals = self._query_entries(query, placeholders)
