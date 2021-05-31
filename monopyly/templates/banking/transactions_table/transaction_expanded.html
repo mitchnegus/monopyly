@@ -23,7 +23,13 @@
 
           <div class="transaction-details">
             <div class="brief">
-              ...
+              {% if transaction['total'] > 0 %}
+                Deposit
+              {% elif transaction['total'] < 0 %}
+                Withdrawal
+              {% else %}
+                Exchange
+              {% endif %}
             </div>
             <div class="total">
               ${{ transaction['total']|currency }}

@@ -781,7 +781,7 @@ form .autocomplete-box .item.active {
 
 .transactions-table .column {
   box-sizing: border-box;
-  padding: 0 10px;
+  margin: 0 10px;
 }
 
 .transactions-table .date.column {
@@ -862,13 +862,6 @@ form .autocomplete-box .item.active {
   display: inline;
 }
 
-@media screen and (max-width: 1200px) {
-  /* Statement disappear */
-  .transactions-table .titles .card.column {
-    padding-right: 10px;
-  }
-}
-
 .transactions-table .transaction {
   display: flex;
   flex-direction: column;
@@ -883,21 +876,6 @@ form .autocomplete-box .item.active {
 
 .transactions-table .transaction .condensed:hover {
   background-color: #fafafa;
-}
-
-.transactions-table .transaction .expanded {
-  display: none;
-  opacity: 0;
-}
-
-.transactions-table .transaction .expanded .row {
-  align-items: flex-start;
-}
-
-.transactions-table .selected.transaction {
-  /*Make top & bottom borders approximately the same size */
-  border-width: 3px;
-  border-top: 2px solid #eeeeee;
 }
 
 .transactions-table .transaction .buttons {
@@ -934,25 +912,51 @@ form .autocomplete-box .item.active {
   }
 }
 
-.transactions-table .expanded .row-content {
-  align-items: flex-start;
-  padding: 20px 0;
+.transactions-table .selected.transaction {
+  /*Make top & bottom borders approximately the same size */
+  border-width: 3px;
+  border-top: 2px solid #eeeeee;
 }
 
-.transactions-table .setting {
+.transactions-table .transaction .expanded {
+  display: none;
+  opacity: 0;
+}
+
+.transactions-table .transaction .expanded .row {
+  align-items: flex-start;
+}
+
+.transactions-table .expanded .row-content {
+  align-items: flex-start;
+  margin: 20px 0;
+}
+@media screen and (max-width: 1000px) {
+  .transactions-table .expanded .row-content {
+    margin-left: 28px;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .transactions-table .expanded .date.column {
+    margin: 0;
+  }
+}
+
+.transactions-table .expanded .setting {
   display: flex;
   flex: 3;
 }
 @media screen and (max-width: 1000px) {
   /* Mobile layout */
-  .transactions-table .setting {
+  .transactions-table .expanded .setting {
     flex-direction: column;
     align-items: flex-start;
     flex: 9;
   }
 }
 
-.transactions-table .setting .date {
+.transactions-table .expanded .setting .date {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -962,61 +966,60 @@ form .autocomplete-box .item.active {
 }
 @media screen and (max-width: 1000px) {
   /* Mobile layout */
-  .transactions-table .setting .date {
+  .transactions-table .expanded .setting .date {
     align-items: flex-start;
   }
 }
 
 @media screen and (max-width: 1000px) {
   /* Mobile layout */
-  .transactions-table .setting .date .month,
-  .transactions-table .setting .date .day,
-  .transactions-table .setting .date .year {
+  .transactions-table .expanded .setting .date .month,
+  .transactions-table .expanded .setting .date .day,
+  .transactions-table .expanded .setting .date .year {
     display: none;
   }
 }
 
-.transactions-table .setting .date .month {
+.transactions-table .expanded .setting .date .month {
   margin-bottom: -10px;
   font-size: 18pt;
 }
 
-.transactions-table .setting .date .day {
+.transactions-table .expanded .setting .date .day {
   font-size: 36pt;
 }
 
-.transactions-table .setting .date .year {
+.transactions-table .expanded .setting .date .year {
   margin-top: -10px;
   font-size: 14pt;
   letter-spacing: 3px;
 }
 
-.transactions-table .setting .date .full {
+.transactions-table .expanded .setting .date .full {
   display: none;
   color: #aaaaaa;
   font-size: 1.1em;
 }
 @media screen and (max-width: 1000px) {
   /* Mobile layout */
-  .transactions-table .setting .date .full {
+  .transactions-table .expanded .setting .date .full {
     display: block;
   }
 }
 
-.transactions-table .setting .description {
+.transactions-table .expanded .setting .description {
   flex: 13;
   min-width: 250px;
-  padding: 0 10px;
 }
 @media screen and (max-width: 1000px) {
   /* Mobile layout */
-  .transactions-table .setting .description {
-    width: 90%;
+  .transactions-table .expanded .setting .description {
+    width: 95%;
     margin-top: 5px;
   }
 }
 
-.transactions-table .setting .transaction-details {
+.transactions-table .expanded .setting .transaction-details {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -1028,38 +1031,38 @@ form .autocomplete-box .item.active {
 }
 @media screen and (max-width: 1200px) {
   /* Statement disappear */
-  .transactions-table .setting .transaction-details {
+  .transactions-table .expanded .setting .transaction-details {
     font-size: 22pt;
   }
 }
 @media screen and (max-width: 1050px) {
   /* Disable transitions for mobile switch */
-  .transactions-table .setting .transaction-details {
+  .transactions-table .expanded .setting .transaction-details {
     transition: all 0s;
   }
 }
 @media screen and (max-width: 1000px) {
   /* Mobile layout */
-  .transactions-table .setting .transaction-details {
+  .transactions-table .expanded .setting .transaction-details {
     font-size: 20pt;
   }
 }
 
-.transactions-table .setting .transaction-details .vendor,
-.transactions-table .setting .transaction-details .brief {
+.transactions-table .expanded .setting .transaction-details .vendor,
+.transactions-table .expanded .setting .transaction-details .brief {
   flex: 4;
   box-sizing: border-box;
   padding-right: 10px;
   font-weight: 600;
 }
 
-.transactions-table .setting .transaction-details .total {
+.transactions-table .expanded .setting .transaction-details .total {
   flex: 1;
   text-align: right;
   font-weight: bold;
 }
 
-.transactions-table .setting .subtransaction-details {
+.transactions-table .expanded .setting .subtransaction-details {
   display: flex;
   justify-content: space-between;
   margin: 5px 0;
@@ -1067,28 +1070,28 @@ form .autocomplete-box .item.active {
   font-size: 12pt;
 }
 
-.transactions-table .setting .subtransaction-details .notes {
+.transactions-table .expanded .setting .subtransaction-details .notes {
   flex: 4;
   padding-right: 10px;
 }
 
-.transactions-table .setting .subtransaction-details .subtotal {
+.transactions-table .expanded .setting .subtransaction-details .subtotal {
   flex: 1;
   text-align: right;
 }
 
-.transactions-table .setting .subtransaction-details .tags-container {
+.transactions-table .expanded .setting .subtransaction-details .tags-container {
   width: 100%;
   max-height: 80%;
   margin: 5px 0;
 }
 
-.transactions-table .setting .subtransaction-details .tags {
+.transactions-table .expanded .setting .subtransaction-details .tags {
   display: flex;
   flex-wrap: wrap;
 }
 
-.transactions-table .setting .subtransaction-details .tags .tag {
+.transactions-table .expanded .setting .subtransaction-details .tags .tag {
   min-width: 50px;
   max-width: 200px;
   margin: 5px 5px 5px 0;
@@ -1229,7 +1232,7 @@ form .autocomplete-box .item.active {
   width: 100%;
   text-align: center;
   font-size: 1.5em;
-  transition: font-size 0.3s
+  transition: font-size 0.3s;
 }
 @media screen and (max-width: 1500px) {
   /* Size downshift */
@@ -1344,6 +1347,111 @@ form .autocomplete-box .item.active {
   min-width: 400px;
 }
 
+.details .transactions-table .date.column {
+  flex: 1;
+}
+
+.details .transactions-table .vendor.column {
+  flex: 4;
+  min-width: 150px;
+}
+
+.details .transactions-table .amount.column {
+  flex: 1;
+  margin-left: auto;
+}
+
+.details .transactions-table .notes.column {
+  flex: 4;
+  min-width: 100px;
+  white-space: nowrap;
+  overflow: auto;
+}
+
+.details .transactions-table .buttons.column {
+  min-width: 20px;
+}
+
+@media screen and (max-width: 1500px) {
+  .details .transactions-table .expanded .row-content {
+    margin-left: 28px;
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  .details .transactions-table .expanded .date.column {
+    margin: 0;
+  }
+}
+
+.details .transactions-table .expanded .setting {
+  width: 100%;
+}
+@media screen and (max-width: 1500px) {
+  /* Mobile layout */
+  .details .transactions-table .expanded .setting {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  /* Mobile layout */
+  .details .transactions-table .expanded .setting .date {
+    align-items: flex-start;
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  .details .transactions-table .expanded .setting .date .month,
+  .details .transactions-table .expanded .setting .date .day,
+  .details .transactions-table .expanded .setting .date .year {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  /* Mobile layout */
+  .details .transactions-table .expanded .setting .date .full {
+    display: block;
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  /* Mobile layout */
+  .details .transactions-table .expanded .setting .description {
+    width: 100%;
+    margin-top: 5px;
+  }
+}
+
+@media screen and (max-width: 1800px) {
+  /* Statement disappear */
+  .details .transactions-table .expanded .setting .transaction-details {
+    font-size: 22pt;
+  }
+}
+@media screen and (max-width: 1550px) {
+  /* Disable transitions for mobile switch */
+  .details .transactions-table .expanded .setting .transaction-details {
+    transition: all 0s;
+  }
+}
+@media screen and (max-width: 1500px) {
+  /* Statement disappear */
+  .details .transactions-table .expanded .setting .transaction-details {
+    font-size: 20pt;
+  }
+}
+
+.details .transactions-table .expanded .payment {
+  flex: 0;
+  padding: 0;
+}
+
+.details .transactions-table .expanded .buttons {
+  height: 60%;
+}
 
 /*
  * Customization for the 'Home' page
@@ -1613,11 +1721,6 @@ form#bank-account .hidden {
 
 
 /*
- * Customization for the (bank) 'Account Details' page
- */
-
-
-/*
  * Customization for the 'New Bank Transaction'/'Update Bank Transaction' pages
  */
 form#bank-transaction {
@@ -1824,9 +1927,6 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the (credit) 'Statement Details' page
  */
-#credit-statement-details #statement-summary .balance {
-}
-
 #credit-statement-details #statement-summary #payment {
   width: 100%;
   font-size: 12pt;
@@ -1956,100 +2056,6 @@ form#pay #make-payment[type="submit"] {
 
 form#pay #make-payment[type="submit"] #prompt {
   display: none;
-}
-
-#credit-statement-details .transactions-table .date.column {
-  flex: 1;
-}
-
-#credit-statement-details .transactions-table .vendor.column {
-  flex: 4;
-  min-width: 150px;
-}
-
-#credit-statement-details .transactions-table .amount.column {
-  flex: 1;
-  margin-left: auto;
-}
-
-#credit-statement-details .transactions-table .notes.column {
-  flex: 4;
-  min-width: 100px;
-  white-space: nowrap;
-  overflow: auto;
-}
-
-#credit-statement-details .transactions-table .buttons.column {
-  min-width: 40px;
-}
-
-#credit-statement-details .transactions-table .setting {
-  width: 100%;
-}
-@media screen and (max-width: 1500px) {
-  /* Mobile layout */
-  #credit-statement-details .transactions-table .setting {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-@media screen and (max-width: 1500px) {
-  /* Mobile layout */
-  #credit-statement-details .transactions-table .setting .date {
-    align-items: flex-start;
-  }
-}
-
-@media screen and (max-width: 1500px) {
-  #credit-statement-details .transactions-table .setting .date .month,
-  #credit-statement-details .transactions-table .setting .date .day,
-  #credit-statement-details .transactions-table .setting .date .year {
-    display: none;
-  }
-}
-
-@media screen and (max-width: 1500px) {
-  /* Mobile layout */
-  #credit-statement-details .transactions-table .setting .date .full {
-    display: block;
-  }
-}
-
-@media screen and (max-width: 1500px) {
-  /* Mobile layout */
-  #credit-statement-details .transactions-table .setting .description {
-    width: 100%;
-    margin-top: 5px;
-  }
-}
-
-@media screen and (max-width: 1800px) {
-  /* Statement disappear */
-  #credit-statement-details .transactions-table .setting .transaction-details {
-    font-size: 22pt;
-  }
-}
-@media screen and (max-width: 1550px) {
-  /* Disable transitions for mobile switch */
-  #credit-statement-details .transactions-table .setting .transaction-details {
-    transition: all 0s;
-  }
-}
-@media screen and (max-width: 1500px) {
-  /* Statement disappear */
-  #credit-statement-details .transactions-table .setting .transaction-details {
-    font-size: 20pt;
-  }
-}
-
-#credit-statement-details .transactions-table .expanded .payment {
-  flex: 0;
-  padding: 0;
-}
-
-#credit-statement-details .transactions-table .expanded .buttons {
-  height: 60%;
 }
 
 #statement-statistics {
