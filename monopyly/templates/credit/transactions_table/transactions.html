@@ -4,7 +4,11 @@
 
   {% for transaction in transactions[:100] %}
 
-    <div id="transaction-{{ transaction['id'] }}" class="transaction">
+    {% if transaction['transaction_date']|string > date_today %}
+      {% set future = 'future' %}
+    {% endif %}
+
+    <div id="transaction-{{ transaction['id'] }}" class="transaction {{ future }}">
       {% include 'credit/transactions_table/transaction_condensed.html' %}
       {% include 'credit/transactions_table/transaction_expanded.html' %}
     </div>

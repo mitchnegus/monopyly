@@ -869,6 +869,10 @@ form .autocomplete-box .item.active {
   transition: border 0.2s ease;
 }
 
+.transactions-table .transaction.future {
+  color: #aaaaaa;
+}
+
 .transactions-table .transaction .condensed {
   height: 25px;
   transition: background-color 0.1s ease;

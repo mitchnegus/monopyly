@@ -42,3 +42,9 @@
 - Backend properly handles duplicate/ancestor tags; all tags are saved in the database, but only the lowest-level child tag must be entered
 - Removed statement level statistics display (not yet mature)
 
+
+## 1.1.0 (in progress)
+- Added banking interface
+- Grayed out pending transactions
+- Minor cosmetic enhancements
+
