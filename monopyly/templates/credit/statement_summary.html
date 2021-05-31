@@ -52,7 +52,7 @@
               <optgroup>
                 <option value="0">Select a bank</option>
                 {% for account in bank_accounts %}
-                  <option value="{{ loop.index }}">
+                  <option value="{{ account['id'] }}">
                     {{ account['bank_name'] }} {{ account['type_name'] }} ({{ account['last_four_digits'] }})
                   </option>
                 {% endfor %}

@@ -15,6 +15,7 @@ from ..form_utils import form_err_msg
 from ..core.internal_transactions import add_internal_transaction
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
+from ..banking.transactions import BankTransactionHandler
 from . import credit
 from .forms import *
 from .accounts import CreditAccountHandler
@@ -239,10 +240,24 @@ def make_payment(statement_id):
     payment_statement = statement_db.infer_statement(card, payment_date,
                                                      creation=True)
     if payment_account_id:
+        bank_transaction_db = BankTransactionHandler()
+        # Ensure that the bank account belongs to the current user
+        bank_transaction_db.get_entry(payment_account_id)
+        # Create an internal transaction ID and corresponding bank transaction
         internal_transaction_id = add_internal_transaction()
+        bank_mapping = {
+            'internal_transaction_id': internal_transaction_id,
+            'account_id': payment_account_id,
+            'transaction_date': payment_date,
+            'total': -payment_amount,
+            'note': "Credit card payment "
+                   f"({card['bank_name']}-{card['last_four_digits']})"
+        }
+        print(bank_mapping)
+        bank_transaction_db.add_entry(bank_mapping)
     else:
         internal_transaction_id = None
-    mapping = {
+    credit_mapping = {
         'internal_transaction_id': internal_transaction_id,
         'statement_id': payment_statement['id'],
         'transaction_date': payment_date,
@@ -253,7 +268,7 @@ def make_payment(statement_id):
             'tags': ['Payments'],
         }],
     }
-    transaction_db.add_entry(mapping)
+    transaction_db.add_entry(credit_mapping)
     # Get the current statement information from the database
     fields = ('card_id', 'bank_name', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')

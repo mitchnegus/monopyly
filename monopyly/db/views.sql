@@ -37,7 +37,7 @@ SELECT
   account_id,
   transaction_date,
   total,
-  SUM(total) OVER (PARTITION BY account_id ORDER BY transaction_date) balance,
+  ROUND(SUM(total) OVER (PARTITION BY account_id ORDER BY transaction_date, id), 2) balance,
   note
 FROM bank_transactions;
 
