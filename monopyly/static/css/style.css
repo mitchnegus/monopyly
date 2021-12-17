@@ -2189,7 +2189,7 @@ form#credit-transaction #new-subtransaction.button {
 }
 
 #transaction-tags .tag {
-  z-index: 99;
+  z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
