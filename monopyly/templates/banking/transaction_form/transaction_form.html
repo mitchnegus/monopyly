@@ -1,25 +1,10 @@
-<form id="bank-transaction" action="{{ submission_url }}" method="POST" autocomplete="off">
+<form id="bank-transaction" class="transaction" action="{{ submission_url }}" method="POST" autocomplete="off">
 
   {{ form.hidden_tag() }}
 
-  <div class="form-line">
-
-    <div id="bank-field" class="form-field autocomplete">
-      {{ form.bank_name.label }}
-      {{ form.bank_name }}
-    </div>
-
-    <div id="last-four-digits-field" class="form-field autocomplete">
-      {{ form.last_four_digits.label }}
-      {{ form.last_four_digits }}
-    </div>
-
-    <div id="account-type-field" class="form-field autocomplete">
-      {{ form.type_name.label }}
-      {{ form.type_name }}
-    </div>
-
-  </div>
+  {% with sub_form = form.account_info, id_prefix = 'transaction' %}
+    {% include 'banking/transaction_form/bank_info_form.html' %}
+  {% endwith %}
 
   <div class="form-line">
 
@@ -41,8 +26,22 @@
   </div>
 
 
+  {% if not update %}
+    <div id="new-transfer" class="add-info button">
+      + Record Transfer
+    </div>
+  {% endif %}
+
+
   <div class="form-field">
-    {{ form.submit(class_="button") }}
+    {% if update == 'transfer' %}
+      {{ form.submit(class_="button", onclick="return alert('This transaction is a transfer and is linked to another. You must update that transaction manually, as changes will not be propagated.')") }}
+    {% else %}
+      {{ form.submit(class_="button") }}
+    {% endif %}
+
+
   </div>
 
 </form>
+

@@ -1,4 +1,4 @@
-<form id="credit-transaction" action="{{ submission_url }}" method="POST" autocomplete="off">
+<form id="credit-transaction" class="transaction" action="{{ submission_url }}" method="POST" autocomplete="off">
 
   {{ form.hidden_tag() }}
 
@@ -42,10 +42,9 @@
     {% endfor %}
   </div>
 
-  <div id="new-subtransaction" class="button">
+  <div id="new-subtransaction" class="add-info button">
     + Add Subtransaction
   </div>
-
 
 
   <div class="form-field">

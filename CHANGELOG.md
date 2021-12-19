@@ -46,5 +46,6 @@
 ## 1.1.0 (in progress)
 - Added banking interface
 - Grayed out pending transactions
+- Fixed bug where transaction tags appeared in front of header bar
 - Minor cosmetic enhancements
 

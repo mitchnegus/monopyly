@@ -177,6 +177,10 @@ class CreditTransactionHandler(DatabaseHandler):
     def update_entry(self, entry_id, mapping):
         """Update a transaction (and its subtransactions) in the database."""
         subtransaction_db = CreditSubtransactionHandler()
+        # Automatically populate the internal transaction ID field
+        transaction = self.get_entry(entry_id)
+        field = 'internal_transaction_id'
+        mapping[field] = transaction[field]
         # Override the default method to account for subtransactions
         subtransactions_data = mapping.pop('subtransactions')
         transaction = super().update_entry(entry_id, mapping)

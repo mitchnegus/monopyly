@@ -54,6 +54,12 @@
         </a>
       {% endif %}
 
+      {% if transaction['internal_transaction_id'] %}
+        <a class="button" onclick="alert('This transaction has internal ID {{ transaction['internal_transaction_id'] }}')">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/link.png') }}" />
+        </a>
+      {% endif %}
+
       <a class="button" href="{{ url_for('banking.update_transaction', transaction_id=transaction['id']) }}">
         <img class="edit icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
       </a>

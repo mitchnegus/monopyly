@@ -31,3 +31,4 @@ import { executeAjaxRequest } from './modules/ajax.js';
   });
 
 })();
+

@@ -1,10 +1,13 @@
 """
 Routes for banking financials.
 """
-from flask import redirect, render_template, flash, request, url_for
+from collections import Counter
+
+from flask import redirect, render_template, flash, request, url_for, jsonify
 
 from ..auth.tools import login_required
 from ..form_utils import form_err_msg
+from ..core.internal_transactions import add_internal_transaction
 from . import banking
 from .forms import *
 from .banks import BankHandler
@@ -99,7 +102,8 @@ def load_account_details(account_id):
     account = account_db.get_entry(account_id)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
-    transaction_fields = ('transaction_date', 'total', 'balance', 'note')
+    transaction_fields = ('transaction_date', 'total', 'balance', 'note',
+                          'internal_transaction_id')
     transactions = transactions_db.get_entries(account_ids=(account['id'],),
                                                sort_order=sort_order,
                                                fields=transaction_fields)
@@ -126,7 +130,7 @@ def add_transaction(bank_id, account_id):
         # Get the necessary fields from the database
         bank_fields = ('bank_name',)
         bank = bank_db.get_entry(bank_id, fields=bank_fields)
-        data = {field: bank[field] for field in bank_fields}
+        data = {'account_info': {field: bank[field] for field in bank_fields}}
         # Prepare known form entries if account is known
         if account_id:
             account_db = BankAccountHandler()
@@ -134,7 +138,7 @@ def add_transaction(bank_id, account_id):
             account_fields = ('last_four_digits', 'type_name')
             account = account_db.get_entry(account_id, fields=account_fields)
             for field in account_fields:
-                data[field] = account[field]
+                data['account_info'][field] = account[field]
         form.process(data=data)
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
@@ -143,7 +147,8 @@ def add_transaction(bank_id, account_id):
                                 account_id=transaction['account_id']))
     # Display the form for accepting user input
     return render_template('banking/transaction_form/'
-                           'transaction_form_page_new.html', form=form)
+                           'transaction_form_page_new.html', form=form,
+                           update=False)
 
 
 @banking.route('/update_transaction/<int:transaction_id>',
@@ -152,9 +157,14 @@ def add_transaction(bank_id, account_id):
 def update_transaction(transaction_id):
     transaction_db = BankTransactionHandler()
     # Get the transaction information from the database
+    account_info_data = {}
     transaction = transaction_db.get_entry(transaction_id)
+    for field in ('bank_name', 'last_four_digits', 'type_name'):
+        account_info_data[field] = transaction[field]
+    transfer_account_data = {}
+    form_data = {**transaction, 'account_info': account_info_data,
+                 'transfer_account_info': transfer_account_data}
     # Define a form for a transaction
-    form_data = {**transaction}
     form = BankTransactionForm(data=form_data)
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
@@ -162,9 +172,11 @@ def update_transaction(transaction_id):
         return redirect(url_for('banking.load_account_details',
                                 account_id=transaction['account_id']))
     # Display the form for accepting user input
+    update = 'transfer' if transaction['internal_transaction_id'] else True
     return render_template('banking/transaction_form/'
                            'transaction_form_page_update.html',
-                           transaction_id=transaction_id, form=form)
+                           transaction_id=transaction_id, form=form,
+                           update=update)
 
 
 def _save_transaction(form, transaction_id=None):
@@ -178,18 +190,39 @@ def _save_transaction(form, transaction_id=None):
     if form.validate():
         transaction_db = BankTransactionHandler()
         transaction_data = form.transaction_data
+        transfer_data = form.transfer_data
         if transaction_id:
             # Update the database with the updated transaction
             transaction = transaction_db.update_entry(transaction_id,
                                                       transaction_data)
         else:
             # Insert the new transaction into the database
+            if transfer_data:
+                # Update the mappings with the internal transaction information
+                internal_transaction_id = add_internal_transaction()
+                field = 'internal_transaction_id'
+                transfer_data[field] = internal_transaction_id
+                transaction_data[field] = internal_transaction_id
+                # Add the transfer to the database
+                transfer = transaction_db.add_entry(transfer_data)
             transaction = transaction_db.add_entry(transaction_data)
         return transaction
     else:
         # Show an error to the user and print the errors for the admin
         flash(form_err_msg)
         print(form.errors)
+
+
+@banking.route('/_add_transfer_fields', methods=('POST',))
+@login_required
+def add_transfer_fields():
+    # Redefine the form for the transaction (including the new transfer fields)
+    # NOTE: this is a hack (since `append_entry` method cannot be used in AJAX)
+    form_id = 'transfer_account_info-0'
+    sub_form = BankTransactionForm.BankAccountInfoForm(prefix=form_id)
+    sub_form.id = form_id
+    return render_template('banking/transaction_form/transfer_form.html',
+                           sub_form=sub_form, id_prefix='transfer')
 
 
 @banking.route('/delete_transaction/<int:transaction_id>')
@@ -207,14 +240,27 @@ def delete_transaction(transaction_id):
 @login_required
 def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
-    return None
-    #post_args = request.get_json()
-    #field = post_args['field']
-    #if field not in ('bank_name'):
-    #    raise ValueError(f"'{field}' does not support autocompletion.")
-    ## Get information from the database to use for autocompletion
-    #bank_db = BankHandler()
-    #banks = bank_db.get_entries(fields=(field,))
-    #suggestions = [bank['bank_name'] for bank in banks]
-    #return jsonify(suggestions)
+    post_args = request.get_json()
+    field = post_args['field']
+    if field not in ('bank_name', 'last_four_digits', 'type_name', 'note'):
+        raise ValueError(f"'{field}' does not support autocompletion.")
+    # Get information from the database to use for autocompletion
+    if field == 'bank_name':
+        bank_db = BankHandler()
+        entries = bank_db.get_entries(fields=(field,))
+    elif field == 'last_four_digits':
+        account_db = BankAccountHandler()
+        entries = account_db.get_entries(fields=(field,))
+    elif field == 'type_name':
+        account_type_db = BankAccountTypeHandler()
+        entries = account_type_db.get_entries(fields=(field,))
+    elif field == 'note':
+        transaction_db = BankTransactionHandler()
+        entries = transaction_db.get_entries(fields=(field,))
+    items = [entry[field] for entry in entries]
+    # Order the returned values by their frequency in the database
+    item_counts = Counter(items)
+    unique_items = set(items)
+    suggestions = sorted(unique_items, key=item_counts.get, reverse=True)
+    return jsonify(suggestions)
 

@@ -129,3 +129,74 @@ class BankTransactionHandler(DatabaseHandler):
                       'user.')
         transaction = self._query_entry(query, placeholders, abort_msg)
         return transaction
+
+    def update_entry(self, entry_id, mapping):
+        """Update a transaction in the database."""
+        # Automatically populate the internal transaction ID field
+        transaction = self.get_entry(entry_id)
+        field = 'internal_transaction_id'
+        mapping[field] = transaction[field]
+        transaction = super().update_entry(entry_id, mapping)
+        return transaction
+
+    def get_matching_transactions(self, transaction_id):
+        """
+        Find all internal transactions that match this transaction.
+
+        Checks all transaction databases for transactions that match the
+        given transaction.
+
+        Parameters
+        ----------
+        transaction_id : integer
+            The ID for the transaction that should be matched.
+
+        Returns
+        -------
+        matching_transactions : dict
+            A dictionary of transaction types and the corresponding
+            transactions that match the given transaction. The
+            transactions may be rows in either the `bank_transactions` or
+            `credit_transactions` databases, depending on the dictionary
+            key (either 'bank' or 'credit' respectively). If no matching
+            transactions are found, `None` is returned.
+        """
+        transaction = self.get_entry(transaction_id,
+                                     ('internal_transaction_id'))
+        internal_transaction_id = transaction['internal_transaction_id']
+        if not internal_transaction_id:
+            return None
+        matching_transactions = {'bank': None, 'credit': None}
+        # Get matching bank transactions
+        query = ("SELECT * "
+                 "  FROM bank_transactions_view AS t "
+                 "       INNER JOIN bank_accounts AS a "
+                 "          ON a.id = t.account_id "
+                 "       INNER JOIN banks AS b "
+                 "          ON b.id = a.bank_id "
+                 " WHERE b.user_id =? AND t.id != ? "
+                 "       AND t.internal_transaction_id = ?")
+        placeholders = (self.user_id, transaction_id, internal_transaction_id)
+        bank_transactions = self.query_entry(query, placeholders)
+        if bank_transactions:
+            matching_transactions['bank'] = bank_transactions
+        # Get matching credit transactions
+        query = ("SELECT * "
+                 "  FROM credit_transactions_view AS t "
+                 "       INNER JOIN credit_statements AS s "
+                 "          ON s.id = t.statement_id "
+                 "       INNER JOIN credit_cards AS c "
+                 "          ON c.id = s.card_id "
+                 "       INNER JOIN credit_accounts AS a "
+                 "          ON a.id = c.account_id "
+                 "       INNER JOIN banks AS b "
+                 "          ON b.id = a.bank_id "
+                 " WHERE b.user_id =? AND t.id != ? "
+                 "       AND t.internal_transaction_id = ?")
+        placeholders = (self.user_id, transaction_id, internal_transaction_id)
+        credit_transactions = self.query_entry(query, placeholders)
+        credit_transactions = self.query_entry(query, placeholders)
+        if credit_transactions:
+            matching_transactions['credit'] = credit_transactions
+        return matching_transactions
+

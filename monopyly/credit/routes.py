@@ -8,7 +8,6 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 
-from ..db import get_db
 from ..auth.tools import login_required
 from ..utils import parse_date, dedelimit_float
 from ..form_utils import form_err_msg
@@ -190,7 +189,8 @@ def load_statement_details(statement_id):
     statement = statement_db.get_entry(statement_id, fields=statement_fields)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
-    transaction_fields = ('transaction_date', 'vendor', 'total', 'notes')
+    transaction_fields = ('transaction_date', 'vendor', 'total', 'notes',
+                          'internal_transaction_id')
     transactions = transaction_db.get_entries(statement_ids=(statement['id'],),
                                               sort_order=sort_order,
                                               fields=transaction_fields)
@@ -253,7 +253,6 @@ def make_payment(statement_id):
             'note': "Credit card payment "
                    f"({card['bank_name']}-{card['last_four_digits']})"
         }
-        print(bank_mapping)
         bank_transaction_db.add_entry(bank_mapping)
     else:
         internal_transaction_id = None
@@ -295,7 +294,8 @@ def load_transactions(card_id):
     sort_order = 'DESC'
     transaction_fields = ('account_id', 'bank_name', 'last_four_digits',
                           'transaction_date', 'vendor', 'total', 'notes',
-                          'statement_id', 'issue_date')
+                          'statement_id', 'issue_date',
+                          'internal_transaction_id')
     transactions = transaction_db.get_entries(card_ids=selected_card_ids,
                                               sort_order=sort_order,
                                               fields=transaction_fields)
@@ -447,12 +447,13 @@ def _save_transaction(form, transaction_id=None):
         print(form.errors)
 
 
-@credit.route('/_add_subtransaction_field', methods=('POST',))
+@credit.route('/_add_subtransaction_fields', methods=('POST',))
 @login_required
-def add_subtransaction_field():
+def add_subtransaction_fields():
     post_args = request.get_json()
-    new_index = post_args['subtransaction_count'] + 1
+    new_index = post_args['subtransaction_count']
     # Redefine the form for the transaction (including using entered info)
+    # NOTE: this is a hack (since `append_entry` method cannot be used in AJAX)
     form_id = f'subtransactions-{new_index}'
     sub_form = CreditTransactionForm.CreditSubtransactionForm(prefix=form_id)
     sub_form.id = form_id

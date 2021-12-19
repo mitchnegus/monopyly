@@ -4,7 +4,8 @@ Generate banking forms for the user to fill out.
 from flask_wtf import FlaskForm
 #from werkzeug.exceptions import abort
 from wtforms.fields import (
-    DecimalField, TextField, BooleanField, SelectField, SubmitField
+    FormField, DecimalField, TextField, BooleanField, SelectField, SubmitField,
+    FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
 
@@ -16,13 +17,22 @@ from .accounts import BankAccountTypeHandler, BankAccountHandler
 
 class BankTransactionForm(FlaskForm):
     """Form to input/edit transactions."""
+
+    class BankAccountInfoForm(FlaskForm):
+        """Form to input/edit bank account identification."""
+        def __init__(self, *args, **kwargs):
+            # Deactivate CSRF as a subform
+            super().__init__(meta={'csrf': False}, *args, **kwargs)
+
+        bank_name = TextField('Bank')
+        last_four_digits = TextField(
+            'Last Four Digits',
+            validators=[DataRequired(), Length(4), NumeralsOnly()]
+        )
+        type_name = TextField('AccountType', validators=[DataRequired()])
+
     # Fields to identify the bank account information for the transaction
-    bank_name = TextField('Bank')
-    last_four_digits = TextField(
-        'Last Four Digits',
-        validators=[DataRequired(), Length(4), NumeralsOnly()]
-    )
-    type_name = TextField('Account Type', validators=[DataRequired()])
+    account_info = FormField(BankAccountInfoForm)
     # Fields pertaining to the transaction
     transaction_date = TextField(
         'Transaction Date',
@@ -36,6 +46,10 @@ class BankTransactionForm(FlaskForm):
         places=2
     )
     note = TextField('Note', [DataRequired()])
+    # Fields to identify a second bank involved in a funds transfer
+    transfer_account_info = FieldList(FormField(BankAccountInfoForm),
+                                      min_entries=0, max_entries=1)
+
     submit = SubmitField('Save Transaction')
 
     @property
@@ -55,13 +69,48 @@ class BankTransactionForm(FlaskForm):
             transaction_data[field] = self[field].data
         return transaction_data
 
+    @property
+    def transfer_data(self):
+        """
+        Produce a dictionary corresponding to the transfer transaction.
+
+        Creates a dictionary of transaction fields and values, in a
+        format that can be added directly to the database as a new
+        bank transaction, for the transfer.
+        """
+        if not self.transfer_account_info:
+            return None
+        account = self.get_transfer_account()
+        transfer_data = {'internal_transaction_id': None,
+                         'account_id': account['id']}
+        transfer_data['transaction_date'] = self['transaction_date'].data
+        transfer_data['total'] = -self['total'].data
+        transfer_data['note'] = self['note'].data
+        return transfer_data
+
     def get_transaction_account(self):
         """Get the bank account associated with the transaction."""
-        account_db = BankAccountHandler()
-        account = account_db.find_account(self.bank_name.data,
-                                          self.last_four_digits.data,
-                                          self.type_name.data)
+        account = self._get_account(
+            self.account_info.bank_name.data,
+            self.account_info.last_four_digits.data,
+            self.account_info.type_name.data
+        )
         return account
+
+    def get_transfer_account(self):
+        """Get the bank account linked in a transfer."""
+        transfer_account_info = self.transfer_account_info[0]
+        account = self._get_account(
+            transfer_account_info.bank_name.data,
+            transfer_account_info.last_four_digits.data,
+            transfer_account_info.type_name.data
+        )
+        return account
+
+    @staticmethod
+    def _get_account(bank_name, last_four_digits, type_name):
+        account_db = BankAccountHandler()
+        return account_db.find_account(bank_name, last_four_digits, type_name)
 
 
 class BankAccountForm(FlaskForm):

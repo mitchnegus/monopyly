@@ -67,6 +67,7 @@ class CreditTransactionForm(FlaskForm):
         subtransaction).
         """
         statement = self.get_transaction_statement()
+        # Internal transaction IDs are managed by the database handler
         transaction_data = {'internal_transaction_id': None,
                             'statement_id': statement['id']}
         # Loop over the transaction-specific fields

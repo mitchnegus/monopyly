@@ -1,8 +1,8 @@
 /*
  * Provide autocomplete suggestions when filling out a transaction form.
  *
- * When entering a transaction, provide autocomplete suggestions to the
- * user. The suggestions are pulled from the database for the field
+ * When entering a bank transaction, provide autocomplete suggestions to
+ * the user. The suggestions are pulled from the database for the field
  * being input using an AJAX request. They are ordered (on the server
  * side) by their occurrence frequecy and then filtered here by the
  * current input text after the input field is changed.
@@ -27,10 +27,7 @@ import { executeAjaxRequest } from './modules/ajax.js';
     // Use a delegated event handler to use autocomplete
     $('form').on('focus', '.autocomplete input', function() {
       const inputElement = this;
-      // Identify the vendor input box (used when suggesting notes)
-      const $vendor = $('form input#vendor');
-      // Smart autocomplete factors in the transaction vendor
-      autocompleteAjaxRequest(inputElement, $vendor);
+      autocompleteAjaxRequest(inputElement);
     });
 
     $('form').on('blur', '.autocomplete input', function() {
@@ -41,13 +38,10 @@ import { executeAjaxRequest } from './modules/ajax.js';
 
   }
 
-  function autocompleteAjaxRequest(inputElement, $vendor = null) {
+  function autocompleteAjaxRequest(inputElement) {
     const inputID = inputElement.id.split('-');
     const field = inputID[inputID.length-1];
-    const rawData = {
-      'field': field,
-      'vendor': $vendor.val()
-    };
+    const rawData = {'field': field};
     // Return a set of autocomplete suggestions from the database
     function autocompleteAction(response) {
       // Define variables for the user input and its database matches
