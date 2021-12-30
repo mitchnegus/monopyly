@@ -360,12 +360,16 @@ def check_sort_order(sort_order):
         raise ValueError('Provide a valid sort order.')
 
 
-def check_field(field):
+def check_field(field, field_list=None):
     """Check that a named field matches database field."""
     field = strip_function(field)
-    if field.split('.', 1)[-1] not in ALL_FIELDS:
-        raise ValueError(f"The field '{field}' does not exist in the "
-                          "database.")
+    if field_list is None:
+        field_list = ALL_FIELDS
+        err_msg = f"The field '{field}' does not exist in the database."
+    else:
+        err_msg = f"The field '{field}' is not in the given list of fields."
+    if field.split('.', 1)[-1] not in field_list:
+        raise ValueError(err_msg)
 
 
 def select_fields(fields, id_field=None, convert_dates=True):
@@ -402,4 +406,11 @@ def select_fields(fields, id_field=None, convert_dates=True):
         else:
             query_fields.append(field)
     return f"{', '.join(query_fields)}"
+
+
+def sort_by_frequency(items):
+    """Return a sorted (unique) list ordered by decreasing frequency."""
+    item_counts = Counter(items)
+    unique_items = set(items)
+    return sorted(unique_items, key=item_counts.get, reverse=True)
 

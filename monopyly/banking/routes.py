@@ -6,6 +6,7 @@ from collections import Counter
 from flask import redirect, render_template, flash, request, url_for, jsonify
 
 from ..auth.tools import login_required
+from ..utils import check_field, sort_by_frequency
 from ..form_utils import form_err_msg
 from ..core.internal_transactions import add_internal_transaction
 from . import banking
@@ -242,25 +243,19 @@ def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
-    if field not in ('bank_name', 'last_four_digits', 'type_name', 'note'):
-        raise ValueError(f"'{field}' does not support autocompletion.")
+    autocomplete_fields = ('bank_name', 'last_four_digits', 'type_name', 'note')
+    check_field(field, autocomplete_fields)
     # Get information from the database to use for autocompletion
     if field == 'bank_name':
-        bank_db = BankHandler()
-        entries = bank_db.get_entries(fields=(field,))
+        db = BankHandler()
     elif field == 'last_four_digits':
-        account_db = BankAccountHandler()
-        entries = account_db.get_entries(fields=(field,))
+        db = BankAccountHandler()
     elif field == 'type_name':
-        account_type_db = BankAccountTypeHandler()
-        entries = account_type_db.get_entries(fields=(field,))
+        db = BankAccountTypeHandler()
     elif field == 'note':
-        transaction_db = BankTransactionHandler()
-        entries = transaction_db.get_entries(fields=(field,))
-    items = [entry[field] for entry in entries]
-    # Order the returned values by their frequency in the database
-    item_counts = Counter(items)
-    unique_items = set(items)
-    suggestions = sorted(unique_items, key=item_counts.get, reverse=True)
+        db = BankTransactionHandler()
+    fields = (field,)
+    entries = db.get_entries(fields=fields)
+    suggestions = sort_by_frequency([entry[field] for entry in entries])
     return jsonify(suggestions)
 

@@ -1,15 +1,13 @@
 """
 Routes for credit card financials.
 """
-from collections import Counter
-
 from flask import (
     g, redirect, render_template, flash, request, url_for, jsonify
 )
 from werkzeug.exceptions import abort
 
 from ..auth.tools import login_required
-from ..utils import parse_date, dedelimit_float
+from ..utils import parse_date, dedelimit_float, check_field, sort_by_frequency
 from ..form_utils import form_err_msg
 from ..core.internal_transactions import add_internal_transaction
 from ..banking.banks import BankHandler
@@ -523,29 +521,25 @@ def suggest_transaction_autocomplete():
     post_args = request.get_json()
     field = post_args['field']
     vendor = post_args['vendor']
-    if field not in ('bank_name', 'last_four_digits', 'vendor', 'note'):
-        raise ValueError(f"'{field}' does not support autocompletion.")
+    autocomplete_fields = ('bank_name', 'last_four_digits', 'vendor', 'note')
+    check_field(field, autocomplete_fields)
     # Get information from the database to use for autocompletion
     if field != 'note':
-        transaction_db = CreditTransactionHandler()
-        entries = transaction_db.get_entries(fields=(field,))
+        db = CreditTransactionHandler()
+        fields = (field,)
     else:
-        subtransaction_db = CreditSubtransactionHandler()
+        db = CreditSubtransactionHandler()
         fields = ('vendor', 'note')
-        entries = subtransaction_db.get_entries(fields=fields)
+    entries = db.get_entries(fields=fields)
+    suggestions = sort_by_frequency([entry[field] for entry in entries])
+    # Also sort note fields by vendor
+    if field == 'note':
         # Generate a map of notes for the current vendor
         note_by_vendor = {}
         for entry in entries:
             note = entry['note']
             if not note_by_vendor.get(note):
                 note_by_vendor[note] = (entry['vendor'] == vendor)
-    items = [entry[field] for entry in entries]
-    # Order the returned values by their frequency in the database
-    item_counts = Counter(items)
-    unique_items = set(items)
-    suggestions = sorted(unique_items, key=item_counts.get, reverse=True)
-    # Also sort note fields by vendor
-    if field == 'note':
         suggestions.sort(key=note_by_vendor.get, reverse=True)
     return jsonify(suggestions)
 
