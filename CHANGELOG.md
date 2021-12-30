@@ -47,5 +47,6 @@
 - Added banking interface
 - Grayed out pending transactions
 - Fixed bug where transaction tags appeared in front of header bar
+- Improved modularity of autocomplete JavaScript
 - Minor cosmetic enhancements
 
