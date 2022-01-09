@@ -208,6 +208,53 @@ class CreditTransactionHandler(DatabaseHandler):
             subtransactions.append(subtransaction)
         return subtransactions
 
+    def get_associated_transaction(self, transaction_id):
+        """
+        Find an internal transaction that matches this transaction.
+
+        Checks the bank transaction database for a transaction that
+        matches the given transaction.
+
+        Parameters
+        ----------
+        transaction_id : integer
+            The ID for the credit transaction that should be matched.
+
+        Returns
+        -------
+        associated_transaction : dict
+            A dictionary of transaction types and the corresponding
+            bank transaction that matches the given transaction. For
+            compatibility with the bank transaction handler, the
+            returned dictionary contains two types of possible
+            transactions: 'bank' and 'credit' transactions. Since this
+            class finds a bank transaction corresponding to a given
+            credit transaction, the 'credit' key in the dictionary will
+            always be assigned a value of `None`.
+        """
+        transaction = self.get_entry(transaction_id,
+                                     ('internal_transaction_id',))
+        internal_transaction_id = transaction['internal_transaction_id']
+        if not internal_transaction_id:
+            return None
+        associated_transaction = {'bank': None, 'credit': None}
+        # Get matching bank transactions
+        query = ("SELECT * "
+                 "  FROM bank_transactions_view AS t "
+                 "       INNER JOIN bank_accounts AS a "
+                 "          ON a.id = t.account_id "
+                 "       INNER JOIN banks AS b "
+                 "          ON b.id = a.bank_id "
+                 "       INNER JOIN bank_account_types AS types "
+                 "          ON types.id = a.account_type_id "
+                 " WHERE b.user_id =? AND t.id != ? "
+                 "       AND t.internal_transaction_id = ?")
+        placeholders = (self.user_id, transaction_id, internal_transaction_id)
+        bank_transactions = self._query_entries(query, placeholders)
+        if bank_transactions:
+            associated_transaction['bank'] = bank_transactions[0]
+        return associated_transaction
+
 
 class CreditSubtransactionHandler(DatabaseHandler):
     """
@@ -785,3 +832,50 @@ class CreditTagHandler(DatabaseHandler):
                         self.user_id, *fill_places(statement_ids))
         tag_average_totals = self._query_entries(query, placeholders)
         return tag_average_totals
+
+
+def save_transaction(form, transaction_id=None):
+    """
+    Save a credit transaction.
+
+    Saves a transaction in the database. If a transaction ID is given,
+    then the transaction is updated with the form information. Otherwise
+    the form information is added as a new entry.
+
+    Parameters
+    ----------
+    form : flask_wtf.FlaskForm
+        The form being used to provide the data being saved.
+    transaction_id : int
+        The ID of the transaction to be saved. If provided, the
+        named transaction will be updated in the database. Otherwise, if
+        the transaction ID is `None`, a new transaction will be added.
+
+    Returns
+    -------
+    entry : tuple (sqlite3.Row, list of sqlite3.Row)
+        An "entry" corresponding to a transaction in the database and
+        all associated subtransactions.
+
+    Raises
+    ------
+    wtfforms.validators.ValidationError
+        Raised when the form does not validate properly.
+    """
+    if form.validate():
+        transaction_db = CreditTransactionHandler()
+        transaction_data = form.transaction_data
+        if transaction_id:
+            # Update the database with the updated transaction
+            entry = transaction_db.update_entry(transaction_id,
+                                                transaction_data)
+        else:
+            # Insert the new transaction into the database
+            entry = transaction_db.add_entry(transaction_data)
+        return entry
+    else:
+        # Show an error to the user and print the errors for the admin
+        flash(form_err_msg)
+        print(form.errors)
+        raise ValidationError('The form did not validate properly.')
+

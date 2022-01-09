@@ -4,6 +4,7 @@ Routes for banking financials.
 from collections import Counter
 
 from flask import redirect, render_template, flash, request, url_for, jsonify
+from wtforms.validators import ValidationError
 
 from ..auth.tools import login_required
 from ..utils import check_field, sort_by_frequency
@@ -13,7 +14,7 @@ from . import banking
 from .forms import *
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler
-from .transactions import BankTransactionHandler
+from .transactions import BankTransactionHandler, save_transaction
 
 
 @banking.route('/accounts')
@@ -113,6 +114,30 @@ def load_account_details(account_id):
                            account_transactions=transactions)
 
 
+@banking.route('/_show_linked_transaction', methods=('POST',))
+@login_required
+def show_linked_transaction():
+    post_args = request.get_json()
+    transaction_id = post_args['transaction_id']
+    db = BankTransactionHandler()
+    transaction = db.get_entry(transaction_id)
+    linked_transactions = db.get_associated_transaction(transaction_id)
+    if linked_transactions['bank']:
+        linked_transaction = linked_transactions['bank']
+        linked_transaction_type = 'bank'
+    elif linked_transactions['credit']:
+        linked_transaction = linked_transactions['credit']
+        linked_transaction_type = 'credit'
+    else:
+        raise ValueError('The linked transaction must be either a credit or '
+                         'bank transaction.')
+    return render_template('banking/transactions_table/'
+                           'linked_transaction_overlay.html',
+                           linked_transaction_type=linked_transaction_type,
+                           transaction=transaction,
+                           linked_transaction=linked_transaction)
+
+
 @banking.route('/add_transaction',
                defaults={'bank_id': None, 'account_id': None},
                methods=('GET', 'POST'))
@@ -143,7 +168,7 @@ def add_transaction(bank_id, account_id):
         form.process(data=data)
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
-        transaction = _save_transaction(form)
+        transaction = save_transaction(form)
         return redirect(url_for('banking.load_account_details',
                                 account_id=transaction['account_id']))
     # Display the form for accepting user input
@@ -169,7 +194,7 @@ def update_transaction(transaction_id):
     form = BankTransactionForm(data=form_data)
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
-        transaction = _save_transaction(form, transaction_id)
+        transaction = save_transaction(form, transaction_id)
         return redirect(url_for('banking.load_account_details',
                                 account_id=transaction['account_id']))
     # Display the form for accepting user input
@@ -178,40 +203,6 @@ def update_transaction(transaction_id):
                            'transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form,
                            update=update)
-
-
-def _save_transaction(form, transaction_id=None):
-    """
-    Save a transaction.
-
-    Saves a transaction in the database. If a transaction ID is given,
-    then the transaction is updated with the form information. Otherwise
-    the form information is added as a new entry.
-    """
-    if form.validate():
-        transaction_db = BankTransactionHandler()
-        transaction_data = form.transaction_data
-        transfer_data = form.transfer_data
-        if transaction_id:
-            # Update the database with the updated transaction
-            transaction = transaction_db.update_entry(transaction_id,
-                                                      transaction_data)
-        else:
-            # Insert the new transaction into the database
-            if transfer_data:
-                # Update the mappings with the internal transaction information
-                internal_transaction_id = add_internal_transaction()
-                field = 'internal_transaction_id'
-                transfer_data[field] = internal_transaction_id
-                transaction_data[field] = internal_transaction_id
-                # Add the transfer to the database
-                transfer = transaction_db.add_entry(transfer_data)
-            transaction = transaction_db.add_entry(transaction_data)
-        return transaction
-    else:
-        # Show an error to the user and print the errors for the admin
-        flash(form_err_msg)
-        print(form.errors)
 
 
 @banking.route('/_add_transfer_fields', methods=('POST',))

@@ -21,7 +21,7 @@
 
         <div class="description">
 
-          <div class="transaction-details">
+          <div class="description-header">
             <div class="brief">
               {% if transaction['total'] > 0 %}
                 Deposit
@@ -44,7 +44,7 @@
       </div>
 
     </div>
-    <div class="buttons">
+    <div class="buttons column">
 
       <img class="less button" src="{{ url_for('static', filename='img/icons/x-thick.png') }}" />
 
@@ -55,9 +55,7 @@
       {% endif %}
 
       {% if transaction['internal_transaction_id'] %}
-        <a class="button" onclick="alert('This transaction has internal ID {{ transaction['internal_transaction_id'] }}')">
-          <img class="icon" src="{{ url_for('static', filename='img/icons/link.png') }}" />
-        </a>
+        <img class="link button" data-transaction-id="{{ transaction['id'] }}" src="{{ url_for('static', filename='img/icons/link.png') }}" />
       {% endif %}
 
       <a class="button" href="{{ url_for('banking.update_transaction', transaction_id=transaction['id']) }}">

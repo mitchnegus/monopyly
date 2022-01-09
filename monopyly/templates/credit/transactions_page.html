@@ -59,7 +59,7 @@
     {% endfor %}
   </div>
 
-  <div id="transactions-container">
+  <div class="transactions-container">
     {% include 'credit/transactions_table/transactions.html' %}
   </div>
 
@@ -75,10 +75,13 @@
   <script>
     const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
     const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
   </script>
   <script type="module" src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
   </script>
   <script type="module" src="{{ url_for('static', filename='js/expand_credit_transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show_linked_transaction.js') }}">
   </script>
 
 {% endblock %}

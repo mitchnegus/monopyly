@@ -53,9 +53,11 @@
 {% block javascript %}
 
   <script>
-    /*const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";*/
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('banking.show_linked_transaction') }}";
   </script>
   <script type="module" src="{{ url_for('static', filename='js/expand_bank_transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show_linked_transaction.js') }}">
   </script>
 
 {% endblock %}

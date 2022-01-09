@@ -5,6 +5,7 @@ from flask import (
     g, redirect, render_template, flash, request, url_for, jsonify
 )
 from werkzeug.exceptions import abort
+from wtforms.validators import ValidationError
 
 from ..auth.tools import login_required
 from ..utils import parse_date, dedelimit_float, check_field, sort_by_frequency
@@ -19,7 +20,8 @@ from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
 from .transactions import (
-    CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler
+    CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler,
+    save_transaction
 )
 
 
@@ -323,6 +325,20 @@ def expand_transaction():
                            subtransactions=subtransactions)
 
 
+@credit.route('/_show_linked_transaction', methods=('POST',))
+@login_required
+def show_linked_transaction():
+    post_args = request.get_json()
+    transaction_id = post_args['transaction_id']
+    db = CreditTransactionHandler()
+    transaction = db.get_entry(transaction_id)
+    linked_transaction = db.get_associated_transaction(transaction_id)['bank']
+    return render_template('credit/transactions_table/'
+                           'linked_transaction_overlay.html',
+                           transaction=transaction,
+                           linked_transaction=linked_transaction)
+
+
 @credit.route('/_update_transactions_display', methods=('POST',))
 @login_required
 def update_transactions_display():
@@ -377,11 +393,14 @@ def add_transaction(card_id, statement_id):
         form.process(data=data)
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
-        transaction, subtransactions = _save_transaction(form)
-        return render_template('credit/transaction_submission_page.html',
-                               transaction=transaction,
-                               subtransactions=subtransactions,
-                               update=False)
+        try:
+            transaction, subtransactions = save_transaction(form)
+            return render_template('credit/transaction_submission_page.html',
+                                   transaction=transaction,
+                                   subtransactions=subtransactions,
+                                   update=False)
+        except ValidationError:
+            pass
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_new.html', form=form)
@@ -410,7 +429,7 @@ def update_transaction(transaction_id):
     form = CreditTransactionForm(data=form_data)
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
-        transaction, subtransactions = _save_transaction(form, transaction_id)
+        transaction, subtransactions = save_transaction(form, transaction_id)
         return render_template('credit/transaction_submission_page.html',
                                transaction=transaction,
                                subtransactions=subtransactions,
@@ -419,30 +438,6 @@ def update_transaction(transaction_id):
     return render_template('credit/transaction_form/'
                            'transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
-
-def _save_transaction(form, transaction_id=None):
-    """
-    Save a transaction.
-
-    Saves a transaction in the database. If a transaction ID is given,
-    then the transaction is updated with the form information. Otherwise
-    the form information is added as a new entry.
-    """
-    if form.validate():
-        transaction_db = CreditTransactionHandler()
-        transaction_data = form.transaction_data
-        if transaction_id:
-            # Update the database with the updated transaction
-            entry = transaction_db.update_entry(transaction_id,
-                                                transaction_data)
-        else:
-            # Insert the new transaction into the database
-            entry = transaction_db.add_entry(transaction_data)
-        return entry
-    else:
-        # Show an error to the user and print the errors for the admin
-        flash(form_err_msg)
-        print(form.errors)
 
 
 @credit.route('/_add_subtransaction_fields', methods=('POST',))
@@ -457,6 +452,7 @@ def add_subtransaction_fields():
     sub_form.id = form_id
     return render_template('credit/transaction_form/subtransaction_form.html',
                            sub_form=sub_form)
+
 
 @credit.route('/delete_transaction/<int:transaction_id>')
 @login_required

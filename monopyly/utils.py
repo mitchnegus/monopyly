@@ -125,7 +125,7 @@ class DatabaseHandler(ABC):
         # Check that an entry was found
         if not entry:
             if not abort_msg:
-                abort_msg = (f'The entry with ID {entry_id} does not exist '
+                abort_msg = (f'The entry with ID {entry["id"]} does not exist '
                               'for the user.')
             abort(404, abort_msg)
         return entry

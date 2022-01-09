@@ -23,7 +23,7 @@ import {
 	// Identify the card filters
 	const $filterContainer = $('#card-filter');
 	// Identify the transactions container
-	const $container = $('#transactions-container');
+	const $container = $('.transactions-container');
 	
 	// Send the Ajax request on click
 	const $filters = $filterContainer.find('.card');
