@@ -59,7 +59,7 @@ def add_account(bank_id):
         else:
             flash(form_err_msg)
             print(form.errors)
-    return render_template('banking/account_form_page_new.html', form=form)
+    return render_template('banking/account_form/account_form_page_new.html', form=form)
 
 
 @banking.route('/delete_account/<int:account_id>')
