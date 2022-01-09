@@ -1,4 +1,4 @@
-{% extends "credit/card_form_page.html" %}
+{% extends "common/form_page.html" %}
 
 
 {% block title %}
@@ -9,7 +9,7 @@
 {% block content %}
 
   {% with submission_url = url_for('credit.add_card') %}
-    {% include 'credit/card_form.html' %}
+    {% include 'credit/card_form/card_form.html' %}
   {% endwith %}
 
 {% endblock %}

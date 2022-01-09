@@ -51,7 +51,7 @@ def add_card():
         else:
             flash(form_err_msg)
             print(form.errors)
-    return render_template('credit/card_form_page_new.html', form=form)
+    return render_template('credit/card_form/card_form_page_new.html', form=form)
 
 
 @credit.route('/account/<int:account_id>')
@@ -81,7 +81,7 @@ def update_card_status():
     # Update the card in the database
     mapping = {'active': int(active)}
     card = card_db.update_entry(card_id, mapping)
-    return render_template('credit/card_front.html',
+    return render_template('credit/card_graphic/card_front.html',
                            card=card)
 
 
@@ -497,7 +497,7 @@ def add_tag():
                 'user_id': g.user['id'],
                 'tag_name': tag_name}
     tag = tag_db.add_entry(tag_data)
-    return render_template('credit/subtag_tree.html',
+    return render_template('credit/tag_tree/subtag_tree.html',
                            tag=tag,
                            tags_heirarchy={})
 

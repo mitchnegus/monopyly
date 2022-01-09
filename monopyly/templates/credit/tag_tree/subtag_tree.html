@@ -12,7 +12,7 @@
 
       {% for tag in tags_heirarchy %}
         {% with tags_heirarchy = tags_heirarchy[tag] %}
-          {% include 'credit/subtag_tree.html' %}
+          {% include 'credit/tag_tree/subtag_tree.html' %}
         {% endwith %}
       {% endfor %}
 
