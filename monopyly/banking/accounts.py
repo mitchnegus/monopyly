@@ -67,7 +67,7 @@ class BankAccountTypeHandler(DatabaseHandler):
     def get_entry(self, account_type_id, fields=None):
         """Get a bank account type from the database given its ID."""
         query = (f"SELECT {select_fields(fields, 'types.id')} "
-                  "  FROM bank_account_types AS types"
+                  "  FROM bank_account_types_view AS types"
                   " WHERE types.id = ? AND user_id IN (0, ?)")
         placeholders = (account_type_id, self.user_id)
         abort_msg = (f'Account type ID {account_type_id} does not exist for '

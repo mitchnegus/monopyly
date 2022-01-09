@@ -23,7 +23,7 @@ DATABASE_FIELDS = {
     'bank_account_types_view': (
         'user_id',
         'type_name',
-        'type_full_name',
+        'type_common_name',
     ),
     'bank_accounts': (
         'bank_id',

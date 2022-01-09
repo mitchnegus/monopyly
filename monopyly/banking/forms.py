@@ -196,10 +196,10 @@ class BankAccountForm(FlaskForm):
         # Set account type choices
         account_type_choices = [(-1, '-')]
         for account_type in user_account_types:
-            display_name = account_type['type_full_name']
+            display_name = account_type['type_name']
             # Display name abbreviations in parentheses
-            if account_type['type_name'] != display_name:
-                display_name += f" ({account_type['type_name']})"
+            if account_type['type_common_name'] != display_name:
+                display_name += f" ({account_type['type_common_name']})"
             account_type_choices.append((account_type['id'], display_name))
         account_type_choices.append((0, 'New account type'))
         self.account_type_id.choices = account_type_choices

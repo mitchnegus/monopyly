@@ -25,7 +25,7 @@
             <div class="account-block">
 
               <div class="account-info">
-                <span class="digits">{{ account['last_four_digits'] }}</span> <b>{{ account['type_full_name'] }}</b>
+                <span class="digits">{{ account['last_four_digits'] }}</span> <b>{{ account['type_name'] }}</b>
              </div>
 
               <div class="expanded">
@@ -53,9 +53,9 @@
         {% for account_type in account_types %}
 
           <div class="account-type">
-            {{ account_type['type_full_name'] }}
-            {% if account_type['type_name'] != account_type['type_full_name'] %}
-              ({{ account_type['type_name'] }})
+            {{ account_type['type_name'] }}
+            {% if account_type['type_common_name'] != account_type['type_name'] %}
+              ({{ account_type['type_common_name'] }})
             {% endif %}
           </div>
 

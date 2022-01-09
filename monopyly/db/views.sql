@@ -13,8 +13,8 @@ CREATE VIEW bank_account_types_view AS
 SELECT
   id,
   user_id,
-  IFNULL(type_abbreviation, type_name) type_name,
-  type_name type_full_name
+  type_name,
+  IFNULL(type_abbreviation, type_name) type_common_name
 FROM bank_account_types;
 
 
