@@ -49,5 +49,6 @@
 - Grayed out pending transactions
 - Fixed bug where transaction tags appeared in front of header bar
 - Improved modularity of autocomplete JavaScript
+- Improved modularity of transaction table templates (for banking and credit transactions)
 - Minor cosmetic enhancements
 

@@ -1505,10 +1505,6 @@ form .autocomplete-box .item.active {
   overflow: auto;
 }
 
-.details .transactions-table .buttons.column {
-  min-width: 20px;
-}
-
 @media screen and (max-width: 1500px) {
   .details .transactions-table .expanded .row-content {
     margin-left: 28px;

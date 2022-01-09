@@ -1,0 +1,67 @@
+<div class="setting">
+
+  <div class="date column">
+    <div class="month">
+      {{ transaction['transaction_date'].strftime('%b')|upper }}
+    </div>
+    <div class="day">
+      {{ transaction['transaction_date'].strftime('%d')|upper }}
+    </div>
+    <div class="year">
+      {{ transaction['transaction_date'].year }}
+    </div>
+    <div class="full">
+      {{ transaction['transaction_date'] }}
+    </div>
+  </div>
+
+  <div class="description">
+
+    <div class="description-header">
+      <div class="vendor">
+        {{ transaction['vendor'] }}
+      </div>
+      <div class="total">
+        ${{ transaction['total']|currency }}
+      </div>
+    </div>
+
+    <div class="subtransaction-container">
+      <!-- Populate with AJAX request -->
+    </div>
+
+  </div>
+</div>
+
+<div class="payment">
+
+  {% if 'statement_id' in transaction.keys() %}
+    <div class="statement">
+      <a href="{{ url_for('credit.load_statement_details', statement_id=transaction['statement_id']) }}">
+        <img src="{{ url_for('static', filename='img/statement.png') }}" />
+        <div class="date">
+          <div class="month">{{ transaction['issue_date'].strftime('%b')|upper }}</div>
+          <div class="year">{{ transaction['issue_date'].year }}</div>
+        </div>
+      </a>
+    </div>
+  {% endif %}
+
+  {% if 'account_id' in transaction.keys() %}
+    <div class="card">
+      <a href="{{ url_for('credit.load_account', account_id=transaction['account_id']) }}">
+        {% with %}
+          {% set img_base = url_for('static', filename='img/cards/') %}
+          {% set card_url =  img_base + transaction['bank_name'].lower() + '-card.png' %}
+          {% set template_url = img_base + 'template-card.png' %}
+          <img class="card-background" src="{{ card_url }}" onerror="if (this.src != '{{ template_url }}') this.src = '{{ template_url }}'" />
+          <div class="card-number">
+            {{ transaction['last_four_digits'] }}
+          </div>
+        {% endwith %}
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+

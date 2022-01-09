@@ -1,6 +1,6 @@
 <div class="transactions-table">
 
-  {% include 'credit/transactions_table/transaction_field_titles.html' %}
+  {% include field_title_template %}
 
   {% for transaction in transactions[:100] %}
 
@@ -9,8 +9,8 @@
     {% endif %}
 
     <div id="transaction-{{ transaction['id'] }}" class="transaction {{ future }}">
-      {% include 'credit/transactions_table/transaction_condensed.html' %}
-      {% include 'credit/transactions_table/transaction_expanded.html' %}
+      {% include 'common/transactions_table/transaction_condensed.html' %}
+      {% include 'common/transactions_table/transaction_expanded.html' %}
     </div>
 
   {% endfor %}

@@ -130,8 +130,9 @@ def show_linked_transaction():
     else:
         raise ValueError('The linked transaction must be either a credit or '
                          'bank transaction.')
-    return render_template('banking/transactions_table/'
+    return render_template('common/transactions_table/'
                            'linked_transaction_overlay.html',
+                           selected_transaction_type='bank',
                            linked_transaction_type=linked_transaction_type,
                            transaction=transaction,
                            linked_transaction=linked_transaction)

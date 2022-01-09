@@ -1,3 +1,6 @@
+{% set bank_transaction_template = 'common/transactions_table/linked_bank_transaction.html' %}
+{% set credit_transaction_template = 'common/transactions_table/linked_credit_transaction.html' %}
+
 <div class="overlay">
   <div id="linked-transaction-display">
 
@@ -6,7 +9,11 @@
     </div>
 
     <div class="linked transaction selected">
-      {% include 'banking/transactions_table/linked_bank_transaction.html' %}
+      {% if selected_transaction_type == 'bank' %}
+        {% include bank_transaction_template %}
+      {% elif selected_transaction_type == 'credit' %}
+        {% include credit_transaction_template %}
+      {% endif %}
     </div>
 
     <img id="link" src="{{ url_for('static', filename='img/icons/link.png') }}" />
@@ -14,9 +21,9 @@
     <div class="linked transaction">
       {% with transaction = linked_transaction %}
         {% if linked_transaction_type == 'bank' %}
-          {% include 'banking/transactions_table/linked_bank_transaction.html' %}
+          {% include bank_transaction_template %}
         {% elif linked_transaction_type == 'credit' %}
-          {% include 'banking/transactions_table/linked_credit_transaction.html' %}
+          {% include credit_transaction_template %}
         {% endif %}
       {% endwith %}
     </div>

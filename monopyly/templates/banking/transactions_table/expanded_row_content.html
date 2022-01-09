@@ -1,0 +1,42 @@
+<div class="setting">
+
+  <div class="date column">
+    <div class="month">
+      {{ transaction['transaction_date'].strftime('%b')|upper }}
+    </div>
+    <div class="day">
+      {{ transaction['transaction_date'].strftime('%d')|upper }}
+    </div>
+    <div class="year">
+      {{ transaction['transaction_date'].year }}
+    </div>
+    <div class="full">
+      {{ transaction['transaction_date'] }}
+    </div>
+  </div>
+
+  <div class="description">
+
+    <div class="description-header">
+      <div class="brief">
+        {% if transaction['total'] > 0 %}
+          Deposit
+        {% elif transaction['total'] < 0 %}
+          Withdrawal
+        {% else %}
+          Exchange
+        {% endif %}
+      </div>
+      <div class="total">
+        ${{ transaction['total']|currency }}
+      </div>
+    </div>
+
+    <div class="notes">
+      {{ transaction['note'] }}
+    </div>
+
+  </div>
+
+</div>
+

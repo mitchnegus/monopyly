@@ -336,8 +336,10 @@ def show_linked_transaction():
     db = CreditTransactionHandler()
     transaction = db.get_entry(transaction_id)
     linked_transaction = db.get_associated_transaction(transaction_id)['bank']
-    return render_template('credit/transactions_table/'
+    return render_template('common/transactions_table/'
                            'linked_transaction_overlay.html',
+                           selected_transaction_type='credit',
+                           linked_transaction_type='bank',
                            transaction=transaction,
                            linked_transaction=linked_transaction)
 
