@@ -43,7 +43,7 @@
 - Removed statement level statistics display (not yet mature)
 
 
-## 1.1.0 (in progress)
+## 1.1.0
 - Added banking interface
 - Added interface for displaying linked transactions (including between bank transactions and credit transactions)
 - Grayed out pending transactions
