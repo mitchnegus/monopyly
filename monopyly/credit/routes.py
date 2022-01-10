@@ -239,10 +239,12 @@ def make_payment(statement_id):
     card = card_db.get_entry(card_id)
     payment_statement = statement_db.infer_statement(card, payment_date,
                                                      creation=True)
+    print([(x, payment_statement[x]) for x in payment_statement.keys()])
     if payment_account_id:
+        bank_account_db  = BankAccountHandler()
         bank_transaction_db = BankTransactionHandler()
         # Ensure that the bank account belongs to the current user
-        bank_transaction_db.get_entry(payment_account_id)
+        bank_account_db.get_entry(payment_account_id)
         # Create an internal transaction ID and corresponding bank transaction
         internal_transaction_id = add_internal_transaction()
         bank_mapping = {
@@ -254,6 +256,7 @@ def make_payment(statement_id):
                    f"({card['bank_name']}-{card['last_four_digits']})"
         }
         bank_transaction_db.add_entry(bank_mapping)
+        print(bank_mapping)
     else:
         internal_transaction_id = None
     credit_mapping = {

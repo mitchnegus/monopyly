@@ -27,8 +27,11 @@ def index():
                 bank_accounts[bank] = accounts
         cards = [dict(card) for card in card_db.get_entries(active=True)]
         for card in cards:
-            last_statement = statement_db.get_entries((card['id'],))[0]
-            card['last_statement_id'] = last_statement['id']
+            statements = statement_db.get_entries((card['id'],))
+            if statements:
+                card['last_statement_id'] = statements[0]['id']
+            else:
+                card['last_statement_id'] = None
     else:
         bank_accounts, cards = None, None
     return render_template('index.html',

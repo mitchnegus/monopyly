@@ -107,11 +107,13 @@
           <ul class="category">
 
             <h4>{{ card['bank_name'] }} {{ card['last_four_digits'] }}</h4>
-            <li>
-              <a href="{{ url_for('credit.load_statement_details', statement_id=card['last_statement_id']) }}">
-                See most recent statement
-              </a>
-            </li>
+            {% if card['last_statement_id'] %}
+              <li>
+                <a href="{{ url_for('credit.load_statement_details', statement_id=card['last_statement_id']) }}">
+                  See most recent statement
+                </a>
+              </li>
+            {% endif %}
             <li>
               <a href="{{ url_for('credit.load_transactions', card_id=card['id']) }}">
                 See transaction history
