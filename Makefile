@@ -2,7 +2,7 @@
 include config.mk
 
 ## develop 	: Install the package in development mode
-.PHONY: develop 
+.PHONY: develop
 develop:
 	python setup.py develop
 
@@ -16,7 +16,7 @@ install:
 package:
 	python setup.py sdist bdist_wheel
 
-## upload	: Upload the package to PyPI
+## upload		: Upload the package to PyPI
 .PHONY: upload
 upload:
 	python -m twine upload --skip-existing dist/*
