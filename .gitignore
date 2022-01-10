@@ -71,6 +71,7 @@ target/
 
 # Image creation files
 monopyly/static/img/**/*.pptx
+monopyly/static/img/**/*.key
 monopyly/static/img/**/*.xcf
 monopyly/static/favicon/*.ai
 

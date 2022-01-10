@@ -1,4 +1,9 @@
-<img class="card-background" src="{{ url_for('static', filename='img/cards/') }}{{ card['bank_name'].lower() }}-card.png">
+{% with %}
+  {% set img_base = url_for('static', filename='img/cards/') %}
+  {% set card_url =  img_base + card['bank_name'].lower() + '-card.png' %}
+  {% set template_url = img_base + 'template-card.png' %}
+  <img class="card-background" src="{{ card_url }}" onerror="if (this.src != '{{ template_url }}') this.src = '{{ template_url }}'" />
+{% endwith %}
 
 <div class="card-number">
   <div class="digits obscure">▐▐▐▐</div>
