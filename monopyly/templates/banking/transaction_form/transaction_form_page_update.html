@@ -1,0 +1,15 @@
+{% extends "banking/transaction_form/transaction_form_page.html" %}
+
+
+{% block title %}
+  Update Bank Transaction
+{% endblock %}
+
+
+{% block content %}
+
+  {% with submission_url = url_for('banking.update_transaction', transaction_id=transaction_id) %}
+    {% include 'banking/transaction_form/transaction_form.html' %}
+  {% endwith %}
+
+{% endblock %}

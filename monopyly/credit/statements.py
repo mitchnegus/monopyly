@@ -8,10 +8,10 @@ from ..utils import (
     check_sort_order, select_fields
 )
 from ..db import DATABASE_FIELDS
-from .transactions import TransactionHandler
+from .transactions import CreditTransactionHandler
 
 
-class StatementHandler(DatabaseHandler):
+class CreditStatementHandler(DatabaseHandler):
     """
     A database handler for managing credit card statements.
 
@@ -40,10 +40,7 @@ class StatementHandler(DatabaseHandler):
     _table = 'credit_statements'
     _table_view = 'credit_statements_view'
 
-    def __init__(self, db=None, user_id=None, check_user=True):
-        super().__init__(db=db, user_id=user_id, check_user=check_user)
-
-    def get_entries(self, card_ids=None, banks=None, active=False,
+    def get_entries(self, card_ids=None, bank_ids=None, active=False,
                     sort_order='DESC', fields=DATABASE_FIELDS[_table]):
         """
         Get credit card statements from the database.
@@ -58,9 +55,9 @@ class StatementHandler(DatabaseHandler):
         card_ids : tuple of int, optional
             A sequence of card IDs for which statements will be selected
             (if `None`, all cards will be selected).
-        banks : tuple of str, optional
-            A sequence of banks for which statements will be selected (if
-            `None`, all banks will be selected).
+        bank_ids : tuple of ints, optional
+            A sequence of bank IDs for which statements will be selected
+            (if `None`, all banks will be selected).
         active : bool, optional
             A flag indicating whether only statements for active cards
             will be returned. The default is `False` (all statements are
@@ -72,8 +69,8 @@ class StatementHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
-            the 'credit_statements', 'credit_cards', or 'credit_accounts'
-            tables.
+            the 'credit_statements', 'credit_cards', 'credit_accounts'
+            or 'banks' tables.
 
         Returns
         –––––––
@@ -82,7 +79,7 @@ class StatementHandler(DatabaseHandler):
         """
         check_sort_order(sort_order)
         card_filter = filter_items(card_ids, 'card_id', 'AND')
-        bank_filter = filter_items(banks, 'bank', 'AND')
+        bank_filter = filter_items(bank_ids, 'bank_id', 'AND')
         active_filter = "AND active = 1" if active else ""
         query = (f"SELECT {select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
@@ -90,11 +87,13 @@ class StatementHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {card_filter} {bank_filter} {active_filter} "
                  f" ORDER BY issue_date {sort_order}, active DESC")
         placeholders = (self.user_id, *fill_places(card_ids),
-                       *fill_places(banks))
+                       *fill_places(bank_ids))
         statements = self._query_entries(query, placeholders)
         return statements
 
@@ -111,8 +110,8 @@ class StatementHandler(DatabaseHandler):
         statement_id : int
             The ID of the statement to be found.
         fields : tuple of str, optional
-            The fields (in either the statements, cards, or accounts
-            tables) to be returned.
+            The fields (in either the statements, cards, accounts, or
+            banks tables) to be returned.
 
         Returns
         –––––––
@@ -125,6 +124,8 @@ class StatementHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                   " WHERE s.id = ? AND user_id = ?")
         placeholders = (statement_id, self.user_id)
         abort_msg = (f'Statement ID {statement_id} does not exist for the '
@@ -151,8 +152,8 @@ class StatementHandler(DatabaseHandler):
             statement to be found (if `None`, the most recent statement
             will be found).
         fields : tuple of str, optional
-            The fields (in either the statements, cards, or accounts
-            tables) to be returned.
+            The fields (in either the statements, cards, accounts, or
+            banks tables) to be returned.
 
         Returns
         –––––––
@@ -167,6 +168,8 @@ class StatementHandler(DatabaseHandler):
                   "          ON c.id = s.card_id "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
                  f" WHERE user_id = ? AND card_id = ? {date_filter} "
                   " ORDER BY issue_date DESC")
         placeholders = (self.user_id, card['id'], *fill_place(issue_date))
@@ -234,7 +237,7 @@ class StatementHandler(DatabaseHandler):
             The IDs of statements to be deleted.
         """
         # Delete all transactions corresponding to these statements
-        transaction_db = TransactionHandler()
+        transaction_db = CreditTransactionHandler()
         transactions = transaction_db.get_entries(statement_ids=entry_ids,
                                                   fields=())
         transaction_ids = [transaction['id'] for transaction in transactions]

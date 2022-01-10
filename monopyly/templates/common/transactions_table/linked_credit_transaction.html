@@ -1,0 +1,28 @@
+<div class="date">
+  {{ transaction['transaction_date'] }}
+</div>
+
+<div class="description-header">
+  <div class="account">
+    {{ transaction['vendor'] }}
+    <div class="account-type">
+      Credit Card
+    </div>
+  </div>
+  <div class="total">
+    ${{ -transaction['total']|currency }}
+  </div>
+</div>
+
+<div class="notes">
+  {{ transaction['notes'] }}
+</div>
+
+<div class="buttons">
+  <a class="button" href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
+    <img class="icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+  </a>
+  <a class="button" href="{{ url_for('credit.load_statement_details', statement_id=transaction['statement_id']) }}">
+    <img class="icon" src="{{ url_for('static', filename='img/icons/statement.png') }}" />
+  </a>
+</div>

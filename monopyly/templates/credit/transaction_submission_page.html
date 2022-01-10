@@ -2,85 +2,87 @@
 
 
 {% block header %}
-	<h1>
-		{% block title %}
-			Transaction {{ 'Updated' if update else 'Submitted' }}
-		{% endblock %}
-	</h1>
+  <h1>
+    {% block title %}
+      Transaction {{ 'Updated' if update else 'Submitted' }}
+    {% endblock %}
+  </h1>
 {% endblock %}
 
 
-{% block content %} 
+{% block content %}
 
-	<div id="receipt">
+  <div id="receipt">
 
-		<p id="receipt-title">
-			The transaction was saved successfully.
-		</p>
-		<br>
-		
-		<p>
-			<b>Card:</b>
-			{{ transaction['bank'] }} ****-{{ transaction['last_four_digits'] }}
-		</p>
+    <p id="receipt-title">
+      The transaction was saved successfully.
+    </p>
+    <br>
 
-		<p>
-			<b>Date: </b>
-			{{ transaction['transaction_date'] }}
-		</p>
+    <p>
+      <b>Card:</b>
+      {{ transaction['bank_name'] }} ****-{{ transaction['last_four_digits'] }}
+    </p>
 
-		<p>
-			<b>Vendor: </b>
-			{{ transaction['vendor'] }}
-		</p>
+    <p>
+      <b>Date: </b>
+      {{ transaction['transaction_date'] }}
+    </p>
 
-		<p>
-			<b>Total: </b>
-			${{ transaction['total']|currency }}
-		</p>
+    <p>
+      <b>Vendor: </b>
+      {{ transaction['vendor'] }}
+    </p>
 
-		{% for subtransaction in subtransactions %}
+    {% if subtransactions|length > 1 %}
+      <p>
+        <b>Total: </b>
+        ${{ transaction['total']|currency }}
+      </p>
+    {% endif %}
 
-			<p>
-				<b>Amount: </b>
-				${{ subtransaction['subtotal']|currency }}
-			</p>
-	
-			<p>
-				<b>Note: </b>
-				{{ subtransaction['note'] }}
-			</p>
+    {% for subtransaction in subtransactions %}
 
-		{% endfor %}
+      <p>
+        <b>Amount: </b>
+        ${{ subtransaction['subtotal']|currency }}
+      </p>
 
-		<p>
-			<b>Statement Date: </b>
-			{{ transaction['issue_date'] }}
-		</p>
+      <p>
+        <b>Note: </b>
+        {{ subtransaction['note'] }}
+      </p>
 
-		{% if g.user %}
-			<br>
-			<a href="{{ url_for('credit.load_statement', statement_id=transaction['statement_id']) }}">
-				See the statement for this transaction
-			</a>
-			<br>
-			<a href="{{ url_for('credit.load_transactions') }}">
-				See transaction history
-			</a>
-			<br>
-			<a href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
-				Update this transaction
-			</a>
-			<br>
-			<a href="{{ url_for('credit.add_transaction') }}">
-				Create a new transaction
-			</a>
-			<br>
-			<a href="{{ url_for('credit.add_transaction', statement_id=transaction['statement_id']) }}">
-				Create a new transaction on this statement
-			</a>
-		{% endif %}
+    {% endfor %}
 
-	</div>
+    <p>
+      <b>Statement Date: </b>
+      {{ transaction['issue_date'] }}
+    </p>
+
+    {% if g.user %}
+      <br>
+      <a href="{{ url_for('credit.load_statement_details', statement_id=transaction['statement_id']) }}">
+        See the statement for this transaction
+      </a>
+      <br>
+      <a href="{{ url_for('credit.load_transactions') }}">
+        See transaction history
+      </a>
+      <br>
+      <a href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
+        Update this transaction
+      </a>
+      <br>
+      <a href="{{ url_for('credit.add_transaction') }}">
+        Create a new transaction
+      </a>
+      <br>
+      <a href="{{ url_for('credit.add_transaction', card_id=transaction['card_id'], statement_id=transaction['statement_id']) }}">
+        Create a new transaction on this statement
+      </a>
+    {% endif %}
+
+  </div>
 
 {% endblock %}

@@ -3,82 +3,90 @@
 
 {% block left_sidebar %}
 
-	<nav id="sidebar-nav-menu">
-		<ul>
+  <nav id="sidebar-nav-menu">
+    <ul>
 
-			<li>
-				<a class="button" href="#top">
-					<img class="icon" src="{{ url_for('static', filename='img/icons/arrow-up.png') }}" />
-				</a>
-			</li>
+      <li>
+        <a class="button" href="#top">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/arrow-up.png') }}" />
+        </a>
+      </li>
 
-			<li>
-				<a class="action button" href="{{ url_for('credit.add_transaction') }}">
-					<img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
-				</a>
-			</li>
+      <li>
+        <a class="action button" href="{{ url_for('credit.add_transaction') }}">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+        </a>
+      </li>
 
-			<li>
-				<a class="action button" href="{{ url_for('credit.load_transactions') }}">
-					<img class="icon" src="{{ url_for('static', filename='img/icons/refresh.png') }}" />
-				</a>
-			</li>
+      <li>
+        <a class="action button" href="{{ url_for('credit.load_transactions') }}">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/refresh.png') }}" />
+        </a>
+      </li>
 
-			<li>
-				<a class="button" href="#bottom">
-					<img class="icon" src="{{ url_for('static', filename='img/icons/arrow-down.png') }}" />
-				</a>
-			</li>
+      <li>
+        <a class="button" href="#bottom">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/arrow-down.png') }}" />
+        </a>
+      </li>
 
-		</ul>
-	</nav>
+    </ul>
+  </nav>
 
 {% endblock %}
 
 
 {% block header %}
 
-	<a name="top"></a>
+  <a name="top"></a>
 
-	<h1>
-		{% block title %}Transactions{% endblock %}
-	</h1>
+  <h1>
+    {% block title %}Credit Transactions{% endblock %}
+  </h1>
 
 {% endblock %}
 
 
 {% block content %}
 
-	<div id="card-filter">
-		{% for card in filter_cards %}
+  <div id="card-filter">
+    {% for card in filter_cards %}
 
-			<a id="{{ card['bank'] }}-{{ card['last_four_digits'] }}" class="card {{ 'active selected' if card['active'] else 'inactive' }}">
-				{{ card['bank'] }} (-{{card['last_four_digits'] }})
-			</a>
+    <a id="{{ card['bank_name'] }}-{{ card['last_four_digits'] }}" class="card {{ 'active' if card['active'] else 'inactive' }}{{ ' selected' if card['id'] in selected_card_ids else '' }}">
+        {{ card['bank_name'] }} (-{{card['last_four_digits'] }})
+      </a>
 
-		{% endfor %}
-	</div>
+    {% endfor %}
+  </div>
 
-	<div id="transactions-container">
-		{% include 'credit/transactions_table/transactions.html' %}
-	</div>
+  <div class="transactions-container">
+    {% set field_title_template = 'credit/transactions_table/transaction_field_titles.html' %}
+    {% set condensed_row_content_template = 'credit/transactions_table/condensed_row_content.html' %}
+    {% set expanded_row_content_template = 'credit/transactions_table/expanded_row_content.html' %}
+    {% set update_transaction_function = 'credit.update_transaction' %}
+    {% set delete_transaction_function = 'credit.delete_transaction' %}
+    {% include 'common/transactions_table/transactions.html' %}
+  </div>
 
-	<a name="bottom"></a>
+  <a name="bottom"></a>
 
 {% endblock %}
 
 
 {% block javascript %}
 
-	<script src="{{ url_for('static', filename='js/define_filter.js') }}">
-	</script>
-	<script>
-		const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
-		const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
-	</script>
-	<script type="module" src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
-	</script>
-	<script type="module" src="{{ url_for('static', filename='js/expand_transaction.js') }}">
-	</script>
+  <script src="{{ url_for('static', filename='js/define_filter.js') }}">
+  </script>
+  <script>
+    const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
+    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/update_transactions_display.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand_credit_transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show_linked_transaction.js') }}">
+  </script>
 
 {% endblock %}

@@ -1,0 +1,22 @@
+<div id="{{ sub_form.id }}">
+
+  <div class="form-line">
+
+    <div id="{{ id_prefix }}-bank-field" class="form-field autocomplete bank-field">
+      {{ sub_form.bank_name.label }}
+      {{ sub_form.bank_name }}
+    </div>
+
+    <div id="{{ id_prefix }}-last-four-digits-field" class="form-field autocomplete last-four-digits-field">
+      {{ sub_form.last_four_digits.label }}
+      {{ sub_form.last_four_digits }}
+    </div>
+
+    <div id="{{ id_prefix }}-account-type-field" class="form-field autocomplete account-type-field">
+      {{ sub_form.type_name.label }}
+      {{ sub_form.type_name }}
+    </div>
+
+  </div>
+
+</div>

@@ -1,28 +1,28 @@
 """
-Generate forms for the user to fill out.
+Generate credit card forms for the user to complete.
 """
-from flask import url_for
 from flask_wtf import FlaskForm
 from werkzeug.exceptions import abort
 from wtforms.fields import (
     FormField, DecimalField, IntegerField, TextField, BooleanField,
-    SelectField, SubmitField, HiddenField, FieldList
+    SelectField, SubmitField, FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
 
 from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
+from ..banking.banks import BankHandler
 from . import credit
-from .accounts import AccountHandler
-from .cards import CardHandler
-from .statements import StatementHandler
+from .accounts import CreditAccountHandler
+from .cards import CreditCardHandler
+from .statements import CreditStatementHandler
 
 
-class TransactionForm(FlaskForm):
-    """Form to input/edit transactions."""
+class CreditTransactionForm(FlaskForm):
+    """Form to input/edit credit card transactions."""
 
-    class SubtransactionForm(FlaskForm):
-        """Form to input/edit subtransactions."""
+    class CreditSubtransactionForm(FlaskForm):
+        """Form to input/edit credit card subtransactions."""
         def __init__(self, *args, **kwargs):
             # Deactivates CSRF as a subform
             super().__init__(meta={'csrf': False}, *args, **kwargs)
@@ -37,7 +37,7 @@ class TransactionForm(FlaskForm):
         tags = TextField('Tags')
 
     # Fields to identify the card/bank information for the transaction
-    bank = TextField('Bank')
+    bank_name = TextField('Bank')
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
@@ -51,7 +51,8 @@ class TransactionForm(FlaskForm):
     )
     vendor = TextField('Vendor', [DataRequired()])
     # Subtransaction fields (must be at least 1 subtransaction)
-    subtransactions = FieldList(FormField(SubtransactionForm), min_entries=1)
+    subtransactions = FieldList(FormField(CreditSubtransactionForm),
+                                min_entries=1)
     submit = SubmitField('Save Transaction')
 
     @property
@@ -61,11 +62,14 @@ class TransactionForm(FlaskForm):
 
         Creates a dictionary of transaction fields and values, in a
         format that can be added directly to the database as a new
-        transaction. The dictionary also includes subtransactions (along
-        with tags associated with each subtransaction).
+        credit card transaction. The dictionary also includes
+        subtransactions (along with tags associated with each
+        subtransaction).
         """
         statement = self.get_transaction_statement()
-        transaction_data = {'statement_id': statement['id']}
+        # Internal transaction IDs are managed by the database handler
+        transaction_data = {'internal_transaction_id': None,
+                            'statement_id': statement['id']}
         # Loop over the transaction-specific fields
         for field in ('transaction_date', 'vendor',):
             transaction_data[field] = self[field].data
@@ -85,8 +89,9 @@ class TransactionForm(FlaskForm):
 
     def get_transaction_card(self):
         """Get the credit card associated with the transaction."""
-        card_db = CardHandler()
-        card = card_db.find_card(self.bank.data, self.last_four_digits.data)
+        card_db = CreditCardHandler()
+        card = card_db.find_card(self.bank_name.data,
+                                 self.last_four_digits.data)
         return card
 
     def get_transaction_statement(self):
@@ -95,7 +100,7 @@ class TransactionForm(FlaskForm):
         card = self.get_transaction_card()
         if not card:
             abort(404, 'A card matching the criteria was not found.')
-        statement_db = StatementHandler()
+        statement_db = CreditStatementHandler()
         # Get the statement corresponding to the card and issue date
         issue_date = self.issue_date.data
         if issue_date:
@@ -111,10 +116,11 @@ class TransactionForm(FlaskForm):
         return statement
 
 
-class CardForm(FlaskForm):
+class CreditCardForm(FlaskForm):
     """Form to input/edit credit cards."""
+    # Fields
     account_id = SelectField('Account', [SelectionNotBlank()], coerce=int)
-    bank = TextField('Bank')
+    bank_name = TextField('Bank')
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
@@ -135,15 +141,26 @@ class CardForm(FlaskForm):
 
     def get_card_account(self, account_creation=True):
         """Get the account associated with the credit card."""
-        account_db = AccountHandler()
+        bank_db, account_db = BankHandler(), CreditAccountHandler()
         # Check if the account exists and potentially create it if not
         if self.account_id.data == 0:
             if account_creation:
+                # Add the bank to the database if it does not already exist
+                bank_name = self.bank_name.data
+                matching_banks = bank_db.get_entries(bank_names=(bank_name,))
+                if not matching_banks:
+                    bank_data = {
+                        'user_id': bank_db.user_id,
+                        'bank_name': bank_name,
+                    }
+                    bank = bank_db.add_entry(bank_data)
+                else:
+                    bank = matching_banks[0]
+                # Add the account to the database
                 account_data = {
-                    'user_id': account_db.user_id,
-                    'bank': self.bank.data,
+                    'bank_id': bank['id'],
                     'statement_issue_day': self.statement_issue_day.data,
-                    'statement_due_day': self.statement_due_day.data
+                    'statement_due_day': self.statement_due_day.data,
                 }
                 account = account_db.add_entry(account_data)
             else:
@@ -151,3 +168,23 @@ class CardForm(FlaskForm):
         else:
             account = account_db.get_entry(self.account_id.data)
         return account
+
+    def prepare_choices(self):
+        """Prepare choices to fill select fields."""
+        self._prepare_credit_account_choices()
+
+    def _prepare_credit_account_choices(self):
+        """Prepare account choices for the card form dropdown."""
+        account_db = CreditAccountHandler()
+        card_db = CreditCardHandler()
+        # Collect all available user accounts
+        user_accounts = account_db.get_entries()
+        account_choices = [(-1, '-')]
+        for account in user_accounts:
+            cards = card_db.get_entries(account_ids=(account['id'],))
+            digits = [f"*{card['last_four_digits']}" for card in cards]
+            # Create a description for the account using the bank and card digits
+            description = f"{account['bank_name']} (cards: {', '.join(digits)})"
+            account_choices.append((account['id'], description))
+        account_choices.append((0, 'New account'))
+        self.account_id.choices = account_choices

@@ -2,14 +2,14 @@
 
 
 {% block title %}
-	Update Transaction
+  Update Credit Transaction
 {% endblock %}
 
 
 {% block content %}
 
-	{% with submission_url = url_for('credit.update_transaction', transaction_id=transaction_id) %}
-		{% include 'credit/transaction_form/transaction_form.html' %}
-	{% endwith %}
+  {% with submission_url = url_for('credit.update_transaction', transaction_id=transaction_id) %}
+    {% include 'credit/transaction_form/transaction_form.html' %}
+  {% endwith %}
 
 {% endblock %}

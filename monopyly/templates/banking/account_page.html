@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+
+
+{% block header %}
+
+  <h1>
+    {% block title %}
+      Account Details
+    {% endblock %}
+  </h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+  <div id="bank-account-details" class="details">
+
+    <div id="bank-account-info" class="primary-info">
+
+      <div id="account-summary-container" class="summary-container">
+        {% include 'banking/account_summary.html' %}
+      </div>
+
+      <div id="account-transactions-container" class="transactions-container">
+        {% with transactions = account_transactions %}
+          {% set field_title_template = 'banking/transactions_table/transaction_field_titles.html' %}
+          {% set condensed_row_content_template = 'banking/transactions_table/condensed_row_content.html' %}
+          {% set expanded_row_content_template = 'banking/transactions_table/expanded_row_content.html' %}
+          {% set update_transaction_function = 'banking.update_transaction' %}
+          {% set delete_transaction_function = 'banking.delete_transaction' %}
+          {% include 'common/transactions_table/transactions.html' %}
+        {% endwith %}
+      </div>
+
+    </div>
+
+  </div>
+
+{% endblock %}
+
+
+{% block right_sidebar %}
+
+    <div class="sidebar-menu">
+
+      <div class="button">
+        <a class="action" href="{{ url_for('banking.add_transaction', bank_id=account['bank_id'], account_id=account['id']) }}">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+        </a>
+      </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+  <script>
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('banking.show_linked_transaction') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand_bank_transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show_linked_transaction.js') }}">
+  </script>
+
+{% endblock %}

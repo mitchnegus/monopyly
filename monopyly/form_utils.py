@@ -4,6 +4,10 @@ General utility objects for handling forms.
 from wtforms.validators import ValidationError
 
 
+# Define a custom form error messaage
+form_err_msg = 'There was an improper value in your form. Please try again.'
+
+
 class NumeralsOnly:
     """
     Validates text contains only numerals.

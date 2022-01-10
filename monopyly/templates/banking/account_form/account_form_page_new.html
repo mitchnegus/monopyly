@@ -1,0 +1,23 @@
+{% extends "common/form_page.html" %}
+
+
+{% block title %}
+  New Bank Account
+{% endblock %}
+
+
+{% block content %}
+
+  {% with submission_url = url_for('banking.add_account') %}
+    {% include 'banking/account_form/account_form.html' %}
+  {% endwith %}
+
+{% endblock %}
+
+
+{% block javascript %}
+  <script type="module" src="{{ url_for('static', filename='js/display_new_bank_inputs.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/display_new_account_type_inputs.js') }}">
+  </script>
+{% endblock %}

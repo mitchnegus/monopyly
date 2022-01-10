@@ -1,26 +1,21 @@
-{% extends "layout.html" %}
-
-
-{% block header %}
-	<h1>{% block title %}{% endblock %}</h1>
-{% endblock %}
+{% extends "common/form_page.html" %}
 
 
 {% block javascript %}
 
-	<script>
-		const ADD_SUBTRANSACTION_FORM_ENDPOINT = "{{ url_for('credit.add_subtransaction_field') }}";
-		const AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_autocomplete') }}";
-		const INFER_CARD_ENDPOINT = "{{ url_for('credit.infer_card') }}";
-		const INFER_STATEMENT_ENDPOINT = "{{ url_for('credit.infer_statement') }}";
-	</script>
-	<script type="module" src="{{ url_for('static', filename='js/add_subtransaction.js') }}">
-	</script>
-	<script src="{{ url_for('static', filename='js/autocomplete_transaction.js') }}">
-	</script>
-	<script src="{{ url_for('static', filename='js/infer_card.js') }}">
-	</script>
-	<script src="{{ url_for('static', filename='js/infer_statement.js') }}">
-	</script>
+  <script>
+    const ADD_SUBTRANSACTION_FORM_ENDPOINT = "{{ url_for('credit.add_subtransaction_fields') }}";
+    const AUTOCOMPLETE_ENDPOINT = "{{ url_for('credit.suggest_transaction_autocomplete') }}";
+    const INFER_CARD_ENDPOINT = "{{ url_for('credit.infer_card') }}";
+    const INFER_STATEMENT_ENDPOINT = "{{ url_for('credit.infer_statement') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/add_subtransaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/autocomplete_credit_transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/infer_card.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/infer_statement.js') }}">
+  </script>
 
 {% endblock %}

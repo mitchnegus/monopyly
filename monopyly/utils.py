@@ -125,7 +125,7 @@ class DatabaseHandler(ABC):
         # Check that an entry was found
         if not entry:
             if not abort_msg:
-                abort_msg = (f'The entry with ID {entry_id} does not exist '
+                abort_msg = (f'The entry with ID {entry["id"]} does not exist '
                               'for the user.')
             abort(404, abort_msg)
         return entry
@@ -360,15 +360,19 @@ def check_sort_order(sort_order):
         raise ValueError('Provide a valid sort order.')
 
 
-def check_field(field):
+def check_field(field, field_list=None):
     """Check that a named field matches database field."""
     field = strip_function(field)
-    if field.split('.', 1)[-1] not in ALL_FIELDS:
-        raise ValueError(f"The field '{field}' does not exist in the "
-                          "database.")
+    if field_list is None:
+        field_list = ALL_FIELDS
+        err_msg = f"The field '{field}' does not exist in the database."
+    else:
+        err_msg = f"The field '{field}' is not in the given list of fields."
+    if field.split('.', 1)[-1] not in field_list:
+        raise ValueError(err_msg)
 
 
-def select_fields(fields, id_field=None):
+def select_fields(fields, id_field=None, convert_dates=True):
     """
     Create a list of a given set of fields.
 
@@ -376,23 +380,37 @@ def select_fields(fields, id_field=None):
     querying the database. If the fields parameter is set to `None`,
     then all fields in the database are returned. An optional 'id_field'
     can be provided to ensure that that field will always be returned,
-    regardless of which other fields are provided.
+    regardless of which other fields are provided. Note that field names
+    ending with the string '_date' are automatically converted to Python
+    `datetime.date` objects. This behavior can be disabled by setting
+    the `convert_dates` flag to `False`.
 
     Parameters
     ––––––––––
     fields : tuple of str, None
         A list of fields to arrrange as a string for database querying.
     id_field : str, optional
-        A field that will always be returned, regardless of the other fields
-        provided.
+        A field that will always be returned, regardless of the other
+        fields provided.
+    convert_dates : bool, optional
+        A flag indicating whether field names ending with '_date' are
+        automatically converted into Python `datetime.date` objecs.
     """
     if fields is None:
         return "*"
     query_fields = [id_field] if id_field else []
     for field in fields:
         check_field(field)
-        if field[-5:] == '_date':
+        if field[-5:] == '_date' and convert_dates:
             query_fields.append(query_date(field))
         else:
             query_fields.append(field)
     return f"{', '.join(query_fields)}"
+
+
+def sort_by_frequency(items):
+    """Return a sorted (unique) list ordered by decreasing frequency."""
+    item_counts = Counter(items)
+    unique_items = set(items)
+    return sorted(unique_items, key=item_counts.get, reverse=True)
+

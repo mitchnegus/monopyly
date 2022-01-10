@@ -1,0 +1,75 @@
+<div id="statement-summary" class="summary-box">
+
+  <div class="account suptitle">
+    {{ statement['bank_name'].upper() }} {{ statement['last_four_digits'] }}
+  </div>
+
+  <div id="issue-date" class="title">
+    {{ statement['issue_date'].strftime('%B %Y') }}
+  </div>
+
+  <div class="balance">
+    <div>$</div>
+    <div>{{ statement['balance']|currency }}</div>
+  </div>
+
+  <div id="payment">
+
+    <div id="due">
+      <div>DUE</div>
+      <div id="due-date" class="update-db-widget">
+        <div class="widget-text">
+          <div class="widget-display">{{ statement['due_date'] }}</div>
+          <input class="widget-input" type="text" name="due_date" value="{{ statement['due_date'] }}" />
+        </div>
+        <img class="widget-edit-button" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+      </div>
+    </div>
+
+    {% if statement['payment_date'] %}
+
+      <div id="paid" class="paid-notice slide-text-gadget">
+        <div class="sleeve">
+          <div class="main">PAID</div>
+          <div class="reveal">{{ statement['payment_date'] }}</div>
+        </div>
+      </div>
+
+    {% else %}
+
+      <form id="pay" action="" method="post">
+
+        <div class="form-inputs">
+
+          <div class="form-line">
+            <div class="dollar-sign">$</div>
+            <input id="pay-amount" type="text" name="pay_amount" value="{{ statement['balance']|currency }}" maxlength="8"/>
+            <input id="pay-date" type="text" name="pay_date" value="{{ date_today }}" maxlength="10"/>
+          </div>
+
+          <div class="form-line">
+            <select id="pay-bank-account" form="pay">
+              <optgroup>
+                <option value="0">Select a bank</option>
+                {% for account in bank_accounts %}
+                  <option value="{{ account['id'] }}">
+                    {{ account['bank_name'] }} {{ account['type_name'] }} ({{ account['last_four_digits'] }})
+                  </option>
+                {% endfor %}
+              </optgroup>
+            </select>
+          </div>
+
+        </div>
+
+        <button id="make-payment" class="dark-background" type="button">
+          <div id="prompt">Make a payment</div>
+          <img class="icon" src="{{ url_for('static', filename='img/icons/checkmark.png') }}" />
+        </button>
+
+      </form>
+
+    {% endif %}
+  </div>
+
+</div>

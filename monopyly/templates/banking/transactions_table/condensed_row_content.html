@@ -1,0 +1,18 @@
+<div class="date column">
+  {{ transaction['transaction_date'] }}
+</div>
+
+<div class="notes text column">
+  {{ transaction['note'] }}
+</div>
+
+<div class="amount column">
+  <span class="dollar-sign">$</span>
+  <span>{{ transaction['total']|currency }}</span>
+</div>
+
+<div class="balance column">
+  <span class="dollar-sign">$</span>
+  <span>{{ transaction['balance']|currency }}</span>
+</div>
+

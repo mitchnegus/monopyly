@@ -42,3 +42,13 @@
 - Backend properly handles duplicate/ancestor tags; all tags are saved in the database, but only the lowest-level child tag must be entered
 - Removed statement level statistics display (not yet mature)
 
+
+## 1.1.0
+- Added banking interface
+- Added interface for displaying linked transactions (including between bank transactions and credit transactions)
+- Grayed out pending transactions
+- Fixed bug where transaction tags appeared in front of header bar
+- Improved modularity of autocomplete JavaScript
+- Improved modularity of transaction table templates (for banking and credit transactions)
+- Minor cosmetic enhancements
+
