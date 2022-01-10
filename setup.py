@@ -18,7 +18,7 @@ long_description = convert_markdown(raw_long_description,
 
 setup(
     name='monopyly',
-    version='1.0.5',
+    version='1.1.0',
     description='A homemade personal finance manager.',
     author='Mitch Negus',
     author_email='mitchnegus57@gmail.com',
