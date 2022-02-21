@@ -372,7 +372,7 @@ class CreditSubtransactionHandler(DatabaseHandler):
         Add a subtransaction to the database.
 
         Uses a mapping produced by a `CreditTransactionForm` to add a
-        new subtransaction into the database. The mapping includes
+        new subtransaction into the database. The mapping contains
         information for the subtransaction, including the corresponding
         transaction. The mapping also provides a list of tags that have
         been assigned to the new subtransaction.

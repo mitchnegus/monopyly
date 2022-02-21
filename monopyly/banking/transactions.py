@@ -134,14 +134,72 @@ class BankTransactionHandler(DatabaseHandler):
         transaction = self._query_entry(query, placeholders, abort_msg)
         return transaction
 
+    def add_entry(self, mapping):
+        """
+        Add a transaction to the database.
+
+        Uses a mapping produced by a `BankTransactionForm` to add a new
+        transaction into the database. The mapping includes information
+        for the transaction, along with information for all
+        subtransactions.
+
+        Parameters
+        ––––––––––
+        mapping : dict
+            A mapping between database fields and the value to be
+            entered into that field for the transaction. The mapping
+            also contains subtransaction information (including tags).
+
+        Returns
+        –––––––
+        transaction : sqlite3.Row
+            The saved transaction.
+        subtransaction : list of sqlite3.Row
+            A list of subtransactions belonging to the saved transaction.
+        """
+        subtransaction_db = BankSubtransactionHandler()
+        # Override the default method to account for subtransactions
+        subtransactions_data = mapping.pop('subtransactions')
+        transaction = super().add_entry(mapping)
+        subtransactions = self._add_subtransactions(transaction['id'],
+                                                    subtransactions_data)
+        # Refresh the transaction information
+        transaction = self.get_entry(transaction['id'])
+        return transaction, subtransactions
+
     def update_entry(self, entry_id, mapping):
         """Update a transaction in the database."""
+        subtransaction_db = BankSubtransactionHandler()
         # Automatically populate the internal transaction ID field
         transaction = self.get_entry(entry_id)
         field = 'internal_transaction_id'
         mapping[field] = transaction[field]
+        # Override the default method to account for subtransactions
+        subtransactions_data = mapping.pop('subtransactions')
         transaction = super().update_entry(entry_id, mapping)
-        return transaction
+        # Replace subtransactions when updating
+        subtransactions = subtransaction_db.get_entries((transaction['id'],))
+        subtransaction_db.delete_entries(
+            [subtransaction['id'] for subtransaction in subtransactions]
+        )
+        subtransactions = self._add_subtransactions(transaction['id'],
+                                                    subtransactions_data)
+        # Refresh the transaction information
+        transaction = self.get_entry(transaction['id'])
+        return transaction, subtransactions
+
+    def _add_subtransactions(self, transaction_id, subtransactions_data):
+        """Add subtransactions to the database for the data given."""
+        subtransaction_db = BankSubtransactionHandler()
+        # Assemble mappings to add subtransactions
+        subtransactions = []
+        for subtransaction_data in subtransactions_data:
+            # Complete the mapping and add the subtransaction to the database
+            sub_mapping = {'transaction_id': transaction_id,
+                           **subtransaction_data}
+            subtransaction = subtransaction_db.add_entry(sub_mapping)
+            subtransactions.append(subtransaction)
+        return subtransactions
 
     def get_associated_transaction(self, transaction_id):
         """
@@ -176,10 +234,10 @@ class BankTransactionHandler(DatabaseHandler):
                  "  FROM bank_transactions_view AS t "
                  "       INNER JOIN bank_accounts AS a "
                  "          ON a.id = t.account_id "
-                 "       INNER JOIN banks AS b "
-                 "          ON b.id = a.bank_id "
                  "       INNER JOIN bank_account_types_view AS types "
                  "          ON types.id = a.account_type_id "
+                 "       INNER JOIN banks AS b "
+                 "          ON b.id = a.bank_id "
                  " WHERE b.user_id =? AND t.id != ? "
                  "       AND t.internal_transaction_id = ?")
         placeholders = (self.user_id, transaction_id, internal_transaction_id)
@@ -204,6 +262,114 @@ class BankTransactionHandler(DatabaseHandler):
         if credit_transactions:
             associated_transaction['credit'] = credit_transactions[0]
         return associated_transaction
+
+
+class BankSubtransactionHandler(DatabaseHandler):
+    """
+    A database handler for accessing bank subtransactions.
+
+    Parameters
+    ––––––––––
+    db : sqlite3.Connection
+        A connection to the database for interfacing.
+    user_id : int
+        The ID of the user who is the subject of database access. If not
+        given, the handler defaults to using the logged-in user.
+    check_user : bool
+        A flag indicating whether the handler should check that the
+        provided user ID matches the logged-in user.
+
+    Attributes
+    ––––––––––
+    table : str
+        The name of the database table that this handler manages.
+    db : sqlite3.Connection
+        A connection to the database for interfacing.
+    cursor : sqlite.Cursor
+        A cursor for executing database interactions.
+    user_id : int
+        The ID of the user who is the subject of database access.
+    """
+    _table = 'bank_subtransactions'
+
+    def get_entries(self, transaction_ids=None, fields=None):
+        """
+        Get all subtransactions for a bank transaction.
+
+        Accesses a set of fields for subtransactions belonging to a set
+        of transactions. By default, all fields for the subtransactions
+        are returned.
+
+        Parameters
+        ––––––––––
+        transaction_ids : tuple of int, optional
+            The IDs of the transactions for which to retrieve
+            subtransactions.
+        fields : tuple of str, optional
+            The fields (in either the transactions, subtransactions,
+            or accounts tables) to be returned. By default, all fields
+            are returned.
+
+        Returns
+        –––––––
+        subtransactions : list of sqlite3.Row
+            A list of bank subtransactions that are associated with the
+            given transaction.
+        """
+        transaction_filter = filter_items(transaction_ids, 'transaction_id',
+                                          'AND')
+        query = (f"SELECT {select_fields(fields, 's_t.id')} "
+                  "  FROM bank_subtransactions AS s_t "
+                  "       INNER JOIN bank_transactions AS t "
+                  "          ON t.id = s_t.transaction_id "
+                  "       INNER JOIN bank_accounts AS a "
+                  "          ON a.id = t.account_id "
+                  "       INNER JOIN bank_account_types_view AS types "
+                  "          ON types.id = a.account_type_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
+                 f" WHERE b.user_id = ? {transaction_filter}")
+        placeholders = (self.user_id, *fill_places(transaction_ids))
+        subtransactions = self._query_entries(query, placeholders)
+        return subtransactions
+
+    def get_entry(self, subtransaction_id, fields=None):
+        """
+        Get a subtransaction from the database given its ID.
+
+        Accesses a set of fields for a given subtransaction. By default,
+        all fields for a subtransaction and the corresponding account
+        are returned.
+
+        Parameters
+        ––––––––––
+        subtransaction_id : int
+            The ID of the subtransaction to be found.
+        fields : tuple of str, optional
+            The fields (in either the subtransactions, transactions,
+            statements, cards, or accounts tables) to be returned.
+
+        Returns
+        –––––––
+        subtransaction : sqlite3.Row
+            The subtransaction information from the database.
+        """
+        query = (f"SELECT {select_fields(fields, 't.id')} "
+                  "  FROM bank_subtransactions AS s_t "
+                  "       INNER JOIN bank_transactions AS t "
+                  "          ON t.id = s_t.transaction_id "
+                  "       INNER JOIN bank_accounts AS a "
+                  "          ON a.id = t.account_id "
+                  "       INNER JOIN bank_account_types_view AS types "
+                  "          ON types.id = a.account_type_id "
+                  "       INNER JOIN banks AS b "
+                  "          ON b.id = a.bank_id "
+                  " WHERE b.user_id = ? AND s_t.id = ?")
+        placeholders = (self.user_id, subtransaction_id)
+        abort_msg = (f'Subtransaction ID {subtransaction_id} does not exist '
+                      'for the user.')
+        subtransaction = self._query_entry(query, placeholders, abort_msg)
+        return subtransaction
 
 
 def save_transaction(form, transaction_id=None):
