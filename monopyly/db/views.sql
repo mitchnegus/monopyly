@@ -36,10 +36,13 @@ SELECT
   internal_transaction_id,
   account_id,
   transaction_date,
-  total,
-  ROUND(SUM(total) OVER (PARTITION BY account_id ORDER BY transaction_date, id), 2) balance,
+  SUM(subtotal) total,
+  ROUND(SUM(subtotal) OVER (PARTITION BY account_id ORDER BY transaction_date, id), 2) balance,
   note
-FROM bank_transactions;
+FROM bank_transactions AS t
+  LEFT OUTER JOIN bank_subtransactions AS s_t
+    ON s_t.transaction_id = t.id
+GROUP BY t.id;
 
 
 /* Prepare a view giving consolidated credit card transaction information */

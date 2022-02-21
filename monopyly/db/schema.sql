@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS banks;
 DROP TABLE IF EXISTS bank_accounts;
 DROP TABLE IF EXISTS bank_account_types;
 DROP TABLE IF EXISTS bank_transactions;
+DROP TABLE IF EXISTS bank_subtransactions;
 DROP TABLE IF EXISTS credit_accounts;
 DROP TABLE IF EXISTS credit_cards;
 DROP TABLE IF EXISTS credit_statements;
@@ -71,11 +72,21 @@ CREATE TABLE bank_transactions (
   internal_transaction_id INTEGER DEFAULT NULL,
   account_id INTEGER NOT NULL,
   transaction_date TEXT NOT NULL,
-  total REAL NOT NULL,
-  note TEXT NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (internal_transaction_id) REFERENCES internal_transactions (id),
   FOREIGN KEY (account_id) REFERENCES bank_accounts (id)
+);
+
+
+/* Store bank subtransaction infromation */
+CREATE TABLE bank_subtransactions (
+  id INTEGER,
+  transaction_id INTEGER NOT NULL,
+  subtotal REAL NOT NULL,
+  note TEXT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (transaction_id) REFERENCES bank_transactions (id),
+    ON DELETE CASCADE
 );
 
 
