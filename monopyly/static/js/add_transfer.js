@@ -20,7 +20,8 @@ import { executeAjaxRequest } from './modules/ajax.js';
   $button.on('click', function() {
     // Execute the AJAX request to retrieve the transfer form
     function addTransferForm(response) {
-      $('#new-transfer').replaceWith(response);
+      $('.add-info.buttons').after(response);
+      $('#new-transfer').hide();
     }
     // Add the new transfer form to the bank transaction form
     executeAjaxRequest(endpoint, 0, addTransferForm);

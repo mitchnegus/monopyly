@@ -1,6 +1,5 @@
 """
-Routes for credit card financials.
-"""
+Routes for credit card financials.  """
 from flask import (
     g, redirect, render_template, flash, request, url_for, jsonify
 )

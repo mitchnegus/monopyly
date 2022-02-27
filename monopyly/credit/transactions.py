@@ -867,12 +867,12 @@ def save_transaction(form, transaction_id=None):
         transaction_data = form.transaction_data
         if transaction_id:
             # Update the database with the updated transaction
-            entry = transaction_db.update_entry(transaction_id,
-                                                transaction_data)
+            transaction = transaction_db.update_entry(transaction_id,
+                                                      transaction_data)
         else:
             # Insert the new transaction into the database
-            entry = transaction_db.add_entry(transaction_data)
-        return entry
+            transaction = transaction_db.add_entry(transaction_data)
+        return transaction
     else:
         # Show an error to the user and print the errors for the admin
         flash(form_err_msg)

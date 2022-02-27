@@ -31,7 +31,7 @@ class CreditTransactionForm(FlaskForm):
             'Amount',
             validators=[DataRequired()],
             filters=[lambda x: float(round(x, 2)) if x else None],
-            places=2
+            places=2,
         )
         note = TextField('Note', [DataRequired()])
         tags = TextField('Tags')
@@ -40,7 +40,7 @@ class CreditTransactionForm(FlaskForm):
     bank_name = TextField('Bank')
     last_four_digits = TextField(
         'Last Four Digits',
-        validators=[DataRequired(), Length(4), NumeralsOnly()]
+        validators=[DataRequired(), Length(4), NumeralsOnly()],
     )
     issue_date = TextField('Statement Date', filters=[parse_date])
     # Fields pertaining to the transaction
@@ -70,14 +70,14 @@ class CreditTransactionForm(FlaskForm):
         # Internal transaction IDs are managed by the database handler
         transaction_data = {'internal_transaction_id': None,
                             'statement_id': statement['id']}
-        # Loop over the transaction-specific fields
+        # Access data for each transaction-specific field
         for field in ('transaction_date', 'vendor',):
             transaction_data[field] = self[field].data
         # Aggregate subtransaction information for the transaction
         transaction_data['subtransactions'] = []
         for form in self['subtransactions']:
             subtransaction_data = {}
-            # Loop over the subtransaction-specific fields
+            # Access data for each subtransaction-specific field
             for field in ('subtotal', 'note'):
                 subtransaction_data[field] = form[field].data
             # RETURN AN EMPTY LIST NOT A LIST WITH EMPTY STRING
