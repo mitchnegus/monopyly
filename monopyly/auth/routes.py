@@ -70,6 +70,6 @@ def login():
 
 @auth.route('/logout')
 def logout():
-    # End the session and clear the user ID;k
+    # End the session and clear the user ID
     session.clear()
     return redirect(url_for('core.index'))
