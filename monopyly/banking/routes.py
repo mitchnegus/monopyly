@@ -13,7 +13,9 @@ from . import banking
 from .forms import *
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler
-from .transactions import BankTransactionHandler, save_transaction
+from .transactions import (
+    BankTransactionHandler, BankSubtransactionHandler, save_transaction
+)
 
 
 @banking.route('/accounts')
@@ -103,7 +105,7 @@ def load_account_details(account_id):
     account = account_db.get_entry(account_id)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
-    transaction_fields = ('transaction_date', 'total', 'balance', 'note',
+    transaction_fields = ('transaction_date', 'total', 'balance', 'notes',
                           'internal_transaction_id')
     transactions = transactions_db.get_entries(account_ids=(account['id'],),
                                                sort_order=sort_order,
@@ -111,6 +113,18 @@ def load_account_details(account_id):
     return render_template('banking/account_page.html',
                            account=account,
                            account_transactions=transactions)
+
+
+@banking.route('/_expand_transaction', methods=('POST',))
+@login_required
+def expand_transaction():
+    subtransaction_db = BankSubtransactionHandler()
+    # Get the transaction ID from the AJAX request
+    transaction_id = request.get_json().split('-')[-1]
+    # Get the subtransactions
+    subtransactions = subtransaction_db.get_entries((transaction_id,))
+    return render_template('credit/transactions_table/subtransactions.html',
+                           subtransactions=subtransactions)
 
 
 @banking.route('/_show_linked_transaction', methods=('POST',))
@@ -168,7 +182,7 @@ def add_transaction(bank_id, account_id):
         form.process(data=data)
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
-        transaction = save_transaction(form)
+        transaction, subtransactions = save_transaction(form)
         return redirect(url_for('banking.load_account_details',
                                 account_id=transaction['account_id']))
     # Display the form for accepting user input
@@ -182,19 +196,26 @@ def add_transaction(bank_id, account_id):
 @login_required
 def update_transaction(transaction_id):
     transaction_db = BankTransactionHandler()
+    subtransaction_db = BankSubtransactionHandler()
     # Get the transaction information from the database
     account_info_data = {}
     transaction = transaction_db.get_entry(transaction_id)
+    subtransactions = subtransaction_db.get_entries((transaction_id,))
+    subtransactions_data = []
+    for subtransaction in subtransactions:
+        subtransaction_data = {**subtransaction}
+        subtransactions_data.append(subtransaction_data)
     for field in ('bank_name', 'last_four_digits', 'type_name'):
         account_info_data[field] = transaction[field]
     transfer_account_data = {}
-    form_data = {**transaction, 'account_info': account_info_data,
+    form_data = {**transaction, 'subtransactions': subtransactions_data,
+                 'account_info': account_info_data,
                  'transfer_account_info': transfer_account_data}
     # Define a form for a transaction
     form = BankTransactionForm(data=form_data)
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
-        transaction = save_transaction(form, transaction_id)
+        transaction, subtransactions = save_transaction(form, transaction_id)
         return redirect(url_for('banking.load_account_details',
                                 account_id=transaction['account_id']))
     # Display the form for accepting user input
@@ -203,6 +224,21 @@ def update_transaction(transaction_id):
                            'transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form,
                            update=update)
+
+
+@banking.route('/_add_subtransaction_fields', methods=('POST',))
+@login_required
+def add_subtransaction_fields():
+    post_args = request.get_json()
+    new_index = post_args['subtransaction_count'] + 1
+    # Redefine the form for the transaction (including using entered info)
+    # NOTE: This is a hack (since `append_entry` method cannot be used in AJAX
+    #       without reloading the form...)
+    form_id = f'subtransactions-{new_index}'
+    sub_form = BankTransactionForm.BankSubtransactionForm(prefix=form_id)
+    sub_form.id = form_id
+    return render_template('banking/transaction_form/subtransaction_form.html',
+                           sub_form=sub_form)
 
 
 @banking.route('/_add_transfer_fields', methods=('POST',))
@@ -234,7 +270,8 @@ def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
-    autocomplete_fields = ('bank_name', 'last_four_digits', 'type_name', 'note')
+    autocomplete_fields = ('bank_name', 'last_four_digits', 'type_name',
+                           'note')
     check_field(field, autocomplete_fields)
     # Get information from the database to use for autocompletion
     if field == 'bank_name':
@@ -244,7 +281,7 @@ def suggest_transaction_autocomplete():
     elif field == 'type_name':
         db = BankAccountTypeHandler()
     elif field == 'note':
-        db = BankTransactionHandler()
+        db = BankSubtransactionHandler()
     fields = (field,)
     entries = db.get_entries(fields=fields)
     suggestions = sort_by_frequency([entry[field] for entry in entries])

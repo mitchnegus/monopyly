@@ -242,10 +242,14 @@ form .form-line .form-field {
   flex-grow: 1;
 }
 
+form .add-info.buttons {
+  margin: 20px 0;
+}
+
 form .add-info.button {
   width: min-content;
   white-space: nowrap;
-  margin: 15px 0 20px;
+  margin: 10px 0;
   padding: 3px 20px;
   border-radius: 15px;
   background-color: #444444;

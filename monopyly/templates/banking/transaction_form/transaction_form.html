@@ -13,24 +13,27 @@
       {{ form.transaction_date }}
     </div>
 
-    <div class="form-field">
-      {{ form.total.label }}
-      {{ form.total }}
-    </div>
-
   </div>
 
-  <div class="form-field autocomplete">
-    {{ form.note.label }}
-    {{ form.note }}
+  <div id="subtransactions">
+    {% for sub_form in form.subtransactions %}
+      {% include 'banking/transaction_form/subtransaction_form.html' %}
+    {% endfor %}
   </div>
 
+  <div class="add-info buttons">
 
-  {% if not update %}
-    <div id="new-transfer" class="add-info button">
-      + Record Transfer
+    <div id="new-subtransaction" class="add-info button">
+      + Add Subtransaction
     </div>
-  {% endif %}
+  
+    {% if not update %}
+      <div id="new-transfer" class="add-info button">
+        + Record Transfer
+      </div>
+    {% endif %}
+
+  </div>
 
 
   <div class="form-field">
@@ -39,8 +42,6 @@
     {% else %}
       {{ form.submit(class_="button") }}
     {% endif %}
-
-
   </div>
 
 </form>

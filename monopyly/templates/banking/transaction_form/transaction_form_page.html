@@ -4,12 +4,15 @@
 {% block javascript %}
 
   <script>
-    const ADD_TRANSFER_FORM_ENDPOINT = "{{ url_for('banking.add_transfer_fields') }}";
     const AUTOCOMPLETE_ENDPOINT = "{{ url_for('banking.suggest_transaction_autocomplete') }}";
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/add_transfer.js') }}">
+    const ADD_SUBTRANSACTION_FORM_ENDPOINT = "{{ url_for('banking.add_subtransaction_fields') }}";
+    const ADD_TRANSFER_FORM_ENDPOINT = "{{ url_for('banking.add_transfer_fields') }}";
   </script>
   <script type="module" src="{{ url_for('static', filename='js/autocomplete_banking_transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/add_subtransaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/add_transfer.js') }}">
   </script>
 
 {% endblock %}

@@ -16,7 +16,7 @@ from .accounts import BankAccountTypeHandler, BankAccountHandler
 
 
 class BankTransactionForm(FlaskForm):
-    """Form to input/edit transactions."""
+    """Form to input/edit bank transactions."""
 
     class BankAccountInfoForm(FlaskForm):
         """Form to input/edit bank account identification."""
@@ -31,6 +31,21 @@ class BankTransactionForm(FlaskForm):
         )
         type_name = TextField('AccountType', validators=[DataRequired()])
 
+    class BankSubtransactionForm(FlaskForm):
+        """Form to input/edit bank subtransactions."""
+        def __init__(self, *args, **kwargs):
+            # Deactivate CSRF as a subform
+            super().__init__(meta={'csrf': False}, *args, **kwargs)
+
+        subtotal = DecimalField(
+            'Amount',
+            validators=[DataRequired()],
+            filters=[lambda x: float(round(x, 2)) if x else None],
+            places=2,
+        )
+        note = TextField('Note', [DataRequired()])
+
+
     # Fields to identify the bank account information for the transaction
     account_info = FormField(BankAccountInfoForm)
     # Fields pertaining to the transaction
@@ -39,17 +54,12 @@ class BankTransactionForm(FlaskForm):
         validators=[DataRequired()],
         filters=[parse_date]
     )
-    total = DecimalField(
-        'Amount',
-        validators=[DataRequired()],
-        filters=[lambda x: float(round(x, 2)) if x else None],
-        places=2
-    )
-    note = TextField('Note', [DataRequired()])
+    # Subtransaction fields (must be at least 1 subtransaction)
+    subtransactions = FieldList(FormField(BankSubtransactionForm),
+                                min_entries=1)
     # Fields to identify a second bank involved in a funds transfer
     transfer_account_info = FieldList(FormField(BankAccountInfoForm),
                                       min_entries=0, max_entries=1)
-
     submit = SubmitField('Save Transaction')
 
     @property
@@ -59,14 +69,23 @@ class BankTransactionForm(FlaskForm):
 
         Creates a dictionary of transaction fields and values, in a
         format that can be added directly to the database as a new
-        bank transaction.
+        bank transaction. The dictionary also includes subtransactions.
         """
         account = self.get_transaction_account()
+        # Internal transaction IDs are managed by the database handler
         transaction_data = {'internal_transaction_id': None,
                             'account_id': account['id']}
-        # Loop over the transaction-specific fields
-        for field in ('transaction_date', 'total', 'note'):
+        # Access data for each transaction-specific field
+        for field in ('transaction_date',):
             transaction_data[field] = self[field].data
+        # Aggregate subtransaction information for the transaction
+        transaction_data['subtransactions'] = []
+        for form in self['subtransactions']:
+            subtransaction_data = {}
+            # Access data for each subtransaction-specific field
+            for field in ('subtotal', 'note'):
+                subtransaction_data[field] = form[field].data
+            transaction_data['subtransactions'].append(subtransaction_data)
         return transaction_data
 
     @property
@@ -81,11 +100,17 @@ class BankTransactionForm(FlaskForm):
         if not self.transfer_account_info:
             return None
         account = self.get_transfer_account()
+        # Internal transaction IDs are managed by the database handler
         transfer_data = {'internal_transaction_id': None,
                          'account_id': account['id']}
-        transfer_data['transaction_date'] = self['transaction_date'].data
-        transfer_data['total'] = -self['total'].data
-        transfer_data['note'] = self['note'].data
+        # Aggregate subtransaction information for the transaction
+        transfer_data['subtransactions'] = []
+        for form in self['subtransactions']:
+            subtransaction_data = {}
+            # Access data for each subtransaction-specific field
+            for field in ('subtotal', 'note'):
+                subtransaction_data[field] = form[field].data
+            transfer_data['subtransactions'].append(subtransaction_data)
         return transfer_data
 
     def get_transaction_account(self):
