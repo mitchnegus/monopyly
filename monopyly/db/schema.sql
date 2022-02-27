@@ -47,8 +47,7 @@ CREATE TABLE bank_account_types (
   type_name TEXT NOT NULL,
   type_abbreviation TEXT,
   PRIMARY KEY (id),
-  UNIQUE (user_id, type_name),
-  UNIQUE (user_id, type_abbreviation)
+  UNIQUE (user_id, type_name)
 );
 
 
@@ -85,7 +84,7 @@ CREATE TABLE bank_subtransactions (
   subtotal REAL NOT NULL,
   note TEXT NOT NULL,
   PRIMARY KEY (id),
-  FOREIGN KEY (transaction_id) REFERENCES bank_transactions (id),
+  FOREIGN KEY (transaction_id) REFERENCES bank_transactions (id)
     ON DELETE CASCADE
 );
 

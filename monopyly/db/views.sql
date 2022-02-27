@@ -1,11 +1,11 @@
 /*
  * Views enabling enhanced database functionality without additional overhead
  */
- DROP VIEW IF EXISTS bank_account_types_view;
- DROP VIEW IF EXISTS bank_accounts_view;
- DROP VIEW IF EXISTS bank_transactions_view;
- DROP VIEW IF EXISTS credit_transactions_view;
- DROP VIEW IF EXISTS credit_statements_view;
+DROP VIEW IF EXISTS bank_account_types_view;
+DROP VIEW IF EXISTS bank_accounts_view;
+DROP VIEW IF EXISTS bank_transactions_view;
+DROP VIEW IF EXISTS credit_transactions_view;
+DROP VIEW IF EXISTS credit_statements_view;
 
 
 /* Prepare a view giving consolidated bank account type information */
@@ -22,27 +22,42 @@ FROM bank_account_types;
 CREATE VIEW bank_accounts_view AS
 SELECT
   a.*,
-  COALESCE(SUM(total), 0) balance
+  ROUND(COALESCE(SUM(subtotal), 0), 2) balance
 FROM bank_accounts AS a
   LEFT OUTER JOIN bank_transactions AS t
     ON t.account_id = a.id
+  LEFT OUTER JOIN bank_subtransactions AS s_t
+    ON s_t.transaction_id = t.id
 GROUP BY a.id;
 
 
 /* Prepare a view giving enhanced bank account transaction information */
 CREATE VIEW bank_transactions_view AS
+WITH view AS (
+  SELECT
+    t.id,
+    internal_transaction_id,
+    account_id,
+    transaction_date,
+    ROUND(SUM(subtotal), 2) total,
+    GROUP_CONCAT(note, '; ') notes
+  FROM bank_transactions AS t
+    LEFT OUTER JOIN bank_subtransactions AS s_t
+      ON s_t.transaction_id = t.id
+  GROUP BY t.id
+)
 SELECT
   id,
   internal_transaction_id,
   account_id,
   transaction_date,
-  SUM(subtotal) total,
-  ROUND(SUM(subtotal) OVER (PARTITION BY account_id ORDER BY transaction_date, id), 2) balance,
-  note
-FROM bank_transactions AS t
-  LEFT OUTER JOIN bank_subtransactions AS s_t
-    ON s_t.transaction_id = t.id
-GROUP BY t.id;
+  total,
+  ROUND(
+    SUM(total) OVER (PARTITION BY account_id ORDER BY transaction_date, id),
+    2
+  ) balance,
+  notes
+FROM view;
 
 
 /* Prepare a view giving consolidated credit card transaction information */
@@ -53,7 +68,7 @@ SELECT
   statement_id,
   transaction_date,
   vendor,
-  SUM(subtotal) total,
+  ROUND(SUM(subtotal), 2) total,
   GROUP_CONCAT(note, '; ') notes
 FROM credit_transactions AS t
   LEFT OUTER JOIN credit_subtransactions AS s_t

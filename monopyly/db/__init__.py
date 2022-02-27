@@ -42,8 +42,6 @@ DATABASE_FIELDS = {
         'internal_transaction_id',
         'account_id',
         'transaction_date',
-        'total',
-        'note',
     ),
     'bank_transactions_view': (
         'internal_transaction_id',
@@ -51,6 +49,11 @@ DATABASE_FIELDS = {
         'transaction_date',
         'total',
         'balance',
+        'notes',
+    ),
+    'bank_subtransactions': (
+        'transaction_id',
+        'subtotal',
         'note',
     ),
     'credit_accounts': (
