@@ -3,6 +3,18 @@ import os
 from setuptools import setup, find_packages
 
 
+# Set the package version
+MAJOR = 1
+MINOR = 1
+PATCH = 1
+DEV = 0
+
+def name_version(major, minor, patch, dev):
+    version_number = f'{MAJOR}.{MINOR}.{PATCH}'
+    suffix = f'{.dev{dev}' if dev else ''
+    return version_number + suffix
+
+
 def convert_markdown(raw_markdown, github_user, github_repo):
     """Convert images in a string of raw markdown to display on PyPI."""
     url = 'https://raw.githubusercontent.com'
@@ -18,7 +30,7 @@ long_description = convert_markdown(raw_long_description,
 
 setup(
     name='monopyly',
-    version='1.1.0',
+    version=name_version(MAJOR, MINOR, PATCH, DEV),
     description='A homemade personal finance manager.',
     author='Mitch Negus',
     author_email='mitchnegus57@gmail.com',

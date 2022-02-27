@@ -44,6 +44,7 @@
 
 
 ## 1.1.0
+
 - Added banking interface
 - Added interface for displaying linked transactions (including between bank transactions and credit transactions)
 - Grayed out pending transactions
@@ -51,4 +52,10 @@
 - Improved modularity of autocomplete JavaScript
 - Improved modularity of transaction table templates (for banking and credit transactions)
 - Minor cosmetic enhancements
+
+
+## 1.1.1 (in progress)
+
+- Banking interface updated to use subtransactions
+- Fixed error on handling subtransactions in credit forms
 
