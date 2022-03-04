@@ -400,25 +400,25 @@ def save_transaction(form, transaction_id=None):
         Raised when the form does not validate properly.
     """
     if form.validate():
-        transaction_db = BankTransactionHandler()
+        db = BankTransactionHandler()
         transaction_data = form.transaction_data
         transfer_data = form.transfer_data
         if transaction_id:
             # Update the database with the updated transaction
-            transaction = transaction_db.update_entry(transaction_id,
-                                                      transaction_data)
+            transaction, subtransactions = db.update_entry(transaction_id,
+                                                           transaction_data)
         else:
             # Insert the new transaction into the database
             if transfer_data:
                 # Update the mappings with the internal transaction information
                 internal_transaction_id = add_internal_transaction()
-                field = 'internal_transaction_id'
-                transfer_data[field] = internal_transaction_id
-                transaction_data[field] = internal_transaction_id
+                internal_id_field = 'internal_transaction_id'
+                transaction_data[internal_id_field] = internal_transaction_id
+                transfer_data[internal_id_field] = internal_transaction_id
                 # Add the transfer to the database
-                transfer = transaction_db.add_entry(transfer_data)
-            transaction = transaction_db.add_entry(transaction_data)
-        return transaction
+                transfer, subtransactions = db.add_entry(transfer_data)
+            transaction, subtransactions = db.add_entry(transaction_data)
+        return transaction, subtransactions
     else:
         # Show an error to the user and print the errors for the admin
         flash(form_err_msg)

@@ -102,14 +102,15 @@ class BankTransactionForm(FlaskForm):
         account = self.get_transfer_account()
         # Internal transaction IDs are managed by the database handler
         transfer_data = {'internal_transaction_id': None,
-                         'account_id': account['id']}
+                         'account_id': account['id'],
+                         'transaction_date': self['transaction_date'].data}
         # Aggregate subtransaction information for the transaction
         transfer_data['subtransactions'] = []
-        for form in self['subtransactions']:
+        for subform in self['subtransactions']:
             subtransaction_data = {}
             # Access data for each subtransaction-specific field
-            for field in ('subtotal', 'note'):
-                subtransaction_data[field] = form[field].data
+            subtransaction_data['subtotal'] = -subform['subtotal'].data
+            subtransaction_data['note'] = subform['note'].data
             transfer_data['subtransactions'].append(subtransaction_data)
         return transfer_data
 
