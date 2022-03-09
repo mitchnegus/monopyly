@@ -45,12 +45,78 @@ def add_card():
             card_db = CreditCardHandler()
             # Insert the new credit card into the database
             card = card_db.add_entry(form.card_data)
-            return redirect(url_for('credit.load_account',
-                                    account_id=card['account_id']))
+            card_to_replace = _get_card_to_replace(card)
+            transfer_form = CardStatementTransferForm()
+            if card_to_replace:
+                # Disable the form submit button
+                form.submit.render_kw = {'disabled': True}
+                return render_template('credit/card_form/'
+                                       'card_form_page_new.html',
+                                       form=form,
+                                       card=card,
+                                       prior_card=card_to_replace,
+                                       transfer_statement_form=transfer_form)
+            else:
+                return redirect(url_for('credit.load_account',
+                                        account_id=card['account_id']))
         else:
             flash(form_err_msg)
             print(form.errors)
     return render_template('credit/card_form/card_form_page_new.html', form=form)
+
+
+def _get_card_to_replace(card):
+    """Get the card that this new card may be intended to replace (if any)."""
+    # Card must be active
+    if card['active']:
+        # Only one other active card must exist for this account
+        card_db = CreditCardHandler()
+        active_cards = card_db.get_entries(account_ids=(card['account_id'],),
+                                           active=True,
+                                           fields=('last_four_digits',))
+        other_active_cards = [_ for _ in active_cards if _['id'] != card['id']]
+        if len(other_active_cards) == 1:
+            other_card = other_active_cards[0]
+            # That active card must have statements with an unpaid balance
+            statement_db = CreditStatementHandler()
+            statements = statement_db.get_entries(card_ids=(other_card['id'],),
+                                                  fields=('balance',))
+            if statements:
+                latest_statement = statements[0]
+                if latest_statement['balance'] > 0:
+                    return other_card
+    # Card does not meet all of these conditions
+    return None
+
+
+@credit.route('/_transfer_card_statement/<int:card_id>/<int:prior_card_id>',
+              methods=('POST',))
+@login_required
+def transfer_statement(card_id, prior_card_id):
+    # Define and validate the form
+    form = CardStatementTransferForm()
+    form.validate()
+    # Identify the account of the cards
+    card_db = CreditCardHandler()
+    card = card_db.get_entry(card_id)
+    account_id = card['account_id']
+    # If response is affirmative, transfer the statement to the new card
+    if form['transfer'].data == 'yes':
+        # Get the most recent statement
+        statement_db = CreditStatementHandler()
+        statement = statement_db.get_entries(card_ids=(prior_card_id,))[0]
+        # Update the latest statement with the new card (mapping has no 'id')
+        statement_mapping_fields = ('card_id', 'issue_date', 'due_date')
+        statement_mapping = {_: statement[_] for _ in statement_mapping_fields}
+        statement_mapping['card_id'] = card_id
+        statement_db.update_entry(statement['id'], statement_mapping)
+        # Deactivate the old card
+        prior_card = card_db.get_entry(prior_card_id)
+        card_mapping_fields = ('account_id', 'last_four_digits', 'active')
+        prior_card_mapping = {_:prior_card[_] for _ in card_mapping_fields}
+        prior_card_mapping['active'] = 0
+        card_db.update_entry(prior_card_id, prior_card_mapping)
+    return redirect(url_for('credit.load_account', account_id=account_id))
 
 
 @credit.route('/account/<int:account_id>')

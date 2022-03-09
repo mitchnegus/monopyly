@@ -12,6 +12,10 @@
     {% include 'credit/card_form/card_form.html' %}
   {% endwith %}
 
+  {% if transfer_statement_form %}
+    {% include 'credit/card_form/transfer_statement_inquiry.html' %}
+  {% endif %}
+
 {% endblock %}
 
 {% block javascript %}

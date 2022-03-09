@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from werkzeug.exceptions import abort
 from wtforms.fields import (
     FormField, DecimalField, IntegerField, TextField, BooleanField,
-    SelectField, SubmitField, FieldList
+    RadioField, SelectField, SubmitField, FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
 
@@ -188,3 +188,10 @@ class CreditCardForm(FlaskForm):
             account_choices.append((account['id'], description))
         account_choices.append((0, 'New account'))
         self.account_id.choices = account_choices
+
+
+class CardStatementTransferForm(FlaskForm):
+    """Form indicating if an unpaid statement should be transferred to a new card."""
+    transfer = RadioField("transfer", choices=[("yes", "Yes"), ("no", "No")])
+    submit = SubmitField("Continue")
+
