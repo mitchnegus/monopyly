@@ -65,7 +65,7 @@ class CreditStatementHandler(DatabaseHandler):
         sort_order : {'ASC', 'DESC'}
             An indicator of whether the statements should be ordered in
             ascending (oldest at top) or descending (newest at top)
-            order.
+            order. The default is descending order.
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). A field can be any column from
