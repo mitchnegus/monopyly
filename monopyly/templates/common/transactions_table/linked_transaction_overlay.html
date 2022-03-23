@@ -2,13 +2,13 @@
 {% set credit_transaction_template = 'common/transactions_table/linked_credit_transaction.html' %}
 
 <div class="overlay">
-  <div id="linked-transaction-display">
+  <div id="linked-transaction-display" class="modal">
 
     <div class="buttons">
       <img class="close button" src="/static/img/icons/x-thick.png">
     </div>
 
-    <div class="linked transaction selected">
+    <div class="linked-transaction selected modal-box">
       {% if selected_transaction_type == 'bank' %}
         {% include bank_transaction_template %}
       {% elif selected_transaction_type == 'credit' %}
@@ -18,7 +18,7 @@
 
     <img id="link" src="{{ url_for('static', filename='img/icons/link.png') }}" />
 
-    <div class="linked transaction">
+    <div class="linked-transaction modal-box">
       {% with transaction = linked_transaction %}
         {% if linked_transaction_type == 'bank' %}
           {% include bank_transaction_template %}

@@ -311,13 +311,15 @@ def make_payment(statement_id):
         bank_account_db.get_entry(payment_account_id)
         # Create an internal transaction ID and corresponding bank transaction
         internal_transaction_id = add_internal_transaction()
+        card_name = f"{card['bank_name']}-{card['last_four_digits']}"
         bank_mapping = {
             'internal_transaction_id': internal_transaction_id,
             'account_id': payment_account_id,
             'transaction_date': payment_date,
-            'total': -payment_amount,
-            'note': "Credit card payment "
-                   f"({card['bank_name']}-{card['last_four_digits']})"
+            'subtransactions': [{
+                'subtotal': -payment_amount,
+                'note': f"Credit card payment ({card_name})",
+            }]
         }
         bank_transaction_db.add_entry(bank_mapping)
     else:

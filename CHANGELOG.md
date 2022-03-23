@@ -57,5 +57,6 @@
 ## 1.1.1 (in progress)
 
 - Banking interface updated to use subtransactions
+- Added the ability to transfer statements when a new credit card is added to an account
 - Fixed error on handling subtransactions in credit forms
 

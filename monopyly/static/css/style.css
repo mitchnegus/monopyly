@@ -218,6 +218,35 @@ aside.sidebar {
 
 
 /*
+ * Style overlays and modals
+ */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 10;
+}
+
+.modal {
+  position: relative;
+  top: 0%;
+  left: 50%;
+  transform: translate(-50%, 15%);
+}
+
+.modal-box {
+  box-sizing: border-box;
+  border: 5px solid #444444;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 1px 1px 5px black;
+}
+
+
+/*
  * Style forms
  */
 form.transaction {
@@ -306,6 +335,12 @@ form input.button {
 form button:hover,
 form input.button:hover {
   filter: brightness(0.98);
+}
+
+form button:disabled,
+form input.button:disabled {
+  color: #bbbbbb;
+  filter: brightness(0.95);
 }
 
 form button .icon {
@@ -1303,21 +1338,7 @@ form .autocomplete-box .item.active {
 /*
  * Style linked transaction overlays
  */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
-  z-index: 10;
-}
-
 #linked-transaction-display {
-  position: relative;
-  top: 0%;
-  left: 50%;
-  transform: translate(-50%, 15%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1344,24 +1365,19 @@ form .autocomplete-box .item.active {
   width: 40px;
 }
 
-#linked-transaction-display .linked.transaction {
+#linked-transaction-display .linked-transaction {
   display: flex;
   flex-direction: column;
   width: 100%;
-  box-sizing: border-box;
   margin: 30px 0;
   padding: 20px 40px;
-  border: 5px solid #444444;
-  border-radius: 10px;
-  background-color: white;
-  box-shadow: 1px 1px 5px black;
 }
 
-#linked-transaction-display .linked.transaction.selected {
+#linked-transaction-display .linked-transaction.selected {
   border: 5px solid #85bb65;
 }
 
-#linked-transaction-display .linked.transaction .date {
+#linked-transaction-display .linked-transaction .date {
   margin-bottom: 20px;
   color: #888888;
   font-size: 14pt;
@@ -1370,34 +1386,34 @@ form .autocomplete-box .item.active {
   text-align: right;
 }
 
-#linked-transaction-display .linked.transaction .description-header .account {
+#linked-transaction-display .linked-transaction .description-header .account {
   flex: 4;
   padding-right: 10px;
   font-size: 20pt;
 }
 
-#linked-transaction-display .linked.transaction .description-header .account-type {
+#linked-transaction-display .linked-transaction .description-header .account-type {
   color: #888888;
   font-size: 16pt;
   font-weight: bold;
   text-transform: uppercase;
 }
 
-#linked-transaction-display .linked.transaction .notes {
+#linked-transaction-display .linked-transaction .notes {
   font-size: 12pt;
 }
 
-#linked-transaction-display .linked.transaction .buttons {
+#linked-transaction-display .linked-transaction .buttons {
   display: flex;
   justify-content: flex-end;
   visibility: hidden;
 }
 
-#linked-transaction-display .linked.transaction:hover .buttons {
+#linked-transaction-display .linked-transaction:hover .buttons {
   visibility: visible;
 }
 
-#linked-transaction-display .linked.transaction .button {
+#linked-transaction-display .linked-transaction .button {
   height: 20px;
   width: 20px;
   margin: 0 5px;
@@ -2021,6 +2037,50 @@ form#card #statement-issue-day-field {
 
 form#card #statement-due-day-field  {
   flex-grow: 1;
+}
+
+#transfer-statement-inquiry {
+  width: 60%;
+  min-width: 300px;
+}
+
+#transfer-statement-inquiry .modal-box {
+  height: 100%;
+  width: 100%;
+  padding: 50px;
+}
+
+#transfer-statement-inquiry form {
+  width: 150px;
+}
+
+#transfer-statement-inquiry .form-option {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#transfer-statement-inquiry .form-option label {
+  width: 50px;
+}
+
+#transfer-statement-inquiry .form-option input {
+  width: 20px;
+  height: 20px;
+}
+
+#transfer-statement-inquiry input#submit {
+  margin: 20px 0;
+}
+
+#transfer-statement-inquiry p.note {
+  color: #555555;
+  font-size: 10pt;
+}
+
+#transfer-statement-inquiry p.note .note-title {
+  font-weight: 500;
 }
 
 
