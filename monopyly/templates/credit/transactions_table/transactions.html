@@ -1,0 +1,6 @@
+{% set field_title_template = 'credit/transactions_table/transaction_field_titles.html' %}
+{% set condensed_row_content_template = 'credit/transactions_table/condensed_row_content.html' %}
+{% set expanded_row_content_template = 'credit/transactions_table/expanded_row_content.html' %}
+{% set update_transaction_function = 'credit.update_transaction' %}
+{% set delete_transaction_function = 'credit.delete_transaction' %}
+{% include 'common/transactions_table/transactions.html' %}
