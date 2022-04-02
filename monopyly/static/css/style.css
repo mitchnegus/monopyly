@@ -260,15 +260,12 @@ form .form-line {
 
 form .form-field {
   margin-left: 0;
+  flex-grow: 1;
 }
 
 form .form-line .form-field ~ .form-field {
   /* Only set margin for fields other than the first on a line */
   margin-left: 5px;
-}
-
-form .form-line .form-field {
-  flex-grow: 1;
 }
 
 form .add-info.buttons {
@@ -353,6 +350,18 @@ form button .icon {
 form button.dark-background .icon {
   filter: brightness(1.2);
   opacity: 0.5;
+}
+
+/*
+ * Style transaction forms
+ */
+form .subtotal-field {
+  flex: 1;
+  min-width: 100px;
+}
+
+form .note-field {
+  flex: 3;
 }
 
 
@@ -1876,15 +1885,6 @@ form#bank-account .hidden {
 /*
  * Customization for the 'New Bank Transaction'/'Update Bank Transaction' pages
  */
-form#bank-transaction #transaction-date-field {
-  flex: 1;
-  min-width: 150px;
-}
-
-form#bank-transaction #total-field {
-  flex: 1;
-}
-
 form#bank-transaction .bank-field {
   flex: 3;
 }
@@ -1897,6 +1897,11 @@ form#bank-transaction .last-four-digits-field {
 form#bank-transaction .account-type-field {
   flex: 1;
   min-width: 115px;
+}
+
+form#bank-transaction .transaction-date-field {
+  flex: 1;
+  min-width: 150px;
 }
 
 form#bank-transaction .transfer-title {
@@ -2305,36 +2310,27 @@ form#pay #make-payment[type="submit"] #prompt {
  * Customization for the 'New Credit Transaction'/
  * 'Update Credit Transaction' pages
  */
-form#credit-transaction #bank-field {
+form#credit-transaction .bank-field {
   flex: 3;
 }
 
-form#credit-transaction #last-four-digits-field {
+form#credit-transaction .last-four-digits-field {
   flex: 1;
   min-width: 125px;
 }
 
-form#credit-transaction #transaction-date-field {
+form#credit-transaction .transaction-date-field {
   flex: 1;
   min-width: 150px;
 }
 
-form#credit-transaction #vendor-field {
+form#credit-transaction .vendor-field {
   flex: 2;
 }
 
 form#credit-transaction .subtransaction-form {
   margin-top: 20px;
   border-top: 1px solid #eaeaea;
-}
-
-form#credit-transaction .subtotal-field {
-  flex: 1;
-  min-width: 100px;
-}
-
-form#credit-transaction .note-field {
-  flex: 3;
 }
 
 

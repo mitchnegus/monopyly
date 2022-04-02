@@ -8,7 +8,7 @@
 
   <div class="form-line">
 
-    <div class="form-field">
+    <div class="form-field transaction-date-field">
       {{ form.transaction_date.label }}
       {{ form.transaction_date }}
     </div>
@@ -26,7 +26,7 @@
     <div id="new-subtransaction" class="add-info button">
       + Add Subtransaction
     </div>
-  
+
     {% if not update %}
       <div id="new-transfer" class="add-info button">
         + Record Transfer
