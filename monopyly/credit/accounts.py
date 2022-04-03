@@ -31,7 +31,7 @@ class CreditAccountHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'credit_accounts'
+    table = 'credit_accounts'
 
     def get_entries(self, bank_names=None, fields=None):
         """

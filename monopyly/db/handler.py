@@ -59,14 +59,10 @@ class DatabaseHandler(ABC):
             abort(403)
 
     @property
-    def table(self):
-        # Ensure that the `_table` attribute is defined
-        try:
-            return self._table
-        except AttributeError:
-            raise AttributeError('The handler must have a defined table.')
-
     @abstractmethod
+    def table(self):
+        raise NotImplementedError("The handler must have a defined table.")
+
     def get_entries(self, fields=None):
         """
         Retrieve a set of entries from the database.
@@ -86,7 +82,6 @@ class DatabaseHandler(ABC):
         placeholders = (self.user_id,)
         entries = self._query_entries(query, placeholders)
         return entries
-
 
     def _query_entries(self, query, placeholders):
         """Execute a query to return entries from the database."""

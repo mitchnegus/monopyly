@@ -41,11 +41,11 @@ class BankTransactionHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'bank_transactions'
-    _table_view = 'bank_transactions_view'
+    table = 'bank_transactions'
+    table_view = 'bank_transactions_view'
 
     def get_entries(self, account_ids=None, active=False, sort_order='DESC',
-                    fields=DATABASE_FIELDS[_table]):
+                    fields=DATABASE_FIELDS[table]):
         """
         Get bank transactions from the database.
 
@@ -290,7 +290,7 @@ class BankSubtransactionHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'bank_subtransactions'
+    table = 'bank_subtransactions'
 
     def get_entries(self, transaction_ids=None, fields=None):
         """

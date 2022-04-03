@@ -41,11 +41,11 @@ class CreditTransactionHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'credit_transactions'
-    _table_view = 'credit_transactions_view'
+    table = 'credit_transactions'
+    table_view = 'credit_transactions_view'
 
     def get_entries(self, card_ids=None, statement_ids=None, active=False,
-                    sort_order='DESC', fields=DATABASE_FIELDS[_table_view]):
+                    sort_order='DESC', fields=DATABASE_FIELDS[table_view]):
         """
         Get credit card transactions from the database.
 
@@ -286,7 +286,7 @@ class CreditSubtransactionHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'credit_subtransactions'
+    table = 'credit_subtransactions'
 
     def get_entries(self, transaction_ids=None, fields=None):
         """

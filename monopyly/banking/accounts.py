@@ -34,8 +34,8 @@ class BankAccountTypeHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'bank_account_types'
-    _table_view = 'bank_account_types_view'
+    table = 'bank_account_types'
+    table_view = 'bank_account_types_view'
 
     def get_entries(self, fields=None):
         """
@@ -176,8 +176,8 @@ class BankAccountHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'bank_accounts'
-    _table_view = 'bank_accounts_view'
+    table = 'bank_accounts'
+    table_view = 'bank_accounts_view'
 
     def get_entries(self, bank_ids=None, account_type_ids=None, fields=None):
         """

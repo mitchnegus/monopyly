@@ -37,11 +37,11 @@ class CreditStatementHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    _table = 'credit_statements'
-    _table_view = 'credit_statements_view'
+    table = 'credit_statements'
+    table_view = 'credit_statements_view'
 
     def get_entries(self, card_ids=None, bank_ids=None, active=False,
-                    sort_order='DESC', fields=DATABASE_FIELDS[_table]):
+                    sort_order='DESC', fields=DATABASE_FIELDS[table]):
         """
         Get credit card statements from the database.
 
