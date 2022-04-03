@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from monopyly.utils import parse_date
+from monopyly.utils import parse_date, dedelimit_float, sort_by_frequency
 
 
 class TestDateParser:
@@ -60,4 +60,41 @@ class TestDateParser:
     def test_invalid_date_string_formats(self, date_string):
         with pytest.raises(ValueError):
             parse_date(date_string)
+
+
+class TestFloatDedelimiter:
+
+    @pytest.mark.parametrize(
+        'value, expected_value',
+        [['1,000', 1000.0],
+         ['1,000.00', 1_000.0],
+         ['5,000,000', 5_000_000.0],
+         ['5,000,000.67', 5_000_000.67],
+         [5000, 5000.0]]
+    )
+    def test_dedelimit_float(self, value, expected_value):
+        assert dedelimit_float(value) == expected_value
+
+    @pytest.mark.parametrize(
+        'value, expectation',
+        [['abc', ValueError],
+         [None, TypeError]]
+    )
+    def test_dedelimit_float_invalid(self, value, expectation):
+        with pytest.raises(expectation):
+            dedelimit_float(value)
+
+
+class TestFrequencySorter:
+
+    @pytest.mark.parametrize(
+        'items, sorted_items',
+        [[[1, 2, 3, 3], [3, 1, 2]],
+         [[1, 1, 2, 3, 3], [1, 3, 2]],
+         [[1, 1, 2, 3, 3, 3], [3, 1, 2]],
+         [['one', 'two', 'two'], ['two', 'one']],
+         [['a', 'a', 'b', 'c', 'c', 'c'], ['c', 'a', 'b']]]
+    )
+    def test_sort_by_frequency(self, items, sorted_items):
+        assert sort_by_frequency(items) == sorted_items
 
