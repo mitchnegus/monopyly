@@ -231,7 +231,7 @@ def parse_date(given_date):
     The following are acceptable date formats (in order of parsing
     precedence):
         - YYYYMMDD
-        - YYYY/[M]M/[D]
+        - YYYY/[M]M/[D]D
         - [M]M/[D]D/[YY]YY
     Dates with a delimiter between time categories (day, month, year)
     are not required to have two digit values (e.g. 'August' could be
@@ -257,31 +257,64 @@ def parse_date(given_date):
     if isinstance(given_date, datetime.date):
         return given_date
     # Handle options for alternate delimiters
+    return _DateParser(given_date).parse()
+
+
+class _DateParser:
+    """Class used to parse dates within the `parse_date` function."""
     alt_delimiters = ('.', '/')
     date_formats = ('%Y-%m-%d', '%m-%d-%Y', '%m-%d-%y')
-    err_msg = (f"The given date ('{given_date}') was not in an acceptable "
-                "format. Try entering the date in the format 'YYYY-MM-DD'.")
-    # Make the delimiter consistent and split the date into components
-    delimited_date = given_date
-    for delimiter in alt_delimiters:
-        delimited_date = delimited_date.replace(delimiter, '-')
-    # Zero pad all date components to be at least length 2
-    split_date = delimited_date.split('-')
-    if len(split_date) == 3:
-        components = [f'{_:0>2}' if len(_) < 2 else _ for _ in split_date]
-    elif len(split_date) == 1 and len(given_date) == 8:
-        components = [given_date[:4], given_date[4:6], given_date[6:]]
-    else:
-        raise ValueError(err_msg)
-    parseable_date = '-'.join(components)
-    # Join the components back together and parse with `datetime` module
-    for fmt in date_formats:
-        try:
-            date = datetime.datetime.strptime(parseable_date, fmt).date()
-            return date
-        except ValueError:
-            pass
-    raise ValueError(err_msg)
+
+    def __init__(self, given_date):
+        self.given_date = given_date
+        self.err_msg = (f"The given date ('{given_date}') was not in an "
+                         "acceptable format. Try entering the date in the "
+                         "format 'YYYY-MM-DD'.")
+
+    def parse(self):
+        """Parse the date (string) into a Python `datetime.date` object."""
+        components = self._get_date_components(self.given_date)
+        parseable_string = '-'.join(components)
+        return self._attempt_datetime_parsing(parseable_string)
+
+    def _get_date_components(self, given_date):
+        """Split the date string into year, month, and day components."""
+        if len(given_date) == 8 and given_date.isnumeric():
+            # Assign components by their place (sans delimiter)
+            components = [given_date[:4], given_date[4:6], given_date[6:]]
+        else:
+            delimited_date = self._standardize_delimiters(given_date)
+            components = self._split_delimited_date(delimited_date)
+        return components
+
+    def _standardize_delimiters(self, date_string):
+        """Set the delimiter in all dates to '-' for simplified parsing."""
+        for delimiter in self.alt_delimiters:
+            date_string = date_string.replace(delimiter, '-')
+        return date_string
+
+    def _split_delimited_date(self, delimited_date_string):
+        """Split a delimited date into components (padding if necessary)."""
+        split_date = delimited_date_string.split('-')
+        if len(split_date) == 3:
+            return self._pad_components(split_date)
+        else:
+            # There should not be anything other than three date components
+            raise ValueError(self.err_msg)
+
+    def _pad_components(self, split_date):
+        """Pad each component with leading zeros if less than two digits."""
+        return [f'{_:0>2}' if len(_) <2 else _ for _ in split_date]
+
+    def _attempt_datetime_parsing(self, parseable_string):
+        """Attempt to parse the string into a date using the valid formats."""
+        for fmt in self.date_formats:
+            try:
+                date = datetime.datetime.strptime(parseable_string, fmt).date()
+                return date
+            except ValueError:
+                pass
+        raise ValueError(self.err_msg)
 
 
 def strip_function(field):
