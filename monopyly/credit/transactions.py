@@ -8,10 +8,7 @@ from flask import flash
 from wtforms.validators import ValidationError
 
 from ..db import DATABASE_FIELDS
-from ..db.handler import (
-    DatabaseHandler, fill_places, filter_items, filter_dates, check_sort_order,
-    select_fields
-)
+from ..db.handler import DatabaseHandler
 from ..form_utils import form_err_msg
 
 
@@ -83,11 +80,12 @@ class CreditTransactionHandler(DatabaseHandler):
         transactions : list of sqlite3.Row
             A list of credit card transactions matching the criteria.
         """
-        check_sort_order(sort_order)
-        card_filter = filter_items(card_ids, 'card_id', 'AND')
-        statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
+        self._queries.check_sort_order(sort_order)
+        card_filter = self._queries.filter_items(card_ids, 'card_id', 'AND')
+        statement_filter = self._queries.filter_items(statement_ids,
+                                                      'statement_id', 'AND')
         active_filter = "AND active = 1" if active else ""
-        query = (f"SELECT {select_fields(fields, 't.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
                   "  FROM credit_transactions_view AS t "
                   "       INNER JOIN credit_statements AS s "
                   "          ON s.id = t.statement_id "
@@ -101,8 +99,8 @@ class CreditTransactionHandler(DatabaseHandler):
                  f"       {card_filter} {statement_filter} {active_filter} "
                   " GROUP BY t.id "
                  f" ORDER BY transaction_date {sort_order}")
-        placeholders = (self.user_id, *fill_places(card_ids),
-                        *fill_places(statement_ids))
+        placeholders = (self.user_id, *self._queries.fill_places(card_ids),
+                        *self._queries.fill_places(statement_ids))
         transactions = self._query_entries(query, placeholders)
         return transactions
 
@@ -127,7 +125,7 @@ class CreditTransactionHandler(DatabaseHandler):
         transaction : sqlite3.Row
             The transaction information from the database.
         """
-        query = (f"SELECT {select_fields(fields, 't.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
                   "  FROM credit_transactions_view AS t "
                   "       INNER JOIN credit_statements AS s "
                   "          ON s.id = t.statement_id "
@@ -312,9 +310,10 @@ class CreditSubtransactionHandler(DatabaseHandler):
             A list of credit card subtransactions that are associated
             with the given transaction.
         """
-        transaction_filter = filter_items(transaction_ids, 'transaction_id',
-                                          'AND')
-        query = (f"SELECT {select_fields(fields, 's_t.id')} "
+        transaction_filter = self._queries.filter_items(transaction_ids,
+                                                        'transaction_id',
+                                                        'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 's_t.id')} "
                   "  FROM credit_subtransactions AS s_t "
                   "       INNER JOIN credit_transactions AS t "
                   "          ON t.id = s_t.transaction_id "
@@ -327,7 +326,8 @@ class CreditSubtransactionHandler(DatabaseHandler):
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                  f" WHERE user_id = ? {transaction_filter}")
-        placeholders = (self.user_id, *fill_places(transaction_ids))
+        placeholders = (self.user_id,
+                        *self._queries.fill_places(transaction_ids))
         subtransactions = self._query_entries(query, placeholders)
         return subtransactions
 
@@ -352,7 +352,7 @@ class CreditSubtransactionHandler(DatabaseHandler):
         subtransaction : sqlite3.Row
             The subtransaction information from the database.
         """
-        query = (f"SELECT {select_fields(fields, 't.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
                   "  FROM credit_subtransactions AS s_t "
                   "       INNER JOIN credit_transactions AS t "
                   "          ON t.id = s_t.transaction_id "
@@ -467,14 +467,13 @@ class CreditTagHandler(DatabaseHandler):
         tags : list of sqlite3.Row
             A list of credit card transaction tags matching the criteria.
         """
-        name_filter = filter_items(tag_names, 'tag_name', 'AND')
-        transaction_filter = filter_items(transaction_ids,
-                                          'transaction_id',
-                                          'AND')
-        subtransaction_filter = filter_items(subtransaction_ids,
-                                             'subtransaction_id',
-                                             'AND')
-        query = (f"SELECT {select_fields(fields, 'DISTINCT tags.id')} "
+        name_filter = self._queries.filter_items(tag_names, 'tag_name', 'AND')
+        transaction_filter = self._queries.filter_items(transaction_ids,
+                                          'transaction_id', 'AND')
+        subtransaction_filter = self._queries.filter_items(subtransaction_ids,
+                                                           'subtransaction_id',
+                                                           'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 'DISTINCT tags.id')} "
                   "  FROM credit_tags AS tags "
                   "       LEFT OUTER JOIN credit_tag_links AS l "
                   "          ON l.tag_id = tags.id "
@@ -482,9 +481,9 @@ class CreditTagHandler(DatabaseHandler):
                   "          ON s_t.id = l.subtransaction_id "
                  f" WHERE user_id = ? {name_filter} "
                  f"       {transaction_filter} {subtransaction_filter}")
-        placeholders = (self.user_id, *fill_places(tag_names),
-                        *fill_places(transaction_ids),
-                        *fill_places(subtransaction_ids))
+        placeholders = (self.user_id, *self._queries.fill_places(tag_names),
+                        *self._queries.fill_places(transaction_ids),
+                        *self._queries.fill_places(subtransaction_ids))
         tags = self._query_entries(query, placeholders)
         # If specified, remove ancestors from the list of tags
         if not ancestors:
@@ -513,7 +512,7 @@ class CreditTagHandler(DatabaseHandler):
         tag : sqlite3.Row
             The tag information from the database.
         """
-        query = (f"SELECT {select_fields(fields, 'tags.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'tags.id')} "
                   "  FROM credit_tags AS tags "
                   " WHERE user_id = ? AND id = ?")
         placeholders = (self.user_id, tag_id)
@@ -541,7 +540,7 @@ class CreditTagHandler(DatabaseHandler):
             A list of credit card transaction tags that are
             subcategories of the given tag.
         """
-        query = (f"SELECT {select_fields(fields, 'tags.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'tags.id')} "
                   "  FROM credit_tags AS tags "
                   " WHERE user_id = ? AND parent_id IS ?")
         placeholders = (self.user_id, tag_id)
@@ -595,7 +594,7 @@ class CreditTagHandler(DatabaseHandler):
             The tag entry matching the given criteria. If no matching
             tag is found, returns `None`.
         """
-        query = (f"SELECT {select_fields(fields, 'tags.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'tags.id')} "
                   "  FROM credit_tags AS tags "
                  f" WHERE user_id = ? AND tag_name = ?")
         placeholders = (self.user_id, tag_name)
@@ -757,10 +756,11 @@ class CreditTagHandler(DatabaseHandler):
         tag_totals : dict
             The list of totals for all tags matching the criteria.
         """
-        tag_filter = filter_items(tag_ids, 'tag_id', 'AND')
-        statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
-        date_filter = filter_dates(start_date, end_date, 'transaction_date',
-                                   'AND')
+        tag_filter = self._queries.filter_items(tag_ids, 'tag_id', 'AND')
+        statement_filter = self._queries.filter_items(statement_ids,
+                                                      'statement_id', 'AND')
+        date_filter = self._queries.filter_dates(start_date, end_date,
+                                                 'transaction_date', 'AND')
         fields = ['SUM(subtotal) total', 'tag_name']
         groups = ['tags.id']
         if group_statements:
@@ -779,7 +779,8 @@ class CreditTagHandler(DatabaseHandler):
                   " WHERE tags.user_id = ? "
                  f"       {tag_filter} {statement_filter} {date_filter} "
                  f" GROUP BY {', '.join(groups)}")
-        placeholders = (self.user_id, *fill_places(statement_ids))
+        placeholders = (self.user_id,
+                        *self._queries.fill_places(statement_ids))
         tag_totals = self._query_entries(query, placeholders)
         return tag_totals
 
@@ -808,7 +809,7 @@ class CreditTagHandler(DatabaseHandler):
             The list of average totals for all tags matching the
             criteria.
         """
-        statement_filter = filter_items(statement_ids, 'id', 'AND')
+        statement_filter = self._queries.filter_items(statement_ids, 'id', 'AND')
         subquery = ("SELECT COUNT(s.id) "
                     "  FROM credit_statements AS s "
                     "       INNER JOIN credit_cards AS c "
@@ -818,8 +819,9 @@ class CreditTagHandler(DatabaseHandler):
                     "       INNER JOIN banks AS b "
                     "             ON b.id = a.bank_id "
                    f" WHERE b.user_id = ? {statement_filter}")
-        tag_filter = filter_items(tag_ids, 'tag_id', 'AND')
-        statement_filter = filter_items(statement_ids, 'statement_id', 'AND')
+        tag_filter = self._queries.filter_items(tag_ids, 'tag_id', 'AND')
+        statement_filter = self._queries.filter_items(statement_ids,
+                                                      'statement_id', 'AND')
         query = (f"SELECT SUM(subtotal) / ({subquery}) average_total, tag_name "
                   "  FROM credit_tags AS tags "
                   "       INNER JOIN credit_tag_links AS l "
@@ -832,8 +834,10 @@ class CreditTagHandler(DatabaseHandler):
                   "          ON s.id = t.statement_id "
                  f" WHERE tags.user_id = ? {tag_filter} {statement_filter} "
                  f" GROUP BY tags.id")
-        placeholders = (self.user_id, *fill_places(statement_ids),
-                        self.user_id, *fill_places(statement_ids))
+        placeholders = (self.user_id,
+                        *self._queries.fill_places(statement_ids),
+                        self.user_id,
+                        *self._queries.fill_places(statement_ids))
         tag_average_totals = self._query_entries(query, placeholders)
         return tag_average_totals
 

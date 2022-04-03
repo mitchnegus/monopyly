@@ -7,10 +7,7 @@ from sqlite3 import IntegrityError
 from flask import flash
 
 from ..db import DATABASE_FIELDS
-from ..db.handler import (
-    DatabaseHandler, fill_places, filter_items, filter_dates, check_sort_order,
-    select_fields
-)
+from ..db.handler import DatabaseHandler
 from ..form_utils import form_err_msg
 from ..core.internal_transactions import add_internal_transaction
 
@@ -79,10 +76,11 @@ class BankTransactionHandler(DatabaseHandler):
         transactions : list of sqlite3.Row
             A list of bank account transactions matching the criteria.
         """
-        check_sort_order(sort_order)
-        account_filter = filter_items(account_ids, 'account_id', 'AND')
+        self._queries.check_sort_order(sort_order)
+        account_filter = self._queries.filter_items(account_ids, 'account_id',
+                                                    'AND')
         active_filter = "AND active = 1" if active else ""
-        query = (f"SELECT {select_fields(fields, 't.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
                   "  FROM bank_transactions_view AS t "
                   "       INNER JOIN bank_accounts AS a "
                   "          ON a.id = t.account_id "
@@ -94,7 +92,7 @@ class BankTransactionHandler(DatabaseHandler):
                  f"       {account_filter} {active_filter} "
                   " GROUP BY t.id "
                  f" ORDER BY transaction_date {sort_order}")
-        placeholders = (self.user_id, *fill_places(account_ids))
+        placeholders = (self.user_id, *self._queries.fill_places(account_ids))
         transactions = self._query_entries(query, placeholders)
         return transactions
 
@@ -119,7 +117,7 @@ class BankTransactionHandler(DatabaseHandler):
         transaction : sqlite3.Row
             The transaction information from the database.
         """
-        query = (f"SELECT {select_fields(fields, 't.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
                   "  FROM bank_transactions_view AS t "
                   "       INNER JOIN bank_accounts AS a "
                   "          ON a.id = t.account_id "
@@ -316,9 +314,10 @@ class BankSubtransactionHandler(DatabaseHandler):
             A list of bank subtransactions that are associated with the
             given transaction.
         """
-        transaction_filter = filter_items(transaction_ids, 'transaction_id',
-                                          'AND')
-        query = (f"SELECT {select_fields(fields, 's_t.id')} "
+        transaction_filter = self._queries.filter_items(transaction_ids,
+                                                        'transaction_id',
+                                                        'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 's_t.id')} "
                   "  FROM bank_subtransactions AS s_t "
                   "       INNER JOIN bank_transactions AS t "
                   "          ON t.id = s_t.transaction_id "
@@ -329,7 +328,8 @@ class BankSubtransactionHandler(DatabaseHandler):
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                  f" WHERE b.user_id = ? {transaction_filter}")
-        placeholders = (self.user_id, *fill_places(transaction_ids))
+        placeholders = (self.user_id,
+                        *self._queries.fill_places(transaction_ids))
         subtransactions = self._query_entries(query, placeholders)
         return subtransactions
 
@@ -354,7 +354,7 @@ class BankSubtransactionHandler(DatabaseHandler):
         subtransaction : sqlite3.Row
             The subtransaction information from the database.
         """
-        query = (f"SELECT {select_fields(fields, 't.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
                   "  FROM bank_subtransactions AS s_t "
                   "       INNER JOIN bank_transactions AS t "
                   "          ON t.id = s_t.transaction_id "

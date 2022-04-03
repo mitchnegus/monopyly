@@ -1,10 +1,7 @@
 """
 Tools for interacting with bank accounts in the database.
 """
-from ..db.handler import (
-    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
-    select_fields
-)
+from ..db.handler import DatabaseHandler
 from .banks import BankHandler
 
 
@@ -57,7 +54,7 @@ class BankAccountTypeHandler(DatabaseHandler):
         account_types : list of sqlite3.Row
             A list of bank accounts types matching the criteria.
         """
-        query = (f"SELECT {select_fields(fields, 'types.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'types.id')} "
                   "  FROM bank_account_types_view AS types"
                  f" WHERE user_id IN (0, ?)")
         placeholders = (self.user_id,)
@@ -66,7 +63,7 @@ class BankAccountTypeHandler(DatabaseHandler):
 
     def get_entry(self, account_type_id, fields=None):
         """Get a bank account type from the database given its ID."""
-        query = (f"SELECT {select_fields(fields, 'types.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'types.id')} "
                   "  FROM bank_account_types_view AS types"
                   " WHERE types.id = ? AND user_id IN (0, ?)")
         placeholders = (account_type_id, self.user_id)
@@ -101,17 +98,18 @@ class BankAccountTypeHandler(DatabaseHandler):
             A bank account type entry matching the given criteria. If no
             matching account type is found, returns `None`.
         """
-        type_filter = filter_item(type_name, 'type_name', 'AND')
-        digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        abbreviation_filter = filter_item(type_abbreviation,
-                                          'type_abbreviation',
-                                          'AND')
-        query = (f"SELECT {select_fields(fields, 'types.id')} "
+        type_filter = self._queries.filter_item(type_name, 'type_name', 'AND')
+        digit_filter = self._queries.filter_item(last_four_digits,
+                                                 'last_four_digits', 'AND')
+        abbreviation_filter = self._queries.filter_item(type_abbreviation,
+                                                        'type_abbreviation',
+                                                        'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 'types.id')} "
                   "  FROM bank_account_types AS types "
                   " WHERE user_id IN (0, ?) "
                  f"       {type_filter} {abbreviation_filter}")
-        placeholders = (self.user_id, *fill_place(type_name),
-                        *fill_place(type_abbreviation))
+        placeholders = (self.user_id, *self._queries.fill_place(type_name),
+                        *self._queries.fill_place(type_abbreviation))
         account_type = self.cursor.execute(query, placeholders).fetchone()
         return account_type
 
@@ -206,9 +204,10 @@ class BankAccountHandler(DatabaseHandler):
         accounts : list of sqlite3.Row
             A list of bank accounts matching the criteria.
         """
-        bank_filter = filter_items(bank_ids, 'b.id', 'AND')
-        type_filter = filter_items(account_type_ids, 'types.id', 'AND')
-        query = (f"SELECT {select_fields(fields, 'a.id')} "
+        bank_filter = self._queries.filter_items(bank_ids, 'b.id', 'AND')
+        type_filter = self._queries.filter_items(account_type_ids, 'types.id',
+                                                 'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 'a.id')} "
                   "  FROM bank_accounts_view AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
@@ -216,14 +215,14 @@ class BankAccountHandler(DatabaseHandler):
                   "          ON types.id = a.account_type_id "
                   " WHERE b.user_id = ? "
                  f"       {bank_filter} {type_filter}")
-        placeholders = (self.user_id, *fill_places(bank_ids),
-                        *fill_places(account_type_ids))
+        placeholders = (self.user_id, *self._queries.fill_places(bank_ids),
+                        *self._queries.fill_places(account_type_ids))
         accounts = self._query_entries(query, placeholders)
         return accounts
 
     def get_entry(self, account_id, fields=None):
         """Get a bank account from the database given its ID."""
-        query = (f"SELECT {select_fields(fields, 'a.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'a.id')} "
                   "  FROM bank_accounts_view AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
@@ -270,10 +269,12 @@ class BankAccountHandler(DatabaseHandler):
             A bank account entry matching the given criteria. If no
             matching account is found, returns `None`.
         """
-        bank_filter = filter_item(bank_name, 'bank_name', 'AND')
-        digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        type_filter = filter_item(account_type_name, 'type_name', 'AND')
-        query = (f"SELECT {select_fields(fields, 'a.id')} "
+        bank_filter = self._queries.filter_item(bank_name, 'bank_name', 'AND')
+        digit_filter = self._queries.filter_item(last_four_digits,
+                                                 'last_four_digits', 'AND')
+        type_filter = self._queries.filter_item(account_type_name, 'type_name',
+                                                'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 'a.id')} "
                   "  FROM bank_accounts_view AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
@@ -281,9 +282,9 @@ class BankAccountHandler(DatabaseHandler):
                   "          ON types.id = a.account_type_id "
                   " WHERE b.user_id = ? "
                  f"       {bank_filter} {digit_filter} {type_filter}")
-        placeholders = (self.user_id, *fill_place(bank_name),
-                        *fill_place(last_four_digits),
-                        *fill_place(account_type_name))
+        placeholders = (self.user_id, *self._queries.fill_place(bank_name),
+                        *self._queries.fill_place(last_four_digits),
+                        *self._queries.fill_place(account_type_name))
         account = self.cursor.execute(query, placeholders).fetchone()
         return account
 

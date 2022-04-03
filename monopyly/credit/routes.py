@@ -10,7 +10,7 @@ from ..auth.tools import login_required
 from ..utils import parse_date, dedelimit_float, sort_by_frequency
 from ..form_utils import form_err_msg
 from ..core.internal_transactions import add_internal_transaction
-from ..db.handler import check_field
+from ..db.handler.queries import check_field
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
 from ..banking.transactions import BankTransactionHandler

@@ -1,9 +1,7 @@
 """
 Tools for interacting with banks in the database.
 """
-from ..db.handler import (
-    DatabaseHandler, fill_places, filter_items, select_fields
-)
+from ..db.handler import DatabaseHandler
 
 
 class BankHandler(DatabaseHandler):
@@ -56,18 +54,19 @@ class BankHandler(DatabaseHandler):
         banks : list of sqlite3.Row
             A list of banks matching the criteria.
         """
-        bank_filter = filter_items(bank_names, 'bank_name', 'AND')
-        query = (f"SELECT {select_fields(fields, 'b.id')} "
+        bank_filter = self._queries.filter_items(bank_names, 'bank_name',
+                                                 'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 'b.id')} "
                   "  FROM banks AS b "
                   " WHERE user_id = ? "
                  f"       {bank_filter} ")
-        placeholders = (self.user_id, *fill_places(bank_names))
+        placeholders = (self.user_id, *self._queries.fill_places(bank_names))
         banks = self._query_entries(query, placeholders)
         return banks
 
     def get_entry(self, bank_id, fields=None):
         """Get a bank from the database given its ID."""
-        query = (f"SELECT {select_fields(fields, 'b.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'b.id')} "
                   "  FROM banks AS b "
                   " WHERE b.id = ? AND user_id = ?")
         placeholders = (bank_id, self.user_id)

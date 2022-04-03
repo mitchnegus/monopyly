@@ -1,10 +1,7 @@
 """
 Tools for interacting with credit cards in the database.
 """
-from ..db.handler import (
-    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
-    select_fields
-)
+from ..db.handler import DatabaseHandler
 from .statements import CreditStatementHandler
 
 
@@ -70,12 +67,14 @@ class CreditCardHandler(DatabaseHandler):
         cards : list of sqlite3.Row
             A list of credit cards matching the criteria.
         """
-        account_filter = filter_items(account_ids, 'account_id', 'AND')
-        bank_filter = filter_items(bank_names, 'bank_name', 'AND')
-        digit_filter = filter_items(last_four_digits,
-                                    'last_four_digits', 'AND')
+        account_filter = self._queries.filter_items(account_ids, 'account_id',
+                                                    'AND')
+        bank_filter = self._queries.filter_items(bank_names, 'bank_name',
+                                                 'AND')
+        digit_filter = self._queries.filter_items(last_four_digits,
+                                                  'last_four_digits', 'AND')
         active_filter = "AND active = 1" if active else ""
-        query = (f"SELECT {select_fields(fields, 'c.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
@@ -86,9 +85,9 @@ class CreditCardHandler(DatabaseHandler):
                  f"       {digit_filter} {active_filter} "
                   " ORDER BY active DESC")
         placeholders = (self.user_id,
-                        *fill_places(account_ids),
-                        *fill_places(bank_names),
-                        *fill_places(last_four_digits))
+                        *self._queries.fill_places(account_ids),
+                        *self._queries.fill_places(bank_names),
+                        *self._queries.fill_places(last_four_digits))
         cards = self._query_entries(query, placeholders)
         return cards
 
@@ -113,7 +112,7 @@ class CreditCardHandler(DatabaseHandler):
         card : sqlite3.Row
             The card information from the database.
         """
-        query = (f"SELECT {select_fields(fields, 'c.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
@@ -155,9 +154,10 @@ class CreditCardHandler(DatabaseHandler):
             A credit card entry matching the given criteria. If no
             matching card is found, returns `None`.
         """
-        bank_filter = filter_item(bank_name, 'bank_name', 'AND')
-        digit_filter = filter_item(last_four_digits, 'last_four_digits', 'AND')
-        query = (f"SELECT {select_fields(fields, 'c.id')} "
+        bank_filter = self._queries.filter_item(bank_name, 'bank_name', 'AND')
+        digit_filter = self._queries.filter_item(last_four_digits,
+                                                 'last_four_digits', 'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 'c.id')} "
                   "  FROM credit_cards AS c "
                   "       INNER JOIN credit_accounts AS a "
                   "          ON a.id = c.account_id "
@@ -165,8 +165,8 @@ class CreditCardHandler(DatabaseHandler):
                   "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} {digit_filter}")
-        placeholders = (self.user_id, *fill_place(bank_name),
-                        *fill_place(last_four_digits))
+        placeholders = (self.user_id, *self._queries.fill_place(bank_name),
+                        *self._queries.fill_place(last_four_digits))
         card = self.cursor.execute(query, placeholders).fetchone()
         return card
 

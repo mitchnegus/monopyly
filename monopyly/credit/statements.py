@@ -3,11 +3,8 @@ Tools for interacting with the credit statements in the database.
 """
 from dateutil.relativedelta import relativedelta
 
-from ..db.handler import (
-    DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
-    check_sort_order, select_fields
-)
 from ..db import DATABASE_FIELDS
+from ..db.handler import DatabaseHandler
 from .transactions import CreditTransactionHandler
 
 
@@ -77,11 +74,11 @@ class CreditStatementHandler(DatabaseHandler):
         statements : list of sqlite3.Row
             A list of credit card statements matching the criteria.
         """
-        check_sort_order(sort_order)
-        card_filter = filter_items(card_ids, 'card_id', 'AND')
-        bank_filter = filter_items(bank_ids, 'bank_id', 'AND')
+        self._queries.check_sort_order(sort_order)
+        card_filter = self._queries.filter_items(card_ids, 'card_id', 'AND')
+        bank_filter = self._queries.filter_items(bank_ids, 'bank_id', 'AND')
         active_filter = "AND active = 1" if active else ""
-        query = (f"SELECT {select_fields(fields, 's.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
                   "          ON c.id = s.card_id "
@@ -92,8 +89,8 @@ class CreditStatementHandler(DatabaseHandler):
                   " WHERE user_id = ? "
                  f"       {card_filter} {bank_filter} {active_filter} "
                  f" ORDER BY issue_date {sort_order}, active DESC")
-        placeholders = (self.user_id, *fill_places(card_ids),
-                       *fill_places(bank_ids))
+        placeholders = (self.user_id, *self._queries.fill_places(card_ids),
+                       *self._queries.fill_places(bank_ids))
         statements = self._query_entries(query, placeholders)
         return statements
 
@@ -118,7 +115,7 @@ class CreditStatementHandler(DatabaseHandler):
         statement : sqlite3.Row
             The statement information from the database.
         """
-        query = (f"SELECT {select_fields(fields, 's.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
                   "          ON c.id = s.card_id "
@@ -161,8 +158,9 @@ class CreditStatementHandler(DatabaseHandler):
             The statement entry matching the given criteria. If no
             matching statement is found, returns `None`.
         """
-        date_filter = filter_item(issue_date, 'issue_date', 'AND')
-        query = (f"SELECT {select_fields(fields, 's.id')} "
+        date_filter = self._queries.filter_item(issue_date, 'issue_date',
+                                                'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 's.id')} "
                   "  FROM credit_statements_view AS s "
                   "       INNER JOIN credit_cards AS c "
                   "          ON c.id = s.card_id "
@@ -172,7 +170,8 @@ class CreditStatementHandler(DatabaseHandler):
                   "          ON b.id = a.bank_id "
                  f" WHERE user_id = ? AND card_id = ? {date_filter} "
                   " ORDER BY issue_date DESC")
-        placeholders = (self.user_id, card['id'], *fill_place(issue_date))
+        placeholders = (self.user_id, card['id'],
+                        *self._queries.fill_place(issue_date))
         statement = self.cursor.execute(query, placeholders).fetchone()
         return statement
 

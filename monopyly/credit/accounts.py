@@ -1,7 +1,7 @@
 """
 Tools for interacting with credit accounts in the database.
 """
-from ..db.handler import DatabaseHandler, fill_places, filter_items, select_fields
+from ..db.handler import DatabaseHandler
 from .cards import CreditCardHandler
 
 
@@ -56,20 +56,21 @@ class CreditAccountHandler(DatabaseHandler):
         accounts : list of sqlite3.Row
             A list of credit accounts matching the criteria.
         """
-        bank_filter = filter_items(bank_names, 'bank_name', 'AND')
-        query = (f"SELECT {select_fields(fields, 'a.id')} "
+        bank_filter = self._queries.filter_items(bank_names, 'bank_name',
+                                                 'AND')
+        query = (f"SELECT {self._queries.select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} ")
-        placeholders = (self.user_id, *fill_places(bank_names))
+        placeholders = (self.user_id, *self._queries.fill_places(bank_names))
         accounts = self._query_entries(query, placeholders)
         return accounts
 
     def get_entry(self, account_id, fields=None):
         """Get a credit account from the database given its ID."""
-        query = (f"SELECT {select_fields(fields, 'a.id')} "
+        query = (f"SELECT {self._queries.select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
