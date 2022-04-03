@@ -7,8 +7,9 @@ from flask import redirect, render_template, flash, request, url_for, jsonify
 from wtforms.validators import ValidationError
 
 from ..auth.tools import login_required
-from ..utils import check_field, sort_by_frequency
+from ..utils import sort_by_frequency
 from ..form_utils import form_err_msg
+from ..db.handler import check_field
 from . import banking
 from .forms import *
 from .banks import BankHandler

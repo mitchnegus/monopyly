@@ -1,7 +1,7 @@
 """
 Tools for interacting with bank accounts in the database.
 """
-from ..utils import (
+from ..db.handler import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
     select_fields
 )

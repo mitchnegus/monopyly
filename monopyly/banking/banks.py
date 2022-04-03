@@ -1,7 +1,9 @@
 """
 Tools for interacting with banks in the database.
 """
-from ..utils import DatabaseHandler, fill_places, filter_items, select_fields
+from ..db.handler import (
+    DatabaseHandler, fill_places, filter_items, select_fields
+)
 
 
 class BankHandler(DatabaseHandler):

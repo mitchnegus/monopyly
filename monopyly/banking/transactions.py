@@ -7,7 +7,7 @@ from sqlite3 import IntegrityError
 from flask import flash
 
 from ..db import DATABASE_FIELDS
-from ..utils import (
+from ..db.handler import (
     DatabaseHandler, fill_places, filter_items, filter_dates, check_sort_order,
     select_fields
 )

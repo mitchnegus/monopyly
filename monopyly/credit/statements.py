@@ -3,7 +3,7 @@ Tools for interacting with the credit statements in the database.
 """
 from dateutil.relativedelta import relativedelta
 
-from ..utils import (
+from ..db.handler import (
     DatabaseHandler, fill_place, fill_places, filter_item, filter_items,
     check_sort_order, select_fields
 )
