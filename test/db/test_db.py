@@ -28,3 +28,4 @@ def test_init_db_command(runner, monkeypatch):
     result = runner.invoke(args=['init-db'])
     assert 'Initialized' in result.output
     assert Recorder.called
+
