@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from flask import g
 from werkzeug.exceptions import abort
 
-from ..db import get_db
+from ..utils import get_db
 from ..fields import DATABASE_FIELDS
 from . import queries
 

@@ -3,7 +3,7 @@ import sqlite3
 
 import pytest
 
-from monopyly.db.db import get_db
+from monopyly.db.utils import get_db
 
 
 def test_get_close_db(app):
@@ -24,7 +24,7 @@ def test_init_db_command(runner, monkeypatch):
     def mock_init_db():
         Recorder.called = True
 
-    monkeypatch.setattr('monopyly.db.init_db', mock_init_db)
+    monkeypatch.setattr('monopyly.db.utils.init_db', mock_init_db)
     result = runner.invoke(args=['init-db'])
     assert 'Initialized' in result.output
     assert Recorder.called

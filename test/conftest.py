@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 from monopyly import create_app
-from monopyly.db import db
+from monopyly import db
 
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
