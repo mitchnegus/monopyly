@@ -14,7 +14,7 @@ from ..db.handler.queries import validate_field
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
 from ..banking.transactions import BankTransactionHandler
-from . import credit
+from . import credit_bp
 from .forms import *
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
@@ -25,7 +25,7 @@ from .transactions import (
 )
 
 
-@credit.route('/cards')
+@credit_bp.route('/cards')
 @login_required
 def load_cards():
     card_db = CreditCardHandler()
@@ -34,7 +34,7 @@ def load_cards():
     return render_template('credit/cards_page.html', cards=cards)
 
 
-@credit.route('/add_card', methods=('GET', 'POST'))
+@credit_bp.route('/add_card', methods=('GET', 'POST'))
 @login_required
 def add_card():
     # Define a form for a credit card
@@ -90,7 +90,7 @@ def _get_card_to_replace(card):
     return None
 
 
-@credit.route('/_transfer_card_statement/<int:card_id>/<int:prior_card_id>',
+@credit_bp.route('/_transfer_card_statement/<int:card_id>/<int:prior_card_id>',
               methods=('POST',))
 @login_required
 def transfer_statement(card_id, prior_card_id):
@@ -120,7 +120,7 @@ def transfer_statement(card_id, prior_card_id):
     return redirect(url_for('credit.load_account', account_id=account_id))
 
 
-@credit.route('/account/<int:account_id>')
+@credit_bp.route('/account/<int:account_id>')
 @login_required
 def load_account(account_id):
     account_db = CreditAccountHandler()
@@ -134,7 +134,7 @@ def load_account(account_id):
                            cards=cards)
 
 
-@credit.route('/_update_card_status', methods=('POST',))
+@credit_bp.route('/_update_card_status', methods=('POST',))
 @login_required
 def update_card_status():
     card_db = CreditCardHandler()
@@ -151,7 +151,7 @@ def update_card_status():
                            card=card)
 
 
-@credit.route('/delete_card/<int:card_id>')
+@credit_bp.route('/delete_card/<int:card_id>')
 @login_required
 def delete_card(card_id):
     card_db = CreditCardHandler()
@@ -161,7 +161,7 @@ def delete_card(card_id):
     return redirect(url_for('credit.load_account', account_id=account_id))
 
 
-@credit.route('/_update_account_statement_issue_day/<int:account_id>',
+@credit_bp.route('/_update_account_statement_issue_day/<int:account_id>',
           methods=('POST',))
 @login_required
 def update_account_statement_issue_day(account_id):
@@ -174,7 +174,7 @@ def update_account_statement_issue_day(account_id):
     return str(account['statement_issue_day'])
 
 
-@credit.route('/_update_account_statement_due_day/<int:account_id>',
+@credit_bp.route('/_update_account_statement_due_day/<int:account_id>',
           methods=('POST',))
 @login_required
 def update_account_statement_due_day(account_id):
@@ -187,7 +187,7 @@ def update_account_statement_due_day(account_id):
     return str(account['statement_due_day'])
 
 
-@credit.route('/delete_account/<int:account_id>')
+@credit_bp.route('/delete_account/<int:account_id>')
 @login_required
 def delete_account(account_id):
     account_db = CreditAccountHandler()
@@ -196,7 +196,7 @@ def delete_account(account_id):
     return redirect(url_for('credit.load_cards'))
 
 
-@credit.route('/statements')
+@credit_bp.route('/statements')
 @login_required
 def load_statements():
     card_db = CreditCardHandler()
@@ -210,7 +210,7 @@ def load_statements():
                            card_statements=card_statements)
 
 
-@credit.route('/_update_statements_display', methods=('POST',))
+@credit_bp.route('/_update_statements_display', methods=('POST',))
 @login_required
 def update_statements_display():
     card_db = CreditCardHandler()
@@ -241,7 +241,7 @@ def _get_card_statements(cards, fields=None):
     return card_statements
 
 
-@credit.route('/statement/<int:statement_id>')
+@credit_bp.route('/statement/<int:statement_id>')
 @login_required
 def load_statement_details(statement_id):
     bank_account_db = BankAccountHandler()
@@ -275,7 +275,7 @@ def load_statement_details(statement_id):
                            tag_average_totals=tag_avgs)
 
 
-@credit.route('/_update_statement_due_date/<int:statement_id>',
+@credit_bp.route('/_update_statement_due_date/<int:statement_id>',
               methods=('POST',))
 @login_required
 def update_statement_due_date(statement_id):
@@ -288,7 +288,7 @@ def update_statement_due_date(statement_id):
     return str(statement['due_date'])
 
 
-@credit.route('/_make_payment/<int:statement_id>',
+@credit_bp.route('/_make_payment/<int:statement_id>',
               methods=('POST',))
 @login_required
 def make_payment(statement_id):
@@ -345,8 +345,8 @@ def make_payment(statement_id):
                            statement=statement)
 
 
-@credit.route('/transactions', defaults={'card_id': None})
-@credit.route('/transactions/<int:card_id>', methods=('GET', 'POST'))
+@credit_bp.route('/transactions', defaults={'card_id': None})
+@credit_bp.route('/transactions/<int:card_id>', methods=('GET', 'POST'))
 @login_required
 def load_transactions(card_id):
     card_db = CreditCardHandler()
@@ -375,7 +375,7 @@ def load_transactions(card_id):
                            transactions=transactions)
 
 
-@credit.route('/_expand_transaction', methods=('POST',))
+@credit_bp.route('/_expand_transaction', methods=('POST',))
 @login_required
 def expand_transaction():
     subtransaction_db = CreditSubtransactionHandler()
@@ -394,7 +394,7 @@ def expand_transaction():
                            subtransactions=subtransactions)
 
 
-@credit.route('/_show_linked_transaction', methods=('POST',))
+@credit_bp.route('/_show_linked_transaction', methods=('POST',))
 @login_required
 def show_linked_transaction():
     post_args = request.get_json()
@@ -410,7 +410,7 @@ def show_linked_transaction():
                            linked_transaction=linked_transaction)
 
 
-@credit.route('/_update_transactions_display', methods=('POST',))
+@credit_bp.route('/_update_transactions_display', methods=('POST',))
 @login_required
 def update_transactions_display():
     card_db = CreditCardHandler()
@@ -433,13 +433,13 @@ def update_transactions_display():
                            transactions=transactions)
 
 
-@credit.route('/add_transaction',
+@credit_bp.route('/add_transaction',
               defaults={'card_id': None, 'statement_id': None},
               methods=('GET', 'POST'))
-@credit.route('/add_transaction/<int:card_id>',
+@credit_bp.route('/add_transaction/<int:card_id>',
               defaults={'statement_id': None},
               methods=('GET', 'POST'))
-@credit.route('/add_transaction/<int:card_id>/<int:statement_id>',
+@credit_bp.route('/add_transaction/<int:card_id>/<int:statement_id>',
               methods=('GET', 'POST'))
 @login_required
 def add_transaction(card_id, statement_id):
@@ -477,7 +477,7 @@ def add_transaction(card_id, statement_id):
                            'transaction_form_page_new.html', form=form)
 
 
-@credit.route('/update_transaction/<int:transaction_id>',
+@credit_bp.route('/update_transaction/<int:transaction_id>',
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
@@ -511,7 +511,7 @@ def update_transaction(transaction_id):
                            transaction_id=transaction_id, form=form)
 
 
-@credit.route('/_add_subtransaction_fields', methods=('POST',))
+@credit_bp.route('/_add_subtransaction_fields', methods=('POST',))
 @login_required
 def add_subtransaction_fields():
     post_args = request.get_json()
@@ -526,7 +526,7 @@ def add_subtransaction_fields():
                            sub_form=sub_form)
 
 
-@credit.route('/delete_transaction/<int:transaction_id>')
+@credit_bp.route('/delete_transaction/<int:transaction_id>')
 @login_required
 def delete_transaction(transaction_id):
     transaction_db = CreditTransactionHandler()
@@ -535,7 +535,7 @@ def delete_transaction(transaction_id):
     return redirect(url_for('credit.load_transactions'))
 
 
-@credit.route('/tags')
+@credit_bp.route('/tags')
 @login_required
 def load_tags():
     tag_db = CreditTagHandler()
@@ -544,7 +544,7 @@ def load_tags():
     return render_template('credit/tags_page.html',
                            tags_heirarchy=heirarchy)
 
-@credit.route('/_add_tag', methods=('POST',))
+@credit_bp.route('/_add_tag', methods=('POST',))
 @login_required
 def add_tag():
     tag_db = CreditTagHandler()
@@ -569,7 +569,7 @@ def add_tag():
                            tags_heirarchy={})
 
 
-@credit.route('/_delete_tag/', methods=('POST',))
+@credit_bp.route('/_delete_tag/', methods=('POST',))
 @login_required
 def delete_tag():
     tag_db = CreditTagHandler()
@@ -582,7 +582,7 @@ def delete_tag():
     return ''
 
 
-@credit.route('/_suggest_transaction_autocomplete', methods=('POST',))
+@credit_bp.route('/_suggest_transaction_autocomplete', methods=('POST',))
 @login_required
 def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
@@ -612,7 +612,7 @@ def suggest_transaction_autocomplete():
     return jsonify(suggestions)
 
 
-@credit.route('/_suggest_card_autocomplete', methods=('POST',))
+@credit_bp.route('/_suggest_card_autocomplete', methods=('POST',))
 @login_required
 def suggest_card_autocomplete():
     # Get the autocomplete field from the AJAX request
@@ -627,7 +627,7 @@ def suggest_card_autocomplete():
     return jsonify(suggestions)
 
 
-@credit.route('/_infer_card', methods=('POST',))
+@credit_bp.route('/_infer_card', methods=('POST',))
 @login_required
 def infer_card():
     card_db = CreditCardHandler()
@@ -658,7 +658,7 @@ def infer_card():
         return ''
 
 
-@credit.route('/_infer_statement', methods=('POST',))
+@credit_bp.route('/_infer_statement', methods=('POST',))
 @login_required
 def infer_statement():
     card_db = CreditCardHandler()
@@ -683,7 +683,7 @@ def infer_statement():
         return ''
 
 
-@credit.route('/_infer_bank', methods=('POST',))
+@credit_bp.route('/_infer_bank', methods=('POST',))
 @login_required
 def infer_bank():
     account_db = CreditAccountHandler()

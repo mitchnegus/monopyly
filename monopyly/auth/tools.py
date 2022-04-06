@@ -6,7 +6,7 @@ import functools
 from flask import g, redirect, session, url_for
 
 from ..db import get_db
-from . import auth
+from . import auth_bp
 
 
 def get_username_and_password(form):
@@ -16,7 +16,7 @@ def get_username_and_password(form):
     return username, password
 
 
-@auth.before_app_request
+@auth_bp.before_app_request
 def load_logged_in_user():
     # Match the user's information with the session
     user_id = session.get('user_id')

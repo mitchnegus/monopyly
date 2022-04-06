@@ -1,10 +1,10 @@
 """
 Filters defined for the application.
 """
-from . import core
+from . import core_bp
 
 
-@core.app_template_filter('currency')
+@core_bp.app_template_filter('currency')
 def make_currency(amount):
     """Return the amount to two decimal places (always shown)."""
     # Correct values of -0.00 to 0
@@ -12,7 +12,7 @@ def make_currency(amount):
     return f'{amount:,.2f}'
 
 
-@core.app_template_filter('ordinal')
+@core_bp.app_template_filter('ordinal')
 def make_ordinal(integer):
     """
     Return the ordinal representation of an integer.

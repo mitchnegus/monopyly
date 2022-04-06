@@ -12,7 +12,6 @@ from wtforms.validators import Optional, DataRequired, Length
 from ..utils import parse_date
 from ..form_utils import NumeralsOnly, SelectionNotBlank
 from ..banking.banks import BankHandler
-from . import credit
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
 from .statements import CreditStatementHandler

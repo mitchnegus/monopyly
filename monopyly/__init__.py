@@ -5,10 +5,10 @@ import os
 from flask import Flask
 
 from monopyly import db
-from monopyly.core import core
-from monopyly.auth import auth
-from monopyly.credit import credit
-from monopyly.banking import banking
+from monopyly.core import core_bp
+from monopyly.auth import auth_bp
+from monopyly.credit import credit_bp
+from monopyly.banking import banking_bp
 
 
 def create_app(test_config=None):
@@ -36,15 +36,15 @@ def create_app(test_config=None):
     db.init_app(app)
 
     # Register the core functionality blueprint
-    app.register_blueprint(core)
+    app.register_blueprint(core_bp)
 
     # Register the authentication blueprint
-    app.register_blueprint(auth)
+    app.register_blueprint(auth_bp)
 
     # Register the banking financials blueprint
-    app.register_blueprint(banking)
+    app.register_blueprint(banking_bp)
 
     # Register the credit card financials blueprint
-    app.register_blueprint(credit)
+    app.register_blueprint(credit_bp)
 
     return app

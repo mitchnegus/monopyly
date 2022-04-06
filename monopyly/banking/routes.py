@@ -10,7 +10,7 @@ from ..auth.tools import login_required
 from ..utils import sort_by_frequency
 from ..form_utils import form_err_msg
 from ..db.handler.queries import validate_field
-from . import banking
+from . import banking_bp
 from .forms import *
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler
@@ -19,7 +19,7 @@ from .transactions import (
 )
 
 
-@banking.route('/accounts')
+@banking_bp.route('/accounts')
 @login_required
 def load_accounts():
     bank_db = BankHandler()
@@ -40,10 +40,10 @@ def load_accounts():
                            account_types=account_types)
 
 
-@banking.route('/add_account',
+@banking_bp.route('/add_account',
                defaults={'bank_id': None},
                methods=('GET', 'POST'))
-@banking.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
+@banking_bp.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
 @login_required
 def add_account(bank_id):
     # Define a form for a bank account
@@ -65,7 +65,7 @@ def add_account(bank_id):
     return render_template('banking/account_form/account_form_page_new.html', form=form)
 
 
-@banking.route('/delete_account/<int:account_id>')
+@banking_bp.route('/delete_account/<int:account_id>')
 @login_required
 def delete_account(account_id):
     account_db = BankAccountHandler()
@@ -74,7 +74,7 @@ def delete_account(account_id):
     return redirect(url_for('banking.load_accounts'))
 
 
-@banking.route('/account_summaries/<int:bank_id>')
+@banking_bp.route('/account_summaries/<int:bank_id>')
 @login_required
 def load_account_summaries(bank_id):
     bank_db = BankHandler()
@@ -97,7 +97,7 @@ def load_account_summaries(bank_id):
                            type_accounts=type_accounts)
 
 
-@banking.route('/account/<int:account_id>')
+@banking_bp.route('/account/<int:account_id>')
 @login_required
 def load_account_details(account_id):
     account_db = BankAccountHandler()
@@ -116,7 +116,7 @@ def load_account_details(account_id):
                            account_transactions=transactions)
 
 
-@banking.route('/_expand_transaction', methods=('POST',))
+@banking_bp.route('/_expand_transaction', methods=('POST',))
 @login_required
 def expand_transaction():
     subtransaction_db = BankSubtransactionHandler()
@@ -128,7 +128,7 @@ def expand_transaction():
                            subtransactions=subtransactions)
 
 
-@banking.route('/_show_linked_transaction', methods=('POST',))
+@banking_bp.route('/_show_linked_transaction', methods=('POST',))
 @login_required
 def show_linked_transaction():
     post_args = request.get_json()
@@ -153,13 +153,13 @@ def show_linked_transaction():
                            linked_transaction=linked_transaction)
 
 
-@banking.route('/add_transaction',
+@banking_bp.route('/add_transaction',
                defaults={'bank_id': None, 'account_id': None},
                methods=('GET', 'POST'))
-@banking.route('/add_transaction/<int:bank_id>',
+@banking_bp.route('/add_transaction/<int:bank_id>',
                defaults={'account_id': None},
                methods=('GET', 'POST'))
-@banking.route('/add_transaction/<int:bank_id>/<int:account_id>',
+@banking_bp.route('/add_transaction/<int:bank_id>/<int:account_id>',
                methods=('GET', 'POST'))
 @login_required
 def add_transaction(bank_id, account_id):
@@ -192,7 +192,7 @@ def add_transaction(bank_id, account_id):
                            update=False)
 
 
-@banking.route('/update_transaction/<int:transaction_id>',
+@banking_bp.route('/update_transaction/<int:transaction_id>',
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
@@ -227,7 +227,7 @@ def update_transaction(transaction_id):
                            update=update)
 
 
-@banking.route('/_add_subtransaction_fields', methods=('POST',))
+@banking_bp.route('/_add_subtransaction_fields', methods=('POST',))
 @login_required
 def add_subtransaction_fields():
     post_args = request.get_json()
@@ -242,7 +242,7 @@ def add_subtransaction_fields():
                            sub_form=sub_form)
 
 
-@banking.route('/_add_transfer_fields', methods=('POST',))
+@banking_bp.route('/_add_transfer_fields', methods=('POST',))
 @login_required
 def add_transfer_fields():
     # Redefine the form for the transaction (including the new transfer fields)
@@ -254,7 +254,7 @@ def add_transfer_fields():
                            sub_form=sub_form, id_prefix='transfer')
 
 
-@banking.route('/delete_transaction/<int:transaction_id>')
+@banking_bp.route('/delete_transaction/<int:transaction_id>')
 @login_required
 def delete_transaction(transaction_id):
     transaction_db = BankTransactionHandler()
@@ -265,7 +265,7 @@ def delete_transaction(transaction_id):
                             account_id=account_id))
 
 
-@banking.route('/_suggest_transaction_autocomplete', methods=('POST',))
+@banking_bp.route('/_suggest_transaction_autocomplete', methods=('POST',))
 @login_required
 def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request

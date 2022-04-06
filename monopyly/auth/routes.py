@@ -5,11 +5,11 @@ from flask import flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..db import get_db
+from . import auth_bp
 from .tools import get_username_and_password
-from . import auth
 
 
-@auth.route('/register', methods=('GET', 'POST'))
+@auth_bp.route('/register', methods=('GET', 'POST'))
 def register():
     if request.method == 'POST':
         # Get username and passwords from the form
@@ -41,7 +41,7 @@ def register():
     return render_template('auth/register.html')
 
 
-@auth.route('/login', methods=('GET', 'POST'))
+@auth_bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
         # Get username and passwords from the form
@@ -68,7 +68,7 @@ def login():
     # Display the login page
     return render_template('auth/login.html')
 
-@auth.route('/logout')
+@auth_bp.route('/logout')
 def logout():
     # End the session and clear the user ID
     session.clear()

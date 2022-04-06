@@ -3,14 +3,14 @@ Routes for core functionality.
 """
 from flask import g, render_template
 
-from . import core
+from . import core_bp
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
 from ..credit.cards import CreditCardHandler
 from ..credit.statements import CreditStatementHandler
 
 
-@core.route('/')
+@core_bp.route('/')
 def index():
     if g.user:
         bank_db = BankHandler()
@@ -39,10 +39,10 @@ def index():
                            cards=cards)
 
 
-@core.route('/about')
+@core_bp.route('/about')
 def about():
     return render_template('about.html')
 
-@core.route('/credits')
+@core_bp.route('/credits')
 def credits():
     return render_template('credits.html')

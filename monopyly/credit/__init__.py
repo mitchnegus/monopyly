@@ -5,6 +5,6 @@ from flask import Blueprint
 
 
 # Define the blueprint
-credit = Blueprint('credit', __name__, url_prefix='/credit')
+credit_bp = Blueprint('credit', __name__, url_prefix='/credit')
 
 from . import routes
