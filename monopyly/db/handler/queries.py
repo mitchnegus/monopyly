@@ -71,13 +71,33 @@ def prepare_date_query(field):
 
 
 def validate_sort_order(sort_order):
-    """Ensure that a valid sort order was provided."""
+    """
+    Ensure that a valid sort order was provided.
+
+    Parameters
+    ----------
+    sort_order : str
+        The order, ascending or descending, that should be used when
+        sorting the returned values from the database query. The order
+        must be either 'ASC' or 'DESC'.
+    """
     if sort_order not in ('ASC', 'DESC'):
         raise ValueError('Provide a valid sort order.')
 
 
 def validate_field(field, field_list=None):
-    """Check that a named field matches database field."""
+    """
+    Check that a named field matches a database field.
+
+    Parameters
+    ----------
+    field : str
+        A field name to be validated.
+    field_list : list, optional
+        A set of field names to be used when determining valid fields.
+        The default is `None`, in which case all fields in the database
+        (and only those fields) are considered valid names.
+    """
     field = strip_function(field)
     if field_list is None:
         field_list = ALL_FIELDS
