@@ -64,19 +64,19 @@ def filter_dates(start_date, end_date, db_date_name, prefix=""):
     return f"{prefix} {date_filter}"
 
 
-def query_date(field):
+def prepare_date_query(field):
     """Return a query string specifically indicating date types."""
     # Use sqlite3 converters to get the field as a date
     return f'{field} "{field} [date]"'
 
 
-def check_sort_order(sort_order):
+def validate_sort_order(sort_order):
     """Ensure that a valid sort order was provided."""
     if sort_order not in ('ASC', 'DESC'):
         raise ValueError('Provide a valid sort order.')
 
 
-def check_field(field, field_list=None):
+def validate_field(field, field_list=None):
     """Check that a named field matches database field."""
     field = strip_function(field)
     if field_list is None:
@@ -116,9 +116,9 @@ def select_fields(fields, id_field=None, convert_dates=True):
         return "*"
     query_fields = [id_field] if id_field else []
     for field in fields:
-        check_field(field)
+        validate_field(field)
         if field[-5:] == '_date' and convert_dates:
-            query_fields.append(query_date(field))
+            query_fields.append(prepare_date_query(field))
         else:
             query_fields.append(field)
     return f"{', '.join(query_fields)}"

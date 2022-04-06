@@ -80,7 +80,7 @@ class CreditTransactionHandler(DatabaseHandler):
         transactions : list of sqlite3.Row
             A list of credit card transactions matching the criteria.
         """
-        self._queries.check_sort_order(sort_order)
+        self._queries.validate_sort_order(sort_order)
         card_filter = self._queries.filter_items(card_ids, 'card_id', 'AND')
         statement_filter = self._queries.filter_items(statement_ids,
                                                       'statement_id', 'AND')

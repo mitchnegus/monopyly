@@ -74,7 +74,7 @@ class CreditStatementHandler(DatabaseHandler):
         statements : list of sqlite3.Row
             A list of credit card statements matching the criteria.
         """
-        self._queries.check_sort_order(sort_order)
+        self._queries.validate_sort_order(sort_order)
         card_filter = self._queries.filter_items(card_ids, 'card_id', 'AND')
         bank_filter = self._queries.filter_items(bank_ids, 'bank_id', 'AND')
         active_filter = "AND active = 1" if active else ""

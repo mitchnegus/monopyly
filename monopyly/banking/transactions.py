@@ -76,7 +76,7 @@ class BankTransactionHandler(DatabaseHandler):
         transactions : list of sqlite3.Row
             A list of bank account transactions matching the criteria.
         """
-        self._queries.check_sort_order(sort_order)
+        self._queries.validate_sort_order(sort_order)
         account_filter = self._queries.filter_items(account_ids, 'account_id',
                                                     'AND')
         active_filter = "AND active = 1" if active else ""

@@ -9,7 +9,7 @@ from wtforms.validators import ValidationError
 from ..auth.tools import login_required
 from ..utils import sort_by_frequency
 from ..form_utils import form_err_msg
-from ..db.handler.queries import check_field
+from ..db.handler.queries import validate_field
 from . import banking
 from .forms import *
 from .banks import BankHandler
@@ -273,7 +273,7 @@ def suggest_transaction_autocomplete():
     field = post_args['field']
     autocomplete_fields = ('bank_name', 'last_four_digits', 'type_name',
                            'note')
-    check_field(field, autocomplete_fields)
+    validate_field(field, autocomplete_fields)
     # Get information from the database to use for autocompletion
     if field == 'bank_name':
         db = BankHandler()

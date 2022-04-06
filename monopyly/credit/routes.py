@@ -10,7 +10,7 @@ from ..auth.tools import login_required
 from ..utils import parse_date, dedelimit_float, sort_by_frequency
 from ..form_utils import form_err_msg
 from ..core.internal_transactions import add_internal_transaction
-from ..db.handler.queries import check_field
+from ..db.handler.queries import validate_field
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
 from ..banking.transactions import BankTransactionHandler
@@ -590,7 +590,7 @@ def suggest_transaction_autocomplete():
     field = post_args['field']
     vendor = post_args['vendor']
     autocomplete_fields = ('bank_name', 'last_four_digits', 'vendor', 'note')
-    check_field(field, autocomplete_fields)
+    validate_field(field, autocomplete_fields)
     # Get information from the database to use for autocompletion
     if field != 'note':
         db = CreditTransactionHandler()
