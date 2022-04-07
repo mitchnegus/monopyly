@@ -65,6 +65,7 @@ class TestHandlerQueryFunctions:
          [1, 'db_item', 'AND', 'AND db_item = ?'],
          [None, 'db_item', '', '']]
     )
+    @patch('monopyly.db.handler.queries.validate_field', new=lambda _: None)
     def test_filter_item(self, item, db_item_name, prefix, filter_output):
         db_filter = filter_item(item, db_item_name, prefix)
         assert db_filter == filter_output
@@ -79,6 +80,7 @@ class TestHandlerQueryFunctions:
          [('item0', 'item1'), 'db_item', '', ' db_item IN (<test>)'],
          [None, 'db_item', '', '']]
     )
+    @patch('monopyly.db.handler.queries.validate_field', new=lambda _: None)
     @patch('monopyly.db.handler.queries.reserve_places', return_value='<test>')
     def test_filter_items(self, mock_function, items, db_item_name, prefix,
                           filter_output):
@@ -100,6 +102,7 @@ class TestHandlerQueryFunctions:
          [None, None, 'db_date', 'AND',
           ""]]
     )
+    @patch('monopyly.db.handler.queries.validate_field', new=lambda _: None)
     def test_filter_dates(self, start_date, end_date, db_date_name, prefix,
                           filter_output):
         db_filter = filter_dates(start_date, end_date, db_date_name, prefix)
@@ -122,15 +125,13 @@ class TestHandlerQueryFunctions:
         with pytest.raises(ValueError):
             validate_sort_order(sort_order)
 
-    test_fields = ['test_field_0', 'test_field_1', 'test_field_2']
-
     @pytest.mark.parametrize(
         'field, field_list',
         [['test_field_0', None],
          ['test_field_1', None],
          ['table.test_field_1', None],
-         ['test_field_a', ('test_field_a', 'test_field_b', 'test_field_c')],
-         ['test_field_b', ('test_field_a', 'test_field_b', 'test_field_c')]]
+         ['test_field_0', ('test_field_0', 'test_field_1')],
+         ['test_field_1', ('test_field_0', 'test_field_1')]]
     )
     @patch('monopyly.db.handler.queries.ALL_FIELDS', new=test_fields)
     def test_validate_field(self, field, field_list):
@@ -140,7 +141,8 @@ class TestHandlerQueryFunctions:
         'field, field_list',
         [['test_field_a', None],
          ['table.test_field_a', None],
-         ['test_field_0', ('test_field_a', 'test_field_b', 'test_field_c')]]
+         ['test_field_0', ('test_field_1', 'test_field_2')],
+         ['test_field_0', ('test_field_0', 'test_field_1', 'test_field_3')]]
     )
     @patch('monopyly.db.handler.queries.ALL_FIELDS', new=test_fields)
     def test_validate_field_invalid(self, field, field_list):

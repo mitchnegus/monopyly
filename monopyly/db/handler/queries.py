@@ -37,29 +37,32 @@ def fill_places(placeholders):
     return tuple(placeholders)
 
 
-def filter_item(item, db_item_name, prefix=""):
+def filter_item(item, field, prefix=""):
     """Create a filter based on a given item."""
+    validate_field(field)
     if item is None:
         return ""
-    return f"{prefix} {db_item_name} = ?"
+    return f"{prefix} {field} = ?"
 
 
-def filter_items(items, db_item_name, prefix=""):
+def filter_items(items, field, prefix=""):
     """Create a filter based on a set of items."""
+    validate_field(field)
     if items is None:
         return ""
-    return f"{prefix} {db_item_name} IN ({reserve_places(items)})"
+    return f"{prefix} {field} IN ({reserve_places(items)})"
 
 
-def filter_dates(start_date, end_date, db_date_name, prefix=""):
+def filter_dates(start_date, end_date, field, prefix=""):
     """Create a filter for a date range."""
+    validate_field(field)
     start_filter, end_filter = "", ""
     if start_date is None and end_date is None:
         return ""
     if isinstance(start_date, datetime.date):
-        start_filter = f"{db_date_name} >= {start_date}"
+        start_filter = f"{field} >= {start_date}"
     if isinstance(end_date, datetime.date):
-        end_filter = f"{db_date_name} <= {end_date}"
+        end_filter = f"{field} <= {end_date}"
     date_filter = ' AND '.join([_ for _ in (start_filter, end_filter) if _])
     return f"{prefix} {date_filter}"
 
@@ -103,6 +106,10 @@ def validate_field(field, field_list=None):
         field_list = ALL_FIELDS
         err_msg = f"The field '{field}' does not exist in the database."
     else:
+        if not all(field in ALL_FIELDS for field in field_list):
+            raise ValueError("The field list contains fields that are not "
+                             "contained in the list of available fields. "
+                             "This poses a security risk and is disallowed.")
         err_msg = f"The field '{field}' is not in the given list of fields."
     if field.split('.', 1)[-1] not in field_list:
         raise ValueError(err_msg)
