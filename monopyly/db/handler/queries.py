@@ -9,6 +9,48 @@ from ..fields import DATABASE_FIELDS
 ALL_FIELDS = [field for fields in DATABASE_FIELDS.values() for field in fields]
 
 
+def validate_field(field, field_list=None):
+    """
+    Check that a named field matches a database field.
+
+    Parameters
+    ----------
+    field : str
+        A field name to be validated.
+    field_list : list, optional
+        A set of field names to be used when determining valid fields.
+        The default is `None`, in which case all fields in the database
+        (and only those fields) are considered valid names.
+    """
+    field = strip_function(field)
+    if field_list is None:
+        field_list = ALL_FIELDS
+        err_msg = f"The field '{field}' does not exist in the database."
+    else:
+        if not all(field in ALL_FIELDS for field in field_list):
+            raise ValueError("The field list contains fields that are not "
+                             "contained in the list of available fields. "
+                             "This poses a security risk and is disallowed.")
+        err_msg = f"The field '{field}' is not in the given list of fields."
+    if field.split('.', 1)[-1] not in field_list:
+        raise ValueError(err_msg)
+
+
+def validate_sort_order(sort_order):
+    """
+    Ensure that a valid sort order was provided.
+
+    Parameters
+    ----------
+    sort_order : str
+        The order, ascending or descending, that should be used when
+        sorting the returned values from the database query. The order
+        must be either 'ASC' or 'DESC'.
+    """
+    if sort_order not in ('ASC', 'DESC'):
+        raise ValueError('Provide a valid sort order.')
+
+
 def strip_function(field):
     """Return a database field name, even if it's a function argument."""
     functions = ('COALESCE', 'SUM', 'MAX', 'MIN')
@@ -71,48 +113,6 @@ def prepare_date_query(field):
     """Return a query string specifically indicating date types."""
     # Use sqlite3 converters to get the field as a date
     return f'{field} "{field} [date]"'
-
-
-def validate_sort_order(sort_order):
-    """
-    Ensure that a valid sort order was provided.
-
-    Parameters
-    ----------
-    sort_order : str
-        The order, ascending or descending, that should be used when
-        sorting the returned values from the database query. The order
-        must be either 'ASC' or 'DESC'.
-    """
-    if sort_order not in ('ASC', 'DESC'):
-        raise ValueError('Provide a valid sort order.')
-
-
-def validate_field(field, field_list=None):
-    """
-    Check that a named field matches a database field.
-
-    Parameters
-    ----------
-    field : str
-        A field name to be validated.
-    field_list : list, optional
-        A set of field names to be used when determining valid fields.
-        The default is `None`, in which case all fields in the database
-        (and only those fields) are considered valid names.
-    """
-    field = strip_function(field)
-    if field_list is None:
-        field_list = ALL_FIELDS
-        err_msg = f"The field '{field}' does not exist in the database."
-    else:
-        if not all(field in ALL_FIELDS for field in field_list):
-            raise ValueError("The field list contains fields that are not "
-                             "contained in the list of available fields. "
-                             "This poses a security risk and is disallowed.")
-        err_msg = f"The field '{field}' is not in the given list of fields."
-    if field.split('.', 1)[-1] not in field_list:
-        raise ValueError(err_msg)
 
 
 def select_fields(fields, id_field=None, convert_dates=True):
