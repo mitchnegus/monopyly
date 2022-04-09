@@ -42,7 +42,7 @@ class BankHandler(DatabaseHandler):
         Parameters
         ––––––––––
         bank_names : tuple of str, optional
-            A sequence of bank names for which cards will be selected
+            A sequence of bank names for which banks will be selected
             (if `None`, all banks will be selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,

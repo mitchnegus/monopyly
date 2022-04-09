@@ -7,6 +7,8 @@ from ..fields import DATABASE_FIELDS
 
 
 ALL_FIELDS = [field for fields in DATABASE_FIELDS.values() for field in fields]
+# Many tables have an 'id' field that is not included in `DATABASE_FIELDS`
+ALL_FIELDS.append('id')
 
 
 def validate_field(field, field_list=None):
