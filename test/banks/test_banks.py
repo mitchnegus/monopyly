@@ -1,11 +1,10 @@
 """Tests for the banking module managing banks."""
-import unittest
-
 import pytest
 from werkzeug.exceptions import NotFound
 
 from monopyly.db import get_db
 from monopyly.banking.banks import BankHandler
+from ..helpers import TestHandler
 
 
 @pytest.fixture
@@ -18,14 +17,7 @@ def bank_db(app, client, auth):
         yield bank_db
 
 
-class TestBankHandler:
-
-    def assertQueryMatchSingle(self, query, reference):
-        assert tuple(query) == reference
-
-    def assertQueryMatchMultiple(self, query, reference):
-        helper = unittest.TestCase()
-        helper.assertCountEqual(map(tuple, query), reference)
+class TestBankHandler(TestHandler):
 
     # Reference only includes entries accessible to the authorized login
     reference = {
@@ -39,7 +31,7 @@ class TestBankHandler:
         assert bank_db.user_id == 3
 
     @pytest.mark.parametrize(
-        'bank_names, fields, entries',
+        'bank_names, fields, reference_entries',
         [[None, None,
           reference['rows']],
          [('Jail',), None,
@@ -47,12 +39,12 @@ class TestBankHandler:
          [None, ('bank_name',),
           [(row[0], row[2]) for row in reference['rows']]]]
     )
-    def test_get_entries(self, bank_db, bank_names, fields, entries):
+    def test_get_entries(self, bank_db, bank_names, fields, reference_entries):
         banks = bank_db.get_entries(bank_names, fields)
-        self.assertQueryMatchMultiple(banks, entries)
+        self.assertMatchEntries(reference_entries, banks)
 
     @pytest.mark.parametrize(
-        'bank_id, fields, entry',
+        'bank_id, fields, reference_entry',
         [[2, None,
           reference['rows'][0]],
          [3, None,
@@ -60,9 +52,9 @@ class TestBankHandler:
          [2, ('bank_name',),
           (reference['rows'][0][0], reference['rows'][0][2])]]
     )
-    def test_get_entry(self, bank_db, bank_id, fields, entry):
+    def test_get_entry(self, bank_db, bank_id, fields, reference_entry):
         bank = bank_db.get_entry(bank_id, fields)
-        self.assertQueryMatchSingle(bank, entry)
+        self.assertMatchEntry(reference_entry, bank)
 
     @pytest.mark.parametrize(
         'bank_id, expectation',
@@ -78,11 +70,9 @@ class TestBankHandler:
                                   'bank_name': 'JP Morgan Chance'})
         assert bank['bank_name'] == 'JP Morgan Chance'
         # Check that the entry was added
-        with app.app_context():
-            db = get_db()
-            count = db.execute("SELECT COUNT(id) FROM banks"
-                               " WHERE bank_name LIKE '%Chance'").fetchone()[0]
-            assert count == 1
+        query = ("SELECT COUNT(id) FROM banks"
+                 " WHERE bank_name LIKE '%Chance'")
+        self.assertQueryEqualsCount(app, query, 1)
 
     def test_add_entry_invalid(self, bank_db):
         with pytest.raises(ValueError):
@@ -97,11 +87,9 @@ class TestBankHandler:
         bank = bank_db.update_entry(2, mapping)
         assert bank['bank_name'] == 'Corner Jail'
         # Check that the entry was updated
-        with app.app_context():
-            db = get_db()
-            count = db.execute("SELECT COUNT(id) FROM banks"
-                               " WHERE bank_name LIKE 'Corner%'").fetchone()[0]
-            assert count == 1
+        query = ("SELECT COUNT(id) FROM banks "
+                 " WHERE bank_name LIKE 'Corner%'")
+        self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
         'bank_id, mapping, expectation',
@@ -120,14 +108,10 @@ class TestBankHandler:
     def test_delete_entries(self, app, bank_db, entry_ids):
         bank_db.delete_entries(entry_ids)
         # Check that the entries were deleted
-        with app.app_context():
-            db = get_db()
-            for entry_id in entry_ids:
-                query = ("SELECT COUNT(id) FROM banks"
-                        f" WHERE id == {entry_id}")
-                count = db.execute("SELECT COUNT(id) FROM banks"
-                                  f" WHERE id == {entry_id}").fetchone()[0]
-                assert count == 0
+        for entry_id in entry_ids:
+            query = ("SELECT COUNT(id) FROM banks"
+                    f" WHERE id = {entry_id}")
+            self.assertQueryEqualsCount(app, query, 0)
 
     def test_delete_entries_invalid(self, bank_db):
         with pytest.raises(NotFound):
