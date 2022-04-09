@@ -11,3 +11,7 @@ def test_index(client, auth):
     # Test index page after login
     #assert False
 
+def test_about(client):
+    response = client.get('/about')
+    assert b'Pass go and collect $200' in response.data
+
