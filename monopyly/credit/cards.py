@@ -154,6 +154,10 @@ class CreditCardHandler(DatabaseHandler):
             A credit card entry matching the given criteria. If no
             matching card is found, returns `None`.
         """
+        if bank_name is None and last_four_digits is None:
+            # No criteria provided, so nothing can be found
+            return None
+        # Search the database for entries matching the criteria
         bank_filter = self._queries.filter_item(bank_name, 'bank_name', 'AND')
         digit_filter = self._queries.filter_item(last_four_digits,
                                                  'last_four_digits', 'AND')

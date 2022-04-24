@@ -47,7 +47,7 @@ class BankAccountTypeHandler(DatabaseHandler):
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
-            'banks' or 'bank_account_types' tables.
+            'bank_account_types' table.
 
         Returns
         –––––––
@@ -98,9 +98,11 @@ class BankAccountTypeHandler(DatabaseHandler):
             A bank account type entry matching the given criteria. If no
             matching account type is found, returns `None`.
         """
+        if type_name is None and type_abbreviation is None:
+            # No criteria provided, so nothing can be found
+            return None
+        # Search the database for entries matching the criteria
         type_filter = self._queries.filter_item(type_name, 'type_name', 'AND')
-        digit_filter = self._queries.filter_item(last_four_digits,
-                                                 'last_four_digits', 'AND')
         abbreviation_filter = self._queries.filter_item(type_abbreviation,
                                                         'type_abbreviation',
                                                         'AND')
@@ -126,9 +128,9 @@ class BankAccountTypeHandler(DatabaseHandler):
         account_types = self.cursor.execute(query, placeholders).fetchall()
         return account_types
 
-    def _add_entry(self):
-        # Should prevent a user from duplicating the common entries
-        pass
+    def add_entry(self, mapping):
+        # To Do: Should prevent a user from duplicating the common entries
+        super().add_entry(mapping)
 
     def delete_entries(self, entry_ids):
         """
@@ -143,8 +145,8 @@ class BankAccountTypeHandler(DatabaseHandler):
             The IDs of account types to be deleted.
         """
         # Delete the given account types
-        # Should prevent user from deleting common entries
-        # Should ensure that this account type is deleted in all use locations
+        # To Do: Should prevent a user from deleting the common entries
+        # To Do: Should ensure that account type is deleted for all uses
         super().delete_entries(entry_ids)
 
 
@@ -269,6 +271,11 @@ class BankAccountHandler(DatabaseHandler):
             A bank account entry matching the given criteria. If no
             matching account is found, returns `None`.
         """
+        criteria = (bank_name, last_four_digits, account_type_name)
+        if all(_ is None for _ in criteria):
+            # No criteria provided, so nothing can be found
+            return None
+        # Search the database for entries matching the criteria
         bank_filter = self._queries.filter_item(bank_name, 'bank_name', 'AND')
         digit_filter = self._queries.filter_item(last_four_digits,
                                                  'last_four_digits', 'AND')

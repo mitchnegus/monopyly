@@ -594,6 +594,7 @@ class CreditTagHandler(DatabaseHandler):
             The tag entry matching the given criteria. If no matching
             tag is found, returns `None`.
         """
+        # Search the database for entries matching the criteria
         query = (f"SELECT {self._queries.select_fields(fields, 'tags.id')} "
                   "  FROM credit_tags AS tags "
                  f" WHERE user_id = ? AND tag_name = ?")

@@ -158,6 +158,7 @@ class CreditStatementHandler(DatabaseHandler):
             The statement entry matching the given criteria. If no
             matching statement is found, returns `None`.
         """
+        # Search the database for entries matching the criteria
         date_filter = self._queries.filter_item(issue_date, 'issue_date',
                                                 'AND')
         query = (f"SELECT {self._queries.select_fields(fields, 's.id')} "
