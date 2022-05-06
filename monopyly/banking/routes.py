@@ -80,7 +80,7 @@ def load_account_summaries(bank_id):
     bank_db = BankHandler()
     account_type_db = BankAccountTypeHandler()
     account_db = BankAccountHandler()
-    # Get all of the user's matching bank accounts from the database
+    # Group a user's matching bank accounts by account type
     bank_account_types = account_type_db.get_types_for_bank(bank_id)
     type_accounts = {}
     for account_type in bank_account_types:
