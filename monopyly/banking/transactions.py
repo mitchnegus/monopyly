@@ -261,6 +261,10 @@ class BankTransactionHandler(DatabaseHandler):
             associated_transaction['credit'] = credit_transactions[0]
         return associated_transaction
 
+    def _get_entry_user_id(self, entry_id):
+        # Get the user ID for an entry (this override eliminates ambiguity)
+        return self.get_entry(entry_id, fields=('b.user_id',))['user_id']
+
 
 class BankSubtransactionHandler(DatabaseHandler):
     """
@@ -370,6 +374,10 @@ class BankSubtransactionHandler(DatabaseHandler):
                       'for the user.')
         subtransaction = self._query_entry(query, placeholders, abort_msg)
         return subtransaction
+
+    def _get_entry_user_id(self, entry_id):
+        # Get the user ID for a given entry
+        return self.get_entry(entry_id, fields=('b.user_id',))['user_id']
 
 
 def save_transaction(form, transaction_id=None):

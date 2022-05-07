@@ -2,7 +2,6 @@
 import pytest
 from werkzeug.exceptions import NotFound
 
-from monopyly.db import get_db
 from monopyly.banking.banks import BankHandler
 from ..helpers import TestHandler
 
@@ -74,9 +73,14 @@ class TestBankHandler(TestHandler):
                  " WHERE bank_name LIKE '%Chance'")
         self.assertQueryEqualsCount(app, query, 1)
 
-    def test_add_entry_invalid(self, bank_db):
+    @pytest.mark.parametrize(
+        'mapping',
+        [{'user_id': 3, 'invalid_field': 'Test'},
+         {'user_id': 3}]
+    )
+    def test_add_entry_invalid(self, bank_db, mapping):
         with pytest.raises(ValueError):
-            bank_db.add_entry({'user_id': 3, 'invalid_field': 'Test'})
+            bank_db.add_entry(mapping)
 
     @pytest.mark.parametrize(
         'mapping',
@@ -113,7 +117,19 @@ class TestBankHandler(TestHandler):
                     f" WHERE id = {entry_id}")
             self.assertQueryEqualsCount(app, query, 0)
 
-    def test_delete_entries_invalid(self, bank_db):
-        with pytest.raises(NotFound):
-            bank_db.delete_entries((1,))
+    def test_delete_cascading_entries(self, app, bank_db):
+        bank_db.delete_entries((3,))
+        # Check that the cascading entries were deleted
+        query = ("SELECT COUNT(id) FROM bank_accounts"
+                f" WHERE bank_id = 3")
+        self.assertQueryEqualsCount(app, query, 0)
+
+    @pytest.mark.parametrize(
+        'entry_ids, expectation',
+        [[(1,), NotFound],   # should not be able to delete other user entries
+         [(4,), NotFound]]   # should not be able to delete nonexistent entries
+    )
+    def test_delete_entries_invalid(self, bank_db, entry_ids, expectation):
+        with pytest.raises(expectation):
+            bank_db.delete_entries(entry_ids)
 

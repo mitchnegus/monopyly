@@ -73,3 +73,20 @@ class BankHandler(DatabaseHandler):
         abort_msg = f'Bank ID {bank_id} does not exist for the user.'
         bank = self._query_entry(query, placeholders, abort_msg)
         return bank
+
+    def delete_entries(self, entry_ids):
+        """
+        Delete banks from the database.
+
+        Given a set of bank IDs, delete the banks from the database.
+        Deleting an account will also delete all accounts (and
+        transactions) associated with that account.
+
+        Parameters
+        ––––––––––
+        entry_ids : list of int
+            The IDs of banks to be deleted.
+        """
+        # Delete the given banks
+        super().delete_entries(entry_ids)
+

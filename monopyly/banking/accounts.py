@@ -61,12 +61,25 @@ class BankAccountTypeHandler(DatabaseHandler):
         account_types = self._query_entries(query, placeholders)
         return account_types
 
+    def get_types_for_bank(self, bank_id):
+        """Return a list of the bank account type IDs that exist for a bank."""
+        query = ("SELECT DISTINCT types.* "
+                 "  FROM bank_account_types_view AS types "
+                 "       INNER JOIN bank_accounts AS a "
+                 "          ON a.account_type_id = types.id "
+                 "       INNER JOIN banks AS b "
+                 "          ON b.id = a.bank_id "
+                 " WHERE types.user_id IN (0, ?) AND b.id = ?")
+        placeholders = (self.user_id, bank_id)
+        account_types = self._query_entries(query, placeholders)
+        return account_types
+
     def get_entry(self, account_type_id, fields=None):
         """Get a bank account type from the database given its ID."""
         query = (f"SELECT {self._queries.select_fields(fields, 'types.id')} "
                   "  FROM bank_account_types_view AS types"
-                  " WHERE types.id = ? AND user_id IN (0, ?)")
-        placeholders = (account_type_id, self.user_id)
+                  " WHERE user_id IN (0, ?) AND types.id = ? ")
+        placeholders = (self.user_id, account_type_id)
         abort_msg = (f'Account type ID {account_type_id} does not exist for '
                       'the user.')
         account = self._query_entry(query, placeholders, abort_msg)
@@ -115,22 +128,9 @@ class BankAccountTypeHandler(DatabaseHandler):
         account_type = self.cursor.execute(query, placeholders).fetchone()
         return account_type
 
-    def get_types_for_bank(self, bank_id):
-        """Return a list of the bank account type IDs that exist for a bank."""
-        query = ("SELECT DISTINCT types.* "
-                 "  FROM bank_account_types_view AS types "
-                 "       INNER JOIN bank_accounts AS a "
-                 "          ON a.account_type_id = types.id "
-                 "       INNER JOIN banks AS b "
-                 "          ON b.id = a.bank_id "
-                 " WHERE types.user_id IN (0, ?) AND b.id = ?")
-        placeholders = (self.user_id, bank_id)
-        account_types = self.cursor.execute(query, placeholders).fetchall()
-        return account_types
-
     def add_entry(self, mapping):
         # To Do: Should prevent a user from duplicating the common entries
-        super().add_entry(mapping)
+        return super().add_entry(mapping)
 
     def delete_entries(self, entry_ids):
         """
@@ -145,7 +145,6 @@ class BankAccountTypeHandler(DatabaseHandler):
             The IDs of account types to be deleted.
         """
         # Delete the given account types
-        # To Do: Should prevent a user from deleting the common entries
         # To Do: Should ensure that account type is deleted for all uses
         super().delete_entries(entry_ids)
 
@@ -311,7 +310,8 @@ class BankAccountHandler(DatabaseHandler):
         Delete bank accounts from the database.
 
         Given a set of account IDs, delete the bank accounts from the
-        database.
+        database. Deleting an account will also delete all transactions
+        associated with that account.
 
         Parameters
         ––––––––––
@@ -320,3 +320,8 @@ class BankAccountHandler(DatabaseHandler):
         """
         # Delete the given accounts
         super().delete_entries(entry_ids)
+
+    def _get_entry_user_id(self, entry_id):
+        # Get the user ID for an entry (this override eliminates ambiguity)
+        return self.get_entry(entry_id, fields=('b.user_id',))['user_id']
+

@@ -183,6 +183,8 @@ class DatabaseHandler(ABC):
         entry : sqlite3.Row
             The saved entry.
         """
+        self._confirm_entry_owner(entry_id)
+        # Check the validity of the mapping
         if not all(key in self._table_fields for key in mapping.keys()):
             raise ValueError('The mapping contains at least one field that '
                              'not match the database. Fields must be one of '
@@ -200,9 +202,8 @@ class DatabaseHandler(ABC):
 
     def delete_entries(self, entry_ids):
         """Delete entries in the database given their IDs."""
-        # Check that the entries exist and belong to the user
         for entry_id in entry_ids:
-            self.get_entry(entry_id)
+            self._confirm_entry_owner(entry_id)
         self.cursor.execute(
             "DELETE "
            f"  FROM {self.table} "
@@ -210,4 +211,13 @@ class DatabaseHandler(ABC):
             entry_ids
         )
         self.db.commit()
+
+    def _confirm_entry_owner(self, entry_id):
+        # Ensure that the registered user owns the entry
+        if self._get_entry_user_id(entry_id) != self.user_id:
+            abort(403)
+
+    def _get_entry_user_id(self, entry_id):
+        # Get the user ID for a given entry
+        return self.get_entry(entry_id, fields=('user_id',))['user_id']
 

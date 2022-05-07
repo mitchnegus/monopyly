@@ -55,11 +55,12 @@ CREATE TABLE bank_account_types (
 CREATE TABLE bank_accounts (
   id INTEGER,
   bank_id INTEGER NOT NULL,
-  last_four_digits TEXT NOT NULL,
   account_type_id INTEGER NOT NULL,
+  last_four_digits TEXT NOT NULL,
   active INTEGER NOT NULL,
   PRIMARY KEY (id),
-  FOREIGN KEY (bank_id) REFERENCES banks (id),
+  FOREIGN KEY (bank_id) REFERENCES banks (id)
+    ON DELETE CASCADE,
   FOREIGN KEY (account_type_id) REFERENCES bank_account_types (id),
   UNIQUE (bank_id, last_four_digits, account_type_id)
 );
