@@ -1,9 +1,6 @@
 """
 Tools for interacting with the bank transactions in the database.
 """
-import datetime
-from sqlite3 import IntegrityError
-
 from flask import flash
 
 from ..db import DATABASE_FIELDS
@@ -173,17 +170,16 @@ class BankTransactionHandler(DatabaseHandler):
         field = 'internal_transaction_id'
         mapping[field] = transaction[field]
         # Override the default method to account for subtransactions
-        subtransactions_data = mapping.pop('subtransactions')
+        subtransactions = subtransaction_db.get_entries((entry_id,))
+        if 'subtransactions' in mapping:
+            subtransactions_data = mapping.pop('subtransactions')
+            # Replace subtransactions when updating
+            subtransaction_db.delete_entries(
+                [subtransaction['id'] for subtransaction in subtransactions]
+            )
+            subtransactions = self._add_subtransactions(entry_id,
+                                                        subtransactions_data)
         transaction = super().update_entry(entry_id, mapping)
-        # Replace subtransactions when updating
-        subtransactions = subtransaction_db.get_entries((transaction['id'],))
-        subtransaction_db.delete_entries(
-            [subtransaction['id'] for subtransaction in subtransactions]
-        )
-        subtransactions = self._add_subtransactions(transaction['id'],
-                                                    subtransactions_data)
-        # Refresh the transaction information
-        transaction = self.get_entry(transaction['id'])
         return transaction, subtransactions
 
     def _add_subtransactions(self, transaction_id, subtransactions_data):

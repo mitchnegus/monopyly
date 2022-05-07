@@ -9,9 +9,21 @@ class TestHandler:
     def assertMatchEntry(self, reference, entry):
         assert tuple(entry) == reference
 
-    def assertMatchEntries(self, reference, entries):
+    def assertMatchEntries(self, reference, entries, order=False):
         helper = unittest.TestCase()
-        helper.assertCountEqual(map(tuple, entries), reference)
+        if order:
+            for row, entry in zip(reference, entries):
+                self.assertMatchEntry(row, entry)
+        else:
+            helper.assertCountEqual(map(tuple, entries), reference)
+
+    def assertContainEntry(self, reference, entry):
+        for value in reference:
+            assert value in entry
+
+    def assertContainEntries(self, reference, entries):
+        for row, entry in zip(reference, entries):
+            self.assertContainEntry(row, entry)
 
     def assertQueryEqualsCount(self, app, query, count):
         with app.app_context():

@@ -7,6 +7,8 @@ VALUES ('test', 'pbkdf2:sha256:50000$TCI4GzcX$0de171a4f4dac32e3364c7ddc7c14f3e2f
 
 /* Register one internal transaction */
 INSERT INTO internal_transactions DEFAULT VALUES;
+/* Register an unused internal transaction */
+INSERT INTO internal_transactions DEFAULT VALUES;
 
 INSERT INTO banks
        (user_id, bank_name)
@@ -35,5 +37,18 @@ VALUES (NULL, 1, '2020-05-04'),  -- 'Test Bank' savings transaction on 2020-05-0
        (NULL, 2, '2020-05-06'),  -- 'Jail' savings transaction on 2020-05-06
        (NULL, 3, '2020-05-04'),  -- 'Jail' checking transaction on 2020-05-04
        (1, 3, '2020-05-05'),     -- 'Jail' checking transaction on 2020-05-05 (link)
-       (NULL, 4, '2020-05-06');  -- 'TheBank' CD transaction on 2020-05-06
+       (NULL, 4, '2020-05-06'),  -- 'TheBank' CD transaction on 2020-05-06
+       (NUll, 4, '2020-05-07');  -- 'TheBank' CD transaction on 2020-05-07
+                                      /* (with no defined subtransactions) */
+INSERT INTO bank_subtransactions
+      (transaction_id, subtotal, note)
+VALUES
+      (1, 100.00, 'Test transaction'),
+      (2, 42.00, 'Jail subtransaction 1'),
+      (2, 43.00, 'Jail subtransaction 2'),
+      (3, 200.00, 'Transfer in'),
+      (4, 58.90, 'What else is there to do in Jail?'),
+      (5, 12.34, 'Canteen purchase'),
+      (6, -200.00, 'Transfer out'),
+      (7, 500.00, 'CD deposit to TheBank');
 
