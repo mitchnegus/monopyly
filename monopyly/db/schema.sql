@@ -75,6 +75,7 @@ CREATE TABLE bank_transactions (
   PRIMARY KEY (id),
   FOREIGN KEY (internal_transaction_id) REFERENCES internal_transactions (id),
   FOREIGN KEY (account_id) REFERENCES bank_accounts (id)
+    ON DELETE CASCADE
 );
 
 

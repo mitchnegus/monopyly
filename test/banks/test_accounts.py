@@ -1,10 +1,7 @@
 """Tests for the banking module managing bank accounts."""
-import unittest
-
 import pytest
 from werkzeug.exceptions import Forbidden, NotFound
 
-from monopyly.db import get_db
 from monopyly.banking.accounts import (
     BankAccountTypeHandler, BankAccountHandler
 )
@@ -293,9 +290,12 @@ class TestBankAccountHandler(TestHandler):
                     f" WHERE id = {entry_id}")
             self.assertQueryEqualsCount(app, query, 0)
 
-    @pytest.mark.skip(reason="needs transactions to cause cascading delete")
-    def test_delete_cascading_entries(self):
-        pass
+    def test_delete_cascading_entries(self, app, account_db):
+        account_db.delete_entries((3,))
+        # Check that the cascading entries were deleted
+        query = ("SELECT COUNT(id) FROM bank_transactions"
+                f" WHERE account_id = 3")
+        self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
         'entry_ids, expectation',
