@@ -71,7 +71,7 @@ CREATE TABLE bank_transactions (
   id INTEGER,
   internal_transaction_id INTEGER DEFAULT NULL,
   account_id INTEGER NOT NULL,
-  transaction_date TEXT NOT NULL,
+  transaction_date DATE NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (internal_transaction_id) REFERENCES internal_transactions (id),
   FOREIGN KEY (account_id) REFERENCES bank_accounts (id)
@@ -119,8 +119,8 @@ CREATE TABLE credit_cards (
 CREATE TABLE credit_statements (
   id INTEGER,
   card_id INTEGER NOT NULL,
-  issue_date TEXT NOT NULL,
-  due_date TEXT NOT NULL,
+  issue_date DATE NOT NULL,
+  due_date DATE NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (card_id) REFERENCES credit_cards (id)
     ON DELETE CASCADE
@@ -132,7 +132,7 @@ CREATE TABLE credit_transactions (
   id INTEGER,
   internal_transaction_id INTEGER DEFAULT NULL,
   statement_id INTEGER NOT NULL,
-  transaction_date TEXT NOT NULL,
+  transaction_date DATE NOT NULL,
   vendor TEXT NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (internal_transaction_id) REFERENCES internal_transactions (id),
