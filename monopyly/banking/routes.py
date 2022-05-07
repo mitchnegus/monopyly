@@ -101,16 +101,16 @@ def load_account_summaries(bank_id):
 @login_required
 def load_account_details(account_id):
     account_db = BankAccountHandler()
-    transactions_db = BankTransactionHandler()
+    transaction_db = BankTransactionHandler()
     # Get the user's bank account from the database
     account = account_db.get_entry(account_id)
     # Get all of the transactions for the statement from the database
     sort_order = 'DESC'
     transaction_fields = ('transaction_date', 'total', 'balance', 'notes',
                           'internal_transaction_id')
-    transactions = transactions_db.get_entries(account_ids=(account['id'],),
-                                               sort_order=sort_order,
-                                               fields=transaction_fields)
+    transactions = transaction_db.get_entries(account_ids=(account['id'],),
+                                              sort_order=sort_order,
+                                              fields=transaction_fields)
     return render_template('banking/account_page.html',
                            account=account,
                            account_transactions=transactions)
