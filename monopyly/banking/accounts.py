@@ -1,6 +1,8 @@
 """
 Tools for interacting with bank accounts in the database.
 """
+from werkzeug.exceptions import abort
+
 from ..db.handler import DatabaseHandler
 from .banks import BankHandler
 
@@ -235,6 +237,19 @@ class BankAccountHandler(DatabaseHandler):
         account = self._query_entry(query, placeholders, abort_msg)
         return account
 
+    def get_bank_balance(self, bank_id):
+        """Get the balance of all accounts at one bank."""
+        query = ("SELECT sum(balance) balance "
+                 "  FROM bank_accounts_view AS a"
+                 "  LEFT OUTER JOIN banks AS b "
+                 "    ON b.id = a.bank_id "
+                 " WHERE b.user_id = ? AND b.id = ?")
+        placeholders = (self.user_id, bank_id)
+        balance = self._query_entry(query, placeholders)[0]
+        if balance is None:
+            abort(404, f"No balance was found for bank with ID {bank_id}.")
+        return balance
+
     def find_account(self, bank_name=None, last_four_digits=None,
                      account_type_name=None, fields=None):
         """
@@ -293,17 +308,6 @@ class BankAccountHandler(DatabaseHandler):
                         *self._queries.fill_place(account_type_name))
         account = self.cursor.execute(query, placeholders).fetchone()
         return account
-
-    def get_balance(self, bank_id):
-        """Get the balance of all accounts at one bank."""
-        query = ("SELECT sum(balance) balance "
-                 "  FROM bank_accounts_view AS a"
-                 "  LEFT OUTER JOIN banks AS b "
-                 "    ON b.id = a.bank_id "
-                 " WHERE b.user_id = ? AND b.id = ?")
-        placeholders = (self.user_id, bank_id)
-        balance = self.cursor.execute(query, placeholders).fetchone()[0]
-        return balance
 
     def delete_entries(self, entry_ids):
         """

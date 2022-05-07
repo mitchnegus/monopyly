@@ -26,8 +26,8 @@ INSERT INTO bank_accounts
        (bank_id, account_type_id, last_four_digits, active)
 VALUES (1, 1, '5555', 1),  -- 'Test Bank' savings account '5555' (active)
        (2, 1, '5556', 1),  -- 'Jail' savings account '5556' (active)
-       (2, 2, '5557', 0),  -- 'Jail' checking account '5557' (inactive)
-       (3, 3, '5558', 1);  -- 'TheBank' CD '5558' (active)
+       (2, 2, '5556', 0),  -- 'Jail' checking account '5556' (inactive)
+       (3, 3, '5557', 1);  -- 'TheBank' CD '5557' (active)
 
 INSERT INTO bank_transactions
        (internal_transaction_id, account_id, transaction_date)

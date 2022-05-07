@@ -81,7 +81,7 @@ class TestBankAccountTypeHandler(TestHandler):
          [3, None,
           view_reference['rows'][2]],
          [2, ('type_name',),
-          (view_reference['rows'][1][0], view_reference['rows'][1][2],)],
+          (view_reference['rows'][1][0], view_reference['rows'][1][2])],
          [3, ('type_name', 'type_common_name'),  # use the fields from the view
           (view_reference['rows'][2][0],
            view_reference['rows'][2][2],
@@ -217,14 +217,132 @@ class TestBankAccountHandler(TestHandler):
         'keys': ('id', 'bank_id', 'account_type_id', 'last_four_digits',
                  'active'),
         'rows': [(2, 2, 1, '5556', 1),
-                 (3, 2, 2, '5557', 0),
-                 (4, 3, 3, '5558', 1)]
+                 (3, 2, 2, '5556', 0),
+                 (4, 3, 3, '5557', 1)]
+    }
+    view_reference = {
+        'keys': ('id', 'bank_id', 'account_type_id', 'last_four_digits',
+                 'active', 'balance'),
+        'rows': [(2, 2, 1, '5556', 1, 343.90),
+                 (3, 2, 2, '5556', 0, -187.66),
+                 (4, 3, 3, '5557', 1, 500.00)]
     }
 
     def test_initialization(self, account_db):
         assert account_db.table == 'bank_accounts'
         assert account_db.table_view == 'bank_accounts_view'
         assert account_db.user_id == 3
+
+    @pytest.mark.parametrize(
+        'bank_ids, account_type_ids, fields, reference_entries',
+        [[None, None, None,
+          view_reference['rows']],
+         [None, None, ('bank_id', 'account_type_id', 'last_four_digits'),
+          [row[:4] for row in view_reference['rows']]],
+         [(2,), None, ('bank_id', 'account_type_id', 'last_four_digits'),
+          [row[:4] for row in view_reference['rows'][:2]]],
+         [None, (2, 3), ('bank_id', 'account_type_id', 'last_four_digits'),
+          [row[:4] for row in view_reference['rows'][1:]]],
+         [None, None, ('last_four_digits', 'balance'), # use view fields
+          [(row[0], row[3], row[5]) for row in view_reference['rows']]]]
+    )
+    def test_get_entries(self, account_db, bank_ids, account_type_ids, fields,
+                         reference_entries):
+        accounts = account_db.get_entries(bank_ids, account_type_ids, fields)
+        if fields:
+            self.assertMatchEntries(reference_entries, accounts)
+        else:
+            # Leaving fields unspecified acquires all fields from many tables
+            self.assertContainEntries(reference_entries, accounts)
+
+    @pytest.mark.parametrize(
+        'account_id, fields, reference_entry',
+        [[2, None,
+          view_reference['rows'][0]],
+         [3, None,
+          view_reference['rows'][1]],
+         [2, ('last_four_digits',),
+          (view_reference['rows'][0][0], view_reference['rows'][0][3])],
+         [3, ('last_four_digits', 'balance'),  # use fields from the view
+          (view_reference['rows'][1][0],
+           view_reference['rows'][1][3],
+           view_reference['rows'][1][5])]]
+    )
+    def test_get_entry(self, account_db, account_id, fields, reference_entry):
+        account = account_db.get_entry(account_id, fields)
+        if fields:
+            self.assertMatchEntry(reference_entry, account)
+        else:
+            # Leaving fields unspecified acquires all fields from many tables
+            self.assertContainEntry(reference_entry, account)
+
+    @pytest.mark.parametrize(
+        'account_id, expectation',
+        [[1, NotFound],  # Not the logged in user
+         [5, NotFound]]  # Not in the database
+    )
+    def test_get_entry_invalid(self, account_db, account_id, expectation):
+        with pytest.raises(expectation):
+            account_db.get_entry(account_id)
+
+    @pytest.mark.parametrize(
+        'bank_id, expected_balance',
+        [[2, (343.90 - 187.66)],
+         [3, 500.00]]
+    )
+    def test_get_bank_balance(self, account_db, bank_id, expected_balance):
+        balance = account_db.get_bank_balance(bank_id)
+        assert balance == expected_balance
+
+    @pytest.mark.parametrize(
+        'bank_id, expectation',
+        [[1, NotFound],  # Not the logged in user
+         [4, NotFound]]  # Not in the database
+    )
+    def test_get_bank_balance_invalid(self, account_db, bank_id, expectation):
+        with pytest.raises(expectation):
+            balance = account_db.get_bank_balance(bank_id)
+
+    @pytest.mark.parametrize(
+        'bank_name, last_four_digits, account_type_name, fields, '
+        'reference_entry',
+        [['Jail', '5556', 'Savings', None,
+          view_reference['rows'][0]],
+         ['Jail', '5556', 'Checking', None,
+          view_reference['rows'][1]],
+         ['TheBank', None, 'Certificate of Deposit', None,
+          view_reference['rows'][2]],
+         [None, '5557', 'Certificate of Deposit', None,
+          view_reference['rows'][2]],
+         ['TheBank', None, 'Certificate of Deposit', ('bank_id', 'balance'),
+          (view_reference['rows'][2][0],
+           view_reference['rows'][2][1],
+           view_reference['rows'][2][5])]]
+    )
+    def test_find_account(self, account_db, bank_name, last_four_digits,
+                          account_type_name, fields, reference_entry):
+        account = account_db.find_account(bank_name, last_four_digits,
+                                          account_type_name, fields)
+        if fields:
+            self.assertMatchEntry(reference_entry, account)
+        else:
+            # Leaving fields unspecified acquires all fields from many tables
+            self.assertContainEntry(reference_entry, account)
+
+    @pytest.mark.parametrize(
+        'bank_name, last_four_digits, account_type_name, fields, '
+        'reference_entry',
+        [('Jail', '6666', None, None,
+          None),
+         (None, None, None, None,
+          None)]
+    )
+    def test_find_account_none_exist(self, account_db, bank_name,
+                                     last_four_digits, account_type_name,
+                                     fields, reference_entry):
+        account = account_db.find_account(bank_name, last_four_digits,
+                                          account_type_name, fields)
+        assert account is None
 
     @pytest.mark.parametrize(
         'mapping',

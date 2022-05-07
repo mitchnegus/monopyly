@@ -115,7 +115,7 @@ class DatabaseHandler(ABC):
         """Execute a query to return a single entry from the database."""
         entry = self.cursor.execute(query, placeholders).fetchone()
         # Check that an entry was found
-        if not entry:
+        if entry is None:
             if not abort_msg:
                 abort_msg = (f'The entry with ID {entry["id"]} does not exist '
                               'for the user.')
