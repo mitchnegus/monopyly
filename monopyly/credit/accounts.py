@@ -33,7 +33,7 @@ class CreditAccountHandler(DatabaseHandler):
     """
     table = 'credit_accounts'
 
-    def get_entries(self, bank_names=None, fields=None):
+    def get_entries(self, bank_ids=None, fields=None):
         """
         Get credit accounts from the database.
 
@@ -43,9 +43,9 @@ class CreditAccountHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
-        bank_names : tuple of str, optional
-            A sequence of bank names for which accounts will be selected (if
-            `None`, all banks will be selected).
+        bank_ids : tuple of int, optional
+            A sequence of bank IDs for which accounts will be selected
+            (if `None`, all banks will be selected).
         fields : tuple of str, optional
             A sequence of fields to select from the database (if `None`,
             all fields will be selected). Can be any field in the
@@ -56,15 +56,14 @@ class CreditAccountHandler(DatabaseHandler):
         accounts : list of sqlite3.Row
             A list of credit accounts matching the criteria.
         """
-        bank_filter = self._queries.filter_items(bank_names, 'bank_name',
-                                                 'AND')
+        bank_filter = self._queries.filter_items(bank_ids, 'b.id', 'AND')
         query = (f"SELECT {self._queries.select_fields(fields, 'a.id')} "
                   "  FROM credit_accounts AS a "
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
                  f"       {bank_filter} ")
-        placeholders = (self.user_id, *self._queries.fill_places(bank_names))
+        placeholders = (self.user_id, *self._queries.fill_places(bank_ids))
         accounts = self._query_entries(query, placeholders)
         return accounts
 
@@ -93,10 +92,5 @@ class CreditAccountHandler(DatabaseHandler):
         entry_ids : list of int
             The IDs of accounts to be deleted.
         """
-        # Delete all cards corresponding to these accounts
-        card_db = CreditCardHandler()
-        cards = card_db.get_entries(fields=(), account_ids=entry_ids)
-        card_ids = [card['id'] for card in cards]
-        card_db.delete_entries(card_ids)
         # Delete the given accounts
         super().delete_entries(entry_ids)

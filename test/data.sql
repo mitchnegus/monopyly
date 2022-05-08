@@ -52,3 +52,9 @@ VALUES
       (6, -200.00, 'Transfer out'),
       (7, 500.00, 'CD deposit to TheBank');
 
+INSERT INTO credit_accounts
+       (bank_id, statement_issue_day, statement_due_day)
+VALUES (1, 1, 20),
+       (2, 10, 5),
+       (3, 20, 12);
+
