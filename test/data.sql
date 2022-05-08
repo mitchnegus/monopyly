@@ -58,3 +58,9 @@ VALUES (1, 1, 20),
        (2, 10, 5),
        (3, 20, 12);
 
+INSERT INTO credit_cards
+       (account_id, last_four_digits, active)
+VALUES (1, '3333', 1),
+       (2, '3334', 0),
+       (2, '3335', 1),
+       (3, '3336', 1);

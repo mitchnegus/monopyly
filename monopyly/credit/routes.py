@@ -630,10 +630,12 @@ def suggest_card_autocomplete():
 @credit_bp.route('/_infer_card', methods=('POST',))
 @login_required
 def infer_card():
+    bank_db = BankHandler()
     card_db = CreditCardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     bank_name = post_args['bank_name']
+    bank = bank_db.get_entries(bank_names=(bank_name,))[0]
     if 'digits' in post_args:
         last_four_digits = post_args['digits']
         # Try to infer card from digits alone
@@ -641,12 +643,12 @@ def infer_card():
                                active=True)
         if len(cards) != 1:
             # Infer card from digits and bank if necessary
-            cards = card_db.get_entries(bank_names=(bank_name,),
+            cards = card_db.get_entries(bank_ids=(bank['id'],),
                                         last_four_digits=(last_four_digits,),
                                         active=True)
     elif 'bank_name' in post_args:
         # Try to infer card from bank alone
-        cards = card_db.get_entries(bank_names=(bank_name,), active=True)
+        cards = card_db.get_entries(bank_ids=(bank['id'],), active=True)
     # Return an inferred card if a single card is identified
     if len(cards) == 1:
         # Return the card info if its is found
@@ -661,6 +663,7 @@ def infer_card():
 @credit_bp.route('/_infer_statement', methods=('POST',))
 @login_required
 def infer_statement():
+    bank_db = BankHandler()
     card_db = CreditCardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
@@ -668,7 +671,8 @@ def infer_statement():
     last_four_digits = post_args['digits']
     transaction_date = parse_date(post_args['transaction_date'])
     # Determine the card used for the transaction from the given info
-    cards = card_db.get_entries(bank_names=(bank_name,),
+    bank = bank_db.get_entries(bank_names=(bank_name,))[0]
+    cards = card_db.get_entries(bank_ids=(bank['id'],),
                                 last_four_digits=(last_four_digits,))
     if len(cards) == 1 and transaction_date:
         statement_db = CreditStatementHandler()

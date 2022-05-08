@@ -33,7 +33,7 @@ class CreditCardHandler(DatabaseHandler):
     """
     table = 'credit_cards'
 
-    def get_entries(self, account_ids=None, bank_names=None,
+    def get_entries(self, bank_ids=None, account_ids=None,
                     last_four_digits=None, active=False, fields=None):
         """
         Get credit cards from the database.
@@ -44,12 +44,12 @@ class CreditCardHandler(DatabaseHandler):
 
         Parameters
         ––––––––––
+        bank_ids : tuple of int, optional
+            A sequence of bank IDs for which cards will be selected
+            (if `None`, all banks will be selected).
         account_ids : tuple of int, optional
             A sequence of account IDs for which cards will be selected
             (if `None`, all accounts will be selected).
-        bank_names : tuple of str, optional
-            A sequence of bank names for which cards will be selected
-            (if `None`, all banks will be selected).
         last_four_digits : tuple of str, optional
             A sequence of final 4 digits for which cards will be
             selected (if `None`, cards with any last 4 digits will be
@@ -67,10 +67,9 @@ class CreditCardHandler(DatabaseHandler):
         cards : list of sqlite3.Row
             A list of credit cards matching the criteria.
         """
+        bank_filter = self._queries.filter_items(bank_ids, 'b.id', 'AND')
         account_filter = self._queries.filter_items(account_ids, 'account_id',
                                                     'AND')
-        bank_filter = self._queries.filter_items(bank_names, 'bank_name',
-                                                 'AND')
         digit_filter = self._queries.filter_items(last_four_digits,
                                                   'last_four_digits', 'AND')
         active_filter = "AND active = 1" if active else ""
@@ -81,12 +80,12 @@ class CreditCardHandler(DatabaseHandler):
                   "       INNER JOIN banks AS b "
                   "          ON b.id = a.bank_id "
                   " WHERE user_id = ? "
-                 f"       {account_filter} {bank_filter} "
+                 f"       {bank_filter} {account_filter} "
                  f"       {digit_filter} {active_filter} "
                   " ORDER BY active DESC")
         placeholders = (self.user_id,
+                        *self._queries.fill_places(bank_ids),
                         *self._queries.fill_places(account_ids),
-                        *self._queries.fill_places(bank_names),
                         *self._queries.fill_places(last_four_digits))
         cards = self._query_entries(query, placeholders)
         return cards
@@ -187,10 +186,5 @@ class CreditCardHandler(DatabaseHandler):
         entry_ids : list of int
             The IDs of credit cards to be deleted.
         """
-        # Delete all statements corresponding to these cards
-        statement_db = CreditStatementHandler()
-        statements = statement_db.get_entries(card_ids=entry_ids, fields=())
-        statement_ids = [statement['id'] for statement in statements]
-        statement_db.delete_entries(statement_ids)
         # Delete the given cards
         super().delete_entries(entry_ids)
