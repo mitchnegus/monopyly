@@ -1,11 +1,9 @@
 """
 Tools for interacting with the credit statements in the database.
 """
-from dateutil.relativedelta import relativedelta
-
+from ..utils import get_next_occurrence_of_day
 from ..db import DATABASE_FIELDS
 from ..db.handler import DatabaseHandler
-from .transactions import CreditTransactionHandler
 
 
 class CreditStatementHandler(DatabaseHandler):
@@ -205,8 +203,7 @@ class CreditStatementHandler(DatabaseHandler):
             The inferred statement entry for the transaction.
         """
         issue_day = card['statement_issue_day']
-        issue_date = determine_statement_issue_date(issue_day,
-                                                    transaction_date)
+        issue_date = get_next_occurrence_of_day(issue_day, transaction_date)
         statement = self.find_statement(card, issue_date)
         if not statement and creation:
             statement = self.add_statement(card, issue_date)
@@ -216,7 +213,7 @@ class CreditStatementHandler(DatabaseHandler):
         """Add a statement to the database."""
         if not due_date:
             due_day = card['statement_due_day']
-            due_date = determine_statement_due_date(due_day, issue_date)
+            due_date = get_next_occurrence_of_day(due_day, issue_date)
         statement_data = {'card_id': card['id'],
                           'issue_date': issue_date,
                           'due_date': due_date}
@@ -236,71 +233,6 @@ class CreditStatementHandler(DatabaseHandler):
         entry_ids : list of int
             The IDs of statements to be deleted.
         """
-        # Delete all transactions corresponding to these statements
-        transaction_db = CreditTransactionHandler()
-        transactions = transaction_db.get_entries(statement_ids=entry_ids,
-                                                  fields=())
-        transaction_ids = [transaction['id'] for transaction in transactions]
-        transaction_db.delete_entries(transaction_ids)
         # Delete the given statements
         super().delete_entries(entry_ids)
 
-
-def determine_statement_issue_date(issue_day, transaction_date):
-    """
-    Determine the date for the statement belonging to a transaction.
-
-    Given the day of them month on which statements are issued and the
-    date a transaction occurred, determine the date the transaction's
-    statement was issued.
-
-    Parameters
-    ––––––––––
-    issue_day : int
-        The day of the month on which statements are issued.
-    transaction_date : datetime.date
-        The date the transaction took place.
-
-    Returns
-    –––––––
-    statement_date : datetime.date
-        The date on which the statement corresponding to the transaction
-        date was issued.
-    """
-    curr_month_statement_date = transaction_date.replace(day=issue_day)
-    if transaction_date.day < issue_day:
-        # The transaction will be on the statement later in the month
-        statement_date = curr_month_statement_date
-    else:
-        # The transaction will be on the next month's statement
-        statement_date = curr_month_statement_date + relativedelta(months=+1)
-    return statement_date
-
-
-def determine_statement_due_date(due_day, issue_date):
-    """
-    Determine the due date for a statement.
-
-    Given the day of the month on which statements are due and the date
-    a statement was issued, determine the statement's due date.
-
-    Parameters
-    ––––––––––
-    due_day : int
-        The day of the month on which statements are due.
-    issue_date : datetime.date
-        The date the statement was issued.
-
-    Returns
-    –––––––
-    due_date : datetime.date
-        The date on which the statement is determined to be due.
-    """
-    curr_month_due_date = issue_date.replace(day=due_day)
-    if issue_date.day < due_day:
-        # The statement is due on the due date later this month
-        due_date = curr_month_due_date
-    else:
-        # The statement is due on the due date next month
-        due_date = curr_month_due_date + relativedelta(months=+1)
-    return due_date

@@ -176,7 +176,6 @@ class TestCreditCardHandler(TestHandler):
                     f" WHERE id = {entry_id}")
             self.assertQueryEqualsCount(app, query, 0)
 
-    @pytest.mark.skip(reason="need statements to cascade delete")
     def test_delete_cascading_entries(self, app, card_db):
         card_db.delete_entries((3,))
         # Check that the cascading entries were deleted

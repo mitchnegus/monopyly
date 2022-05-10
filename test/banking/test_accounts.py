@@ -223,9 +223,9 @@ class TestBankAccountHandler(TestHandler):
     view_reference = {
         'keys': ('id', 'bank_id', 'account_type_id', 'last_four_digits',
                  'active', 'balance'),
-        'rows': [(2, 2, 1, '5556', 1, 343.90),
-                 (3, 2, 2, '5556', 0, -187.66),
-                 (4, 3, 3, '5557', 1, 500.00)]
+        'rows': [(2, 2, 1, '5556', 1, 443.90),
+                 (3, 2, 2, '5556', 0, -409.21),
+                 (4, 3, 3, '5557', 1, 200.00)]
     }
 
     def test_initialization(self, account_db):
@@ -287,8 +287,8 @@ class TestBankAccountHandler(TestHandler):
 
     @pytest.mark.parametrize(
         'bank_id, expected_balance',
-        [[2, (343.90 - 187.66)],
-         [3, 500.00]]
+        [[2, (443.90 - 409.21)],
+         [3, 200.00]]
     )
     def test_get_bank_balance(self, account_db, bank_id, expected_balance):
         balance = account_db.get_bank_balance(bank_id)

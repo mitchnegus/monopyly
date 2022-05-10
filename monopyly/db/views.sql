@@ -138,7 +138,7 @@ FROM credit_statements s
       /* Only compare balances for a single account */
       v1.account_id = v2.account_id
       /* Get times where payments offset charges */
-      AND v1.statement_charge_total + v2.daily_payment_total < 0
+      AND ROUND(v1.statement_charge_total + v2.daily_payment_total) <= 0
     ORDER BY v1.transaction_date
   ) v2
     ON v2.id = s.id

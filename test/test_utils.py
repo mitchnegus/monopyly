@@ -3,7 +3,9 @@ from datetime import date
 
 import pytest
 
-from monopyly.utils import parse_date, dedelimit_float, sort_by_frequency
+from monopyly.utils import (
+    parse_date, get_next_occurrence_of_day, dedelimit_float, sort_by_frequency
+)
 
 
 class TestDateParser:
@@ -60,6 +62,23 @@ class TestDateParser:
     def test_invalid_date_string_formats(self, date_string):
         with pytest.raises(ValueError):
             parse_date(date_string)
+
+
+class TestDateOccurrenceFinder:
+
+    @pytest.mark.parametrize(
+        'day, given_date, next_date',
+        [[1, date(1990, 1, 15), date(1990, 2, 1)],
+         [10, date(2000, 3, 15), date(2000, 4, 10)],
+         [15, date(2005, 5, 1), date(2005, 5, 15)],
+         [25, date(2020, 2, 14), date(2020, 2, 25)]]
+    )
+    def test_get_next_occurrence_of_day(self, day, given_date, next_date):
+        assert get_next_occurrence_of_day(day, given_date) == next_date
+
+    @pytest.mark.skip(reason="not implemented")
+    def test_get_next_occurrence_of_day_invalid(self, day, given_date):
+        assert False
 
 
 class TestFloatDedelimiter:

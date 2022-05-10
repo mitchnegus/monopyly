@@ -4,6 +4,8 @@ General utility objects.
 from collections import Counter
 import datetime
 
+from dateutil.relativedelta import relativedelta
+
 
 def parse_date(given_date):
     """
@@ -100,6 +102,20 @@ class _DateParser:
             except ValueError:
                 pass
         raise ValueError(self.err_msg)
+
+
+def get_next_occurrence_of_day(day, given_date):
+    """
+    Given a day of the month and a date, find the next occurrence of the day.
+    """
+    day_date_in_given_date_month = given_date.replace(day=day)
+    if given_date.day < day:
+        # The next occurrence of the day happens later in the same month
+        next_date = day_date_in_given_date_month
+    else:
+        # The next occurrence of the day happens in the next month
+        next_date = day_date_in_given_date_month + relativedelta(months=+1)
+    return next_date
 
 
 def dedelimit_float(value, delimiter=','):
