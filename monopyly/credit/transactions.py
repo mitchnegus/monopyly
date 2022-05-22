@@ -184,17 +184,16 @@ class CreditTransactionHandler(DatabaseHandler):
         field = 'internal_transaction_id'
         mapping[field] = transaction[field]
         # Override the default method to account for subtransactions
-        subtransactions_data = mapping.pop('subtransactions')
+        subtransactions = subtransaction_db.get_entries((entry_id,))
+        if 'subtransactions' in mapping:
+            subtransactions_data = mapping.pop('subtransactions')
+            # Replace subtransactions when updating
+            subtransaction_db.delete_entries(
+                [subtransaction['id'] for subtransaction in subtransactions]
+            )
+            subtransactions = self._add_subtransactions(entry_id,
+                                                        subtransactions_data)
         transaction = super().update_entry(entry_id, mapping)
-        # Replace subtransactions when updating
-        subtransactions = subtransaction_db.get_entries((transaction['id'],))
-        subtransaction_db.delete_entries(
-            [subtransaction['id'] for subtransaction in subtransactions]
-        )
-        subtransactions = self._add_subtransactions(transaction['id'],
-                                                    subtransactions_data)
-        # Refresh the transaction information
-        transaction = self.get_entry(transaction['id'])
         return transaction, subtransactions
 
     def _add_subtransactions(self, transaction_id, subtransactions_data):
@@ -428,9 +427,6 @@ class CreditTagHandler(DatabaseHandler):
         The ID of the user who is the subject of database access.
     """
     table = 'credit_tags'
-
-    def __init__(self, db=None, user_id=None, check_user=True):
-        super().__init__(db=db, user_id=user_id, check_user=check_user)
 
     def get_entries(self, tag_names=None, transaction_ids=None,
                     subtransaction_ids=None, fields=DATABASE_FIELDS[table],

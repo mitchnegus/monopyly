@@ -1,4 +1,4 @@
-"""Tests for the banking module managing transactions/subtransactions."""
+"""Tests for the credit module managing transactions/subtransactions."""
 from datetime import date
 from unittest.mock import patch
 from sqlite3 import IntegrityError
@@ -6,8 +6,8 @@ from sqlite3 import IntegrityError
 import pytest
 from werkzeug.exceptions import NotFound
 
-from monopyly.banking.transactions import (
-    BankTransactionHandler, BankSubtransactionHandler
+from monopyly.credit.transactions import (
+    CreditTransactionHandler, CreditSubtransactionHandler
 )
 from ..helpers import TestHandler
 
@@ -18,7 +18,7 @@ def transaction_db(app, client, auth):
     with client:
         # Context variables (e.g. `g`) may be accessed only after response
         client.get('/')
-        transaction_db = BankTransactionHandler()
+        transaction_db = CreditTransactionHandler()
         yield transaction_db
 
 
@@ -28,65 +28,81 @@ def subtransaction_db(app, client, auth):
     with client:
         # Context variables (e.g. `g`) may be accessed only after response
         client.get('/')
-        subtransaction_db = BankSubtransactionHandler()
+        subtransaction_db = CreditSubtransactionHandler()
         yield subtransaction_db
 
 
-class TestBankTransactionHandler(TestHandler):
+class TestCreditTransactionHandler(TestHandler):
 
     # References only include entries accessible to the authorized login
     #   - ordered by date (most recent first)
     reference = {
-        'keys': ('id', 'internal_transaction_id', 'account_id',
-                 'transaction_date'),
-        'rows': [(8, None, 4, date(2020, 5, 7)),
-                 (7, None, 4, date(2020, 5, 6)),
-                 (4, None, 2, date(2020, 5, 6)),
-                 (6, 1, 3, date(2020, 5, 5)),
-                 (3, 1, 2, date(2020, 5, 5)),
-                 (5, 2, 3, date(2020, 5, 4)),
-                 (2, None, 2, date(2020, 5, 4))]
+        'keys': ('id', 'internal_transaction_id', 'statement_id',
+                 'transaction_date', 'vendor'),
+        'rows': [(11, None, 7, date(2020, 6, 5), 'Reading Railroad'),
+                 (8, None, 5, date(2020, 5, 30), 'Water Works'),
+                 (10, None, 6, date(2020, 5, 10), 'Income Tax Board'),
+                 (7, 2, 4, date(2020, 5, 4), 'JP Morgan Chance'),
+                 (6, None, 4, date(2020, 5, 1), 'Marvin Gardens'),
+                 (5, None, 4, date(2020, 4, 25), 'Electric Company'),
+                 (9, None, 6, date(2020, 4, 20), 'Pennsylvania Avenue'),
+                 (2, None, 2, date(2020, 4, 13), 'Top Left Corner'),
+                 (4, None, 3, date(2020, 4, 5), 'Park Place'),
+                 (3, None, 3, date(2020, 3, 20), 'Boardwalk'),
+                 (12, None, 2, date(2020, 3, 10), 'Community Chest')]
     }
     view_reference = {
-        'keys': ('id', 'internal_transaction_id', 'account_id',
-                 'transaction_date', 'total', 'notes'),
-        'rows': [(8, None, 4, date(2020, 5, 7), None, None),
-                 (7, None, 4, date(2020, 5, 6), 200.00,
-                  '"Go" Corner ATM deposit'),
-                 (4, None, 2, date(2020, 5, 6), 58.90,
-                  'What else is there to do in Jail?'),
-                 (6, 1, 3, date(2020, 5, 5), -300.00,
-                  'Transfer out'),
-                 (3, 1, 2, date(2020, 5, 5), 300.00,
-                  'Transfer in'),
-                 (5, 2, 3, date(2020, 5, 4), -109.21,
-                  'Credit card payment'),
-                 (2, None, 2, date(2020, 5, 4), 85.00,
-                  'Jail subtransaction 1; Jail subtransaction 2')]
+        'keys': ('id', 'internal_transaction_id', 'statement_id',
+                 'transaction_date', 'vendor', 'total', 'notes'),
+        'rows': [(11, None, 7, date(2020, 6, 5), 'Reading Railroad',
+                  253.99, 'Conducting business'),
+                 (8, None, 5, date(2020, 5, 30), 'Water Works',
+                  26.87, 'Tough loss'),
+                 (10, None, 6, date(2020, 5, 10), 'Income Tax Board',
+                  -123.00, 'Refund'),
+                 (7, 2, 4, date(2020, 5, 4), 'JP Morgan Chance',
+                  -109.21, 'Credit card payment'),
+                 (6, None, 4, date(2020, 5, 1), 'Marvin Gardens',
+                  6500.00, 'Expensive real estate'),
+                 (5, None, 4, date(2020, 4, 25), 'Electric Company',
+                  99.00, 'Electric bill'),
+                 (9, None, 6, date(2020, 4, 20), 'Pennsylvania Avenue',
+                  1600.00, 'Expensive house tour'),
+                 (2, None, 2, date(2020, 4, 13), 'Top Left Corner',
+                  1.00, 'Parking (thought it was free)'),
+                 (4, None, 3, date(2020, 4, 5), 'Park Place',
+                  65.00, 'One for the park; One for the place'),
+                 (3, None, 3, date(2020, 3, 20), 'Boardwalk',
+                  43.21, 'Merry-go-round'),
+                 (12, None, 2, date(2020, 3, 10), 'Community Chest',
+                  None, None)]
     }
 
     def test_initialization(self, transaction_db):
-        assert transaction_db.table == 'bank_transactions'
-        assert transaction_db.table_view == 'bank_transactions_view'
+        assert transaction_db.table == 'credit_transactions'
+        assert transaction_db.table_view == 'credit_transactions_view'
         assert transaction_db.user_id == 3
 
     @pytest.mark.parametrize(
-        'account_ids, active, sort_order, fields, reference_entries',
-        [[None, False, 'DESC', None,  # defaults
+        'card_ids, statement_ids, active, sort_order, fields, '
+        'reference_entries',
+        [[None, None, False, 'DESC', None,  # defaults
           view_reference['rows']],
-         [None, False, 'DESC', view_reference['keys'][1:],
+         [None, None, False, 'DESC', view_reference['keys'][1:],
           view_reference['rows']],
-         [(2, 3), False, 'DESC', view_reference['keys'][1:],
-          view_reference['rows'][2:]],
-         [None, True, 'DESC', view_reference['keys'][1:],  # account 3 inactive
-          [row for row in view_reference['rows'] if row[2] != 3]],
-         [None, False, 'ASC', view_reference['keys'][1:],
+         [(2, 3), None, False, 'DESC', view_reference['keys'][1:],
+          [row for row in view_reference['rows'] if row[2] in (2, 3, 4, 5)]],
+         [None, (3,), False, 'DESC', view_reference['keys'][1:],
+          [row for row in view_reference['rows'] if row[2] == 3]],
+         [None, None, True, 'DESC', view_reference['keys'][1:],
+          [row for row in view_reference['rows'] if row[2] != 2]],
+         [None, None, False, 'ASC', view_reference['keys'][1:],
           view_reference['rows'][::-1]]]
     )
-    def test_get_entries(self, transaction_db, account_ids, active, sort_order,
-                         fields, reference_entries):
-        transactions = transaction_db.get_entries(account_ids, active,
-                                                  sort_order, fields)
+    def test_get_entries(self, transaction_db, card_ids, statement_ids, active,
+                         sort_order, fields, reference_entries):
+        transactions = transaction_db.get_entries(card_ids, statement_ids,
+                                                  active, sort_order, fields)
         if fields:
             self.assertMatchEntries(reference_entries, transactions,
                                     order=True)
@@ -97,17 +113,18 @@ class TestBankTransactionHandler(TestHandler):
     @pytest.mark.parametrize(
         'transaction_id, fields, reference_entry',
         [[2, None,
-          view_reference['rows'][6]],
+          view_reference['rows'][7]],
          [3, None,
-          view_reference['rows'][4]],
-         [2, ('account_id', 'transaction_date'),
-          (view_reference['rows'][6][0],
-           view_reference['rows'][6][2],
-           view_reference['rows'][6][3])],
-         [2, ('total', 'notes'),  # use fields from the view
-          (view_reference['rows'][6][0],
-           view_reference['rows'][6][4],
-           view_reference['rows'][6][5])]]
+          view_reference['rows'][9]],
+         [2, ('transaction_date', 'vendor'),
+          (view_reference['rows'][7][0],
+           view_reference['rows'][7][3],
+           view_reference['rows'][7][4])],
+         [2, ('vendor', 'total', 'notes'),  # use fields from the view
+          (view_reference['rows'][7][0],
+           view_reference['rows'][7][4],
+           view_reference['rows'][7][5],
+           view_reference['rows'][7][6])]]
     )
     def test_get_entry(self, transaction_db, transaction_id, fields,
                        reference_entry):
@@ -120,8 +137,8 @@ class TestBankTransactionHandler(TestHandler):
 
     @pytest.mark.parametrize(
         'transaction_id',
-        [1,  # Not the logged in user
-         9]  # Not in the database
+        [1,   # Not the logged in user
+         13]  # Not in the database
     )
     def test_get_entry_invalid(self, transaction_db, transaction_id):
         with pytest.raises(NotFound):
@@ -129,35 +146,38 @@ class TestBankTransactionHandler(TestHandler):
 
     @pytest.mark.parametrize(
         'mapping',
-        [{'internal_transaction_id': None, 'account_id': 3,
-          'transaction_date': '2022-05-08', 'subtransactions': [{'test': 1}]},
-         {'internal_transaction_id': 2, 'account_id': 3,
-          'transaction_date': '2022-05-08', 'subtransactions': [{'test': 1}]}]
+        [{'internal_transaction_id': None, 'statement_id': 4,
+          'transaction_date': '2020-05-03', 'vendor': 'Baltic Avenue',
+          'subtransactions': [{'test': 1}]},
+         {'internal_transaction_id': 2, 'statement_id': 6,
+          'transaction_date': '2020-05-03', 'vendor': 'Mediterranean Avenue',
+          'subtransactions': [{'test': 1}]}]
     )
     @patch(
-         'monopyly.banking.transactions.BankSubtransactionHandler.add_entry',
+        'monopyly.credit.transactions.CreditSubtransactionHandler.add_entry',
         return_value='new subtransaction'
     )
     def test_add_entry(self, mock_method, app, transaction_db, mapping):
         transaction, subtransactions = transaction_db.add_entry(mapping)
-        assert transaction['transaction_date'] == date(2022, 5, 8)
+        assert transaction['transaction_date'] == date(2020, 5, 3)
         assert subtransactions == ['new subtransaction']
         # Check that the entry was added
-        query = ("SELECT COUNT(id) FROM bank_transactions"
-                 " WHERE transaction_date = '2022-05-08'")
+        query = ("SELECT COUNT(id) FROM credit_transactions"
+                 " WHERE transaction_date = '2020-05-03'")
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
         'mapping, expectation',
         [[{'internal_transaction_id': None, 'invalid_field': 'Test',
-           'transaction_date': '2022-05-08',
+           'transaction_date': '2020-05-03', 'vendor': 'Baltic Avenue',
            'subtransactions': [{'test': 1}]},
           ValueError],
-         [{'internal_transaction_id': 2, 'account_id': 3,
+         [{'internal_transaction_id': 2, 'statement_id': 4,
+           'transaction_date': '2020-05-03',
            'subtransactions': [{'test': 1}]},
           ValueError],
-         [{'internal_transaction_id': 2, 'account_id': 3,
-           'transaction_date': '2022-05-08'},
+         [{'internal_transaction_id': 2, 'statement_id': 4,
+           'transaction_date': '2022-05-03', 'vendor': 'Baltic Avenue'},
           KeyError]]
     )
     def test_add_entry_invalid(self, transaction_db, mapping, expectation):
@@ -166,31 +186,31 @@ class TestBankTransactionHandler(TestHandler):
 
     @pytest.mark.parametrize(
         'mapping',
-        [{'internal_transaction_id': None, 'account_id': 3,
-          'transaction_date': '2022-05-08', 'subtransactions': [{'test': 1}]},
-         {'transaction_date': '2022-05-08'}]
+        [{'internal_transaction_id': None, 'statement_id': 4,
+          'transaction_date': '2022-05-03', 'subtransactions': [{'test': 1}]},
+         {'transaction_date': '2022-05-03'}]
     )
     @patch(
-        'monopyly.banking.transactions.BankSubtransactionHandler.add_entry',
+        'monopyly.credit.transactions.CreditSubtransactionHandler.add_entry',
         return_value='new subtransaction'
     )
     def test_update_entry(self, mock_method, app, transaction_db, mapping):
         transaction, subtransactions = transaction_db.update_entry(5, mapping)
-        assert transaction['transaction_date'] == date(2022, 5, 8)
+        assert transaction['transaction_date'] == date(2022, 5, 3)
         if 'subtransactions' in mapping:
             assert subtransactions == ['new subtransaction']
         # Check that the entry was updated
-        query = ("SELECT COUNT(id) FROM bank_transactions"
-                 " WHERE transaction_date = '2022-05-08'")
+        query = ("SELECT COUNT(id) FROM credit_transactions"
+                 " WHERE transaction_date = '2022-05-03'")
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
         'transaction_id, mapping, expectation',
-        [[1, {'account_id': 1, 'transaction_date': '2020-05-08'},
+        [[1, {'statement_id': 1, 'transaction_date': '2020-05-03'},
           NotFound],  # another user
-         [5, {'account_id': 3, 'invalid_field': 'Test'},
+         [5, {'statement_id': 4, 'invalid_field': 'Test'},
           ValueError],
-         [9, {'account_id': 3, 'transaction_date': '2022-05-08'},
+         [13, {'statement_id': 4, 'transaction_date': '2022-05-03'},
           NotFound]]   # nonexistent ID
     )
     def test_update_entry_invalid(self, transaction_db, transaction_id,
@@ -205,21 +225,21 @@ class TestBankTransactionHandler(TestHandler):
         transaction_db.delete_entries(entry_ids)
         # Check that the entries were deleted
         for entry_id in entry_ids:
-            query = ("SELECT COUNT(id) FROM bank_transactions"
+            query = ("SELECT COUNT(id) FROM credit_transactions"
                     f" WHERE id = {entry_id}")
             self.assertQueryEqualsCount(app, query, 0)
 
     def test_delete_cascading_entries(self, app, transaction_db):
         transaction_db.delete_entries((2,))
         # Check that the cascading entries were deleted
-        query = ("SELECT COUNT(id) FROM bank_subtransactions"
+        query = ("SELECT COUNT(id) FROM credit_subtransactions"
                 f" WHERE transaction_id = 2")
         self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
         'entry_ids, expectation',
-        [[(1,), NotFound],   # should not be able to delete other user entries
-         [(9,), NotFound]]   # should not be able to delete nonexistent entries
+        [[(1,), NotFound],    # should not be able to delete other user entries
+         [(13,), NotFound]]   # should not be able to delete nonexistent entries
     )
     def test_delete_entries_invalid(self, transaction_db, entry_ids,
                                     expectation):
@@ -227,34 +247,38 @@ class TestBankTransactionHandler(TestHandler):
             transaction_db.delete_entries(entry_ids)
 
 
-class TestBankSubtransactionsHandler(TestHandler):
+class TestCreditSubtransactionsHandler(TestHandler):
 
     # References only include entries accessible to the authorized login
     reference = {
         'keys': ('id', 'transaction_id', 'subtotal', 'note'),
-        'rows': [(2, 2, 42.00, 'Jail subtransaction 1'),
-                 (3, 2, 43.00, 'Jail subtransaction 2'),
-                 (4, 3, 300.00, 'Transfer in'),
-                 (5, 4, 58.90, 'What else is there to do in Jail?'),
-                 (6, 5, -109.21, 'Credit card payment'),
-                 (7, 6, -300.00, 'Transfer out'),
-                 (8, 7, 200.00, '"Go" Corner ATM deposit')]
+        'rows': [(2, 2, 1.00, 'Parking (thought it was free)'),
+                 (3, 3, 43.21, 'Merry-go-round'),
+                 (4, 4, 30.00, 'One for the park'),
+                 (5, 4, 35.00, 'One for the place'),
+                 (6, 5, 99.00, 'Electric bill'),
+                 (7, 6, 6500.00, 'Expensive real estate'),
+                 (8, 7, -109.21, 'Credit card payment'),
+                 (9, 8, 26.87, 'Tough loss'),
+                 (10, 9, 1600.00, 'Expensive house tour'),
+                 (11, 10, -123.00, 'Refund'),
+                 (12, 11, 253.99, 'Conducting business')]
     }
 
     def test_initialization(self, subtransaction_db):
-        assert subtransaction_db.table == 'bank_subtransactions'
+        assert subtransaction_db.table == 'credit_subtransactions'
         assert subtransaction_db.user_id == 3
 
     @pytest.mark.parametrize(
         'transaction_ids, fields, reference_entries',
         [[None, None,
           reference['rows']],
-         [(2, 3, 4), None,
-          reference['rows'][:4]],
+         [(2, 3, 4, 5), None,
+          reference['rows'][:5]],
          [None, ('subtotal', 'note'),
           [(row[0], row[2], row[3]) for row in reference['rows']]],
-         [(2, 3, 4), ('subtotal', 'note'),
-          [(row[0], row[2], row[3]) for row in reference['rows'][:4]]]]
+         [(2, 3, 4, 5), ('subtotal', 'note'),
+          [(row[0], row[2], row[3]) for row in reference['rows'][:5]]]]
     )
     def test_get_entries(self, subtransaction_db, transaction_ids, fields,
                          reference_entries):
@@ -288,8 +312,8 @@ class TestBankSubtransactionsHandler(TestHandler):
 
     @pytest.mark.parametrize(
         'subtransaction_id, expectation',
-        [[1, NotFound],  # Not the logged in user
-         [9, NotFound]]  # Not in the database
+        [[1, NotFound],   # Not the logged in user
+         [13, NotFound]]  # Not in the database
     )
     def test_get_entry_invalid(self, subtransaction_db, subtransaction_id,
                                expectation):
@@ -298,25 +322,33 @@ class TestBankSubtransactionsHandler(TestHandler):
 
     @pytest.mark.parametrize(
         'mapping',
-        [{'transaction_id': 2, 'subtotal': 43.00,
-          'note': 'TEST subtransaction'},  # sibling subtransactions exist
-         {'transaction_id': 8, 'subtotal': 123.00,
-          'note': 'TEST subtransaction'}]  # first subtransaction
+        [{'transaction_id': 4, 'subtotal': 40.00,
+          'note': 'TEST subtransaction',  # sibling subtransactions exist
+          'tags': ['test tag']},
+         {'transaction_id': 12, 'subtotal': 250.00,
+          'note': 'TEST subtransaction',  # first subtransaction
+          'tags': ['test tag']},
+         {'transaction_id': 12, 'subtotal': 250.00,
+          'note': 'TEST subtransaction',  # first subtransaction, no tags
+          'tags': []}]
     )
-    def test_add_entry(self, app, subtransaction_db, mapping):
+    @patch('monopyly.credit.transactions.CreditTagHandler.update_tag_links')
+    def test_add_entry(self, mock_method, app, subtransaction_db, mapping):
         subtransaction_db.add_entry(mapping)
         # Check that the entry was added
-        query = ("SELECT COUNT(id) FROM bank_subtransactions"
+        query = ("SELECT COUNT(id) FROM credit_subtransactions"
                  " WHERE note = 'TEST subtransaction'")
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
         'mapping, expectation',
-        [[{'transaction_id': 2, 'invalid_field': 'Test', 'note': 'TEST'},
+        [[{'transaction_id': 4, 'invalid_field': 'Test', 'note': 'TEST',
+           'tags': ['test tag']},
           ValueError],
-         [{'transaction_id': 2, 'subtotal': 5.00,},
+         [{'transaction_id': 4, 'subtotal': 5.00, 'tags': ['test tag']},
           ValueError],
-         [{'transaction_id': 9, 'subtotal': 5.00, 'note': 'TEST'},
+         [{'transaction_id': 13, 'subtotal': 5.00, 'note': 'TEST',
+           'tags': ['test tag']},
           IntegrityError]]  # transaction does not exist
     )
     def test_add_entry_invalid(self, subtransaction_db, mapping, expectation):
@@ -326,7 +358,8 @@ class TestBankSubtransactionsHandler(TestHandler):
     @pytest.mark.skip(reason="never update subtransactions; only replace")
     @pytest.mark.parametrize(
         'subtransaction_id, mapping',
-        [[2, {'transaction_id': 2, 'subtotal': 41.00, 'note': 'TEST update'}],
+        [[2, {'transaction_id': 2, 'subtotal': 41.00, 'note': 'TEST update',
+              'tags': ['test tag']}],
          [4, {'transaction_id': 4, 'subtotal': 58.90, 'note': 'TEST update'}],
          [4, {'transaction_id': 4, 'note': 'TEST update'}]]
     )
@@ -334,7 +367,7 @@ class TestBankSubtransactionsHandler(TestHandler):
                           mapping):
         subtransaction_db.update_entry(subtransaction_id, mapping)
         # Check that the entry was updated
-        query = ("SELECT COUNT(id) FROM bank_subtransactions"
+        query = ("SELECT COUNT(id) FROM credit_subtransactions"
                  " WHERE note = 'TEST update'")
         self.assertQueryEqualsCount(app, query, 1)
 
@@ -362,14 +395,14 @@ class TestBankSubtransactionsHandler(TestHandler):
         subtransaction_db.delete_entries(entry_ids)
         # Check that the entries were deleted
         for entry_id in entry_ids:
-            query = ("SELECT COUNT(id) FROM bank_subtransactions"
+            query = ("SELECT COUNT(id) FROM credit_subtransactions"
                     f" WHERE id = {entry_id}")
             self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
         'entry_ids, expectation',
         [[(1,), NotFound],   # should not be able to delete other user entries
-         [(9,), NotFound]]   # should not be able to delete nonexistent entries
+         [(13,), NotFound]]  # should not be able to delete nonexistent entries
     )
     def test_delete_entries_invalid(self, subtransaction_db, entry_ids,
                                     expectation):

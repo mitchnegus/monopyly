@@ -75,6 +75,7 @@ FROM credit_transactions AS t
     ON s_t.transaction_id = t.id
 GROUP BY t.id;
 
+
 /* Prepare a view giving enhanced credit card statement information */
 CREATE VIEW credit_statements_view AS
 WITH view AS (

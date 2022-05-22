@@ -88,7 +88,8 @@ VALUES (NULL, 1, '2020-04-20', 'Test vendor'),
        (NULL, 5, '2020-05-30', 'Water Works'),
        (NULL, 6, '2020-04-20', 'Pennsylvania Avenue'),
        (NULL, 6, '2020-05-10', 'Income Tax Board'),
-       (NULL, 7, '2020-06-05', 'Reading Railroad');
+       (NULL, 7, '2020-06-05', 'Reading Railroad'),
+       (NULL, 2, '2020-03-10', 'Community Chest');
 
 INSERT INTO credit_subtransactions
        (transaction_id, subtotal, note)
