@@ -1,10 +1,8 @@
 """
 Tools for interacting with the bank transactions in the database.
 """
-from flask import flash
-
 from ..core.internal_transactions import add_internal_transaction
-from ..common.form_utils import form_err_msg
+from ..common.form_utils import execute_on_form_validation
 from ..db import DATABASE_FIELDS
 from ..db.handler import DatabaseHandler
 
@@ -376,6 +374,7 @@ class BankSubtransactionHandler(DatabaseHandler):
         return self.get_entry(entry_id, fields=('b.user_id',))['user_id']
 
 
+@execute_on_form_validation
 def save_transaction(form, transaction_id=None):
     """
     Save a banking transaction.
@@ -403,29 +402,23 @@ def save_transaction(form, transaction_id=None):
     wtfforms.validators.ValidationError
         Raised when the form does not validate properly.
     """
-    if form.validate():
-        db = BankTransactionHandler()
-        transaction_data = form.transaction_data
-        transfer_data = form.transfer_data
-        if transaction_id:
-            # Update the database with the updated transaction
-            transaction, subtransactions = db.update_entry(transaction_id,
-                                                           transaction_data)
-        else:
-            # Insert the new transaction into the database
-            if transfer_data:
-                # Update the mappings with the internal transaction information
-                internal_transaction_id = add_internal_transaction()
-                internal_id_field = 'internal_transaction_id'
-                transaction_data[internal_id_field] = internal_transaction_id
-                transfer_data[internal_id_field] = internal_transaction_id
-                # Add the transfer to the database
-                transfer, subtransactions = db.add_entry(transfer_data)
-            transaction, subtransactions = db.add_entry(transaction_data)
-        return transaction, subtransactions
+    db = BankTransactionHandler()
+    transaction_data = form.transaction_data
+    transfer_data = form.transfer_data
+    if transaction_id:
+        # Update the database with the updated transaction
+        transaction, subtransactions = db.update_entry(transaction_id,
+                                                       transaction_data)
     else:
-        # Show an error to the user and print the errors for the admin
-        flash(form_err_msg)
-        print(form.errors)
-        raise ValidationError('The form did not validate properly.')
+        # Insert the new transaction into the database
+        if transfer_data:
+            # Update the mappings with the internal transaction information
+            internal_transaction_id = add_internal_transaction()
+            internal_id_field = 'internal_transaction_id'
+            transaction_data[internal_id_field] = internal_transaction_id
+            transfer_data[internal_id_field] = internal_transaction_id
+            # Add the transfer to the database
+            transfer, subtransactions = db.add_entry(transfer_data)
+        transaction, subtransactions = db.add_entry(transaction_data)
+    return transaction, subtransactions
 

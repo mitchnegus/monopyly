@@ -4,10 +4,7 @@ Tools for interacting with the credit transactions in the database.
 import datetime
 from sqlite3 import IntegrityError
 
-from flask import flash
-from wtforms.validators import ValidationError
-
-from ..common.form_utils import form_err_msg
+from ..common.form_utils import execute_on_form_validation
 from ..db import DATABASE_FIELDS
 from ..db.handler import DatabaseHandler
 
@@ -839,6 +836,7 @@ class CreditTagHandler(DatabaseHandler):
         return tag_average_totals
 
 
+@execute_on_form_validation
 def save_transaction(form, transaction_id=None):
     """
     Save a credit transaction.
@@ -867,20 +865,14 @@ def save_transaction(form, transaction_id=None):
     wtfforms.validators.ValidationError
         Raised when the form does not validate properly.
     """
-    if form.validate():
-        db = CreditTransactionHandler()
-        transaction_data = form.transaction_data
-        if transaction_id:
-            # Update the database with the updated transaction
-            transaction, subtransactions = db.update_entry(transaction_id,
-                                                           transaction_data)
-        else:
-            # Insert the new transaction into the database
-            transaction, subtransactions = db.add_entry(transaction_data)
-        return transaction, subtransactions
+    db = CreditTransactionHandler()
+    transaction_data = form.transaction_data
+    if transaction_id:
+        # Update the database with the updated transaction
+        transaction, subtransactions = db.update_entry(transaction_id,
+                                                       transaction_data)
     else:
-        # Show an error to the user and print the errors for the admin
-        flash(form_err_msg)
-        print(form.errors)
-        raise ValidationError('The form did not validate properly.')
+        # Insert the new transaction into the database
+        transaction, subtransactions = db.add_entry(transaction_data)
+    return transaction, subtransactions
 

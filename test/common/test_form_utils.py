@@ -1,5 +1,6 @@
 """Tests for form utilities."""
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+from contextlib import nullcontext as does_not_raise
 
 import pytest
 from wtforms.validators import ValidationError
@@ -12,10 +13,26 @@ def mock_form():
     with patch('flask_wtf.FlaskForm') as mock_form:
         yield mock_form
 
+
 @pytest.fixture
 def mock_field():
     with patch('wtforms.fields.Field') as mock_field:
         yield mock_field
+
+
+@pytest.mark.parametrize(
+    'validated, expectation',
+    [[True, does_not_raise()],
+     [False, pytest.raises(ValidationError)]]
+)
+@patch('monopyly.common.form_utils.flash', new=lambda x: None)
+def test_execute_on_form_validation(validated, expectation):
+    func = Mock()
+    form = Mock()
+    form.validate.return_value = validated
+    wrapped_func = execute_on_form_validation(func)
+    with expectation:
+        wrapped_func(form)
 
 class TestValidators:
 
