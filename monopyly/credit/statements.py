@@ -1,7 +1,7 @@
 """
 Tools for interacting with the credit statements in the database.
 """
-from ..utils import get_next_occurrence_of_day
+from ..common.utils import get_next_occurrence_of_day
 from ..db import DATABASE_FIELDS
 from ..db.handler import DatabaseHandler
 

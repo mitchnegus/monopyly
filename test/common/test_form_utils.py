@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from wtforms.validators import ValidationError
 
-from monopyly.form_utils import *
+from monopyly.common.form_utils import *
 
 
 @pytest.fixture

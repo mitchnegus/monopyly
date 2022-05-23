@@ -3,10 +3,10 @@ Tools for interacting with the bank transactions in the database.
 """
 from flask import flash
 
+from ..core.internal_transactions import add_internal_transaction
+from ..common.form_utils import form_err_msg
 from ..db import DATABASE_FIELDS
 from ..db.handler import DatabaseHandler
-from ..form_utils import form_err_msg
-from ..core.internal_transactions import add_internal_transaction
 
 
 class BankTransactionHandler(DatabaseHandler):

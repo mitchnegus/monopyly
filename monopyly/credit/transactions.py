@@ -7,9 +7,9 @@ from sqlite3 import IntegrityError
 from flask import flash
 from wtforms.validators import ValidationError
 
+from ..common.form_utils import form_err_msg
 from ..db import DATABASE_FIELDS
 from ..db.handler import DatabaseHandler
-from ..form_utils import form_err_msg
 
 
 class CreditTransactionHandler(DatabaseHandler):
