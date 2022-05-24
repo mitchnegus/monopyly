@@ -108,12 +108,12 @@ class TestCreditStatementHandler(TestHandler):
             self.assertContainEntry(reference_entry, statement)
 
     @pytest.mark.parametrize(
-        'statement_id, expectation',
+        'statement_id, exception',
         [[1, NotFound],  # Not the logged in user
          [8, NotFound]]  # Not in the database
     )
-    def test_get_entry_invalid(self, statement_db, statement_id, expectation):
-        with pytest.raises(expectation):
+    def test_get_entry_invalid(self, statement_db, statement_id, exception):
+        with pytest.raises(exception):
             statement_db.get_entry(statement_id)
 
     @pytest.mark.parametrize(
@@ -187,14 +187,14 @@ class TestCreditStatementHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'card, issue_date, due_date, expectation',
+        'card, issue_date, due_date, exception',
         [[{}, date(2020, 7, 15), None, KeyError],
          [{'id': 3, 'statement_due_day': 5}, None, None, AttributeError],
          [{'id': 3, 'statement_due_day': 5}, None, 'test', IntegrityError]]
     )
     def test_add_entry_invalid(self, statement_db, card, issue_date, due_date,
-                               expectation):
-        with pytest.raises(expectation):
+                               exception):
+        with pytest.raises(exception):
             statement_db.add_statement(card, issue_date, due_date)
 
     @pytest.mark.parametrize(
@@ -211,7 +211,7 @@ class TestCreditStatementHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'statement_id, mapping, expectation',
+        'statement_id, mapping, exception',
         [[1, {'card_id': 2, 'issue_date': '2020-05-20'},  # another user
           NotFound],
          [2, {'card_id': 2, 'invalid_field': 'Test'},
@@ -220,8 +220,8 @@ class TestCreditStatementHandler(TestHandler):
           NotFound]]
     )
     def test_update_entry_invalid(self, statement_db, statement_id, mapping,
-                                  expectation):
-        with pytest.raises(expectation):
+                                  exception):
+        with pytest.raises(exception):
             statement_db.update_entry(statement_id, mapping)
 
     @pytest.mark.parametrize(
@@ -243,11 +243,11 @@ class TestCreditStatementHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
-        'entry_ids, expectation',
+        'entry_ids, exception',
         [[(1,), NotFound],   # should not be able to delete other user entries
-         [(10,), NotFound]]   # should not be able to delete nonexistent entries
+         [(10,), NotFound]]  # should not be able to delete nonexistent entries
     )
-    def test_delete_entries_invalid(self, statement_db, entry_ids, expectation):
-        with pytest.raises(expectation):
+    def test_delete_entries_invalid(self, statement_db, entry_ids, exception):
+        with pytest.raises(exception):
             statement_db.delete_entries(entry_ids)
 

@@ -95,12 +95,12 @@ class TestFloatDedelimiter:
         assert dedelimit_float(value) == expected_value
 
     @pytest.mark.parametrize(
-        'value, expectation',
+        'value, exception',
         [['abc', ValueError],
          [None, TypeError]]
     )
-    def test_dedelimit_float_invalid(self, value, expectation):
-        with pytest.raises(expectation):
+    def test_dedelimit_float_invalid(self, value, exception):
+        with pytest.raises(exception):
             dedelimit_float(value)
 
 

@@ -76,12 +76,12 @@ class TestCreditCardHandler(TestHandler):
             self.assertContainEntry(reference_entry, card)
 
     @pytest.mark.parametrize(
-        'card_id, expectation',
+        'card_id, exception',
         [[1, NotFound],  # Not the logged in user
          [5, NotFound]]  # Not in the database
     )
-    def test_get_entry_invalid(self, card_db, card_id, expectation):
-        with pytest.raises(expectation):
+    def test_get_entry_invalid(self, card_db, card_id, exception):
+        with pytest.raises(exception):
             card_db.get_entry(card_id)
 
     @pytest.mark.parametrize(
@@ -152,7 +152,7 @@ class TestCreditCardHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'card_id, mapping, expectation',
+        'card_id, mapping, exception',
         [[1, {'account_id': 2, 'last_four_digits': '4444'},  # another user
           NotFound],
          [2, {'account_id': 2, 'invalid_field': 'Test'},
@@ -161,8 +161,8 @@ class TestCreditCardHandler(TestHandler):
           NotFound]]
     )
     def test_update_entry_invalid(self, card_db, card_id, mapping,
-                                  expectation):
-        with pytest.raises(expectation):
+                                  exception):
+        with pytest.raises(exception):
             card_db.update_entry(card_id, mapping)
 
     @pytest.mark.parametrize(
@@ -184,11 +184,11 @@ class TestCreditCardHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
-        'entry_ids, expectation',
+        'entry_ids, exception',
         [[(1,), NotFound],   # should not be able to delete other user entries
          [(5,), NotFound]]   # should not be able to delete nonexistent entries
     )
-    def test_delete_entries_invalid(self, card_db, entry_ids, expectation):
-        with pytest.raises(expectation):
+    def test_delete_entries_invalid(self, card_db, entry_ids, exception):
+        with pytest.raises(exception):
             card_db.delete_entries(entry_ids)
 

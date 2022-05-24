@@ -148,7 +148,7 @@ class TestBankTransactionHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'mapping, expectation',
+        'mapping, exception',
         [[{'internal_transaction_id': None, 'invalid_field': 'Test',
            'transaction_date': '2022-05-08',
            'subtransactions': [{'test': 1}]},
@@ -160,8 +160,8 @@ class TestBankTransactionHandler(TestHandler):
            'transaction_date': '2022-05-08'},
           KeyError]]
     )
-    def test_add_entry_invalid(self, transaction_db, mapping, expectation):
-        with pytest.raises(expectation):
+    def test_add_entry_invalid(self, transaction_db, mapping, exception):
+        with pytest.raises(exception):
             transaction_db.add_entry(mapping)
 
     @pytest.mark.parametrize(
@@ -185,7 +185,7 @@ class TestBankTransactionHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'transaction_id, mapping, expectation',
+        'transaction_id, mapping, exception',
         [[1, {'account_id': 1, 'transaction_date': '2020-05-08'},
           NotFound],  # another user
          [5, {'account_id': 3, 'invalid_field': 'Test'},
@@ -194,8 +194,8 @@ class TestBankTransactionHandler(TestHandler):
           NotFound]]   # nonexistent ID
     )
     def test_update_entry_invalid(self, transaction_db, transaction_id,
-                                  mapping, expectation):
-        with pytest.raises(expectation):
+                                  mapping, exception):
+        with pytest.raises(exception):
             transaction_db.update_entry(transaction_id, mapping)
 
     @pytest.mark.parametrize(
@@ -217,13 +217,13 @@ class TestBankTransactionHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
-        'entry_ids, expectation',
+        'entry_ids, exception',
         [[(1,), NotFound],   # should not be able to delete other user entries
          [(9,), NotFound]]   # should not be able to delete nonexistent entries
     )
     def test_delete_entries_invalid(self, transaction_db, entry_ids,
-                                    expectation):
-        with pytest.raises(expectation):
+                                    exception):
+        with pytest.raises(exception):
             transaction_db.delete_entries(entry_ids)
 
 
@@ -287,13 +287,13 @@ class TestBankSubtransactionsHandler(TestHandler):
             self.assertContainEntry(reference_entry, subtransaction)
 
     @pytest.mark.parametrize(
-        'subtransaction_id, expectation',
+        'subtransaction_id, exception',
         [[1, NotFound],  # Not the logged in user
          [9, NotFound]]  # Not in the database
     )
     def test_get_entry_invalid(self, subtransaction_db, subtransaction_id,
-                               expectation):
-        with pytest.raises(expectation):
+                               exception):
+        with pytest.raises(exception):
             subtransaction_db.get_entry(subtransaction_id)
 
     @pytest.mark.parametrize(
@@ -311,7 +311,7 @@ class TestBankSubtransactionsHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'mapping, expectation',
+        'mapping, exception',
         [[{'transaction_id': 2, 'invalid_field': 'Test', 'note': 'TEST'},
           ValueError],
          [{'transaction_id': 2, 'subtotal': 5.00,},
@@ -319,8 +319,8 @@ class TestBankSubtransactionsHandler(TestHandler):
          [{'transaction_id': 9, 'subtotal': 5.00, 'note': 'TEST'},
           IntegrityError]]  # transaction does not exist
     )
-    def test_add_entry_invalid(self, subtransaction_db, mapping, expectation):
-        with pytest.raises(expectation):
+    def test_add_entry_invalid(self, subtransaction_db, mapping, exception):
+        with pytest.raises(exception):
             subtransaction_db.add_entry(mapping)
 
     @pytest.mark.skip(reason="never update subtransactions; only replace")
@@ -340,7 +340,7 @@ class TestBankSubtransactionsHandler(TestHandler):
 
     @pytest.mark.skip(reason="never update subtransactions; only replace")
     @pytest.mark.parametrize(
-        'subtransaction_id, mapping, expectation',
+        'subtransaction_id, mapping, exception',
         [[1, {'transaction_id': 1, 'note': 'TEST update'},  # another user
           NotFound],
          [2, {'transaction_id': 2, 'invalid_field': 'Test'},
@@ -351,8 +351,8 @@ class TestBankSubtransactionsHandler(TestHandler):
           IntegrityError]]                                  # transaction ID
     )
     def test_update_entry_invalid(self, subtransaction_db, subtransaction_id,
-                                  mapping, expectation):
-        with pytest.raises(expectation):
+                                  mapping, exception):
+        with pytest.raises(exception):
             subtransaction_db.update_entry(subtransaction_id, mapping)
 
     @pytest.mark.parametrize(
@@ -367,12 +367,12 @@ class TestBankSubtransactionsHandler(TestHandler):
             self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
-        'entry_ids, expectation',
+        'entry_ids, exception',
         [[(1,), NotFound],   # should not be able to delete other user entries
          [(9,), NotFound]]   # should not be able to delete nonexistent entries
     )
     def test_delete_entries_invalid(self, subtransaction_db, entry_ids,
-                                    expectation):
-        with pytest.raises(expectation):
+                                    exception):
+        with pytest.raises(exception):
             subtransaction_db.delete_entries(entry_ids)
 

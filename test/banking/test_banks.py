@@ -56,12 +56,12 @@ class TestBankHandler(TestHandler):
         self.assertMatchEntry(reference_entry, bank)
 
     @pytest.mark.parametrize(
-        'bank_id, expectation',
+        'bank_id, exception',
         [[1, NotFound],  # Not the logged in user
          [5, NotFound]]  # Not in the database
     )
-    def test_get_entry_invalid(self, bank_db, bank_id, expectation):
-        with pytest.raises(expectation):
+    def test_get_entry_invalid(self, bank_db, bank_id, exception):
+        with pytest.raises(exception):
             bank_db.get_entry(bank_id)
 
     def test_add_entry(self, app, bank_db):
@@ -96,14 +96,14 @@ class TestBankHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'bank_id, mapping, expectation',
+        'bank_id, mapping, exception',
         [[1, {'user_id': 3, 'bank_name': 'Test'}, NotFound],  # another user
          [2, {'user_id': 3, 'invalid_field': 'Test'}, ValueError],
          [5, {'user_id': 3, 'bank_name': 'Test'}, NotFound]]  # nonexistent ID
     )
     def test_update_entry_invalid(self, bank_db, bank_id, mapping,
-                                  expectation):
-        with pytest.raises(expectation):
+                                  exception):
+        with pytest.raises(exception):
             bank_db.update_entry(bank_id, mapping)
 
     @pytest.mark.parametrize(
@@ -125,11 +125,11 @@ class TestBankHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
-        'entry_ids, expectation',
+        'entry_ids, exception',
         [[(1,), NotFound],   # should not be able to delete other user entries
          [(4,), NotFound]]   # should not be able to delete nonexistent entries
     )
-    def test_delete_entries_invalid(self, bank_db, entry_ids, expectation):
-        with pytest.raises(expectation):
+    def test_delete_entries_invalid(self, bank_db, entry_ids, exception):
+        with pytest.raises(exception):
             bank_db.delete_entries(entry_ids)
 

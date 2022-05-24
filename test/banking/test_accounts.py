@@ -93,13 +93,13 @@ class TestBankAccountTypeHandler(TestHandler):
         self.assertMatchEntry(reference_entry, account_type)
 
     @pytest.mark.parametrize(
-        'account_type_id, expectation',
+        'account_type_id, exception',
         [[4, NotFound],  # Not the logged in user
          [7, NotFound]]  # Not in the database
     )
     def test_get_entry_invalid(self, account_type_db, account_type_id,
-                               expectation):
-        with pytest.raises(expectation):
+                               exception):
+        with pytest.raises(exception):
             account_type_db.get_entry(account_type_id)
 
     @pytest.mark.parametrize(
@@ -177,14 +177,14 @@ class TestBankAccountTypeHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'account_type_id, mapping, expectation',
+        'account_type_id, mapping, exception',
         [[2, {'user_id': 3, 'type_name': 'Test'}, Forbidden], # another user
          [5, {'user_id': 3, 'invalid_field': 'Test'}, ValueError],
          [7, {'user_id': 3, 'type_name': 'Test'}, NotFound]]  # nonexistent ID
     )
     def test_update_entry_invalid(self, account_type_db, account_type_id,
-                                  mapping, expectation):
-        with pytest.raises(expectation):
+                                  mapping, exception):
+        with pytest.raises(exception):
             account_type_db.update_entry(account_type_id, mapping)
 
     @pytest.mark.parametrize(
@@ -199,14 +199,14 @@ class TestBankAccountTypeHandler(TestHandler):
             self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
-        'entry_ids, expectation',
+        'entry_ids, exception',
         [[(1,), Forbidden],  # should not be able to delete common entries
          [(4,), NotFound],   # should not be able to delete other user entries
          [(7,), NotFound]]   # should not be able to delete nonexistent entries
     )
     def test_delete_entries_invalid(self, account_type_db, entry_ids,
-                                    expectation):
-        with pytest.raises(expectation):
+                                    exception):
+        with pytest.raises(exception):
             account_type_db.delete_entries(entry_ids)
 
 
@@ -277,12 +277,12 @@ class TestBankAccountHandler(TestHandler):
             self.assertContainEntry(reference_entry, account)
 
     @pytest.mark.parametrize(
-        'account_id, expectation',
+        'account_id, exception',
         [[1, NotFound],  # Not the logged in user
          [5, NotFound]]  # Not in the database
     )
-    def test_get_entry_invalid(self, account_db, account_id, expectation):
-        with pytest.raises(expectation):
+    def test_get_entry_invalid(self, account_db, account_id, exception):
+        with pytest.raises(exception):
             account_db.get_entry(account_id)
 
     @pytest.mark.parametrize(
@@ -295,12 +295,12 @@ class TestBankAccountHandler(TestHandler):
         assert balance == expected_balance
 
     @pytest.mark.parametrize(
-        'bank_id, expectation',
+        'bank_id, exception',
         [[1, NotFound],  # Not the logged in user
          [4, NotFound]]  # Not in the database
     )
-    def test_get_bank_balance_invalid(self, account_db, bank_id, expectation):
-        with pytest.raises(expectation):
+    def test_get_bank_balance_invalid(self, account_db, bank_id, exception):
+        with pytest.raises(exception):
             balance = account_db.get_bank_balance(bank_id)
 
     @pytest.mark.parametrize(
@@ -384,7 +384,7 @@ class TestBankAccountHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
-        'account_id, mapping, expectation',
+        'account_id, mapping, exception',
         [[1, {'bank_id': 2, 'last_four_digits': '6666'},  # another user
           NotFound],
          [2, {'bank_id': 2, 'invalid_field': 'Test'},
@@ -393,8 +393,8 @@ class TestBankAccountHandler(TestHandler):
           NotFound]]
     )
     def test_update_entry_invalid(self, account_db, account_id, mapping,
-                                  expectation):
-        with pytest.raises(expectation):
+                                  exception):
+        with pytest.raises(exception):
             account_db.update_entry(account_id, mapping)
 
     @pytest.mark.parametrize(
@@ -416,11 +416,11 @@ class TestBankAccountHandler(TestHandler):
         self.assertQueryEqualsCount(app, query, 0)
 
     @pytest.mark.parametrize(
-        'entry_ids, expectation',
+        'entry_ids, exception',
         [[(1,), NotFound],   # should not be able to delete other user entries
          [(5,), NotFound]]   # should not be able to delete nonexistent entries
     )
-    def test_delete_entries_invalid(self, account_db, entry_ids, expectation):
-        with pytest.raises(expectation):
+    def test_delete_entries_invalid(self, account_db, entry_ids, exception):
+        with pytest.raises(exception):
             account_db.delete_entries(entry_ids)
 
