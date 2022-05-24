@@ -44,8 +44,8 @@ def make_ordinal(integer):
     This function is an adaptation of the one proposed by Stack Overflow user
     Florian Brucker (https://stackoverflow.com/a/50992575/8754471).
     """
-    suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n%10, 4)]
-    if 11 <= (n%100) <= 13:
+    suffix = ['th', 'st', 'nd', 'rd', 'th'][min(integer%10, 4)]
+    if 11 <= (integer%100) <= 13:
         suffix = 'th'
-    return f'{n}{suffix}'
+    return f'{integer}{suffix}'
 
