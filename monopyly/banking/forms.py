@@ -116,27 +116,19 @@ class BankTransactionForm(FlaskForm):
 
     def get_transaction_account(self):
         """Get the bank account associated with the transaction."""
-        account = self._get_account(
-            self.account_info.bank_name.data,
-            self.account_info.last_four_digits.data,
-            self.account_info.type_name.data
-        )
-        return account
+        return self._get_account(self.account_info)
 
     def get_transfer_account(self):
         """Get the bank account linked in a transfer."""
         transfer_account_info = self.transfer_account_info[0]
-        account = self._get_account(
-            transfer_account_info.bank_name.data,
-            transfer_account_info.last_four_digits.data,
-            transfer_account_info.type_name.data
-        )
-        return account
+        return self._get_account(transfer_account_info)
 
     @staticmethod
-    def _get_account(bank_name, last_four_digits, type_name):
+    def _get_account(account_info):
         account_db = BankAccountHandler()
-        return account_db.find_account(bank_name, last_four_digits, type_name)
+        return account_db.find_account(account_info.bank_name.data,
+                                       account_info.last_four_digits.data,
+                                       account_info.type_name.data)
 
 
 class BankAccountForm(FlaskForm):
