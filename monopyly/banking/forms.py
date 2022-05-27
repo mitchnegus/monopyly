@@ -1,16 +1,19 @@
 """
 Generate banking forms for the user to fill out.
 """
+from functools import wraps
+
 from flask_wtf import FlaskForm
-#from werkzeug.exceptions import abort
 from wtforms.fields import (
-    FormField, DecimalField, TextField, BooleanField, SelectField, SubmitField,
-    FieldList
+    FormField, DecimalField, TextField, BooleanField, SubmitField, FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
 
 from ..common.utils import parse_date
-from ..common.form_utils import NumeralsOnly, SelectionNotBlank
+from ..common.form_utils import (
+    FlaskSubForm, AcquisitionSubForm, CustomChoiceSelectField, NumeralsOnly,
+    SelectionNotBlank
+)
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler
 
@@ -18,12 +21,8 @@ from .accounts import BankAccountTypeHandler, BankAccountHandler
 class BankTransactionForm(FlaskForm):
     """Form to input/edit bank transactions."""
 
-    class BankAccountInfoForm(FlaskForm):
+    class BankAccountForm(FlaskSubForm):
         """Form to input/edit bank account identification."""
-        def __init__(self, *args, **kwargs):
-            # Deactivate CSRF as a subform
-            super().__init__(meta={'csrf': False}, *args, **kwargs)
-
         bank_name = TextField('Bank')
         last_four_digits = TextField(
             'Last Four Digits',
@@ -31,12 +30,14 @@ class BankTransactionForm(FlaskForm):
         )
         type_name = TextField('AccountType', validators=[DataRequired()])
 
-    class BankSubtransactionForm(FlaskForm):
-        """Form to input/edit bank subtransactions."""
-        def __init__(self, *args, **kwargs):
-            # Deactivate CSRF as a subform
-            super().__init__(meta={'csrf': False}, *args, **kwargs)
+        def get_account(self):
+            account_db = BankAccountHandler()
+            return account_db.find_account(self.bank_name.data,
+                                           self.last_four_digits.data,
+                                           self.type_name.data)
 
+    class BankSubtransactionForm(FlaskSubForm):
+        """Form to input/edit bank subtransactions."""
         subtotal = DecimalField(
             'Amount',
             validators=[DataRequired()],
@@ -45,9 +46,8 @@ class BankTransactionForm(FlaskForm):
         )
         note = TextField('Note', [DataRequired()])
 
-
     # Fields to identify the bank account information for the transaction
-    account_info = FormField(BankAccountInfoForm)
+    account_info = FormField(BankAccountForm)
     # Fields pertaining to the transaction
     transaction_date = TextField(
         'Transaction Date',
@@ -58,7 +58,7 @@ class BankTransactionForm(FlaskForm):
     subtransactions = FieldList(FormField(BankSubtransactionForm),
                                 min_entries=1)
     # Fields to identify a second bank involved in a funds transfer
-    transfer_account_info = FieldList(FormField(BankAccountInfoForm),
+    transfer_account_info = FieldList(FormField(BankAccountForm),
                                       min_entries=0, max_entries=1)
     submit = SubmitField('Save Transaction')
 
@@ -116,28 +116,83 @@ class BankTransactionForm(FlaskForm):
 
     def get_transaction_account(self):
         """Get the bank account associated with the transaction."""
-        return self._get_account(self.account_info)
+        return self.account_info.get_account()
 
     def get_transfer_account(self):
         """Get the bank account linked in a transfer."""
-        transfer_account_info = self.transfer_account_info[0]
-        return self._get_account(transfer_account_info)
+        return self.transfer_account_info[0].get_account()
+
+
+class BankSelectField(CustomChoiceSelectField):
+    """Bank field that uses the database to prepare field choices."""
+    _db_handler_type = BankHandler
+
+    def __init__(self, **kwargs):
+        label = 'Bank'
+        validators = [SelectionNotBlank()]
+        super().__init__(label, validators, coerce=int, **kwargs)
 
     @staticmethod
-    def _get_account(account_info):
-        account_db = BankAccountHandler()
-        return account_db.find_account(account_info.bank_name.data,
-                                       account_info.last_four_digits.data,
-                                       account_info.type_name.data)
+    def _format_choice(bank):
+        display_name = bank['bank_name']
+        return display_name
+
+
+class AccountTypeSelectField(CustomChoiceSelectField):
+    """Account type field that uses the database to prepare field choices."""
+    _db_handler_type = BankAccountTypeHandler
+
+    def __init__(self, **kwargs):
+        label = 'Account Type'
+        validators = [SelectionNotBlank()]
+        super().__init__(label, validators, coerce=int, **kwargs)
+
+    @staticmethod
+    def _format_choice(account_type):
+        display_name = account_type['type_name']
+        # Display name abbreviations in parentheses
+        if account_type['type_common_name'] != display_name:
+            display_name += f" ({account_type['type_common_name']})"
+        return display_name
 
 
 class BankAccountForm(FlaskForm):
     """Form to input/edit bank accounts."""
-    bank_id = SelectField('Bank', [SelectionNotBlank()], coerce=int)
-    bank_name = TextField('Bank Name')
-    account_type_id = SelectField('Account Type', [SelectionNotBlank()],
-                                  coerce=int)
-    account_type_name = TextField('Account Type Name')
+
+    class BankForm(AcquisitionSubForm):
+        """Form to input/edit bank identification."""
+        _db_handler_type = BankHandler
+        bank_id = BankSelectField()
+        bank_name = TextField('Bank Name')
+
+        def get_bank(self):
+            return self.get_entry(self.bank_id.data, creation=True)
+
+        def _prepare_mapping(self):
+            data = {
+                'user_id': self.db.user_id,
+                'bank_name': self.bank_name.data,
+            }
+            return data
+
+    class AccountTypeForm(AcquisitionSubForm):
+        _db_handler_type = BankAccountTypeHandler
+        account_type_id = AccountTypeSelectField()
+        type_name = TextField('Account Type Name')
+
+        def get_account_type(self):
+            return self.get_entry(self.account_type_id.data, creation=True)
+
+        def _prepare_mapping(self):
+            data = {
+                'user_id': self.db.user_id,
+                'type_name': self.type_name.data,
+                'type_abbreviation': None,
+            }
+            return data
+
+    bank = FormField(BankForm)
+    account_type = FormField(AccountTypeForm)
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
@@ -148,77 +203,11 @@ class BankAccountForm(FlaskForm):
     @property
     def account_data(self):
         """Produce a dictionary corresponding to a database bank account."""
-        bank = self.get_bank()
-        account_type = self.get_account_type()
+        bank = self.bank.get_bank()
+        account_type = self.account_type.get_account_type()
         account_data = {'bank_id': bank['id'],
                         'account_type_id': account_type['id']}
         for field in ('last_four_digits', 'active'):
             account_data[field] = self[field].data
         return account_data
-
-    def get_bank(self, bank_creation=True):
-        bank_db = BankHandler()
-        # Check if the bank exists and potentially create it if not
-        if self.bank_id.data == 0:
-            if bank_creation:
-                # Add the bank to the database if it does not already exist
-                bank_data = {
-                    'user_id': bank_db.user_id,
-                    'bank_name': self.bank_name.data,
-                }
-                bank = bank_db.add_entry(bank_data)
-            else:
-                bank = None
-        else:
-            bank = bank_db.get_entry(self.bank_id.data)
-        return bank
-
-    def get_account_type(self, account_type_creation=True):
-        account_type_db = BankAccountTypeHandler()
-        # Check if the account type exists and potentially create it if not
-        if self.account_type_id.data == 0:
-            if account_type_creation:
-                # Add the type to the database if it does not already exist
-                account_type_data = {
-                    'user_id': account_type_db.user_id,
-                    'type_name': self.account_type_name.data,
-                    'type_abbreviation': None,
-                }
-                account_type = account_type_db.add_entry(account_type_data)
-            else:
-                account_type = None
-        else:
-            account_type = account_type_db.get_entry(self.account_type_id.data)
-        return account_type
-
-    def prepare_choices(self):
-        """Prepare choices to fill select fields."""
-        self._prepare_bank_choices()
-        self._prepare_account_type_choices()
-
-    def _prepare_bank_choices(self):
-        bank_db = BankHandler()
-        # Collect all available user banks
-        user_banks = bank_db.get_entries()
-        # Set bank choices
-        bank_choices = [(-1, '-')]
-        for bank in user_banks:
-            bank_choices.append((bank['id'], bank['bank_name']))
-        bank_choices.append((0, 'New bank'))
-        self.bank_id.choices = bank_choices
-
-    def _prepare_account_type_choices(self):
-        account_type_db = BankAccountTypeHandler()
-        # Collect all available user account types
-        user_account_types = account_type_db.get_entries()
-        # Set account type choices
-        account_type_choices = [(-1, '-')]
-        for account_type in user_account_types:
-            display_name = account_type['type_name']
-            # Display name abbreviations in parentheses
-            if account_type['type_common_name'] != display_name:
-                display_name += f" ({account_type['type_common_name']})"
-            account_type_choices.append((account_type['id'], display_name))
-        account_type_choices.append((0, 'New account type'))
-        self.account_type_id.choices = account_type_choices
 

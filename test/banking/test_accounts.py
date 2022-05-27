@@ -18,16 +18,6 @@ def account_type_db(app, client, auth):
         yield account_type_db
 
 
-@pytest.fixture
-def account_db(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        account_db = BankAccountHandler()
-        yield account_db
-
-
 class TestBankAccountTypeHandler(TestHandler):
 
     # References only include entries accessible to the authorized login
@@ -208,6 +198,16 @@ class TestBankAccountTypeHandler(TestHandler):
                                     exception):
         with pytest.raises(exception):
             account_type_db.delete_entries(entry_ids)
+
+
+@pytest.fixture
+def account_db(app, client, auth):
+    auth.login('mr.monopyly', 'MONOPYLY')
+    with client:
+        # Context variables (e.g. `g`) may be accessed only after response
+        client.get('/')
+        account_db = BankAccountHandler()
+        yield account_db
 
 
 class TestBankAccountHandler(TestHandler):

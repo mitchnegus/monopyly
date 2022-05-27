@@ -8,8 +8,8 @@ import { displayInput } from './modules/display_new_choice_form_input.js';
 
   // Identify the account selection box for a new card
   let $fieldBankName = $('form#bank-account #bank-name-field');
-  let $inputBank = $('form#bank-account #bank_id');
-  let $inputBankName = $('form#bank-account #bank_name');
+  let $inputBank = $('form#bank-account #bank-bank_id');
+  let $inputBankName = $('form#bank-account #bank-bank_name');
   displayInput(
     $fieldBankName,
     $inputBank,

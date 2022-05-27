@@ -4,13 +4,15 @@ import unittest
 from monopyly.db import get_db
 
 
+helper = unittest.TestCase()
+
+
 class TestHandler:
 
     def assertMatchEntry(self, reference, entry):
         assert tuple(entry) == reference
 
     def assertMatchEntries(self, reference, entries, order=False):
-        helper = unittest.TestCase()
         if order:
             for row, entry in zip(reference, entries):
                 self.assertMatchEntry(row, entry)
