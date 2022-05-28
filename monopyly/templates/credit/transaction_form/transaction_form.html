@@ -5,13 +5,13 @@
   <div class="form-line">
 
     <div class="form-field bank-field autocomplete">
-      {{ form.bank_name.label }}
-      {{ form.bank_name }}
+      {{ form.statement_info.card_info.bank_name.label }}
+      {{ form.statement_info.card_info.bank_name }}
     </div>
 
     <div class="form-field last-four-digits-field autocomplete">
-      {{ form.last_four_digits.label }}
-      {{ form.last_four_digits }}
+      {{ form.statement_info.card_info.last_four_digits.label }}
+      {{ form.statement_info.card_info.last_four_digits }}
     </div>
 
   </div>
@@ -31,8 +31,8 @@
   </div>
 
   <div class="form-field">
-    {{ form.issue_date.label }}
-    {{ form.issue_date }}
+    {{ form.statement_info.issue_date.label }}
+    {{ form.statement_info.issue_date }}
   </div>
 
 

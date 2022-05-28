@@ -39,7 +39,6 @@ def load_cards():
 def add_card():
     # Define a form for a credit card
     form = CreditCardForm()
-    form.prepare_choices()
     # Check if a card was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():
@@ -451,7 +450,8 @@ def add_transaction(card_id, statement_id):
         # Get the necessary fields from the database
         card_fields = ('bank_name', 'last_four_digits')
         card = card_db.get_entry(card_id, fields=card_fields)
-        data = {field: card[field] for field in card_fields}
+        card_data = {field: card[field] for field in card_fields}
+        data = {'statement_info': {'card_info': card_data}}
         # Prepare known form entries if statement is known
         if statement_id:
              statement_db = CreditStatementHandler()
@@ -460,7 +460,7 @@ def add_transaction(card_id, statement_id):
              statement = statement_db.get_entry(statement_id,
                                                 fields=statement_fields)
              for field in statement_fields:
-                 data[field] = statement[field]
+                 data['statement_info'][field] = statement[field]
         form.process(data=data)
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':

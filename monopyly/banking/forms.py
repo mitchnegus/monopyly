@@ -11,7 +11,7 @@ from wtforms.validators import Optional, DataRequired, Length
 
 from ..common.utils import parse_date
 from ..common.form_utils import (
-    FlaskSubForm, AcquisitionSubForm, CustomChoiceSelectField, NumeralsOnly,
+    FlaskSubform, AcquisitionSubform, CustomChoiceSelectField, NumeralsOnly,
     SelectionNotBlank
 )
 from .banks import BankHandler
@@ -21,7 +21,7 @@ from .accounts import BankAccountTypeHandler, BankAccountHandler
 class BankTransactionForm(FlaskForm):
     """Form to input/edit bank transactions."""
 
-    class BankAccountForm(FlaskSubForm):
+    class AccountSubform(FlaskSubform):
         """Form to input/edit bank account identification."""
         bank_name = TextField('Bank')
         last_four_digits = TextField(
@@ -31,12 +31,13 @@ class BankTransactionForm(FlaskForm):
         type_name = TextField('AccountType', validators=[DataRequired()])
 
         def get_account(self):
+            """Get the bank account described by the form data."""
             account_db = BankAccountHandler()
             return account_db.find_account(self.bank_name.data,
                                            self.last_four_digits.data,
                                            self.type_name.data)
 
-    class BankSubtransactionForm(FlaskSubForm):
+    class SubtransactionSubform(FlaskSubform):
         """Form to input/edit bank subtransactions."""
         subtotal = DecimalField(
             'Amount',
@@ -47,7 +48,7 @@ class BankTransactionForm(FlaskForm):
         note = TextField('Note', [DataRequired()])
 
     # Fields to identify the bank account information for the transaction
-    account_info = FormField(BankAccountForm)
+    account_info = FormField(AccountSubform)
     # Fields pertaining to the transaction
     transaction_date = TextField(
         'Transaction Date',
@@ -55,10 +56,10 @@ class BankTransactionForm(FlaskForm):
         filters=[parse_date]
     )
     # Subtransaction fields (must be at least 1 subtransaction)
-    subtransactions = FieldList(FormField(BankSubtransactionForm),
+    subtransactions = FieldList(FormField(SubtransactionSubform),
                                 min_entries=1)
     # Fields to identify a second bank involved in a funds transfer
-    transfer_account_info = FieldList(FormField(BankAccountForm),
+    transfer_account_info = FieldList(FormField(AccountSubform),
                                       min_entries=0, max_entries=1)
     submit = SubmitField('Save Transaction')
 
@@ -159,40 +160,45 @@ class AccountTypeSelectField(CustomChoiceSelectField):
 class BankAccountForm(FlaskForm):
     """Form to input/edit bank accounts."""
 
-    class BankForm(AcquisitionSubForm):
+    class BankSubform(AcquisitionSubform):
         """Form to input/edit bank identification."""
         _db_handler_type = BankHandler
         bank_id = BankSelectField()
         bank_name = TextField('Bank Name')
 
         def get_bank(self):
+            """Get the bank described by the form data."""
             return self.get_entry(self.bank_id.data, creation=True)
 
         def _prepare_mapping(self):
-            data = {
+            # Mapping must match format for `banks` database table
+            bank_data = {
                 'user_id': self.db.user_id,
                 'bank_name': self.bank_name.data,
             }
-            return data
+            return bank_data
 
-    class AccountTypeForm(AcquisitionSubForm):
+    class AccountTypeSubform(AcquisitionSubform):
+        """Form to input/edit bank account types."""
         _db_handler_type = BankAccountTypeHandler
         account_type_id = AccountTypeSelectField()
         type_name = TextField('Account Type Name')
 
         def get_account_type(self):
+            """Get the bank account type described by the form data."""
             return self.get_entry(self.account_type_id.data, creation=True)
 
         def _prepare_mapping(self):
-            data = {
+            # Mapping must match format for `bank_account_types` database table
+            account_type_data = {
                 'user_id': self.db.user_id,
                 'type_name': self.type_name.data,
                 'type_abbreviation': None,
             }
-            return data
+            return account_type_data
 
-    bank = FormField(BankForm)
-    account_type = FormField(AccountTypeForm)
+    bank_info = FormField(BankSubform)
+    account_type_info = FormField(AccountTypeSubform)
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
@@ -203,8 +209,8 @@ class BankAccountForm(FlaskForm):
     @property
     def account_data(self):
         """Produce a dictionary corresponding to a database bank account."""
-        bank = self.bank.get_bank()
-        account_type = self.account_type.get_account_type()
+        bank = self.bank_info.get_bank()
+        account_type = self.account_type_info.get_account_type()
         account_data = {'bank_id': bank['id'],
                         'account_type_id': account_type['id']}
         for field in ('last_four_digits', 'active'):

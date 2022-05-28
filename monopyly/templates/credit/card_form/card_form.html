@@ -5,15 +5,15 @@
   <div id="primary-info">
 
     <div id="account-field" class="form-field">
-      {{ form.account_id.label }}
-      {{ form.account_id }}
+      {{ form.account_info.account_id.label }}
+      {{ form.account_info.account_id }}
     </div>
 
     <div class="form-line">
 
       <div id="bank-field" class="form-field autocomplete">
-        {{ form.bank_name.label }}
-        {{ form.bank_name }}
+        {{ form.account_info.bank_name.label }}
+        {{ form.account_info.bank_name }}
       </div>
 
       <div id="last-four-digits-field" class="form-field">
@@ -33,14 +33,14 @@
   <div id="secondary-info" class="form-line hidden">
 
     <div id="statement-issue-day-field" class="form-field">
-      {{ form.statement_issue_day.label }}
-      {{ form.statement_issue_day }}
+      {{ form.account_info.statement_issue_day.label }}
+      {{ form.account_info.statement_issue_day }}
     </div>
 
 
     <div id="statement-due-day-field" class="form-field">
-      {{ form.statement_due_day.label }}
-      {{ form.statement_due_day }}
+      {{ form.account_info.statement_due_day.label }}
+      {{ form.account_info.statement_due_day }}
     </div>
 
   </div>

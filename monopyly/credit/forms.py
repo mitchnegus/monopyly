@@ -5,12 +5,15 @@ from flask_wtf import FlaskForm
 from werkzeug.exceptions import abort
 from wtforms.fields import (
     FormField, DecimalField, IntegerField, TextField, BooleanField,
-    RadioField, SelectField, SubmitField, FieldList
+    RadioField, SubmitField, FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
 
 from ..common.utils import parse_date
-from ..common.form_utils import NumeralsOnly, SelectionNotBlank
+from ..common.form_utils import (
+    FlaskSubform, AcquisitionSubform, CustomChoiceSelectField, NumeralsOnly,
+    SelectionNotBlank
+)
 from ..banking.banks import BankHandler
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
@@ -20,12 +23,52 @@ from .statements import CreditStatementHandler
 class CreditTransactionForm(FlaskForm):
     """Form to input/edit credit card transactions."""
 
-    class CreditSubtransactionForm(FlaskForm):
-        """Form to input/edit credit card subtransactions."""
-        def __init__(self, *args, **kwargs):
-            # Deactivates CSRF as a subform
-            super().__init__(meta={'csrf': False}, *args, **kwargs)
+    class StatementSubform(FlaskSubform):
+        """Form to input/edit credit statement identification."""
 
+        class CardSubform(FlaskSubform):
+            """Form to input/edit credit account identification."""
+            bank_name = TextField('Bank')
+            last_four_digits = TextField(
+                'Last Four Digits',
+                validators=[DataRequired(), Length(4), NumeralsOnly()],
+            )
+
+            def get_card(self):
+                """Get the credit card described by the form data."""
+                card_db = CreditCardHandler()
+                return card_db.find_card(self.bank_name.data,
+                                         self.last_four_digits.data)
+
+        # Fields to identify the card/bank information for the transaction
+        card_info = FormField(CardSubform)
+        issue_date = TextField('Statement Date', filters=[parse_date])
+
+        def get_statement(self, transaction_date):
+            """Get the credit card statement described by the form data."""
+            # Get the card for the transaction
+            card = self.card_info.get_card()
+            if not card:
+                abort(404, 'A card matching the criteria was not found.')
+            statement_db = CreditStatementHandler()
+            # Get the statement corresponding to the card and issue date
+            issue_date = self.issue_date.data
+            if issue_date:
+                statement = statement_db.find_statement(card, issue_date)
+                # Create the statement if it does not already exist
+                if not statement:
+                    statement = statement_db.add_statement(card, issue_date)
+            else:
+                # No issue date was given, so the statement must be inferred
+                statement = statement_db.infer_statement(
+                    card,
+                    transaction_date,
+                    creation=True
+                )
+            return statement
+
+    class SubtransactionSubform(FlaskSubform):
+        """Form to input/edit credit card subtransactions."""
         subtotal = DecimalField(
             'Amount',
             validators=[DataRequired()],
@@ -35,13 +78,8 @@ class CreditTransactionForm(FlaskForm):
         note = TextField('Note', [DataRequired()])
         tags = TextField('Tags')
 
-    # Fields to identify the card/bank information for the transaction
-    bank_name = TextField('Bank')
-    last_four_digits = TextField(
-        'Last Four Digits',
-        validators=[DataRequired(), Length(4), NumeralsOnly()],
-    )
-    issue_date = TextField('Statement Date', filters=[parse_date])
+    # Fields to identify the statement information for the transaction
+    statement_info = FormField(StatementSubform)
     # Fields pertaining to the transaction
     transaction_date = TextField(
         'Transaction Date',
@@ -50,7 +88,7 @@ class CreditTransactionForm(FlaskForm):
     )
     vendor = TextField('Vendor', [DataRequired()])
     # Subtransaction fields (must be at least 1 subtransaction)
-    subtransactions = FieldList(FormField(CreditSubtransactionForm),
+    subtransactions = FieldList(FormField(SubtransactionSubform),
                                 min_entries=1)
     submit = SubmitField('Save Transaction')
 
@@ -65,7 +103,8 @@ class CreditTransactionForm(FlaskForm):
         subtransactions (along with tags associated with each
         subtransaction).
         """
-        statement = self.get_transaction_statement()
+        transaction_date = self.transaction_date.data
+        statement = self.statement_info.get_statement(transaction_date)
         # Internal transaction IDs are managed by the database handler
         transaction_data = {'internal_transaction_id': None,
                             'statement_id': statement['id']}
@@ -86,107 +125,77 @@ class CreditTransactionForm(FlaskForm):
             transaction_data['subtransactions'].append(subtransaction_data)
         return transaction_data
 
-    def get_transaction_card(self):
-        """Get the credit card associated with the transaction."""
-        card_db = CreditCardHandler()
-        card = card_db.find_card(self.bank_name.data,
-                                 self.last_four_digits.data)
-        return card
 
-    def get_transaction_statement(self):
-        """Get the credit card statement associated with the transaction."""
-        # Get the card for the transaction
-        card = self.get_transaction_card()
-        if not card:
-            abort(404, 'A card matching the criteria was not found.')
-        statement_db = CreditStatementHandler()
-        # Get the statement corresponding to the card and issue date
-        issue_date = self.issue_date.data
-        if issue_date:
-            statement = statement_db.find_statement(card, issue_date)
-            # Create the statement if it doesn't exist
-            if not statement:
-                statement = statement_db.add_statement(card, issue_date)
-        else:
-            # No issue date was given, so the statement must be inferred
-            statement = statement_db.infer_statement(card,
-                                                     self.transaction_date.data,
-                                                     creation=True)
-        return statement
+class AccountSelectField(CustomChoiceSelectField):
+    """Account field that uses the database to prepare field choices."""
+    _db_handler_type = CreditAccountHandler
+
+    def __init__(self, **kwargs):
+        label = 'Account'
+        validators = [SelectionNotBlank()]
+        super().__init__(label, validators, coerce=int, **kwargs)
+
+    @staticmethod
+    def _format_choice(account):
+        card_db = CreditCardHandler()
+        cards = card_db.get_entries(account_ids=(account['id'],))
+        digits = [f"*{card['last_four_digits']}" for card in cards]
+        # Create a description for the account using the bank and card digits
+        display_name = f"{account['bank_name']} (cards: {', '.join(digits)})"
+        return display_name
 
 
 class CreditCardForm(FlaskForm):
     """Form to input/edit credit cards."""
-    # Fields
-    account_id = SelectField('Account', [SelectionNotBlank()], coerce=int)
-    bank_name = TextField('Bank')
+
+    class AccountSubform(AcquisitionSubform):
+        """Form to input/edit account identification."""
+        _db_handler_type = CreditAccountHandler
+        account_id = AccountSelectField()
+        bank_name = TextField('Bank')
+        statement_issue_day = IntegerField('Statement Issue Day', [Optional()])
+        statement_due_day = IntegerField('Statement Due Day', [Optional()])
+
+        def get_account(self):
+            return self.get_entry(self.account_id.data, creation=True)
+
+        def _prepare_mapping(self):
+            # Mapping relies on knowing the bank, which must also be acquired
+            bank_db = BankHandler()
+            bank_name = self.bank_name.data
+            banks = bank_db.get_entries(bank_names=(bank_name,))
+            if not banks:
+                bank_data = {
+                    'user_id': bank_db.user_id,
+                    'bank_name': bank_name
+                }
+                bank = bank_db.add_entry(bank_data)
+            else:
+                bank = banks[0]
+            # Mapping must match format for `credit_accounts` database table
+            account_data = {
+                'bank_id': bank['id'],
+                'statement_issue_day': self.statement_issue_day.data,
+                'statement_due_day': self.statement_due_day.data,
+            }
+            return account_data
+
+    account_info = FormField(AccountSubform)
     last_four_digits = TextField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
     )
-    statement_issue_day = IntegerField('Statement Issue Day', [Optional()])
-    statement_due_day = IntegerField('Statement Due Day', [Optional()])
     active = BooleanField('Active', default='checked')
     submit = SubmitField('Save Card')
 
     @property
     def card_data(self):
         """Produce a dictionary corresponding to a database card."""
-        account = self.get_card_account()
+        account = self.account_info.get_account()
         card_data = {'account_id': account['id']}
         for field in ('last_four_digits', 'active'):
             card_data[field] = self[field].data
         return card_data
-
-    def get_card_account(self, account_creation=True):
-        """Get the account associated with the credit card."""
-        bank_db, account_db = BankHandler(), CreditAccountHandler()
-        # Check if the account exists and potentially create it if not
-        if self.account_id.data == 0:
-            if account_creation:
-                # Add the bank to the database if it does not already exist
-                bank_name = self.bank_name.data
-                matching_banks = bank_db.get_entries(bank_names=(bank_name,))
-                if not matching_banks:
-                    bank_data = {
-                        'user_id': bank_db.user_id,
-                        'bank_name': bank_name,
-                    }
-                    bank = bank_db.add_entry(bank_data)
-                else:
-                    bank = matching_banks[0]
-                # Add the account to the database
-                account_data = {
-                    'bank_id': bank['id'],
-                    'statement_issue_day': self.statement_issue_day.data,
-                    'statement_due_day': self.statement_due_day.data,
-                }
-                account = account_db.add_entry(account_data)
-            else:
-                account = None
-        else:
-            account = account_db.get_entry(self.account_id.data)
-        return account
-
-    def prepare_choices(self):
-        """Prepare choices to fill select fields."""
-        self._prepare_credit_account_choices()
-
-    def _prepare_credit_account_choices(self):
-        """Prepare account choices for the card form dropdown."""
-        account_db = CreditAccountHandler()
-        card_db = CreditCardHandler()
-        # Collect all available user accounts
-        user_accounts = account_db.get_entries()
-        account_choices = [(-1, '-')]
-        for account in user_accounts:
-            cards = card_db.get_entries(account_ids=(account['id'],))
-            digits = [f"*{card['last_four_digits']}" for card in cards]
-            # Create a description for the account using the bank and card digits
-            description = f"{account['bank_name']} (cards: {', '.join(digits)})"
-            account_choices.append((account['id'], description))
-        account_choices.append((0, 'New account'))
-        self.account_id.choices = account_choices
 
 
 class CardStatementTransferForm(FlaskForm):

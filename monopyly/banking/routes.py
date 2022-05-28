@@ -50,7 +50,7 @@ def add_account(bank_id):
     form = BankAccountForm()
     # Prepare known form entries if bank is known
     if bank_id:
-        form.process(data={'bank': {'bank_id': bank_id}})
+        form.process(data={'bank_info': {'bank_id': bank_id}})
     # Check if an account was submitted and add it to the database
     if request.method == 'POST':
         if form.validate():

@@ -8,7 +8,7 @@
  */
 
 
-function displayInput($field, $inputChoice, $inputChoiceName) {
+function displayInput($field, $inputChoice) {
 
   // Set the value for the `New account type` option
   const valueNewChoice = 0;

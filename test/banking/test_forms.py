@@ -1,5 +1,6 @@
 """Tests for the banking module forms."""
 from unittest.mock import patch
+from datetime import date
 
 import pytest
 
@@ -26,7 +27,7 @@ def filled_transaction_form(transaction_form):
     transaction_form.account_info.last_four_digits.data = '5556'
     transaction_form.account_info.type_name.data = 'Savings'
     # Mock the transaction data
-    transaction_form.transaction_date.data = '2020-12-25'
+    transaction_form.transaction_date.data = date(2020, 12, 25)
     # Mock the subtransaction subform data
     transaction_form.subtransactions[0].subtotal.data = 25.00
     transaction_form.subtransactions[0].note.data = 'Christmas gift'
@@ -82,7 +83,7 @@ class TestBankTransactionForm:
         data = {
             'internal_transaction_id': None,
             'account_id': 2,
-            'transaction_date': '2020-12-25',
+            'transaction_date': date(2020, 12, 25),
             'subtransactions': [
                 {'note': 'Christmas gift', 'subtotal': 25.00}
             ],
@@ -93,7 +94,7 @@ class TestBankTransactionForm:
         data = {
             'internal_transaction_id': None,
             'account_id': 4,
-            'transaction_date': '2020-12-25',
+            'transaction_date': date(2020, 12, 25),
             'subtransactions': [
                 {'note': 'Christmas gift', 'subtotal': -25.00}
             ],
@@ -117,9 +118,9 @@ def account_form(app, client, auth):
 @pytest.fixture
 def filled_account_form(account_form):
     # Mock the bank info subform data
-    account_form.bank.bank_id.data = 2
+    account_form.bank_info.bank_id.data = 2
     # Mock the account type info subform data
-    account_form.account_type.account_type_id.data = 5
+    account_form.account_type_info.account_type_id.data = 5
     # Mock the account data
     account_form.last_four_digits.data = '8888'
     account_form.active = True
@@ -129,19 +130,20 @@ def filled_account_form(account_form):
 class TestBankAccountForm:
 
     def test_initialization(self, account_form):
-        form_fields = ('bank', 'account_type', 'last_four_digits', 'submit')
+        form_fields = ('bank_info', 'account_type_info', 'last_four_digits',
+                       'submit')
         for field in form_fields:
             assert hasattr(account_form, field)
 
     def test_bank_subform_initialization(self, account_form):
         subform_fields = ('bank_id', 'bank_name')
         for field in subform_fields:
-            assert hasattr(account_form['bank'], field)
+            assert hasattr(account_form['bank_info'], field)
 
     def test_account_info_subform_initialization(self, account_form):
         subform_fields = ('account_type_id', 'type_name')
         for field in subform_fields:
-            assert hasattr(account_form['account_type'], field)
+            assert hasattr(account_form['account_type_info'], field)
 
     def test_prepare_bank_choices(self, account_form):
         # Choices should be all user banks, a null selection, and a new option
@@ -151,7 +153,7 @@ class TestBankAccountForm:
             (3, 'TheBank'),
             (0, 'New bank'),
         ]
-        bank_id_field = account_form.bank.bank_id
+        bank_id_field = account_form.bank_info.bank_id
         assert bank_id_field.choices == choices
 
     def test_prepare_account_type_choices(self, account_form):
@@ -166,7 +168,7 @@ class TestBankAccountForm:
             (6, 'Cooperative Enjoyment Depository (Mutual FunD)'),
             (0, 'New account type'),
         ]
-        account_type_id_field = account_form.account_type.account_type_id
+        account_type_id_field = account_form.account_type_info.account_type_id
         helper.assertCountEqual(account_type_id_field.choices, choices)
 
     def test_account_data(self, filled_account_form):
@@ -179,9 +181,10 @@ class TestBankAccountForm:
         assert filled_account_form.account_data == data
 
     def test_account_data_new_bank(self, filled_account_form):
+        bank_info = filled_account_form.bank_info
         # Set the account form bank info to be a new bank
-        filled_account_form.bank.bank_id.data = 0
-        filled_account_form.bank.bank_name.data = 'Test Bank'
+        bank_info.bank_id.data = 0
+        bank_info.bank_name.data = 'Test Bank'
         data = {
             'bank_id': 4,
             'account_type_id': 5,
@@ -191,9 +194,10 @@ class TestBankAccountForm:
         assert filled_account_form.account_data == data
 
     def test_account_data_new_account_type(self, filled_account_form):
+        account_type_info = filled_account_form.account_type_info
         # Set the account form account type info to be a new account type
-        filled_account_form.account_type.account_type_id.data = 0
-        filled_account_form.account_type.type_name.data = 'Test Account Type'
+        account_type_info.account_type_id.data = 0
+        account_type_info.type_name.data = 'Test Account Type'
         data = {
             'bank_id': 2,
             'account_type_id': 7,

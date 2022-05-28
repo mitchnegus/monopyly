@@ -8,12 +8,10 @@ import { displayInput } from './modules/display_new_choice_form_input.js';
 
   // Identify the account selection box for a new card
   let $fieldAccountTypeName = $('form#bank-account #account-type-name-field');
-  let $inputAccountType = $('form#bank-account #account_type-account_type_id');
-  let $inputAccountTypeName = $('form#bank-account #account_type-type_name');
+  let $inputAccountType = $('form#bank-account #account_type_info-account_type_id');
   displayInput(
     $fieldAccountTypeName,
-    $inputAccountType,
-    $inputAccountTypeName
+    $inputAccountType
   );
 
 })();

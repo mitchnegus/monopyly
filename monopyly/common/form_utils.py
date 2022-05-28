@@ -14,18 +14,18 @@ from wtforms.validators import ValidationError
 form_err_msg = "There was an improper value in your form. Please try again."
 
 
-class FlaskSubForm(FlaskForm):
+class FlaskSubform(FlaskForm):
     """Subform disabling CSRF (CSRF is REQUIRED in encapsulating form)."""
     def __init__(self, *args, **kwargs):
         super().__init__(meta={'csrf': False}, *args, **kwargs)
 
 
-class AbstractSubformMixinMeta(type(FlaskSubForm), ABC):
+class AbstractSubformMixinMeta(type(FlaskSubform), ABC):
     # Defined to allow the subforms to also to be abstract base classes
     pass
 
 
-class AcquisitionSubForm(FlaskSubForm, metaclass=AbstractSubformMixinMeta):
+class AcquisitionSubform(FlaskSubform, metaclass=AbstractSubformMixinMeta):
     """Subform that facilitates acquisition based on data and the database."""
 
     @property

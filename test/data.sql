@@ -68,6 +68,8 @@ VALUES (1, '3333', 1),
 
 INSERT INTO credit_statements
        (card_id, issue_date, due_date)
+       /* Note: `issue_date` intentionally different from `statement_issue_day`
+                as this connection is typical but not required */
 VALUES (1, '2020-05-15', '2020-06-05'),
        (2, '2020-03-15', '2020-04-05'),
        (3, '2020-04-15', '2020-05-05'),
