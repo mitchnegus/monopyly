@@ -9,6 +9,7 @@ from wtforms.validators import ValidationError
 from ..auth.tools import login_required
 from ..common.utils import sort_by_frequency
 from ..common.form_utils import form_err_msg
+from ..common.transactions import get_linked_transaction
 from ..db.handler.queries import validate_field
 from . import banking_bp
 from .forms import *
@@ -134,20 +135,10 @@ def show_linked_transaction():
     transaction_id = post_args['transaction_id']
     db = BankTransactionHandler()
     transaction = db.get_entry(transaction_id)
-    linked_transactions = db.get_associated_transaction(transaction_id)
-    if linked_transactions['bank']:
-        linked_transaction = linked_transactions['bank']
-        linked_transaction_type = 'bank'
-    elif linked_transactions['credit']:
-        linked_transaction = linked_transactions['credit']
-        linked_transaction_type = 'credit'
-    else:
-        raise ValueError('The linked transaction must be either a credit or '
-                         'bank transaction.')
+    linked_transaction = get_linked_transaction(transaction)
     return render_template('common/transactions_table/'
                            'linked_transaction_overlay.html',
                            selected_transaction_type='bank',
-                           linked_transaction_type=linked_transaction_type,
                            transaction=transaction,
                            linked_transaction=linked_transaction)
 

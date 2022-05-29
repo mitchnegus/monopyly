@@ -64,7 +64,7 @@ class CreditAccountHandler(DatabaseHandler):
                   " WHERE user_id = ? "
                  f"       {bank_filter} ")
         placeholders = (self.user_id, *self._queries.fill_places(bank_ids))
-        accounts = self._query_entries(query, placeholders)
+        accounts = self.query_entries(query, placeholders)
         return accounts
 
     def get_entry(self, account_id, fields=None):
@@ -76,7 +76,7 @@ class CreditAccountHandler(DatabaseHandler):
                   " WHERE a.id = ? AND user_id = ?")
         placeholders = (account_id, self.user_id)
         abort_msg = f'Account ID {account_id} does not exist for the user.'
-        account = self._query_entry(query, placeholders, abort_msg)
+        account = self.query_entry(query, placeholders, abort_msg)
         return account
 
     def delete_entries(self, entry_ids):

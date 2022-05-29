@@ -7,13 +7,13 @@ from werkzeug.exceptions import abort
 from wtforms.validators import ValidationError
 
 from ..auth.tools import login_required
-from ..core.internal_transactions import add_internal_transaction
 from ..common.utils import parse_date, dedelimit_float, sort_by_frequency
 from ..common.form_utils import form_err_msg
+from ..common.transactions import get_linked_transaction
 from ..db.handler.queries import validate_field
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
-from ..banking.transactions import BankTransactionHandler
+from ..banking.transactions import BankTransactionHandler, record_new_transfer
 from . import credit_bp
 from .forms import *
 from .accounts import CreditAccountHandler
@@ -306,14 +306,12 @@ def make_payment(statement_id):
                                                      creation=True)
     if payment_account_id:
         bank_account_db  = BankAccountHandler()
-        bank_transaction_db = BankTransactionHandler()
         # Ensure that the bank account belongs to the current user
         bank_account_db.get_entry(payment_account_id)
-        # Create an internal transaction ID and corresponding bank transaction
-        internal_transaction_id = add_internal_transaction()
+        # Populate a mapping for the transfer
         card_name = f"{card['bank_name']}-{card['last_four_digits']}"
         bank_mapping = {
-            'internal_transaction_id': internal_transaction_id,
+#            'internal_transaction_id': internal_transaction_id,
             'account_id': payment_account_id,
             'transaction_date': payment_date,
             'subtransactions': [{
@@ -321,7 +319,8 @@ def make_payment(statement_id):
                 'note': f"Credit card payment ({card_name})",
             }]
         }
-        bank_transaction_db.add_entry(bank_mapping)
+        transfer, subtransactions = record_new_transfer(bank_mapping)
+        internal_transaction_id = transfer['internal_transaction_id']
     else:
         internal_transaction_id = None
     credit_mapping = {
@@ -400,11 +399,10 @@ def show_linked_transaction():
     transaction_id = post_args['transaction_id']
     db = CreditTransactionHandler()
     transaction = db.get_entry(transaction_id)
-    linked_transaction = db.get_associated_transaction(transaction_id)['bank']
+    linked_transaction = get_linked_transaction(transaction)
     return render_template('common/transactions_table/'
                            'linked_transaction_overlay.html',
                            selected_transaction_type='credit',
-                           linked_transaction_type='bank',
                            transaction=transaction,
                            linked_transaction=linked_transaction)
 

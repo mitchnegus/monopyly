@@ -20,9 +20,9 @@
 
     <div class="linked-transaction modal-box">
       {% with transaction = linked_transaction %}
-        {% if linked_transaction_type == 'bank' %}
+        {% if transaction.subtype == 'bank' %}
           {% include bank_transaction_template %}
-        {% elif linked_transaction_type == 'credit' %}
+        {% elif transaction.subtype == 'credit' %}
           {% include credit_transaction_template %}
         {% endif %}
       {% endwith %}

@@ -89,7 +89,7 @@ class CreditStatementHandler(DatabaseHandler):
                  f" ORDER BY issue_date {sort_order}, active DESC")
         placeholders = (self.user_id, *self._queries.fill_places(card_ids),
                        *self._queries.fill_places(bank_ids))
-        statements = self._query_entries(query, placeholders)
+        statements = self.query_entries(query, placeholders)
         return statements
 
     def get_entry(self, statement_id, fields=None):
@@ -125,7 +125,7 @@ class CreditStatementHandler(DatabaseHandler):
         placeholders = (statement_id, self.user_id)
         abort_msg = (f'Statement ID {statement_id} does not exist for the '
                       'user.')
-        statement = self._query_entry(query, placeholders, abort_msg)
+        statement = self.query_entry(query, placeholders, abort_msg)
         return statement
 
     def find_statement(self, card, issue_date=None, fields=None):

@@ -44,6 +44,7 @@ class DatabaseHandler(ABC):
         The ID of the user who is the subject of database access.
     """
     _queries = queries
+    _entry_type = None
 
     def __init__(self, db=None, user_id=None, check_user=True):
         # Set the fields for the handler
@@ -77,12 +78,14 @@ class DatabaseHandler(ABC):
                  f"  FROM {self.table} "
                   " WHERE user_id = ? ")
         placeholders = (self.user_id,)
-        entries = self._query_entries(query, placeholders)
+        entries = self.query_entries(query, placeholders)
         return entries
 
-    def _query_entries(self, query, placeholders):
+    def query_entries(self, query, placeholders):
         """Execute a query to return entries from the database."""
         entries = self.cursor.execute(query, placeholders).fetchall()
+        if self._entry_type:
+            entries = [self._entry_type(entry, self) for entry in entries]
         return entries
 
     def get_entry(self, entry_id, fields=None):
@@ -108,10 +111,10 @@ class DatabaseHandler(ABC):
                  f"  FROM {self.table} "
                   " WHERE id = ? AND user_id = ?")
         placeholders = (entry_id, self.user_id)
-        entry = self._query_entry(entry_id, query, placeholders)
+        entry = self.query_entry(entry_id, query, placeholders)
         return entry
 
-    def _query_entry(self, query, placeholders, abort_msg=None):
+    def query_entry(self, query, placeholders, abort_msg=None):
         """Execute a query to return a single entry from the database."""
         entry = self.cursor.execute(query, placeholders).fetchone()
         # Check that an entry was found
@@ -120,6 +123,8 @@ class DatabaseHandler(ABC):
                 abort_msg = (f'The entry with ID {entry["id"]} does not exist '
                               'for the user.')
             abort(404, abort_msg)
+        if self._entry_type:
+            entry = self._entry_type(entry, self)
         return entry
 
     def add_entry(self, mapping):

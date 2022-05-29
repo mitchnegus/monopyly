@@ -5,8 +5,14 @@ import datetime
 from sqlite3 import IntegrityError
 
 from ..common.form_utils import execute_on_form_validation
+from ..common.transactions import Transaction
 from ..db import DATABASE_FIELDS
 from ..db.handler import DatabaseHandler
+
+
+class CreditTransaction(Transaction):
+    """A credit transaction."""
+    subtype = 'credit'
 
 
 class CreditTransactionHandler(DatabaseHandler):
@@ -37,6 +43,7 @@ class CreditTransactionHandler(DatabaseHandler):
     """
     table = 'credit_transactions'
     table_view = 'credit_transactions_view'
+    _entry_type = CreditTransaction
 
     def get_entries(self, card_ids=None, statement_ids=None, active=False,
                     sort_order='DESC', fields=DATABASE_FIELDS[table_view]):
@@ -98,7 +105,7 @@ class CreditTransactionHandler(DatabaseHandler):
                  f" ORDER BY transaction_date {sort_order}")
         placeholders = (self.user_id, *self._queries.fill_places(card_ids),
                         *self._queries.fill_places(statement_ids))
-        transactions = self._query_entries(query, placeholders)
+        transactions = self.query_entries(query, placeholders)
         return transactions
 
     def get_entry(self, transaction_id, fields=None):
@@ -136,7 +143,7 @@ class CreditTransactionHandler(DatabaseHandler):
         placeholders = (self.user_id, transaction_id)
         abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
                       'user.')
-        transaction = self._query_entry(query, placeholders, abort_msg)
+        transaction = self.query_entry(query, placeholders, abort_msg)
         return transaction
 
     def add_entry(self, mapping):
@@ -205,53 +212,6 @@ class CreditTransactionHandler(DatabaseHandler):
             subtransaction = subtransaction_db.add_entry(sub_mapping)
             subtransactions.append(subtransaction)
         return subtransactions
-
-    def get_associated_transaction(self, transaction_id):
-        """
-        Find an internal transaction that matches this transaction.
-
-        Checks the bank transaction database for a transaction that
-        matches the given transaction.
-
-        Parameters
-        ----------
-        transaction_id : integer
-            The ID for the credit transaction that should be matched.
-
-        Returns
-        -------
-        associated_transaction : dict
-            A dictionary of transaction types and the corresponding
-            bank transaction that matches the given transaction. For
-            compatibility with the bank transaction handler, the
-            returned dictionary contains two types of possible
-            transactions: 'bank' and 'credit' transactions. Since this
-            class finds a bank transaction corresponding to a given
-            credit transaction, the 'credit' key in the dictionary will
-            always be assigned a value of `None`.
-        """
-        transaction = self.get_entry(transaction_id,
-                                     ('internal_transaction_id',))
-        internal_transaction_id = transaction['internal_transaction_id']
-        if not internal_transaction_id:
-            return None
-        associated_transaction = {'bank': None, 'credit': None}
-        # Get matching bank transactions
-        query = ("SELECT * "
-                 "  FROM bank_transactions_view AS t "
-                 "       INNER JOIN bank_accounts AS a "
-                 "          ON a.id = t.account_id "
-                 "       INNER JOIN banks AS b "
-                 "          ON b.id = a.bank_id "
-                 "       INNER JOIN bank_account_types AS types "
-                 "          ON types.id = a.account_type_id "
-                 " WHERE b.user_id =? AND t.id != ? "
-                 "       AND t.internal_transaction_id = ?")
-        placeholders = (self.user_id, transaction_id, internal_transaction_id)
-        bank_transactions = self._query_entries(query, placeholders)
-        if bank_transactions:
-            associated_transaction['bank'] = bank_transactions[0]
-        return associated_transaction
 
 
 class CreditSubtransactionHandler(DatabaseHandler):
@@ -324,7 +284,7 @@ class CreditSubtransactionHandler(DatabaseHandler):
                  f" WHERE user_id = ? {transaction_filter}")
         placeholders = (self.user_id,
                         *self._queries.fill_places(transaction_ids))
-        subtransactions = self._query_entries(query, placeholders)
+        subtransactions = self.query_entries(query, placeholders)
         return subtransactions
 
     def get_entry(self, subtransaction_id, fields=None):
@@ -364,7 +324,7 @@ class CreditSubtransactionHandler(DatabaseHandler):
         placeholders = (self.user_id, subtransaction_id)
         abort_msg = (f'Subtransaction ID {subtransaction_id} does not exist '
                       'for the user.')
-        subtransaction = self._query_entry(query, placeholders, abort_msg)
+        subtransaction = self.query_entry(query, placeholders, abort_msg)
         return subtransaction
 
     def add_entry(self, mapping):
@@ -477,7 +437,7 @@ class CreditTagHandler(DatabaseHandler):
         placeholders = (self.user_id, *self._queries.fill_places(tag_names),
                         *self._queries.fill_places(transaction_ids),
                         *self._queries.fill_places(subtransaction_ids))
-        tags = self._query_entries(query, placeholders)
+        tags = self.query_entries(query, placeholders)
         # If specified, remove ancestors from the list of tags
         if not ancestors:
             for tag in tags:
@@ -510,7 +470,7 @@ class CreditTagHandler(DatabaseHandler):
                   " WHERE user_id = ? AND id = ?")
         placeholders = (self.user_id, tag_id)
         abort_msg = (f'Tag ID {tag_id} does not exist for the user.')
-        tag = self._query_entry(query, placeholders, abort_msg)
+        tag = self.query_entry(query, placeholders, abort_msg)
         return tag
 
     def get_subtags(self, tag_id, fields=None):
@@ -537,7 +497,7 @@ class CreditTagHandler(DatabaseHandler):
                   "  FROM credit_tags AS tags "
                   " WHERE user_id = ? AND parent_id IS ?")
         placeholders = (self.user_id, tag_id)
-        subtags = self._query_entries(query, placeholders)
+        subtags = self.query_entries(query, placeholders)
         return subtags
 
     def get_supertag(self, tag_id, fields=None):
@@ -775,7 +735,7 @@ class CreditTagHandler(DatabaseHandler):
                  f" GROUP BY {', '.join(groups)}")
         placeholders = (self.user_id,
                         *self._queries.fill_places(statement_ids))
-        tag_totals = self._query_entries(query, placeholders)
+        tag_totals = self.query_entries(query, placeholders)
         return tag_totals
 
     def get_statement_average_totals(self, tag_ids=None, statement_ids=None):
@@ -832,7 +792,7 @@ class CreditTagHandler(DatabaseHandler):
                         *self._queries.fill_places(statement_ids),
                         self.user_id,
                         *self._queries.fill_places(statement_ids))
-        tag_average_totals = self._query_entries(query, placeholders)
+        tag_average_totals = self.query_entries(query, placeholders)
         return tag_average_totals
 
 
@@ -856,9 +816,10 @@ def save_transaction(form, transaction_id=None):
 
     Returns
     -------
-    entry : tuple (sqlite3.Row, list of sqlite3.Row)
-        An "entry" corresponding to a transaction in the database and
-        all associated subtransactions.
+    transaction : Transaction
+        The saved transaction.
+    subtransactions : list of sqlite3.Row
+        The subtransactions of the saved transaction.
 
     Raises
     ------

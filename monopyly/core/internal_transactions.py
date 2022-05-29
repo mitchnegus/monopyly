@@ -12,3 +12,4 @@ def add_internal_transaction(db=None):
     db.commit()
     entry_id = cursor.lastrowid
     return entry_id
+

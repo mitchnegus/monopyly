@@ -60,7 +60,7 @@ class BankAccountTypeHandler(DatabaseHandler):
                   "  FROM bank_account_types_view AS types"
                  f" WHERE user_id IN (0, ?)")
         placeholders = (self.user_id,)
-        account_types = self._query_entries(query, placeholders)
+        account_types = self.query_entries(query, placeholders)
         return account_types
 
     def get_types_for_bank(self, bank_id):
@@ -73,7 +73,7 @@ class BankAccountTypeHandler(DatabaseHandler):
                  "          ON b.id = a.bank_id "
                  " WHERE types.user_id IN (0, ?) AND b.id = ?")
         placeholders = (self.user_id, bank_id)
-        account_types = self._query_entries(query, placeholders)
+        account_types = self.query_entries(query, placeholders)
         return account_types
 
     def get_entry(self, account_type_id, fields=None):
@@ -84,7 +84,7 @@ class BankAccountTypeHandler(DatabaseHandler):
         placeholders = (self.user_id, account_type_id)
         abort_msg = (f'Account type ID {account_type_id} does not exist for '
                       'the user.')
-        account = self._query_entry(query, placeholders, abort_msg)
+        account = self.query_entry(query, placeholders, abort_msg)
         return account
 
     def find_account_type(self, type_name=None, type_abbreviation=None,
@@ -220,7 +220,7 @@ class BankAccountHandler(DatabaseHandler):
                  f"       {bank_filter} {type_filter}")
         placeholders = (self.user_id, *self._queries.fill_places(bank_ids),
                         *self._queries.fill_places(account_type_ids))
-        accounts = self._query_entries(query, placeholders)
+        accounts = self.query_entries(query, placeholders)
         return accounts
 
     def get_entry(self, account_id, fields=None):
@@ -234,7 +234,7 @@ class BankAccountHandler(DatabaseHandler):
                   " WHERE a.id = ? AND b.user_id = ?")
         placeholders = (account_id, self.user_id)
         abort_msg = f'Account ID {account_id} does not exist for the user.'
-        account = self._query_entry(query, placeholders, abort_msg)
+        account = self.query_entry(query, placeholders, abort_msg)
         return account
 
     def get_bank_balance(self, bank_id):
@@ -245,7 +245,7 @@ class BankAccountHandler(DatabaseHandler):
                  "    ON b.id = a.bank_id "
                  " WHERE b.user_id = ? AND b.id = ?")
         placeholders = (self.user_id, bank_id)
-        balance = self._query_entry(query, placeholders)[0]
+        balance = self.query_entry(query, placeholders)[0]
         if balance is None:
             abort(404, f"No balance was found for bank with ID {bank_id}.")
         return balance

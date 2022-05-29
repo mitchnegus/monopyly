@@ -6,9 +6,7 @@ from sqlite3 import IntegrityError
 import pytest
 from werkzeug.exceptions import NotFound
 
-from monopyly.banking.transactions import (
-    BankTransactionHandler, BankSubtransactionHandler
-)
+from monopyly.banking.transactions import *
 from ..helpers import TestHandler
 
 
@@ -375,4 +373,65 @@ class TestBankSubtransactionsHandler(TestHandler):
                                     exception):
         with pytest.raises(exception):
             subtransaction_db.delete_entries(entry_ids)
+
+
+class TestSaveFormFunctions:
+
+    @patch('monopyly.banking.transactions.BankTransactionHandler')
+    @patch('monopyly.banking.forms.BankTransactionForm')
+    def test_save_new_transaction(self, mock_form, mock_handler):
+        # Mock the return values and data
+        mock_method = mock_handler.return_value.add_entry
+        mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
+                                    ['subtransactions'])
+        mock_form.transaction_data = {'key': 'test transaction data'}
+        mock_form.transfer_data = None
+        # Call the function and check for proper call signatures
+        save_transaction(mock_form)
+        mock_method.assert_called_once_with(mock_form.transaction_data)
+
+    @patch('monopyly.banking.transactions.record_new_transfer')
+    @patch('monopyly.banking.transactions.BankTransactionHandler')
+    @patch('monopyly.banking.forms.BankTransactionForm')
+    def test_save_new_transaction_with_transfer(self, mock_form, mock_handler,
+                                                mock_function):
+        # Mock the return values and data
+        mock_method = mock_handler.return_value.add_entry
+        mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
+                                    ['subtransactions'])
+        mock_function.return_value = ({'id': 0, 'internal_transaction_id': 0},
+                                      ['subtransactions'])
+        mock_form.transaction_data = {'key': 'test transaction data'}
+        mock_form.transfer_data = {'key': 'test transfer data'}
+        # Call the function and check for proper call signatures
+        save_transaction(mock_form)
+        mock_function.assert_called_once_with(mock_form.transfer_data)
+        mock_method.assert_called_once_with(mock_form.transaction_data)
+
+    @patch('monopyly.banking.transactions.BankTransactionHandler')
+    @patch('monopyly.banking.forms.BankTransactionForm')
+    def test_save_updated_transaction(self, mock_form, mock_handler):
+        # Mock the return values and data
+        mock_method = mock_handler.return_value.update_entry
+        mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
+                                    ['subtransactions'])
+        mock_form.transaction_data = {'key': 'test transaction data'}
+        mock_form.transfer_data = None
+        # Call the function and check for proper call signatures
+        transaction_id = 2
+        save_transaction(mock_form, transaction_id)
+        mock_method.assert_called_once_with(transaction_id,
+                                            mock_form.transaction_data)
+
+    @patch('monopyly.banking.transactions.BankTransactionHandler')
+    @patch('monopyly.banking.transactions.add_internal_transaction')
+    def test_record_new_transfer(self, mock_function, mock_handler):
+        # Mock the return values and data
+        mock_method = mock_handler.return_value.add_entry
+        mock_method.return_value = ('transfer', 'subtransactions')
+        transfer_data = {'key': 'test data'}
+        # Call the function and check for proper call signatures
+        record_new_transfer(transfer_data)
+        mock_method.assert_called_once_with(transfer_data)
+        mock_function.assert_called_once()
 

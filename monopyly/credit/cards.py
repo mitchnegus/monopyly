@@ -87,7 +87,7 @@ class CreditCardHandler(DatabaseHandler):
                         *self._queries.fill_places(bank_ids),
                         *self._queries.fill_places(account_ids),
                         *self._queries.fill_places(last_four_digits))
-        cards = self._query_entries(query, placeholders)
+        cards = self.query_entries(query, placeholders)
         return cards
 
     def get_entry(self, card_id, fields=None):
@@ -120,7 +120,7 @@ class CreditCardHandler(DatabaseHandler):
                   " WHERE c.id = ? AND user_id = ?")
         placeholders = (card_id, self.user_id)
         abort_msg = f'Card ID {card_id} does not exist for the user.'
-        card = self._query_entry(query, placeholders, abort_msg)
+        card = self.query_entry(query, placeholders, abort_msg)
         return card
 
     def find_card(self, bank_name=None, last_four_digits=None, fields=None):

@@ -7,7 +7,7 @@ import pytest
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.transactions import (
-    CreditTransactionHandler, CreditSubtransactionHandler
+    CreditTransactionHandler, CreditSubtransactionHandler, save_transaction
 )
 from ..helpers import TestHandler
 
@@ -408,4 +408,33 @@ class TestCreditSubtransactionsHandler(TestHandler):
                                     exception):
         with pytest.raises(exception):
             subtransaction_db.delete_entries(entry_ids)
+
+
+class TestSaveFormFunctions:
+
+    @patch('monopyly.credit.transactions.CreditTransactionHandler')
+    @patch('monopyly.credit.forms.CreditTransactionForm')
+    def test_save_new_transaction(self, mock_form, mock_handler):
+        # Mock the return values and data
+        mock_method = mock_handler.return_value.add_entry
+        mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
+                                    ['subtransactions'])
+        mock_form.transaction_data = {'key': 'test transaction data'}
+        # Call the function and check for proper call signatures
+        save_transaction(mock_form)
+        mock_method.assert_called_once_with(mock_form.transaction_data)
+
+    @patch('monopyly.credit.transactions.CreditTransactionHandler')
+    @patch('monopyly.credit.forms.CreditTransactionForm')
+    def test_save_updated_transaction(self, mock_form, mock_handler):
+        # Mock the return values and data
+        mock_method = mock_handler.return_value.update_entry
+        mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
+                                    ['subtransactions'])
+        mock_form.transaction_data = {'key': 'test transaction data'}
+        # Call the function and check for proper call signatures
+        transaction_id = 2
+        save_transaction(mock_form, transaction_id)
+        mock_method.assert_called_once_with(transaction_id,
+                                            mock_form.transaction_data)
 
