@@ -18,24 +18,14 @@ from .accounts import BankAccountTypeHandler, BankAccountHandler
 from .transactions import (
     BankTransactionHandler, BankSubtransactionHandler, save_transaction
 )
+from .actions import *
 
 
 @banking_bp.route('/accounts')
 @login_required
 def load_accounts():
-    bank_db = BankHandler()
-    account_db = BankAccountHandler()
-    account_type_db = BankAccountTypeHandler()
-    # Get the user's banks from the database
-    banks = bank_db.get_entries()
-    # Get all of the user's bank accounts from the database
-    bank_accounts = {}
-    for bank in banks:
-        accounts = account_db.get_entries((bank['id'],))
-        if accounts:
-            bank_accounts[bank] = accounts
-    # Get all of the user's bank account types from the database
-    account_types = account_type_db.get_entries()
+    bank_accounts = get_user_bank_account_groupings()
+    account_types = get_user_bank_account_types()
     return render_template('banking/accounts_page.html',
                            bank_accounts=bank_accounts,
                            account_types=account_types)
