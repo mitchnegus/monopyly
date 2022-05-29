@@ -9,13 +9,9 @@ from ..helpers import TestHandler
 
 
 @pytest.fixture
-def account_type_db(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        account_type_db = BankAccountTypeHandler()
-        yield account_type_db
+def account_type_db(client_context):
+    account_type_db = BankAccountTypeHandler()
+    yield account_type_db
 
 
 class TestBankAccountTypeHandler(TestHandler):

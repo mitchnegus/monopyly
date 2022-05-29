@@ -9,13 +9,9 @@ from monopyly.credit.forms import CreditTransactionForm, CreditCardForm
 
 
 @pytest.fixture
-def transaction_form(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        form = CreditTransactionForm()
-        yield form
+def transaction_form(client_context):
+    form = CreditTransactionForm()
+    yield form
 
 
 @pytest.fixture
@@ -107,13 +103,9 @@ class TestBankTransactionForm:
 
 
 @pytest.fixture
-def card_form(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        form = CreditCardForm()
-        yield form
+def card_form(client_context):
+    form = CreditCardForm()
+    yield form
 
 
 @pytest.fixture

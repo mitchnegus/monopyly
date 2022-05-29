@@ -11,13 +11,9 @@ from ..helpers import helper
 
 
 @pytest.fixture
-def transaction_form(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        form = BankTransactionForm()
-        yield form
+def transaction_form(client_context):
+   form = BankTransactionForm()
+   yield form
 
 
 @pytest.fixture
@@ -106,13 +102,9 @@ class TestBankTransactionForm:
 
 
 @pytest.fixture
-def account_form(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        form = BankAccountForm()
-        yield form
+def account_form(client_context):
+    form = BankAccountForm()
+    yield form
 
 
 @pytest.fixture

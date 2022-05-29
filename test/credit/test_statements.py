@@ -11,13 +11,9 @@ from ..helpers import TestHandler
 
 
 @pytest.fixture
-def statement_db(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        statement_db = CreditStatementHandler()
-        yield statement_db
+def statement_db(client_context):
+    statement_db = CreditStatementHandler()
+    yield statement_db
 
 
 class TestCreditStatementHandler(TestHandler):

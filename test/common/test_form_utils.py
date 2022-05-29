@@ -34,6 +34,7 @@ def test_execute_on_form_validation(validated, expectation):
     with expectation:
         wrapped_func(form)
 
+
 class TestValidators:
 
     @pytest.mark.parametrize(

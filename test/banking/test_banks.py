@@ -7,13 +7,9 @@ from ..helpers import TestHandler
 
 
 @pytest.fixture
-def bank_db(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        bank_db = BankHandler()
-        yield bank_db
+def bank_db(client_context):
+    bank_db = BankHandler()
+    yield bank_db
 
 
 class TestBankHandler(TestHandler):

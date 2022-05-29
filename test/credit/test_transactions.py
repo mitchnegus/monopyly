@@ -13,23 +13,15 @@ from ..helpers import TestHandler
 
 
 @pytest.fixture
-def transaction_db(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        transaction_db = CreditTransactionHandler()
-        yield transaction_db
+def transaction_db(client_context):
+    transaction_db = CreditTransactionHandler()
+    yield transaction_db
 
 
 @pytest.fixture
-def subtransaction_db(app, client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
-    with client:
-        # Context variables (e.g. `g`) may be accessed only after response
-        client.get('/')
-        subtransaction_db = CreditSubtransactionHandler()
-        yield subtransaction_db
+def subtransaction_db(client_context):
+    subtransaction_db = CreditSubtransactionHandler()
+    yield subtransaction_db
 
 
 class TestCreditTransactionHandler(TestHandler):

@@ -58,3 +58,12 @@ class AuthActions:
 def auth(client):
     return AuthActions(client)
 
+
+@pytest.fixture
+def client_context(app, client, auth):
+    auth.login('mr.monopyly', 'MONOPYLY')
+    with client:
+        # Context variables (e.g. `g`) may be accessed only after response
+        client.get('/')
+        yield client_context
+
