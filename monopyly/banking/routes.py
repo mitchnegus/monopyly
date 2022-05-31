@@ -10,11 +10,12 @@ from ..auth.tools import login_required
 from ..common.utils import sort_by_frequency
 from ..common.form_utils import form_err_msg
 from ..common.transactions import get_linked_transaction
+from ..common.actions import get_user_database_entries, delete_database_entry
 from ..db.handler.queries import validate_field
 from . import banking_bp
 from .forms import *
 from .banks import BankHandler
-from .accounts import BankAccountTypeHandler, BankAccountHandler
+from .accounts import BankAccountTypeHandler, BankAccountHandler, save_account
 from .transactions import (
     BankTransactionHandler, BankSubtransactionHandler, save_transaction
 )
@@ -25,7 +26,7 @@ from .actions import *
 @login_required
 def load_accounts():
     bank_accounts = get_user_bank_account_groupings()
-    account_types = get_user_bank_account_types()
+    account_types = get_user_database_entries(BankAccountTypeHandler)
     return render_template('banking/accounts_page.html',
                            bank_accounts=bank_accounts,
                            account_types=account_types)
@@ -37,30 +38,20 @@ def load_accounts():
 @banking_bp.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
 @login_required
 def add_account(bank_id):
-    # Define a form for a bank account
-    form = BankAccountForm()
-    # Prepare known form entries if bank is known
-    if bank_id:
-        form.process(data={'bank_info': {'bank_id': bank_id}})
+    data = {'bank_info': {'bank_id': bank_id}} if bank_id else None
+    form = BankAccountForm(data=data)
     # Check if an account was submitted and add it to the database
     if request.method == 'POST':
-        if form.validate():
-            account_db = BankAccountHandler()
-            # Insert the new bank account into the database
-            account = account_db.add_entry(form.account_data)
-            return redirect(url_for('banking.load_accounts'))
-        else:
-            flash(form_err_msg)
-            print(form.errors)
-    return render_template('banking/account_form/account_form_page_new.html', form=form)
+        account = save_account(form)
+        return redirect(url_for('banking.load_accounts'))
+    return render_template('banking/account_form/account_form_page_new.html',
+                           form=form)
 
 
 @banking_bp.route('/delete_account/<int:account_id>')
 @login_required
 def delete_account(account_id):
-    account_db = BankAccountHandler()
-    # Remove the account from the database
-    account_db.delete_entries((account_id,))
+    delete_database_entry(BankAccountHandler, account_id)
     return redirect(url_for('banking.load_accounts'))
 
 
@@ -68,19 +59,8 @@ def delete_account(account_id):
 @login_required
 def load_account_summaries(bank_id):
     bank_db = BankHandler()
-    account_type_db = BankAccountTypeHandler()
-    account_db = BankAccountHandler()
-    # Group a user's matching bank accounts by account type
-    bank_account_types = account_type_db.get_types_for_bank(bank_id)
-    type_accounts = {}
-    for account_type in bank_account_types:
-        bank_ids = (bank_id,)
-        type_ids = (account_type['id'],)
-        accounts = account_db.get_entries(bank_ids, type_ids)
-        type_accounts[account_type] = accounts
-    # Get the bank info
     bank = bank_db.get_entry(bank_id)
-    bank_balance = account_db.get_bank_balance(bank_id)
+    bank_balance, type_accounts = get_bank_account_summaries(bank_id)
     return render_template('banking/account_summaries_page.html',
                            bank=bank,
                            bank_balance=bank_balance,
@@ -90,17 +70,7 @@ def load_account_summaries(bank_id):
 @banking_bp.route('/account/<int:account_id>')
 @login_required
 def load_account_details(account_id):
-    account_db = BankAccountHandler()
-    transaction_db = BankTransactionHandler()
-    # Get the user's bank account from the database
-    account = account_db.get_entry(account_id)
-    # Get all of the transactions for the statement from the database
-    sort_order = 'DESC'
-    transaction_fields = ('transaction_date', 'total', 'balance', 'notes',
-                          'internal_transaction_id')
-    transactions = transaction_db.get_entries(account_ids=(account['id'],),
-                                              sort_order=sort_order,
-                                              fields=transaction_fields)
+    account, transactions = get_bank_account_details(account_id)
     return render_template('banking/account_page.html',
                            account=account,
                            account_transactions=transactions)
@@ -143,24 +113,7 @@ def show_linked_transaction():
                methods=('GET', 'POST'))
 @login_required
 def add_transaction(bank_id, account_id):
-    # Define a form for a transaction
-    form = BankTransactionForm()
-    # Prepare known form entries if bank is known
-    if bank_id:
-        bank_db = BankHandler()
-        # Get the necessary fields from the database
-        bank_fields = ('bank_name',)
-        bank = bank_db.get_entry(bank_id, fields=bank_fields)
-        data = {'account_info': {field: bank[field] for field in bank_fields}}
-        # Prepare known form entries if account is known
-        if account_id:
-            account_db = BankAccountHandler()
-            # Get the necessary fields from the database
-            account_fields = ('last_four_digits', 'type_name')
-            account = account_db.get_entry(account_id, fields=account_fields)
-            for field in account_fields:
-                data['account_info'][field] = account[field]
-        form.process(data=data)
+    form = BankTransactionForm.create(bank_id, account_id)
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
         transaction, subtransactions = save_transaction(form)
@@ -216,7 +169,7 @@ def add_subtransaction_fields():
     # NOTE: This is a hack (since `append_entry` method cannot be used in AJAX
     #       without reloading the form...)
     form_id = f'subtransactions-{new_index}'
-    sub_form = BankTransactionForm.BankSubtransactionForm(prefix=form_id)
+    sub_form = BankTransactionForm.SubtransactionSubform(prefix=form_id)
     sub_form.id = form_id
     return render_template('banking/transaction_form/subtransaction_form.html',
                            sub_form=sub_form)
@@ -228,7 +181,7 @@ def add_transfer_fields():
     # Redefine the form for the transaction (including the new transfer fields)
     # NOTE: this is a hack (since `append_entry` method cannot be used in AJAX)
     form_id = 'transfer_account_info-0'
-    sub_form = BankTransactionForm.BankAccountInfoForm(prefix=form_id)
+    sub_form = BankTransactionForm.AccountSubform(prefix=form_id)
     sub_form.id = form_id
     return render_template('banking/transaction_form/transfer_form.html',
                            sub_form=sub_form, id_prefix='transfer')
@@ -237,10 +190,9 @@ def add_transfer_fields():
 @banking_bp.route('/delete_transaction/<int:transaction_id>')
 @login_required
 def delete_transaction(transaction_id):
-    transaction_db = BankTransactionHandler()
-    # Remove the transaction from the database
-    account_id = transaction_db.get_entry(transaction_id)['account_id']
-    transaction_db.delete_entries((transaction_id,))
+    # Get the account for the transaction to guide the page redirect
+    account_id = delete_database_entry(BankTransactionHandler, transaction_id,
+                                       return_field='account_id')
     return redirect(url_for('banking.load_account_details',
                             account_id=account_id))
 

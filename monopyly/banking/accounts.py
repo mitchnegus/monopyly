@@ -3,6 +3,7 @@ Tools for interacting with bank accounts in the database.
 """
 from werkzeug.exceptions import abort
 
+from ..common.form_utils import execute_on_form_validation
 from ..db.handler import DatabaseHandler
 from .banks import BankHandler
 
@@ -328,4 +329,35 @@ class BankAccountHandler(DatabaseHandler):
     def _get_entry_user_id(self, entry_id):
         # Get the user ID for an entry (this override eliminates ambiguity)
         return self.get_entry(entry_id, fields=('b.user_id',))['user_id']
+
+
+@execute_on_form_validation
+def save_account(form):
+    """
+    Save a bank account.
+
+    Saves a bank account in the database. The form information is added
+    as a new entry, and the ability to update the account is not yet
+    supported.
+
+    Parameters
+    ----------
+    form : flask_wtf.FlaskForm
+        The form being used to provide the data being saved.
+
+    Returns
+    -------
+    account : sqlite3.Row
+        The saved transaction.
+
+    Raises
+    ------
+    wtfforms.validators.ValidationError
+        Raised when the form does not validate properly.
+    """
+    db = BankAccountHandler()
+    account_data = form.account_data
+    # Insert the new account into the database
+    account = db.add_entry(account_data)
+    return account
 

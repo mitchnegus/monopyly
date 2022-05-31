@@ -1,10 +1,10 @@
 """Tests for the banking module managing bank accounts."""
+from unittest.mock import patch
+
 import pytest
 from werkzeug.exceptions import Forbidden, NotFound
 
-from monopyly.banking.accounts import (
-    BankAccountTypeHandler, BankAccountHandler
-)
+from monopyly.banking.accounts import *
 from ..helpers import TestHandler
 
 
@@ -419,4 +419,18 @@ class TestBankAccountHandler(TestHandler):
     def test_delete_entries_invalid(self, account_db, entry_ids, exception):
         with pytest.raises(exception):
             account_db.delete_entries(entry_ids)
+
+
+class TestSaveFormFunctions:
+
+    @patch('monopyly.banking.accounts.BankAccountHandler')
+    @patch('monopyly.banking.forms.BankAccountForm')
+    def test_save_new_transaction(self, mock_form, mock_handler_type):
+        # Mock the return values and data
+        mock_method = mock_handler_type.return_value.add_entry
+        mock_method.return_value = {'id': 0, 'bank_id': 0}
+        mock_form.account_data = {'key': 'test account data'}
+        # Call the function and check for proper call signatures
+        save_account(mock_form)
+        mock_method.assert_called_once_with(mock_form.account_data)
 

@@ -1,7 +1,6 @@
 """
 Generate credit card forms for the user to complete.
 """
-from flask_wtf import FlaskForm
 from werkzeug.exceptions import abort
 from wtforms.fields import (
     FormField, DecimalField, IntegerField, TextField, BooleanField,
@@ -11,8 +10,8 @@ from wtforms.validators import Optional, DataRequired, Length
 
 from ..common.utils import parse_date
 from ..common.form_utils import (
-    FlaskSubform, AcquisitionSubform, CustomChoiceSelectField, NumeralsOnly,
-    SelectionNotBlank
+    MonopylyForm, Subform, AcquisitionSubform, CustomChoiceSelectField,
+    NumeralsOnly, SelectionNotBlank
 )
 from ..banking.banks import BankHandler
 from .accounts import CreditAccountHandler
@@ -20,13 +19,13 @@ from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
 
 
-class CreditTransactionForm(FlaskForm):
+class CreditTransactionForm(MonopylyForm):
     """Form to input/edit credit card transactions."""
 
-    class StatementSubform(FlaskSubform):
+    class StatementSubform(Subform):
         """Form to input/edit credit statement identification."""
 
-        class CardSubform(FlaskSubform):
+        class CardSubform(Subform):
             """Form to input/edit credit account identification."""
             bank_name = TextField('Bank')
             last_four_digits = TextField(
@@ -67,7 +66,7 @@ class CreditTransactionForm(FlaskForm):
                 )
             return statement
 
-    class SubtransactionSubform(FlaskSubform):
+    class SubtransactionSubform(Subform):
         """Form to input/edit credit card subtransactions."""
         subtotal = DecimalField(
             'Amount',
@@ -145,7 +144,7 @@ class AccountSelectField(CustomChoiceSelectField):
         return display_name
 
 
-class CreditCardForm(FlaskForm):
+class CreditCardForm(MonopylyForm):
     """Form to input/edit credit cards."""
 
     class AccountSubform(AcquisitionSubform):
@@ -198,7 +197,7 @@ class CreditCardForm(FlaskForm):
         return card_data
 
 
-class CardStatementTransferForm(FlaskForm):
+class CardStatementTransferForm(MonopylyForm):
     """Form indicating if an unpaid statement should be transferred to a new card."""
     transfer = RadioField("transfer", choices=[("yes", "Yes"), ("no", "No")])
     submit = SubmitField("Continue")

@@ -371,9 +371,9 @@ class TestSaveFormFunctions:
 
     @patch('monopyly.banking.transactions.BankTransactionHandler')
     @patch('monopyly.banking.forms.BankTransactionForm')
-    def test_save_new_transaction(self, mock_form, mock_handler):
+    def test_save_new_transaction(self, mock_form, mock_handler_type):
         # Mock the return values and data
-        mock_method = mock_handler.return_value.add_entry
+        mock_method = mock_handler_type.return_value.add_entry
         mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
                                     ['subtransactions'])
         mock_form.transaction_data = {'key': 'test transaction data'}
@@ -382,13 +382,13 @@ class TestSaveFormFunctions:
         save_transaction(mock_form)
         mock_method.assert_called_once_with(mock_form.transaction_data)
 
+    @patch('monopyly.banking.forms.BankTransactionForm')
     @patch('monopyly.banking.transactions.record_new_transfer')
     @patch('monopyly.banking.transactions.BankTransactionHandler')
-    @patch('monopyly.banking.forms.BankTransactionForm')
-    def test_save_new_transaction_with_transfer(self, mock_form, mock_handler,
-                                                mock_function):
+    def test_save_new_transaction_with_transfer(self, mock_handler_type,
+                                                mock_function, mock_form):
         # Mock the return values and data
-        mock_method = mock_handler.return_value.add_entry
+        mock_method = mock_handler_type.return_value.add_entry
         mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
                                     ['subtransactions'])
         mock_function.return_value = ({'id': 0, 'internal_transaction_id': 0},
@@ -402,9 +402,9 @@ class TestSaveFormFunctions:
 
     @patch('monopyly.banking.transactions.BankTransactionHandler')
     @patch('monopyly.banking.forms.BankTransactionForm')
-    def test_save_updated_transaction(self, mock_form, mock_handler):
+    def test_save_updated_transaction(self, mock_form, mock_handler_type):
         # Mock the return values and data
-        mock_method = mock_handler.return_value.update_entry
+        mock_method = mock_handler_type.return_value.update_entry
         mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
                                     ['subtransactions'])
         mock_form.transaction_data = {'key': 'test transaction data'}
@@ -417,9 +417,9 @@ class TestSaveFormFunctions:
 
     @patch('monopyly.banking.transactions.BankTransactionHandler')
     @patch('monopyly.banking.transactions.add_internal_transaction')
-    def test_record_new_transfer(self, mock_function, mock_handler):
+    def test_record_new_transfer(self, mock_function, mock_handler_type):
         # Mock the return values and data
-        mock_method = mock_handler.return_value.add_entry
+        mock_method = mock_handler_type.return_value.add_entry
         mock_method.return_value = ('transfer', 'subtransactions')
         transfer_data = {'key': 'test data'}
         # Call the function and check for proper call signatures

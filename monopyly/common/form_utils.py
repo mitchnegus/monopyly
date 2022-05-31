@@ -14,18 +14,29 @@ from wtforms.validators import ValidationError
 form_err_msg = "There was an improper value in your form. Please try again."
 
 
-class FlaskSubform(FlaskForm):
+class MonopylyForm(FlaskForm):
+    """A form with package specific customizations."""
+
+    @staticmethod
+    def _prepare_submapping(entry_id, db_handler_type, fields):
+        """Prepare a subset of a mapping by looking up a database entry."""
+        db = db_handler_type()
+        entry = db.get_entry(entry_id, fields)
+        return {field: entry[field] for field in fields}
+
+
+class Subform(MonopylyForm):
     """Subform disabling CSRF (CSRF is REQUIRED in encapsulating form)."""
     def __init__(self, *args, **kwargs):
         super().__init__(meta={'csrf': False}, *args, **kwargs)
 
 
-class AbstractSubformMixinMeta(type(FlaskSubform), ABC):
+class AbstractSubformMixinMeta(type(Subform), ABC):
     # Defined to allow the subforms to also to be abstract base classes
     pass
 
 
-class AcquisitionSubform(FlaskSubform, metaclass=AbstractSubformMixinMeta):
+class AcquisitionSubform(Subform, metaclass=AbstractSubformMixinMeta):
     """Subform that facilitates acquisition based on data and the database."""
 
     @property

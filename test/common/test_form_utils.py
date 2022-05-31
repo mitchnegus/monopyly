@@ -8,18 +8,6 @@ from wtforms.validators import ValidationError
 from monopyly.common.form_utils import *
 
 
-@pytest.fixture
-def mock_form():
-    with patch('flask_wtf.FlaskForm') as mock_form:
-        yield mock_form
-
-
-@pytest.fixture
-def mock_field():
-    with patch('wtforms.fields.Field') as mock_field:
-        yield mock_field
-
-
 @pytest.mark.parametrize(
     'validated, expectation',
     [[True, does_not_raise()],
@@ -33,6 +21,18 @@ def test_execute_on_form_validation(validated, expectation):
     wrapped_func = execute_on_form_validation(func)
     with expectation:
         wrapped_func(form)
+
+
+@pytest.fixture
+def mock_form():
+    with patch('flask_wtf.FlaskForm') as mock_form:
+        yield mock_form
+
+
+@pytest.fixture
+def mock_field():
+    with patch('wtforms.fields.Field') as mock_field:
+        yield mock_field
 
 
 class TestValidators:

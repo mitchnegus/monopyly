@@ -10,6 +10,7 @@ from ..auth.tools import login_required
 from ..common.utils import parse_date, dedelimit_float, sort_by_frequency
 from ..common.form_utils import form_err_msg
 from ..common.transactions import get_linked_transaction
+from ..common.actions import get_user_database_entries, delete_database_entry
 from ..db.handler.queries import validate_field
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
@@ -28,9 +29,7 @@ from .transactions import (
 @credit_bp.route('/cards')
 @login_required
 def load_cards():
-    card_db = CreditCardHandler()
-    # Get all of the user's credit cards from the database
-    cards = card_db.get_entries()
+    cards = get_user_database_entries(CreditCardHandler)
     return render_template('credit/cards_page.html', cards=cards)
 
 
@@ -153,10 +152,8 @@ def update_card_status():
 @credit_bp.route('/delete_card/<int:card_id>')
 @login_required
 def delete_card(card_id):
-    card_db = CreditCardHandler()
-    account_id = card_db.get_entry(card_id)['account_id']
-    # Remove the credit card from the database
-    card_db.delete_entries((card_id,))
+    account_id = delete_database_entry(CreditCardHandler, card_id,
+                                       return_field='account_id')
     return redirect(url_for('credit.load_account', account_id=account_id))
 
 
@@ -189,9 +186,7 @@ def update_account_statement_due_day(account_id):
 @credit_bp.route('/delete_account/<int:account_id>')
 @login_required
 def delete_account(account_id):
-    account_db = CreditAccountHandler()
-    # Remove the account from the database
-    account_db.delete_entries((account_id,))
+    delete_database_entry(CreditAccountHandler, account_id)
     return redirect(url_for('credit.load_cards'))
 
 
@@ -311,7 +306,6 @@ def make_payment(statement_id):
         # Populate a mapping for the transfer
         card_name = f"{card['bank_name']}-{card['last_four_digits']}"
         bank_mapping = {
-#            'internal_transaction_id': internal_transaction_id,
             'account_id': payment_account_id,
             'transaction_date': payment_date,
             'subtransactions': [{
@@ -440,8 +434,6 @@ def update_transactions_display():
               methods=('GET', 'POST'))
 @login_required
 def add_transaction(card_id, statement_id):
-    # Define a form for a transaction
-    form = CreditTransactionForm()
     # Prepare known form entries if card is known
     if card_id:
         card_db = CreditCardHandler()
@@ -452,14 +444,16 @@ def add_transaction(card_id, statement_id):
         data = {'statement_info': {'card_info': card_data}}
         # Prepare known form entries if statement is known
         if statement_id:
-             statement_db = CreditStatementHandler()
-             # Get the necessary fields from the database
-             statement_fields = ('issue_date',)
-             statement = statement_db.get_entry(statement_id,
-                                                fields=statement_fields)
-             for field in statement_fields:
-                 data['statement_info'][field] = statement[field]
-        form.process(data=data)
+            statement_db = CreditStatementHandler()
+            # Get the necessary fields from the database
+            statement_fields = ('issue_date',)
+            statement = statement_db.get_entry(statement_id,
+                                               fields=statement_fields)
+            for field in statement_fields:
+                data['statement_info'][field] = statement[field]
+    else:
+        data = None
+    form = CreditTransactionForm(data=data)
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
         try:
@@ -484,6 +478,13 @@ def update_transaction(transaction_id):
     tag_db = CreditTagHandler()
     # Get the transaction information from the database
     transaction = transaction_db.get_entry(transaction_id)
+    native_transaction_fields = ('transaction_date', 'vendor')
+    data = {field: transaction[field] for field in native_transaction_fields}
+    card_fields = ('bank_name', 'last_four_digits')
+    data['statement_info'] = {
+        'card_info': {field: transaction[field] for field in card_fields},
+        'issue_date': transaction['issue_date'],
+    }
     subtransactions = subtransaction_db.get_entries((transaction_id,))
     subtransactions_data = []
     for subtransaction in subtransactions:
@@ -493,7 +494,7 @@ def update_transaction(transaction_id):
         subtransaction_data = {**subtransaction}
         subtransaction_data['tags'] = tag_list
         subtransactions_data.append(subtransaction_data)
-    form_data = {**transaction, 'subtransactions': subtransactions_data}
+    form_data = {**data, 'subtransactions': subtransactions_data}
     # Define a form for a transaction
     form = CreditTransactionForm(data=form_data)
     # Check if a transaction was updated (and update it in the database)
@@ -527,9 +528,7 @@ def add_subtransaction_fields():
 @credit_bp.route('/delete_transaction/<int:transaction_id>')
 @login_required
 def delete_transaction(transaction_id):
-    transaction_db = CreditTransactionHandler()
-    # Remove the transaction from the database
-    transaction_db.delete_entries((transaction_id,))
+    delete_database_entry(CreditTransactionHandler, transaction_id)
     return redirect(url_for('credit.load_transactions'))
 
 

@@ -3,7 +3,6 @@ Generate banking forms for the user to fill out.
 """
 from functools import wraps
 
-from flask_wtf import FlaskForm
 from wtforms.fields import (
     FormField, DecimalField, TextField, BooleanField, SubmitField, FieldList
 )
@@ -11,17 +10,17 @@ from wtforms.validators import Optional, DataRequired, Length
 
 from ..common.utils import parse_date
 from ..common.form_utils import (
-    FlaskSubform, AcquisitionSubform, CustomChoiceSelectField, NumeralsOnly,
-    SelectionNotBlank
+    MonopylyForm, Subform, AcquisitionSubform, CustomChoiceSelectField,
+    NumeralsOnly, SelectionNotBlank
 )
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler
 
 
-class BankTransactionForm(FlaskForm):
+class BankTransactionForm(MonopylyForm):
     """Form to input/edit bank transactions."""
 
-    class AccountSubform(FlaskSubform):
+    class AccountSubform(Subform):
         """Form to input/edit bank account identification."""
         bank_name = TextField('Bank')
         last_four_digits = TextField(
@@ -37,7 +36,7 @@ class BankTransactionForm(FlaskForm):
                                            self.last_four_digits.data,
                                            self.type_name.data)
 
-    class SubtransactionSubform(FlaskSubform):
+    class SubtransactionSubform(Subform):
         """Form to input/edit bank subtransactions."""
         subtotal = DecimalField(
             'Amount',
@@ -123,6 +122,50 @@ class BankTransactionForm(FlaskForm):
         """Get the bank account linked in a transfer."""
         return self.transfer_account_info[0].get_account()
 
+    @classmethod
+    def create(cls, bank_id=None, account_id=None):
+        """
+        Create a bank account transaction form for a new transaction.
+
+        Generate a form for a new bank account transaction. This form
+        should be prepopulated with any bank and account information
+        that is available (as determined by a bank ID or account ID from
+        the database that is provided as an argument).
+
+        Parameters
+        ----------
+        bank_id : int
+            The ID of a bank to use when prepolating the form.
+        account_id : int
+            The ID of a bank account to use when prepolating the form.
+
+        Returns
+        -------
+        form : BankTransactionForm
+            An instantiation of this class with any prepopulated
+            information.
+        """
+        # Prepare known form entries if the bank is known
+        if bank_id:
+            bank_db = BankHandler()
+            bank_info = cls._prepare_submapping(
+                bank_id,
+                BankHandler,
+                ('bank_name',),
+            )
+            data = {'account_info': bank_info}
+            # Prepare known form entries if the account is known
+            if account_id:
+                account_info = cls._prepare_submapping(
+                    account_id,
+                    BankAccountHandler,
+                    ('last_four_digits', 'type_name'),
+                )
+                data['account_info'].update(account_info)
+        else:
+            data = None
+        return cls(data=data)
+
 
 class BankSelectField(CustomChoiceSelectField):
     """Bank field that uses the database to prepare field choices."""
@@ -157,7 +200,7 @@ class AccountTypeSelectField(CustomChoiceSelectField):
         return display_name
 
 
-class BankAccountForm(FlaskForm):
+class BankAccountForm(MonopylyForm):
     """Form to input/edit bank accounts."""
 
     class BankSubform(AcquisitionSubform):

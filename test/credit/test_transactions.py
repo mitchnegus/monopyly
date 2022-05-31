@@ -406,9 +406,9 @@ class TestSaveFormFunctions:
 
     @patch('monopyly.credit.transactions.CreditTransactionHandler')
     @patch('monopyly.credit.forms.CreditTransactionForm')
-    def test_save_new_transaction(self, mock_form, mock_handler):
+    def test_save_new_transaction(self, mock_form, mock_handler_type):
         # Mock the return values and data
-        mock_method = mock_handler.return_value.add_entry
+        mock_method = mock_handler_type.return_value.add_entry
         mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
                                     ['subtransactions'])
         mock_form.transaction_data = {'key': 'test transaction data'}
@@ -418,9 +418,9 @@ class TestSaveFormFunctions:
 
     @patch('monopyly.credit.transactions.CreditTransactionHandler')
     @patch('monopyly.credit.forms.CreditTransactionForm')
-    def test_save_updated_transaction(self, mock_form, mock_handler):
+    def test_save_updated_transaction(self, mock_form, mock_handler_type):
         # Mock the return values and data
-        mock_method = mock_handler.return_value.update_entry
+        mock_method = mock_handler_type.return_value.update_entry
         mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
                                     ['subtransactions'])
         mock_form.transaction_data = {'key': 'test transaction data'}

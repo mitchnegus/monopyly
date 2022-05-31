@@ -1,5 +1,5 @@
 """Tests for the banking module forms."""
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from datetime import date
 
 import pytest
@@ -99,6 +99,30 @@ class TestBankTransactionForm:
 
     def test_no_transfer_data(self, filled_transaction_form):
         assert filled_transaction_form.transfer_data is None
+
+    @pytest.mark.parametrize(
+        'bank_id, account_id',
+        [[None, None],
+         [Mock(), None],
+         [Mock(), Mock()]]
+    )
+    @patch('monopyly.banking.forms.BankAccountHandler')
+    @patch('monopyly.banking.forms.BankHandler')
+    def test_create(self, mock_bank_handler_type, mock_account_handler_type,
+                    client_context, bank_id, account_id):
+        mock_bank_db = mock_bank_handler_type.return_value
+        mock_account_db = mock_account_handler_type.return_value
+        # Mock the bank info (if an ID was provided)
+        bank_info = {'bank_name': 'test_bank' if bank_id else None}
+        mock_bank_db.get_entry.return_value = bank_info
+        # Mock the account info (if an ID was provided)
+        other_account_info = {
+            'last_four_digits': '2222' if account_id else None,
+            'type_name': 'test_type' if account_id else None,
+        }
+        mock_account_db.get_entry.return_value = other_account_info
+        form = BankTransactionForm.create(bank_id, account_id)
+        assert form.account_info.data == {**bank_info, **other_account_info}
 
 
 @pytest.fixture
