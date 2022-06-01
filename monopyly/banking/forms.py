@@ -15,6 +15,7 @@ from ..common.form_utils import (
 )
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler
+from .transactions import BankTransactionHandler, BankSubtransactionHandler
 
 
 class BankTransactionForm(MonopylyForm):
@@ -123,7 +124,7 @@ class BankTransactionForm(MonopylyForm):
         return self.transfer_account_info[0].get_account()
 
     @classmethod
-    def create(cls, bank_id=None, account_id=None):
+    def generate_new(cls, bank_id=None, account_id=None):
         """
         Create a bank account transaction form for a new transaction.
 
@@ -142,29 +143,79 @@ class BankTransactionForm(MonopylyForm):
         Returns
         -------
         form : BankTransactionForm
-            An instantiation of this class with any prepopulated
-            information.
+            An instance of this class with any prepopulated information.
         """
-        # Prepare known form entries if the bank is known
-        if bank_id:
-            bank_db = BankHandler()
-            bank_info = cls._prepare_submapping(
-                bank_id,
-                BankHandler,
-                ('bank_name',),
-            )
-            data = {'account_info': bank_info}
-            # Prepare known form entries if the account is known
-            if account_id:
-                account_info = cls._prepare_submapping(
-                    account_id,
-                    BankAccountHandler,
-                    ('last_four_digits', 'type_name'),
-                )
-                data['account_info'].update(account_info)
-        else:
-            data = None
+        # Bank ID must be known (at least) for there to be data to prepare
+        data = cls._prepare_new_data(bank_id, account_id) if bank_id else None
         return cls(data=data)
+
+    @classmethod
+    def _prepare_new_data(cls, bank_id, account_id):
+        bank_info = cls._prepare_submapping(
+            bank_id,
+            BankHandler,
+            ('bank_name',),
+        )
+        data = {'account_info': bank_info}
+        # Add account info to the data if that is known
+        if account_id:
+            account_info = cls._prepare_submapping(
+                account_id,
+                BankAccountHandler,
+                ('last_four_digits', 'type_name'),
+            )
+            data['account_info'].update(account_info)
+        return data
+
+    @classmethod
+    def generate_update(cls, transaction_id):
+        """
+        Prepare a bank account transaction form to update a transaction.
+
+        Generate a form to update an existing bank account transaction.
+        This form should be prepopulated with all transaction
+        information that has previously been provided so that it can be
+        updated.
+
+        Parameters
+        ----------
+        transaction_id : int
+            The ID of the transaction to be updated.
+
+        Returns
+        -------
+        form : BankTransactionForm
+            An instance of this class with any prepopulated information.
+        """
+        data = cls._prepare_update_data(transaction_id)
+        return cls(data=data)
+
+    @classmethod
+    def _prepare_update_data(cls, transaction_id):
+        # Get the transaction information from the database
+        transaction_info = cls._prepare_submapping(
+            transaction_id,
+            BankTransactionHandler,
+            ('bank_name', 'last_four_digits', 'type_name', 'transaction_date'),
+        )
+        data = {'transaction_date': transaction_info.pop('transaction_date')}
+        data['account_info'] = transaction_info
+        # Transfer data is cannot be updated (update transfers independently)
+        data['transfer_account_info'] = {}
+        # Get the subtransaction information from the database
+        data['subtransactions'] = cls._prepare_subtransactions_submapping(
+            transaction_id
+        )
+        return data
+
+    @classmethod
+    def _prepare_subtransactions_submapping(cls, transaction_id):
+        """Prepare a subset of a mapping for bank subtransactions."""
+        subtransaction_db = BankSubtransactionHandler()
+        subtransactions = subtransaction_db.get_entries((transaction_id,))
+        fields = ('subtotal', 'note')
+        return [{field: subtransaction[field] for field in fields}
+                for subtransaction in subtransactions]
 
 
 class BankSelectField(CustomChoiceSelectField):

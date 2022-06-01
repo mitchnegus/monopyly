@@ -113,7 +113,7 @@ def show_linked_transaction():
                methods=('GET', 'POST'))
 @login_required
 def add_transaction(bank_id, account_id):
-    form = BankTransactionForm.create(bank_id, account_id)
+    form = BankTransactionForm.generate_new(bank_id, account_id)
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
         transaction, subtransactions = save_transaction(form)
@@ -129,24 +129,7 @@ def add_transaction(bank_id, account_id):
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    transaction_db = BankTransactionHandler()
-    subtransaction_db = BankSubtransactionHandler()
-    # Get the transaction information from the database
-    account_info_data = {}
-    transaction = transaction_db.get_entry(transaction_id)
-    subtransactions = subtransaction_db.get_entries((transaction_id,))
-    subtransactions_data = []
-    for subtransaction in subtransactions:
-        subtransaction_data = {**subtransaction}
-        subtransactions_data.append(subtransaction_data)
-    for field in ('bank_name', 'last_four_digits', 'type_name'):
-        account_info_data[field] = transaction[field]
-    transfer_account_data = {}
-    form_data = {**transaction, 'subtransactions': subtransactions_data,
-                 'account_info': account_info_data,
-                 'transfer_account_info': transfer_account_data}
-    # Define a form for a transaction
-    form = BankTransactionForm(data=form_data)
+    form = BankTransactionForm.generate_update(transaction_id)
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
         transaction, subtransactions = save_transaction(form, transaction_id)

@@ -108,8 +108,9 @@ class TestBankTransactionForm:
     )
     @patch('monopyly.banking.forms.BankAccountHandler')
     @patch('monopyly.banking.forms.BankHandler')
-    def test_create(self, mock_bank_handler_type, mock_account_handler_type,
-                    client_context, bank_id, account_id):
+    def test_generate_new(self, mock_bank_handler_type,
+                          mock_account_handler_type,
+                          client_context, bank_id, account_id):
         mock_bank_db = mock_bank_handler_type.return_value
         mock_account_db = mock_account_handler_type.return_value
         # Mock the bank info (if an ID was provided)
@@ -121,8 +122,38 @@ class TestBankTransactionForm:
             'type_name': 'test_type' if account_id else None,
         }
         mock_account_db.get_entry.return_value = other_account_info
-        form = BankTransactionForm.create(bank_id, account_id)
+        form = BankTransactionForm.generate_new(bank_id, account_id)
         assert form.account_info.data == {**bank_info, **other_account_info}
+
+    @patch('monopyly.banking.forms.BankSubtransactionHandler')
+    @patch('monopyly.banking.forms.BankTransactionHandler')
+    def test_generate_update(self, mock_transaction_handler_type,
+                             mock_subtransaction_handler_type, client_context):
+        mock_transaction_id = Mock()
+        mock_transaction_db = mock_transaction_handler_type.return_value
+        mock_subtransaction_db = mock_subtransaction_handler_type.return_value
+        # Mock the transaction info
+        transaction_info = {
+            'transaction_date': 'test_date',
+        }
+        account_info = {
+            'bank_name': 'test_bank',
+            'last_four_digits': '2222',
+            'type_name': 'test_type',
+        }
+        mock_transaction_db.get_entry.return_value = {**transaction_info,
+                                                      **account_info}
+        # Mock the subtransaction info
+        subtransaction_info = [
+            {'subtotal': 100.00, 'note': 'test_note 1'},
+            {'subtotal': 200.00, 'note': 'test note 2'},
+        ]
+        mock_subtransaction_db.get_entries.return_value = subtransaction_info
+        form = BankTransactionForm.generate_update(mock_transaction_id)
+        assert form.transaction_date.data == 'test_date'
+        assert form.account_info.data == account_info
+        for subform, data in zip(form.subtransactions, subtransaction_info):
+            assert subform.data == data
 
 
 @pytest.fixture
