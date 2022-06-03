@@ -1,8 +1,6 @@
 """
 Generate banking forms for the user to fill out.
 """
-from functools import wraps
-
 from wtforms.fields import (
     FormField, DecimalField, StringField, BooleanField, SubmitField, FieldList
 )
