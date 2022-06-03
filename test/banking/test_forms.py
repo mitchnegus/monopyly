@@ -290,3 +290,13 @@ class TestBankAccountForm:
         }
         assert filled_account_form.account_data == data
 
+    @pytest.mark.parametrize('bank_id', [None, 1])
+    def test_generate_new(self, client_context, bank_id):
+        # Mock the bank info (if an ID was provided)
+        bank_info = {
+            'bank_id': bank_id if bank_id else None,
+            'bank_name': None,
+        }
+        form = BankAccountForm.generate_new(bank_id)
+        assert form.bank_info.data == bank_info
+

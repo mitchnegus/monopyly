@@ -38,8 +38,7 @@ def load_accounts():
 @banking_bp.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
 @login_required
 def add_account(bank_id):
-    data = {'bank_info': {'bank_id': bank_id}} if bank_id else None
-    form = BankAccountForm(data=data)
+    form = BankAccountForm.generate_new(bank_id)
     # Check if an account was submitted and add it to the database
     if request.method == 'POST':
         account = save_account(form)

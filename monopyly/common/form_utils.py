@@ -65,7 +65,9 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
         this method. (Hence why the class is called like a class method,
         but uses `self` in the argument list).
         """
-        self._prepare_new_data(*args, **kwargs)
+        data = self._prepare_new_data(*args, **kwargs)
+        if data:
+            self.process(data=data)
 
     @abstractmethod
     def _prepare_new_data(self, *args, **kwargs):
@@ -98,7 +100,8 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
         this method. (Hence why the class is called like a class method,
         but uses `self` in the argument list).
         """
-        self._prepare_update_data(entry_id)
+        data = self._prepare_update_data(entry_id)
+        self.process(data=data)
 
     @abstractmethod
     def _prepare_update_data(self, entry_id):
@@ -175,7 +178,6 @@ class AcquisitionSubform(EntrySubform):
     @abstractmethod
     def _prepare_mapping(self):
         raise NotImplementedError("Prepare the mapping using a subclass.")
-
 
 
 class CustomChoiceSelectField(SelectField, ABC):

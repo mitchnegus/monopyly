@@ -166,7 +166,7 @@ class BankTransactionForm(EntryForm):
                 data_subset = self._get_data_from_entry(BankAccountHandler,
                                                         account_id)
                 data['account_info'].update(data_subset['account_info'])
-            self.process(data=data)
+            return data
 
     @classmethod
     def generate_update(cls, transaction_id):
@@ -194,7 +194,7 @@ class BankTransactionForm(EntryForm):
     def _prepare_update_data(self, transaction_id):
         data = self._get_data_from_entry(BankTransactionHandler,
                                          transaction_id)
-        self.process(data=data)
+        return data
 
     def _get_field_list_data(self, field_list, entry):
         if field_list.name.endswith('subtransactions'):
@@ -305,4 +305,39 @@ class BankAccountForm(EntryForm):
         for field in ('last_four_digits', 'active'):
             account_data[field] = self[field].data
         return account_data
+
+    @classmethod
+    def generate_new(cls, bank_id=None):
+        """
+        Create a bank account form for a new bank account.
+
+        Generate a form for a new bank account. This form should be
+        prepopulated with any bank information that is available (as
+        determined by a bank ID from the database that is provided as an
+        argument). This method is an alternative to traditional
+        instantiation.
+
+        Parameters
+        ----------
+        bank_id : int
+            The ID of a bank to use when prepolating the form.
+
+        Returns
+        -------
+        form : BankAccountForm
+            An instance of this class with any prepopulated information.
+        """
+        return super().generate_new(bank_id)
+
+    def _prepare_new_data(self, bank_id):
+        # Bank ID must be known (at least) for there to be data to prepare
+        if bank_id:
+            # `bank_name` is only used/shown when adding new banks
+            data = {'bank_info': {'bank_id': bank_id, 'bank_name': None}}
+            return data
+
+    @classmethod
+    def generate_update(cls, account_id):
+        raise NotImplementedError("Bank accounts do not currently support "
+                                  "an interface for updating.")
 
