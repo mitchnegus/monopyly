@@ -35,8 +35,9 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
     def form_generator(method):
         """Wrap a form method so that it generates (and returns) a form."""
         @classmethod
+        @wraps(method)
         def wrapper(cls, *args, **kwargs):
-            # Instantiate the class to enable field structure introspection
+            # Instantiate the form to enable field structure introspection
             form = cls()
             method(form, *args, **kwargs)
             return form
