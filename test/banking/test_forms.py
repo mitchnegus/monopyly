@@ -182,17 +182,16 @@ class TestBankTransactionForm:
         suggestions = BankTransactionForm.autocomplete(field)
         assert suggestions == expected_suggestions
 
-
-    @pytest.mark.skip(reason="this will not work until Python3.9")
     def test_autocompletion_fields(self):
         autocompleter = BankTransactionForm.TransactionAutocompleter
-        autocompletion_fields = (
+        autocompletion_fields = [
             'bank_name',
             'last_four_digits',
             'type_name',
             'note'
-        )
+        ]
         assert autocompleter.autocompletion_fields == autocompletion_fields
+
 
 @pytest.fixture
 def account_form(client_context):
