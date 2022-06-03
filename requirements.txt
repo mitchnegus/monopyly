@@ -1,0 +1,11 @@
+coverage
+flask
+flask-wtf
+ipython
+numpy
+pip
+pytest
+pytest-cov
+python-dateutil
+setuptools
+werkzeug

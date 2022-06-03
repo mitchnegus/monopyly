@@ -13,7 +13,7 @@ def test_registration(client, app):
         '/auth/register',
         data={'username': 'a', 'password': 'a'}
     )
-    assert 'http://localhost/auth/login' == response.headers['Location']
+    assert '/auth/login' == response.headers['Location']
     # Check that the registration was successful
     with app.app_context():
         query = "SELECT * FROM users WHERE username = 'a'"
@@ -38,7 +38,7 @@ def test_login(client, auth):
     # Check that the 'login' route is successfully reached
     assert client.get('/auth/login').status_code == 200
     response = auth.login()
-    assert response.headers['Location'] == 'http://localhost/'
+    assert response.headers['Location'] == '/'
     # Check that the session variables are properly set
     with client:
         client.get('/')

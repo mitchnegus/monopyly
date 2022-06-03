@@ -3,7 +3,7 @@ Generate credit card forms for the user to complete.
 """
 from werkzeug.exceptions import abort
 from wtforms.fields import (
-    FormField, DecimalField, IntegerField, TextField, BooleanField,
+    FormField, DecimalField, IntegerField, StringField, BooleanField,
     RadioField, SubmitField, FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
@@ -27,8 +27,8 @@ class CreditTransactionForm(EntryForm):
 
         class CardSubform(EntrySubform):
             """Form to input/edit credit account identification."""
-            bank_name = TextField('Bank')
-            last_four_digits = TextField(
+            bank_name = StringField('Bank')
+            last_four_digits = StringField(
                 'Last Four Digits',
                 validators=[DataRequired(), Length(4), NumeralsOnly()],
             )
@@ -41,7 +41,7 @@ class CreditTransactionForm(EntryForm):
 
         # Fields to identify the card/bank information for the transaction
         card_info = FormField(CardSubform)
-        issue_date = TextField('Statement Date', filters=[parse_date])
+        issue_date = StringField('Statement Date', filters=[parse_date])
 
         def get_statement(self, transaction_date):
             """Get the credit card statement described by the form data."""
@@ -74,18 +74,18 @@ class CreditTransactionForm(EntryForm):
             filters=[lambda x: float(round(x, 2)) if x else None],
             places=2,
         )
-        note = TextField('Note', [DataRequired()])
-        tags = TextField('Tags')
+        note = StringField('Note', [DataRequired()])
+        tags = StringField('Tags')
 
     # Fields to identify the statement information for the transaction
     statement_info = FormField(StatementSubform)
     # Fields pertaining to the transaction
-    transaction_date = TextField(
+    transaction_date = StringField(
         'Transaction Date',
         validators=[DataRequired()],
         filters=[parse_date]
     )
-    vendor = TextField('Vendor', [DataRequired()])
+    vendor = StringField('Vendor', [DataRequired()])
     # Subtransaction fields (must be at least 1 subtransaction)
     subtransactions = FieldList(FormField(SubtransactionSubform),
                                 min_entries=1)
@@ -151,7 +151,7 @@ class CreditCardForm(EntryForm):
         """Form to input/edit account identification."""
         _db_handler_type = CreditAccountHandler
         account_id = AccountSelectField()
-        bank_name = TextField('Bank')
+        bank_name = StringField('Bank')
         statement_issue_day = IntegerField('Statement Issue Day', [Optional()])
         statement_due_day = IntegerField('Statement Due Day', [Optional()])
 
@@ -180,7 +180,7 @@ class CreditCardForm(EntryForm):
             return account_data
 
     account_info = FormField(AccountSubform)
-    last_four_digits = TextField(
+    last_four_digits = StringField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
     )

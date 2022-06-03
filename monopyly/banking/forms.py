@@ -4,7 +4,7 @@ Generate banking forms for the user to fill out.
 from functools import wraps
 
 from wtforms.fields import (
-    FormField, DecimalField, TextField, BooleanField, SubmitField, FieldList
+    FormField, DecimalField, StringField, BooleanField, SubmitField, FieldList
 )
 from wtforms.validators import Optional, DataRequired, Length
 
@@ -23,12 +23,12 @@ class BankTransactionForm(EntryForm):
 
     class AccountSubform(EntrySubform):
         """Form to input/edit bank account identification."""
-        bank_name = TextField('Bank')
-        last_four_digits = TextField(
+        bank_name = StringField('Bank')
+        last_four_digits = StringField(
             'Last Four Digits',
             validators=[DataRequired(), Length(4), NumeralsOnly()]
         )
-        type_name = TextField('AccountType', validators=[DataRequired()])
+        type_name = StringField('AccountType', validators=[DataRequired()])
 
         def get_account(self):
             """Get the bank account described by the form data."""
@@ -45,12 +45,12 @@ class BankTransactionForm(EntryForm):
             filters=[lambda x: float(round(x, 2)) if x else None],
             places=2,
         )
-        note = TextField('Note', [DataRequired()])
+        note = StringField('Note', [DataRequired()])
 
     # Fields to identify the bank account information for the transaction
     account_info = FormField(AccountSubform)
     # Fields pertaining to the transaction
-    transaction_date = TextField(
+    transaction_date = StringField(
         'Transaction Date',
         validators=[DataRequired()],
         filters=[parse_date]
@@ -253,7 +253,7 @@ class BankAccountForm(EntryForm):
         """Form to input/edit bank identification."""
         _db_handler_type = BankHandler
         bank_id = BankSelectField()
-        bank_name = TextField('Bank Name')
+        bank_name = StringField('Bank Name')
 
         def get_bank(self):
             """Get the bank described by the form data."""
@@ -271,7 +271,7 @@ class BankAccountForm(EntryForm):
         """Form to input/edit bank account types."""
         _db_handler_type = BankAccountTypeHandler
         account_type_id = AccountTypeSelectField()
-        type_name = TextField('Account Type Name')
+        type_name = StringField('Account Type Name')
 
         def get_account_type(self):
             """Get the bank account type described by the form data."""
@@ -288,7 +288,7 @@ class BankAccountForm(EntryForm):
 
     bank_info = FormField(BankSubform)
     account_type_info = FormField(AccountTypeSubform)
-    last_four_digits = TextField(
+    last_four_digits = StringField(
         'Last Four Digits',
         validators=[DataRequired(), Length(4), NumeralsOnly()]
     )
