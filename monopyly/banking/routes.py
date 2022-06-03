@@ -186,20 +186,6 @@ def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
-    autocomplete_fields = ('bank_name', 'last_four_digits', 'type_name',
-                           'note')
-    validate_field(field, autocomplete_fields)
-    # Get information from the database to use for autocompletion
-    if field == 'bank_name':
-        db = BankHandler()
-    elif field == 'last_four_digits':
-        db = BankAccountHandler()
-    elif field == 'type_name':
-        db = BankAccountTypeHandler()
-    elif field == 'note':
-        db = BankSubtransactionHandler()
-    fields = (field,)
-    entries = db.get_entries(fields=fields)
-    suggestions = sort_by_frequency([entry[field] for entry in entries])
+    suggestions = BankTransactionForm.autocomplete(field)
     return jsonify(suggestions)
 

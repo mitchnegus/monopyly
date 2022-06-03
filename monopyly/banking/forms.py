@@ -10,18 +10,18 @@ from wtforms.validators import Optional, DataRequired, Length
 
 from ..common.utils import parse_date
 from ..common.form_utils import (
-    MonopylyForm, Subform, AcquisitionSubform, CustomChoiceSelectField,
-    NumeralsOnly, SelectionNotBlank
+    EntryForm, EntrySubform, AcquisitionSubform, CustomChoiceSelectField,
+    Autocompleter, NumeralsOnly, SelectionNotBlank
 )
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler
 from .transactions import BankTransactionHandler, BankSubtransactionHandler
 
 
-class BankTransactionForm(MonopylyForm):
+class BankTransactionForm(EntryForm):
     """Form to input/edit bank transactions."""
 
-    class AccountSubform(Subform):
+    class AccountSubform(EntrySubform):
         """Form to input/edit bank account identification."""
         bank_name = TextField('Bank')
         last_four_digits = TextField(
@@ -37,7 +37,7 @@ class BankTransactionForm(MonopylyForm):
                                            self.last_four_digits.data,
                                            self.type_name.data)
 
-    class SubtransactionSubform(Subform):
+    class SubtransactionSubform(EntrySubform):
         """Form to input/edit bank subtransactions."""
         subtotal = DecimalField(
             'Amount',
@@ -62,6 +62,15 @@ class BankTransactionForm(MonopylyForm):
     transfer_account_info = FieldList(FormField(AccountSubform),
                                       min_entries=0, max_entries=1)
     submit = SubmitField('Save Transaction')
+
+    class TransactionAutocompleter(Autocompleter):
+        """Tool to provide autocompletion suggestions for the form."""
+        _autocompletion_handler_map = {
+            'bank_name': BankHandler,
+            'last_four_digits': BankAccountHandler,
+            'type_name': BankAccountTypeHandler,
+            'note': BankSubtransactionHandler,
+        }
 
     @property
     def transaction_data(self):
@@ -131,7 +140,8 @@ class BankTransactionForm(MonopylyForm):
         Generate a form for a new bank account transaction. This form
         should be prepopulated with any bank and account information
         that is available (as determined by a bank ID or account ID from
-        the database that is provided as an argument).
+        the database that is provided as an argument). This method is an
+        alternative to traditional instantiation.
 
         Parameters
         ----------
@@ -145,27 +155,18 @@ class BankTransactionForm(MonopylyForm):
         form : BankTransactionForm
             An instance of this class with any prepopulated information.
         """
-        # Bank ID must be known (at least) for there to be data to prepare
-        data = cls._prepare_new_data(bank_id, account_id) if bank_id else None
-        return cls(data=data)
+        return super().generate_new(bank_id, account_id)
 
-    @classmethod
-    def _prepare_new_data(cls, bank_id, account_id):
-        bank_info = cls._prepare_submapping(
-            bank_id,
-            BankHandler,
-            ('bank_name',),
-        )
-        data = {'account_info': bank_info}
-        # Add account info to the data if that is known
-        if account_id:
-            account_info = cls._prepare_submapping(
-                account_id,
-                BankAccountHandler,
-                ('last_four_digits', 'type_name'),
-            )
-            data['account_info'].update(account_info)
-        return data
+    def _prepare_new_data(self, bank_id, account_id):
+        # Bank ID must be known (at least) for there to be data to prepare
+        if bank_id:
+            data = self._get_data_from_entry(BankHandler, bank_id)
+            # Add account info to the data if that is known
+            if account_id:
+                data_subset = self._get_data_from_entry(BankAccountHandler,
+                                                        account_id)
+                data['account_info'].update(data_subset['account_info'])
+            self.process(data=data)
 
     @classmethod
     def generate_update(cls, transaction_id):
@@ -175,7 +176,8 @@ class BankTransactionForm(MonopylyForm):
         Generate a form to update an existing bank account transaction.
         This form should be prepopulated with all transaction
         information that has previously been provided so that it can be
-        updated.
+        updated. This method is an alternative to traditional
+        instantiation.
 
         Parameters
         ----------
@@ -187,35 +189,28 @@ class BankTransactionForm(MonopylyForm):
         form : BankTransactionForm
             An instance of this class with any prepopulated information.
         """
-        data = cls._prepare_update_data(transaction_id)
-        return cls(data=data)
+        return super().generate_update(transaction_id)
+
+    def _prepare_update_data(self, transaction_id):
+        data = self._get_data_from_entry(BankTransactionHandler,
+                                         transaction_id)
+        self.process(data=data)
+
+    def _get_field_list_data(self, field_list, entry):
+        if field_list.name.endswith('subtransactions'):
+            # Get all subtransactions and use the subform to template data
+            subtransaction_db = BankSubtransactionHandler()
+            subtransactions = subtransaction_db.get_entries((entry['id'],))
+            subform = field_list[0]
+            return [subform._get_form_data(subtransaction)
+                    for subtransaction in subtransactions]
+        elif field_list.name.endswith('transfer_account_info'):
+            # Updating transactions disallows updating linked transfers
+            return []
 
     @classmethod
-    def _prepare_update_data(cls, transaction_id):
-        # Get the transaction information from the database
-        transaction_info = cls._prepare_submapping(
-            transaction_id,
-            BankTransactionHandler,
-            ('bank_name', 'last_four_digits', 'type_name', 'transaction_date'),
-        )
-        data = {'transaction_date': transaction_info.pop('transaction_date')}
-        data['account_info'] = transaction_info
-        # Transfer data is cannot be updated (update transfers independently)
-        data['transfer_account_info'] = {}
-        # Get the subtransaction information from the database
-        data['subtransactions'] = cls._prepare_subtransactions_submapping(
-            transaction_id
-        )
-        return data
-
-    @classmethod
-    def _prepare_subtransactions_submapping(cls, transaction_id):
-        """Prepare a subset of a mapping for bank subtransactions."""
-        subtransaction_db = BankSubtransactionHandler()
-        subtransactions = subtransaction_db.get_entries((transaction_id,))
-        fields = ('subtotal', 'note')
-        return [{field: subtransaction[field] for field in fields}
-                for subtransaction in subtransactions]
+    def autocomplete(cls, field):
+        return cls.TransactionAutocompleter.autocomplete(field)
 
 
 class BankSelectField(CustomChoiceSelectField):
@@ -251,7 +246,7 @@ class AccountTypeSelectField(CustomChoiceSelectField):
         return display_name
 
 
-class BankAccountForm(MonopylyForm):
+class BankAccountForm(EntryForm):
     """Form to input/edit bank accounts."""
 
     class BankSubform(AcquisitionSubform):

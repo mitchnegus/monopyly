@@ -1,5 +1,5 @@
 """Tests for the banking module forms."""
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, PropertyMock, patch
 from datetime import date
 
 import pytest
@@ -134,6 +134,7 @@ class TestBankTransactionForm:
         mock_subtransaction_db = mock_subtransaction_handler_type.return_value
         # Mock the transaction info
         transaction_info = {
+            'id': 0,
             'transaction_date': 'test_date',
         }
         account_info = {
@@ -155,6 +156,43 @@ class TestBankTransactionForm:
         for subform, data in zip(form.subtransactions, subtransaction_info):
             assert subform.data == data
 
+    @pytest.mark.parametrize(
+        'field, expected_suggestions',
+        [['test_field_0', [0, 1, 3]],
+         ['test_field_1', [3, 1, 2]],
+         ['test_field_2', [2, 3, 4, 5]]]
+    )
+    @patch(
+        'monopyly.banking.forms.BankTransactionForm.TransactionAutocompleter'
+        '._autocompletion_handler_map',
+        new_callable=PropertyMock
+    )
+    @patch(
+        'monopyly.common.form_utils.validate_field',
+        new=lambda field, autocompletion_fields: None)
+    def test_autocomplete(self, mock_property, field, expected_suggestions):
+        mock_handler_type = mock_property.return_value.__getitem__.return_value
+        mock_db = mock_handler_type.return_value
+        mock_db.get_entries.return_value = [
+            {'test_field_0': 0, 'test_field_1': 1, 'test_field_2': 2},
+            {'test_field_0': 0, 'test_field_1': 2, 'test_field_2': 4},
+            {'test_field_0': 1, 'test_field_1': 3, 'test_field_2': 5},
+            {'test_field_0': 3, 'test_field_1': 3, 'test_field_2': 3},
+        ]
+        suggestions = BankTransactionForm.autocomplete(field)
+        assert suggestions == expected_suggestions
+
+
+    @pytest.mark.skip(reason="this will not work until Python3.9")
+    def test_autocompletion_fields(self):
+        autocompleter = BankTransactionForm.TransactionAutocompleter
+        autocompletion_fields = (
+            'bank_name',
+            'last_four_digits',
+            'type_name',
+            'note'
+        )
+        assert autocompleter.autocompletion_fields == autocompletion_fields
 
 @pytest.fixture
 def account_form(client_context):

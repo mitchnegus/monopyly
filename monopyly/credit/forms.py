@@ -10,7 +10,7 @@ from wtforms.validators import Optional, DataRequired, Length
 
 from ..common.utils import parse_date
 from ..common.form_utils import (
-    MonopylyForm, Subform, AcquisitionSubform, CustomChoiceSelectField,
+    EntryForm, EntrySubform, AcquisitionSubform, CustomChoiceSelectField,
     NumeralsOnly, SelectionNotBlank
 )
 from ..banking.banks import BankHandler
@@ -19,13 +19,13 @@ from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
 
 
-class CreditTransactionForm(MonopylyForm):
+class CreditTransactionForm(EntryForm):
     """Form to input/edit credit card transactions."""
 
-    class StatementSubform(Subform):
+    class StatementSubform(EntrySubform):
         """Form to input/edit credit statement identification."""
 
-        class CardSubform(Subform):
+        class CardSubform(EntrySubform):
             """Form to input/edit credit account identification."""
             bank_name = TextField('Bank')
             last_four_digits = TextField(
@@ -66,7 +66,7 @@ class CreditTransactionForm(MonopylyForm):
                 )
             return statement
 
-    class SubtransactionSubform(Subform):
+    class SubtransactionSubform(EntrySubform):
         """Form to input/edit credit card subtransactions."""
         subtotal = DecimalField(
             'Amount',
@@ -144,7 +144,7 @@ class AccountSelectField(CustomChoiceSelectField):
         return display_name
 
 
-class CreditCardForm(MonopylyForm):
+class CreditCardForm(EntryForm):
     """Form to input/edit credit cards."""
 
     class AccountSubform(AcquisitionSubform):
@@ -197,7 +197,7 @@ class CreditCardForm(MonopylyForm):
         return card_data
 
 
-class CardStatementTransferForm(MonopylyForm):
+class CardStatementTransferForm(EntryForm):
     """Form indicating if an unpaid statement should be transferred to a new card."""
     transfer = RadioField("transfer", choices=[("yes", "Yes"), ("no", "No")])
     submit = SubmitField("Continue")
