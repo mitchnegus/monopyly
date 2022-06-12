@@ -11,12 +11,15 @@ from wtforms.validators import Optional, DataRequired, Length
 from ..common.utils import parse_date
 from ..common.form_utils import (
     EntryForm, EntrySubform, AcquisitionSubform, CustomChoiceSelectField,
-    NumeralsOnly, SelectionNotBlank
+    Autocompleter, NumeralsOnly, SelectionNotBlank
 )
 from ..banking.banks import BankHandler
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
+from .transactions import (
+    CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler
+)
 
 
 class CreditTransactionForm(EntryForm):
@@ -91,6 +94,15 @@ class CreditTransactionForm(EntryForm):
                                 min_entries=1)
     submit = SubmitField('Save Transaction')
 
+    class TransactionAutocompleter(Autocompleter):
+        """Tool to provide autocompletion suggestions for the form."""
+        _autocompletion_handler_map = {
+            'bank_name': BankHandler,
+            'last_four_digits': CreditCardHandler,
+            'vendor': CreditTransactionHandler,
+            'note': CreditSubtransactionHandler,
+        }
+
     @property
     def transaction_data(self):
         """
@@ -102,8 +114,7 @@ class CreditTransactionForm(EntryForm):
         subtransactions (along with tags associated with each
         subtransaction).
         """
-        transaction_date = self.transaction_date.data
-        statement = self.statement_info.get_statement(transaction_date)
+        statement = self.get_transaction_statement()
         # Internal transaction IDs are managed by the database handler
         transaction_data = {'internal_transaction_id': None,
                             'statement_id': statement['id']}
@@ -123,6 +134,70 @@ class CreditTransactionForm(EntryForm):
             subtransaction_data['tags'] = tag_data
             transaction_data['subtransactions'].append(subtransaction_data)
         return transaction_data
+
+    def get_transaction_statement(self):
+        """Get the credit card statement associated with the transaction."""
+        return self.statement_info.get_statement(self.transaction_date.data)
+
+    def prepopulate_transaction(self, transaction):
+        """
+        Prepopulate the form with credit transaction information.
+        """
+        subtransaction_db = CreditSubtransactionHandler()
+        tag_db = CreditTagHandler()
+        subtransactions = subtransaction_db.get_entries((transaction['id'],))
+        subtransactions_data = []
+        for subtransaction in subtransactions:
+            subtransaction_ids = (subtransaction['id'],)
+            tags = tag_db.get_entries(subtransaction_ids=subtransaction_ids)
+            tag_list = ', '.join([tag['tag_name'] for tag in tags])
+            subtransaction_data = {**subtransaction, 'tags': tag_list}
+            subtransactions_data.append(subtransaction_data)
+        self.prepopulate(transaction, subtransactions=subtransactions_data)
+
+    @classmethod
+    def autocomplete(cls, field):
+        """Provide autocompletion suggestions for form fields."""
+        return cls.TransactionAutocompleter.autocomplete(field)
+
+    @classmethod
+    def autocomplete_note(cls, vendor):
+        """
+        Provide autocompletion suggestions for the note field.
+
+        The note field should be sorted in two levels. The first items
+        in the list should be suggested notes based on transactions
+        performed at this vendor, since it's likely that a similar
+        note may be used at the vendor again. Then, once notes are
+        sorted by vendor, they should be organized by their frequency,
+        in the database, as is standard for autocompletion suggestions.
+
+        Parameters
+        ----------
+        vendor : str
+            The name of the vendor who's prior notes should be
+            prioritized in the autocompletion suggestions.
+
+        Returns
+        -------
+        suggestions : list of str
+            A list of strings giving transaction note suggestions,
+            first sorted by the named vendor, then by frequency of
+            occurrence in the database.
+        """
+        suggestions = cls.autocomplete('note')
+        db = CreditSubtransactionHandler()
+        entries = db.get_entries(fields=('vendor', 'note'))
+        # Generate a map of notes for the current vendor
+        note_by_vendor = {}
+        for entry in entries:
+            note = entry['note']
+            # Update note if not yet recorded or not yet associated with vendor
+            if not note_by_vendor.get(note):
+                note_by_vendor[note] = (entry['vendor'] == vendor)
+        suggestions.sort(key=note_by_vendor.get, reverse=True)
+        return suggestions
+
 
 
 class AccountSelectField(CustomChoiceSelectField):
@@ -187,6 +262,12 @@ class CreditCardForm(EntryForm):
     active = BooleanField('Active', default='checked')
     submit = SubmitField('Save Card')
 
+    class CardAutocompleter(Autocompleter):
+        """Tool to provide autocompletion suggestions for the form."""
+        _autocompletion_handler_map = {
+            'bank_name': BankHandler,
+        }
+
     @property
     def card_data(self):
         """Produce a dictionary corresponding to a database card."""
@@ -195,6 +276,11 @@ class CreditCardForm(EntryForm):
         for field in ('last_four_digits', 'active'):
             card_data[field] = self[field].data
         return card_data
+
+    @classmethod
+    def autocomplete(cls, field):
+        """Provide autocompletion suggestions for form fields."""
+        return cls.CardAutocompleter.autocomplete(field)
 
 
 class CardStatementTransferForm(EntryForm):

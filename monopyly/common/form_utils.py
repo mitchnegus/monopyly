@@ -32,115 +32,61 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
     that follows the same naming schema.
     """
 
-    def form_generator(method):
-        """Wrap a form method so that it generates (and returns) a form."""
-        @classmethod
-        @wraps(method)
-        def wrapper(cls, *args, **kwargs):
-            # Instantiate the form to enable field structure introspection
-            form = cls()
-            method(form, *args, **kwargs)
-            return form
-        return wrapper
-
-    @form_generator
-    @abstractmethod
-    def generate_new(self, *args, **kwargs):
+    def prepopulate(self, entry, **field_list_entries):
         """
-        Prepare a form to create a new database entry.
-
-        Generate a form to create a new database entry. This form should
-        be prepopulated with information from other entries specified by
-        ID in the method arguments.
-
-        Returns
-        -------
-        BankTransactionForm
-            An instance of this class with any prepopulated information.
-
-        Notes
-        -----
-        The `form_generator` decorator instantiates this class as a form
-        instance before this method is run, passing that instance to
-        this method. (Hence why the class is called like a class method,
-        but uses `self` in the argument list).
-        """
-        data = self._prepare_new_data(*args, **kwargs)
-        if data:
-            self.process(data=data)
-
-    @abstractmethod
-    def _prepare_new_data(self, *args, **kwargs):
-        raise NotImplementedError("Use a derived class instead.")
-
-    @form_generator
-    @abstractmethod
-    def generate_update(self, entry_id):
-        """
-        Prepare a form to update a database entry.
-
-        Generate a form to update an existing database entry. This form
-        should be prepopulated with all entry information that has been
-        previously provided so that it can be updated.
+        Prepopulate the form with the given database entry information.
 
         Parameters
         ----------
-        entry_id : int
-            The ID of the entry to be updated.
-
-        Returns
-        -------
-        form : EntryForm
-            An instance of this class with any prepopulated information.
-
-        Notes
-        -----
-        The `form_generator` decorator instantiates this class as a form
-        instance before this method is run, passing that instance to
-        this method. (Hence why the class is called like a class method,
-        but uses `self` in the argument list).
+        entry : sqlite3.Row
+            A database entry from which to pull information.
+        **field_list_entries :
+            Keyword arguments containing lists of database entries to
+            use for pulling information for field list constructions.
+            The keyword must be named to match the corresponding `FieldList`
+            name.
         """
-        data = self._prepare_update_data(entry_id)
+        data = self._get_form_data(entry, field_list_entries)
         self.process(data=data)
 
-    @abstractmethod
-    def _prepare_update_data(self, entry_id):
-        raise NotImplementedError("Use a derived class instead.")
-
-    def _get_data_from_entry(self, db_handler_type, entry_id):
-        # Uses an entry (and database producing the entry) to load current data
-        db = db_handler_type()
-        entry = db.get_entry(entry_id)
-        data = self._get_form_data(entry)
-        return data
-
-    def _get_form_data(self, entry):
+    def _get_form_data(self, entry, entry_lists):
         # Use the form fields (matching database fields) to get data
         form_data = {}
         for field in self:
             try:
-                field_name, field_data = self._get_field_data(field, entry)
-                form_data[field_name] = field_data
-            except KeyError:
+                name, data = self._get_field_data(field, entry, entry_lists)
+                form_data[name] = data
+            except (IndexError, KeyError):
+                # It is ok for data to not be found in the given entry
+                # - KeyError thrown if key not in dict
+                # - IndexError thrown if key not in sqlite3.Row
                 pass
         return form_data
 
-    def _get_field_data(self, field, entry):
+    def _get_field_data(self, field, entry, entry_lists):
         # In a subform field, the database name is only the last component
         field_name = field.name.split('-')[-1]
         if isinstance(field, FormField):
-            field_data = field._get_form_data(entry)
+            field_data = field._get_form_data(entry, entry_lists)
         elif isinstance(field, FieldList):
-            field_data = self._get_field_list_data(field, entry)
+            entry_list = entry_lists[field_name]
+            field_data = self._get_field_list_data(field, entry_list,
+                                                   entry_lists)
         else:
             field_data = entry[field_name]
         return field_name, field_data
 
-    @abstractmethod
-    def _get_field_list_data(self, field, entry):
-        raise NotImplementedError("Field list behavior must currently be "
-                                  "defined in a subclass as it is not "
-                                  "generalizable.")
+    def _get_field_list_data(self, field_list, entry_list, entry_lists):
+        # Use each entry list item to populate each field list item
+        field_list_data = []
+        for i, entry in enumerate(entry_list):
+            # Add the field to the field list if it does not exist yet
+            if i >= len(field_list):
+                field_list.append_entry()
+            field = field_list[i]
+            name, data = self._get_field_data(field, entry, entry_lists)
+            field_list_data.append(data)
+        return field_list_data
 
 
 class EntrySubform(EntryForm):
@@ -237,6 +183,7 @@ class Autocompleter(ABC):
     autocompletion for fields in that form as necessary.
     """
 
+
     @classmethod
     @property
     def autocompletion_fields(cls):
@@ -262,6 +209,9 @@ class Autocompleter(ABC):
         field : str
             The name of the form field for which to provide
             autocompletion.
+        priority_sort_field : str
+            A field in the database that will take precedence over
+            frequency
 
         Returns
         -------

@@ -130,84 +130,18 @@ class BankTransactionForm(EntryForm):
         """Get the bank account linked in a transfer."""
         return self.transfer_account_info[0].get_account()
 
-    @classmethod
-    def generate_new(cls, bank_id=None, account_id=None):
+    def prepopulate_transaction(self, transaction):
         """
-        Create a bank account transaction form for a new transaction.
-
-        Generate a form for a new bank account transaction. This form
-        should be prepopulated with any bank and account information
-        that is available (as determined by a bank ID or account ID from
-        the database that is provided as an argument). This method is an
-        alternative to traditional instantiation.
-
-        Parameters
-        ----------
-        bank_id : int
-            The ID of a bank to use when prepolating the form.
-        account_id : int
-            The ID of a bank account to use when prepolating the form.
-
-        Returns
-        -------
-        form : BankTransactionForm
-            An instance of this class with any prepopulated information.
+        Prepopulate the form with bank transaction information.
         """
-        return super().generate_new(bank_id, account_id)
-
-    def _prepare_new_data(self, bank_id, account_id):
-        # Bank ID must be known (at least) for there to be data to prepare
-        if bank_id:
-            data = self._get_data_from_entry(BankHandler, bank_id)
-            # Add account info to the data if that is known
-            if account_id:
-                data_subset = self._get_data_from_entry(BankAccountHandler,
-                                                        account_id)
-                data['account_info'].update(data_subset['account_info'])
-            return data
-
-    @classmethod
-    def generate_update(cls, transaction_id):
-        """
-        Prepare a bank account transaction form to update a transaction.
-
-        Generate a form to update an existing bank account transaction.
-        This form should be prepopulated with all transaction
-        information that has previously been provided so that it can be
-        updated. This method is an alternative to traditional
-        instantiation.
-
-        Parameters
-        ----------
-        transaction_id : int
-            The ID of the transaction to be updated.
-
-        Returns
-        -------
-        form : BankTransactionForm
-            An instance of this class with any prepopulated information.
-        """
-        return super().generate_update(transaction_id)
-
-    def _prepare_update_data(self, transaction_id):
-        data = self._get_data_from_entry(BankTransactionHandler,
-                                         transaction_id)
-        return data
-
-    def _get_field_list_data(self, field_list, entry):
-        if field_list.name.endswith('subtransactions'):
-            # Get all subtransactions and use the subform to template data
-            subtransaction_db = BankSubtransactionHandler()
-            subtransactions = subtransaction_db.get_entries((entry['id'],))
-            subform = field_list[0]
-            return [subform._get_form_data(subtransaction)
-                    for subtransaction in subtransactions]
-        elif field_list.name.endswith('transfer_account_info'):
-            # Updating transactions disallows updating linked transfers
-            return []
+        subtransaction_db = BankSubtransactionHandler()
+        subtransactions = subtransaction_db.get_entries((transaction['id'],))
+        # Prepare and prepopulate data from the transaction/subtransaction info
+        self.prepopulate(transaction, subtransactions=subtransactions)
 
     @classmethod
     def autocomplete(cls, field):
+        """Provide autocompletion suggestions for form fields."""
         return cls.TransactionAutocompleter.autocomplete(field)
 
 
@@ -303,39 +237,4 @@ class BankAccountForm(EntryForm):
         for field in ('last_four_digits', 'active'):
             account_data[field] = self[field].data
         return account_data
-
-    @classmethod
-    def generate_new(cls, bank_id=None):
-        """
-        Create a bank account form for a new bank account.
-
-        Generate a form for a new bank account. This form should be
-        prepopulated with any bank information that is available (as
-        determined by a bank ID from the database that is provided as an
-        argument). This method is an alternative to traditional
-        instantiation.
-
-        Parameters
-        ----------
-        bank_id : int
-            The ID of a bank to use when prepolating the form.
-
-        Returns
-        -------
-        form : BankAccountForm
-            An instance of this class with any prepopulated information.
-        """
-        return super().generate_new(bank_id)
-
-    def _prepare_new_data(self, bank_id):
-        # Bank ID must be known (at least) for there to be data to prepare
-        if bank_id:
-            # `bank_name` is only used/shown when adding new banks
-            data = {'bank_info': {'bank_id': bank_id, 'bank_name': None}}
-            return data
-
-    @classmethod
-    def generate_update(cls, account_id):
-        raise NotImplementedError("Bank accounts do not currently support "
-                                  "an interface for updating.")
 

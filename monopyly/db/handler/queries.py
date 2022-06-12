@@ -30,9 +30,10 @@ def validate_field(field, field_list=None):
         err_msg = f"The field '{field}' does not exist in the database."
     else:
         if not all(field in ALL_FIELDS for field in field_list):
-            raise ValueError("The field list contains fields that are not "
-                             "contained in the list of available fields. "
-                             "This poses a security risk and is disallowed.")
+            raise ValueError("The list of fields given contains fields that "
+                             "are not present in the global list of available "
+                             "fields. This poses a security risk and is "
+                             "disallowed.")
         err_msg = f"The field '{field}' is not in the given list of fields."
     if field.split('.', 1)[-1] not in field_list:
         raise ValueError(err_msg)

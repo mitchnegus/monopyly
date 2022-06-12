@@ -807,7 +807,7 @@ def save_transaction(form, transaction_id=None):
 
     Parameters
     ----------
-    form : flask_wtf.FlaskForm
+    form : CreditTransactionForm
         The form being used to provide the data being saved.
     transaction_id : int
         The ID of the transaction to be saved. If provided, the
@@ -820,11 +820,6 @@ def save_transaction(form, transaction_id=None):
         The saved transaction.
     subtransactions : list of sqlite3.Row
         The subtransactions of the saved transaction.
-
-    Raises
-    ------
-    wtfforms.validators.ValidationError
-        Raised when the form does not validate properly.
     """
     db = CreditTransactionHandler()
     transaction_data = form.transaction_data

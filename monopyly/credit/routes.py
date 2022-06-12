@@ -24,6 +24,7 @@ from .transactions import (
     CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler,
     save_transaction
 )
+from .actions import *
 
 
 @credit_bp.route('/cards')
@@ -198,7 +199,7 @@ def load_statements():
     all_cards = card_db.get_entries()
     active_cards = card_db.get_entries(active=True)
     # Get all of the user's statements for active cards from the database
-    card_statements = _get_card_statements(active_cards)
+    card_statements = get_card_statement_groupings(active_cards)
     return render_template('credit/statements_page.html',
                            filter_cards=all_cards,
                            card_statements=card_statements)
@@ -211,28 +212,12 @@ def update_statements_display():
     # Separate the arguments of the POST method
     post_args = request.get_json()
     filter_ids = post_args['filter_ids']
-    # Determine the card IDs from the arguments of POST method
+    # Determine the cards from the arguments of POST method
     cards = [card_db.find_card(*tag.split('-')) for tag in filter_ids]
     # Filter selected statements from the database
-    card_statements = _get_card_statements(cards)
+    card_statements = get_card_statements(cards)
     return render_template('credit/statements.html',
                            card_statements=card_statements)
-
-
-def _get_card_statements(cards, fields=None):
-    """Returns a dictionary of cards and the corresponding statements."""
-    statement_db = CreditStatementHandler()
-    # Set the default fields if not otherwise specified
-    if fields is None:
-        fields = ('card_id', 'issue_date', 'due_date',
-                  'balance', 'payment_date')
-    # Assemble the dictionary of cards and their statements
-    card_statements = {}
-    for card in cards:
-        card_ids = (card['id'],)
-        statements = statement_db.get_entries(card_ids, fields=fields)
-        card_statements[card] = statements
-    return card_statements
 
 
 @credit_bp.route('/statement/<int:statement_id>')
@@ -434,36 +419,21 @@ def update_transactions_display():
               methods=('GET', 'POST'))
 @login_required
 def add_transaction(card_id, statement_id):
-    # Prepare known form entries if card is known
-    if card_id:
-        card_db = CreditCardHandler()
-        # Get the necessary fields from the database
-        card_fields = ('bank_name', 'last_four_digits')
-        card = card_db.get_entry(card_id, fields=card_fields)
-        card_data = {field: card[field] for field in card_fields}
-        data = {'statement_info': {'card_info': card_data}}
-        # Prepare known form entries if statement is known
-        if statement_id:
-            statement_db = CreditStatementHandler()
-            # Get the necessary fields from the database
-            statement_fields = ('issue_date',)
-            statement = statement_db.get_entry(statement_id,
-                                               fields=statement_fields)
-            for field in statement_fields:
-                data['statement_info'][field] = statement[field]
-    else:
-        data = None
-    form = CreditTransactionForm(data=data)
+    form = CreditTransactionForm()
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
-        try:
-            transaction, subtransactions = save_transaction(form)
-            return render_template('credit/transaction_submission_page.html',
-                                   transaction=transaction,
-                                   subtransactions=subtransactions,
-                                   update=False)
-        except ValidationError:
-            pass
+        transaction, subtransactions = save_transaction(form)
+        return render_template('credit/transaction_submission_page.html',
+                               transaction=transaction,
+                               subtransactions=subtransactions,
+                               update=False)
+    else:
+        if statement_id:
+            statement = CreditStatementHandler().get_entry(statement_id)
+            form.prepopulate(statement)
+        elif card_id:
+            card = CreditCardHandler().get_entry(card_id)
+            form.prepopulate(card)
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_new.html', form=form)
@@ -473,30 +443,7 @@ def add_transaction(card_id, statement_id):
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    transaction_db = CreditTransactionHandler()
-    subtransaction_db = CreditSubtransactionHandler()
-    tag_db = CreditTagHandler()
-    # Get the transaction information from the database
-    transaction = transaction_db.get_entry(transaction_id)
-    native_transaction_fields = ('transaction_date', 'vendor')
-    data = {field: transaction[field] for field in native_transaction_fields}
-    card_fields = ('bank_name', 'last_four_digits')
-    data['statement_info'] = {
-        'card_info': {field: transaction[field] for field in card_fields},
-        'issue_date': transaction['issue_date'],
-    }
-    subtransactions = subtransaction_db.get_entries((transaction_id,))
-    subtransactions_data = []
-    for subtransaction in subtransactions:
-        tags = tag_db.get_entries(subtransaction_ids=(subtransaction['id'],),
-                                  fields=('tag_name',), ancestors=False)
-        tag_list = ', '.join([tag['tag_name'] for tag in tags])
-        subtransaction_data = {**subtransaction}
-        subtransaction_data['tags'] = tag_list
-        subtransactions_data.append(subtransaction_data)
-    form_data = {**data, 'subtransactions': subtransactions_data}
-    # Define a form for a transaction
-    form = CreditTransactionForm(data=form_data)
+    form = CreditTransactionForm()
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
         transaction, subtransactions = save_transaction(form, transaction_id)
@@ -504,6 +451,9 @@ def update_transaction(transaction_id):
                                transaction=transaction,
                                subtransactions=subtransactions,
                                update=True)
+    else:
+        transaction = CreditTransactionHandler().get_entry(transaction_id)
+        form.prepopulate_transaction(transaction)
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_update.html',
@@ -585,27 +535,11 @@ def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
-    vendor = post_args['vendor']
-    autocomplete_fields = ('bank_name', 'last_four_digits', 'vendor', 'note')
-    validate_field(field, autocomplete_fields)
-    # Get information from the database to use for autocompletion
     if field != 'note':
-        db = CreditTransactionHandler()
-        fields = (field,)
+        suggestions = CreditTransactionForm.autocomplete(field)
     else:
-        db = CreditSubtransactionHandler()
-        fields = ('vendor', 'note')
-    entries = db.get_entries(fields=fields)
-    suggestions = sort_by_frequency([entry[field] for entry in entries])
-    # Also sort note fields by vendor
-    if field == 'note':
-        # Generate a map of notes for the current vendor
-        note_by_vendor = {}
-        for entry in entries:
-            note = entry['note']
-            if not note_by_vendor.get(note):
-                note_by_vendor[note] = (entry['vendor'] == vendor)
-        suggestions.sort(key=note_by_vendor.get, reverse=True)
+        vendor = post_args['vendor']
+        suggestions = CreditTransactionForm.autocomplete_note(vendor)
     return jsonify(suggestions)
 
 
@@ -615,12 +549,7 @@ def suggest_card_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args['field']
-    if field not in ('bank_name'):
-        raise ValueError(f"'{field}' does not support autocompletion.")
-    # Get information from the database to use for autocompletion
-    bank_db = BankHandler()
-    banks = bank_db.get_entries(fields=(field,))
-    suggestions = [bank['bank_name'] for bank in banks]
+    suggestions = CreditCardForm.autocomplete(field)
     return jsonify(suggestions)
 
 

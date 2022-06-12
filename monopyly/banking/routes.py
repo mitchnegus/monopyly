@@ -4,6 +4,7 @@ Routes for banking financials.
 from collections import Counter
 
 from flask import redirect, render_template, request, url_for, jsonify
+from wtforms.validators import ValidationError
 
 from ..auth.tools import login_required
 from ..common.transactions import get_linked_transaction
@@ -34,11 +35,15 @@ def load_accounts():
 @banking_bp.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
 @login_required
 def add_account(bank_id):
-    form = BankAccountForm.generate_new(bank_id)
+    form = BankAccountForm()
     # Check if an account was submitted and add it to the database
     if request.method == 'POST':
         account = save_account(form)
         return redirect(url_for('banking.load_accounts'))
+    else:
+        if bank_id:
+            bank = BankHandler().get_entry(bank_id)
+            form.prepopulate_bank(bank)
     return render_template('banking/account_form/account_form_page_new.html',
                            form=form)
 
@@ -108,12 +113,19 @@ def show_linked_transaction():
                methods=('GET', 'POST'))
 @login_required
 def add_transaction(bank_id, account_id):
-    form = BankTransactionForm.generate_new(bank_id, account_id)
+    form = BankTransactionForm()
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
         transaction, subtransactions = save_transaction(form)
         return redirect(url_for('banking.load_account_details',
                                 account_id=transaction['account_id']))
+    else:
+        if account_id:
+            account = BankAccountHandler().get_entry(account_id)
+            form.prepopulate(account)
+        elif bank_id:
+            bank = BankHandler().get_entry(bank_id)
+            form.prepopulate(bank)
     # Display the form for accepting user input
     return render_template('banking/transaction_form/'
                            'transaction_form_page_new.html', form=form,
@@ -124,12 +136,15 @@ def add_transaction(bank_id, account_id):
               methods=('GET', 'POST'))
 @login_required
 def update_transaction(transaction_id):
-    form = BankTransactionForm.generate_update(transaction_id)
+    form = BankTransactionForm()
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
         transaction, subtransactions = save_transaction(form, transaction_id)
         return redirect(url_for('banking.load_account_details',
                                 account_id=transaction['account_id']))
+    else:
+        transaction = BankTransactionHandler().get_entry(transaction_id)
+        form.prepopulate_transaction(transaction)
     # Display the form for accepting user input
     update = 'transfer' if transaction['internal_transaction_id'] else True
     return render_template('banking/transaction_form/'

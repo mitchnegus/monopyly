@@ -1,6 +1,7 @@
 """
 Tools for interacting with credit cards in the database.
 """
+from ..common.form_utils import execute_on_form_validation
 from ..db.handler import DatabaseHandler
 from .statements import CreditStatementHandler
 
@@ -188,3 +189,37 @@ class CreditCardHandler(DatabaseHandler):
         """
         # Delete the given cards
         super().delete_entries(entry_ids)
+
+
+@execute_on_form_validation
+def save_card(form, card_id=None):
+    """
+    Save a credit card.
+
+    Saves a credit card in the database. If a card ID is given, then the
+    card is updated with the form information. Otherwise, the form
+    information is added as a new entry.
+
+    Parameters
+    ----------
+    form : flask_wtf.FlaskForm
+        The form beign used to provide the data being saved.
+    card_id : int
+        The ID of hte card to be saved. If provided, the named card will
+        be updated in the database. Otherwise, if the card ID is `None`,
+        a new card will be added.
+
+    Returns
+    -------
+    card : sqlite3.Row
+        The saved card.
+    """
+    db = CreditCardHandler()
+    card_data = form.card_data
+    if card_id:
+        # Update the database with the updated card
+        card = db.update_entry(card_id, card_data)
+    else:
+        # Insert the new transaction into the database
+        card = db.add_entry(card_data)
+    return card

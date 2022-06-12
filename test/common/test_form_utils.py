@@ -23,6 +23,51 @@ def test_execute_on_form_validation(validated, expectation):
         wrapped_func(form)
 
 
+class ConcreteAutocompleter(Autocompleter):
+
+    _autocompletion_handler_map = {
+        'test_field_0': Mock(),
+        'test_field_1': Mock(),
+        'test_field_2': Mock(),
+    }
+
+
+@pytest.fixture
+def concrete_autocompleter():
+    handler_map = ConcreteAutocompleter._autocompletion_handler_map
+    for field, mock_handler_type in handler_map.items():
+        mock_db = mock_handler_type.return_value
+        mock_db.get_entries.return_value = [
+            {'test_field_0': 0, 'test_field_1': 1, 'test_field_2': 2},
+            {'test_field_0': 0, 'test_field_1': 2, 'test_field_2': 4},
+            {'test_field_0': 1, 'test_field_1': 3, 'test_field_2': 5},
+            {'test_field_0': 3, 'test_field_1': 3, 'test_field_2': 3},
+        ]
+    return ConcreteAutocompleter
+
+
+class TestAutocompleter:
+
+    def test_autocompletion_fields(self):
+        autocompleter = ConcreteAutocompleter
+        autocompletion_fields = ['test_field_0',
+                                 'test_field_1',
+                                 'test_field_2']
+        assert autocompleter.autocompletion_fields == autocompletion_fields
+
+    @pytest.mark.parametrize(
+        'field, expected_suggestions',
+        [['test_field_0', [0, 1, 3]],
+         ['test_field_1', [3, 1, 2]],
+         ['test_field_2', [2, 3, 4, 5]]]
+    )
+    @patch('monopyly.common.form_utils.validate_field', new=Mock())
+    def test_autocomplete(self, concrete_autocompleter, field,
+                          expected_suggestions):
+        suggestions = concrete_autocompleter.autocomplete(field)
+        assert suggestions == expected_suggestions
+
+
 @pytest.fixture
 def mock_form():
     with patch('flask_wtf.FlaskForm') as mock_form:

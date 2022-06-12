@@ -342,18 +342,13 @@ def save_account(form):
 
     Parameters
     ----------
-    form : flask_wtf.FlaskForm
+    form : BankAccountForm
         The form being used to provide the data being saved.
 
     Returns
     -------
     account : sqlite3.Row
         The saved transaction.
-
-    Raises
-    ------
-    wtfforms.validators.ValidationError
-        Raised when the form does not validate properly.
     """
     db = BankAccountHandler()
     account_data = form.account_data

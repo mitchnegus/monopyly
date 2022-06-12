@@ -4,7 +4,6 @@ from unittest.mock import Mock, MagicMock
 import pytest
 
 from monopyly.common.actions import *
-from test.helpers import TestHandler
 
 
 def test_get_user_database_entries():
@@ -14,6 +13,17 @@ def test_get_user_database_entries():
     entries = get_user_database_entries(mock_handler_type)
     mock_db.get_entries.assert_called_once()
     assert entries == 'test entries'
+
+
+@pytest.mark.parametrize('fields', [None, ('test_field_1', 'test_field_2')])
+def test_get_groupings(fields):
+    mock_entries = [MagicMock(), MagicMock()]
+    mock_grouped_entries = [MagicMock(), MagicMock()]
+    mock_handler_type = Mock()
+    mock_db = mock_handler_type.return_value
+    mock_db.get_entries.return_value = mock_grouped_entries
+    groupings = get_groupings(mock_entries, mock_db, fields=fields)
+    assert groupings == {entry: mock_grouped_entries for entry in mock_entries}
 
 
 @pytest.mark.parametrize(

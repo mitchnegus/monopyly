@@ -409,24 +409,32 @@ class TestSaveFormFunctions:
     def test_save_new_transaction(self, mock_form, mock_handler_type):
         # Mock the return values and data
         mock_method = mock_handler_type.return_value.add_entry
+        mock_transaction = {'id': 0, 'internal_transaction_id': 0}
+        mock_subtransactions = ['subtransactions']
         mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
                                     ['subtransactions'])
         mock_form.transaction_data = {'key': 'test transaction data'}
         # Call the function and check for proper call signatures
-        save_transaction(mock_form)
+        transaction, subtransactions = save_transaction(mock_form)
         mock_method.assert_called_once_with(mock_form.transaction_data)
+        assert transaction == mock_transaction
+        assert subtransactions == mock_subtransactions
 
     @patch('monopyly.credit.transactions.CreditTransactionHandler')
     @patch('monopyly.credit.forms.CreditTransactionForm')
     def test_save_updated_transaction(self, mock_form, mock_handler_type):
         # Mock the return values and data
         mock_method = mock_handler_type.return_value.update_entry
-        mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
-                                    ['subtransactions'])
+        mock_transaction = {'id': 0, 'internal_transaction_id': 0}
+        mock_subtransactions = ['subtransactions']
+        mock_method.return_value = (mock_transaction, mock_subtransactions)
         mock_form.transaction_data = {'key': 'test transaction data'}
         # Call the function and check for proper call signatures
         transaction_id = 2
-        save_transaction(mock_form, transaction_id)
+        transaction, subtransactions = save_transaction(mock_form,
+                                                        transaction_id)
         mock_method.assert_called_once_with(transaction_id,
                                             mock_form.transaction_data)
+        assert transaction == mock_transaction
+        assert subtransactions == mock_subtransactions
 

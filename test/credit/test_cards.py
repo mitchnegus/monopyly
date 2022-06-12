@@ -1,8 +1,10 @@
 """Tests for the credit module managing credit cards."""
+from unittest.mock import patch
+
 import pytest
 from werkzeug.exceptions import NotFound
 
-from monopyly.credit.cards import CreditCardHandler
+from monopyly.credit.cards import CreditCardHandler, save_card
 from ..helpers import TestHandler
 
 
@@ -187,4 +189,34 @@ class TestCreditCardHandler(TestHandler):
     def test_delete_entries_invalid(self, card_db, entry_ids, exception):
         with pytest.raises(exception):
             card_db.delete_entries(entry_ids)
+
+
+class TestSaveFormFunctions:
+
+    @patch('monopyly.credit.cards.CreditCardHandler')
+    @patch('monopyly.credit.forms.CreditCardForm')
+    def test_save_new_card(self, mock_form, mock_handler_type):
+        # Mock the return values and data
+        mock_method = mock_handler_type.return_value.add_entry
+        mock_card = {'id': 0, 'last_four_digits': '2222'}
+        mock_method.return_value = mock_card
+        mock_form.card_data = {'key': 'test card data'}
+        # Call the function and check for proper call signatures
+        card = save_card(mock_form)
+        mock_method.assert_called_once_with(mock_form.card_data)
+        assert card == mock_card
+
+    @patch('monopyly.credit.cards.CreditCardHandler')
+    @patch('monopyly.credit.forms.CreditCardForm')
+    def test_save_updated_card(self, mock_form, mock_handler_type):
+        # Mock the return values and data
+        mock_method = mock_handler_type.return_value.update_entry
+        mock_card = {'id': 0, 'last_four_digits': '2222'}
+        mock_method.return_value = mock_card
+        mock_form.card_data = {'key': 'test card data'}
+        # Call the function and check for proper call signatures
+        card_id = 2
+        card = save_card(mock_form, card_id)
+        mock_method.assert_called_once_with(card_id, mock_form.card_data)
+        assert card == mock_card
 

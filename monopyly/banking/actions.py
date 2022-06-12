@@ -1,21 +1,26 @@
-"""Module describing logical banking actions (e.g. to be used in routes)."""
+"""Module describing logical banking actions (to be used in routes)."""
+from ..common.actions import get_groupings
 from .banks import BankHandler
 from .accounts import BankAccountHandler, BankAccountTypeHandler
 from .transactions import BankTransactionHandler
 
 
 def get_user_bank_account_groupings():
-    """Get groupings (by bank) of a user's bank accounts."""
+    """
+    Get groupings (by bank) of a user's bank accounts.
+
+    Returns
+    -------
+    bank_accounts : dict
+        A mapping between the bank entries for the user and a list of
+        all bank account entries for that bank.
+    """
     bank_db = BankHandler()
+    account_db = BankAccountHandler()
     # Get all user banks from the database
     banks = bank_db.get_entries()
-    # Get all of the user's bank accounts from the database (grouped by bank)
-    bank_accounts = {}
-    account_db = BankAccountHandler()
-    for bank in banks:
-        accounts = account_db.get_entries((bank['id'],))
-        if accounts:
-            bank_accounts[bank] = accounts
+    # Get groupings of bank accounts (grouped by bank)
+    bank_accounts = get_groupings(banks, account_db)
     return bank_accounts
 
 

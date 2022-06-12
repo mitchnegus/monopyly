@@ -428,9 +428,11 @@ class TestSaveFormFunctions:
     def test_save_new_transaction(self, mock_form, mock_handler_type):
         # Mock the return values and data
         mock_method = mock_handler_type.return_value.add_entry
-        mock_method.return_value = {'id': 0, 'bank_id': 0}
+        mock_account = {'id': 0, 'bank_id': 0}
+        mock_method.return_value = mock_account
         mock_form.account_data = {'key': 'test account data'}
         # Call the function and check for proper call signatures
-        save_account(mock_form)
+        account = save_account(mock_form)
         mock_method.assert_called_once_with(mock_form.account_data)
+        assert account == mock_account
 

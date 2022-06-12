@@ -330,7 +330,7 @@ def save_transaction(form, transaction_id=None):
 
     Parameters
     ----------
-    form : flask_wtf.FlaskForm
+    form : BankTransactionForm
         The form being used to provide the data being saved.
     transaction_id : int
         The ID of the transaction to be saved. If provided, the
@@ -343,11 +343,6 @@ def save_transaction(form, transaction_id=None):
         The saved transaction.
     subtransactions : list of sqlite3.Row
         The subtransactions of the saved transaction.
-
-    Raises
-    ------
-    wtfforms.validators.ValidationError
-        Raised when the form does not validate properly.
     """
     db = BankTransactionHandler()
     transaction_data = form.transaction_data
@@ -372,8 +367,12 @@ def record_new_transfer(transfer_data):
     db = BankTransactionHandler()
     # Create a new internal transaction ID to assign to the transfer
     internal_transaction_id = add_internal_transaction()
-    transfer_data['internal_transaction_id'] = internal_transaction_id
+    # Recreate the data dictionary since the mapping must be properly ordered
+    transfer_transaction_data = {
+        'internal_transaction_id': internal_transaction_id,
+        **transfer_data,
+    }
     # Add the transfer to the database
-    transfer, subtransactions = db.add_entry(transfer_data)
+    transfer, subtransactions = db.add_entry(transfer_transaction_data)
     return transfer, subtransactions
 

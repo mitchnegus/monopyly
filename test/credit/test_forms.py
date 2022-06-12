@@ -1,6 +1,6 @@
 """Tests for the banking module forms."""
-from unittest.mock import patch
-from datetime import date
+from unittest.mock import Mock, patch
+from datetime import datetime, date
 
 import pytest
 from werkzeug.exceptions import NotFound
@@ -31,7 +31,7 @@ def filled_transaction_form(transaction_form):
     yield transaction_form
 
 
-class TestBankTransactionForm:
+class TestCreditTransactionForm:
 
     def test_initialization(self, transaction_form):
         form_fields = ('statement_info', 'transaction_date', 'vendor',
@@ -100,6 +100,154 @@ class TestBankTransactionForm:
         card_info.bank_name.data = 'Invalid Bank'
         with pytest.raises(NotFound):
             filled_transaction_form.transaction_data
+
+    def test_get_transaction_statement(self, filled_transaction_form):
+        statement = filled_transaction_form.get_transaction_statement()
+        assert statement['id'] == 4
+
+    @pytest.mark.parametrize(
+        'mock_entry',
+        [{'card_id': 1,       # must be an integer for field compatibility
+          'bank_name': 'Test Bank',
+          'last_four_digits': '2222'},
+         {'statement_id': 1,  # must be an integer for field compatibility
+          'bank_name': 'Test Bank',
+          'last_four_digits': '2222',
+          'issue_date': '2022-05-15'}]
+    )
+    def test_prepopulate(self, transaction_form, mock_entry):
+        transaction_form.prepopulate(mock_entry)
+        # Check that the form data matches the expectation
+        mock_issue_date = mock_entry.get('issue_date')
+        if mock_issue_date:
+            test_issue_datetime = datetime.strptime(mock_issue_date,
+                                                    '%Y-%m-%d')
+            test_issue_date = test_issue_datetime.date()
+        else:
+            test_issue_date = None
+        transaction_form_data = {
+            'csrf_token': None,
+            'statement_info': {
+                'card_info': {
+                    'bank_name': mock_entry.get('bank_name'),
+                    'last_four_digits': mock_entry.get('last_four_digits'),
+                },
+                'issue_date': test_issue_date,
+            },
+            'transaction_date': None,
+            'vendor': None,
+            'subtransactions': [
+                {'subtotal': None, 'note': None, 'tags': None},
+            ],
+            'submit': False,
+        }
+        assert transaction_form.data == transaction_form_data
+
+    @patch('monopyly.credit.forms.CreditTagHandler')
+    @patch('monopyly.credit.forms.CreditSubtransactionHandler')
+    def test_prepopulate_transaction(self, mock_subtransaction_handler_type,
+                                     mock_tag_handler_type, transaction_form):
+        # Mock the transaction
+        mock_transaction = {
+            'id': Mock(),
+            'internal_transaction_id': None,
+            'bank_id': 100,       # must be an integer for field compatibility
+            'bank_name': 'Test Bank',
+            'account_id': 100,    # must be an integer for field compatibility
+            'card_id': 100,       # must be an integer for field compatibility
+            'last_four_digits': '7777',
+            'active': True,
+            'statement_id': 100,  # must be an integer for field compatibility
+            'issue_date': '2022-06-05',
+            'due_date': '2022-07-01',
+            'transaction_date': '2022-06-01',
+            'vendor': 'Test Vendor',
+        }
+        # Mock the subtransactions returned by the mock handler
+        mock_subtransactions = [
+            {'id': Mock(), 'subtotal': 25.00, 'note': 'test note one'},
+            {'id': Mock(), 'subtotal': 50.00, 'note': 'test note two'},
+            {'id': Mock(), 'subtotal': 75.00, 'note': 'test note three'},
+        ]
+        mock_subtransaction_db = mock_subtransaction_handler_type.return_value
+        mock_subtransactions_method = mock_subtransaction_db.get_entries
+        mock_subtransactions_method.return_value = mock_subtransactions
+        # Mock the tags returned by the mock handler
+        mock_tags = [
+            [],
+            [{'id': Mock(), 'parent_id': Mock(), 'tag_name': 'tag one'}],
+            [{'id': Mock(), 'parent_id': Mock(), 'tag_name': 'tag one'},
+             {'id': Mock(), 'parent_id': Mock(), 'tag_name': 'tag two'}]
+        ]
+        mock_tag_db = mock_tag_handler_type.return_value
+        mock_tags_method = mock_tag_db.get_entries
+        mock_tags_method.side_effect = mock_tags
+        transaction_form.prepopulate_transaction(mock_transaction)
+        # Check that the form data matches the expectation
+        test_subtransactions = []
+        for subtransaction, tags in zip(mock_subtransactions, mock_tags):
+            test_subtransactions.append({
+                **{key: subtransaction[key] for key in ('subtotal', 'note')},
+                'tags': ', '.join([tag['tag_name'] for tag in tags]),
+            })
+        transaction_form_data = {
+            'csrf_token': None,
+            'statement_info': {
+                'card_info': {
+                    'bank_name': mock_transaction['bank_name'],
+                    'last_four_digits': mock_transaction['last_four_digits'],
+                },
+                'issue_date': date(2022, 6, 5),
+            },
+            'transaction_date': date(2022, 6, 1),
+            'vendor': mock_transaction['vendor'],
+            'subtransactions': test_subtransactions,
+            'submit': False,
+        }
+        assert transaction_form.data == transaction_form_data
+
+    def test_autocompletion_fields(self):
+        autocompleter = CreditTransactionForm.TransactionAutocompleter
+        autocompletion_fields = [
+            'bank_name',
+            'last_four_digits',
+            'vendor',
+            'note',
+        ]
+        assert autocompleter.autocompletion_fields == autocompletion_fields
+
+    @patch(
+        'monopyly.credit.forms.CreditTransactionForm.TransactionAutocompleter'
+    )
+    def test_autocomplete(self, mock_autocompleter):
+        mock_method = mock_autocompleter.autocomplete
+        suggestions = CreditTransactionForm.autocomplete('test_field')
+        assert suggestions == mock_method.return_value
+        mock_method.assert_called_once_with('test_field')
+
+    @pytest.mark.parametrize(
+        'vendor, suggestion_order',
+        [['Vendor 0', (0, 1, 2)],
+         ['Vendor 1', (2, 0, 1)]]
+    )
+    @patch('monopyly.credit.forms.CreditSubtransactionHandler')
+    @patch('monopyly.credit.forms.CreditTransactionForm.autocomplete')
+    def test_autocomplete_note(self, mock_method, mock_handler_type,
+                               client_context, vendor, suggestion_order):
+        mock_suggestions = ['Vendor 0, test 0',
+                            'Vendor 0, test 1',
+                            'Vendor 1, test 0']
+        mock_method.return_value = mock_suggestions.copy()
+        mock_subtransactions = [
+            {'vendor': 'Vendor 0', 'note': 'Vendor 0, test 0'},
+            {'vendor': 'Vendor 0', 'note': 'Vendor 0, test 1'},
+            {'vendor': 'Vendor 0', 'note': 'Vendor 0, test 0'},
+            {'vendor': 'Vendor 1', 'note': 'Vendor 1, test 0'},
+        ]
+        mock_db = mock_handler_type.return_value
+        mock_db.get_entries.return_value = mock_subtransactions
+        suggestions = CreditTransactionForm.autocomplete_note(vendor)
+        assert suggestions == [mock_suggestions[i] for i in suggestion_order]
 
 
 @pytest.fixture
@@ -177,4 +325,15 @@ class TestCreditCardForm:
             'active': 1,
         }
         assert filled_card_form.card_data == data
+
+    def test_autocompletion_fields(self):
+        autocompleter = CreditCardForm.CardAutocompleter
+        autocompletion_fields = ['bank_name']
+        assert autocompleter.autocompletion_fields == autocompletion_fields
+
+    @patch('monopyly.credit.forms.CreditCardForm.CardAutocompleter')
+    def test_autocomplete(self, mock_autocompleter):
+        mock_method = mock_autocompleter.autocomplete
+        CreditCardForm.autocomplete('test_field')
+        mock_method.assert_called_once_with('test_field')
 

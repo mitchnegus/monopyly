@@ -32,3 +32,15 @@ class TestHandler:
             db = get_db()
             db_count = db.execute(query).fetchone()[0]
             assert db_count == count
+
+
+class TestGrouper:
+
+    def compare_groupings(self, grouping, expected_id_groupings):
+        for category_entry, entries in grouping.items():
+            # Use IDs as a proxy for testing the full database query result
+            category_id = category_entry['id']
+            assert category_id in expected_id_groupings
+            for entry in entries:
+                assert entry['id'] in expected_id_groupings[category_id]
+
