@@ -148,6 +148,20 @@ class TestBankAccountTypeHandler(TestHandler):
         with pytest.raises(ValueError):
             account_type_db.add_entry(mapping)
 
+    def test_add_entry_invalid_user(self, app, account_type_db):
+        query = ("SELECT COUNT(id) FROM bank_account_types"
+                 " WHERE user_id = 1")
+        self.assertQueryEqualsCount(app, query, 1)
+        with pytest.raises(NotFound):
+            mapping = {
+                'user_id': 1,
+                'type_name': 'Well Stocked Hand',
+                'type_abbreviation': 'Paper',
+            }
+            account_type_db.add_entry(mapping)
+        # Check that the transaction was not added to a different account
+        self.assertQueryEqualsCount(app, query, 1)
+
     @pytest.mark.parametrize(
         'mapping',
         [{'user_id': 3, 'type_name': 'Trustworthy Friend',
@@ -364,6 +378,21 @@ class TestBankAccountHandler(TestHandler):
     def test_add_entry_invalid(self, account_db, mapping):
         with pytest.raises(ValueError):
             account_db.add_entry(mapping)
+
+    def test_add_entry_invalid_user(self, app, account_db):
+        query = ("SELECT COUNT(id) FROM bank_accounts"
+                 " WHERE bank_id = 1")
+        self.assertQueryEqualsCount(app, query, 1)
+        with pytest.raises(NotFound):
+            mapping = {
+                'bank_id': 1,
+                'account_type_id': 5,
+                'last_four_digits': '6666',
+                'active': 1,
+            }
+            account_db.add_entry(mapping)
+        # Check that the transaction was not added to a different account
+        self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
         'mapping',

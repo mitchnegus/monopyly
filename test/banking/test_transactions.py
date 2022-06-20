@@ -154,6 +154,21 @@ class TestBankTransactionHandler(TestHandler):
         with pytest.raises(exception):
             transaction_db.add_entry(mapping)
 
+    def test_add_entry_invalid_user(self, app, transaction_db):
+        query = ("SELECT COUNT(id) FROM bank_transactions"
+                 " WHERE account_id = 1")
+        self.assertQueryEqualsCount(app, query, 1)
+        with pytest.raises(NotFound):
+            mapping = {
+                'internal_transaction_id': 2,
+                'account_id': 1,
+                'transaction_date': '2022-05-08',
+                'subtransactions': [{'test': 1}],
+            }
+            transaction_db.add_entry(mapping)
+        # Check that the transaction was not added to a different account
+        self.assertQueryEqualsCount(app, query, 1)
+
     @pytest.mark.parametrize(
         'mapping',
         [{'internal_transaction_id': None, 'account_id': 3,
@@ -431,15 +446,30 @@ class TestSaveFormFunctions:
     @patch('monopyly.banking.transactions.add_internal_transaction')
     def test_record_new_transfer(self, mock_function, mock_handler_type):
         # Mock the return values and data
-        mock_method = mock_handler_type.return_value.add_entry
-        mock_method.return_value = ('transfer', 'subtransactions')
-        transfer_data = {'key': 'test data'}
-        # Call the function and check for proper call signatures
-        record_new_transfer(transfer_data)
-        expected_transfer_transaction_data = {
-            'internal_transaction_id': mock_function.return_value,
-            **transfer_data,
+        mock_transfer_data = {'key': 'test data'}
+        mock_unlinked_entry = {
+            'id': 100,
+            'internal_transaction_id': None,
         }
-        mock_method.assert_called_once_with(expected_transfer_transaction_data)
+        mock_linked_entry = {
+            'id': 100,
+            'internal_transaction_id': mock_function.return_value,
+        }
+        mock_subtransactions = ['subtransactions']
+        mock_add_method = mock_handler_type.return_value.add_entry
+        mock_add_method.return_value = (mock_unlinked_entry,
+                                        mock_subtransactions)
+        mock_update_method = mock_handler_type.return_value.update_entry
+        mock_update_method.return_value = (mock_linked_entry,
+                                           mock_subtransactions)
+        # Call the function and check for proper call signatures
+        record_new_transfer(mock_transfer_data)
+        mock_add_method.assert_called_once_with(
+            {'internal_transaction_id': None, **mock_transfer_data}
+        )
+        mock_update_method.assert_called_once_with(
+            mock_add_method.return_value[0]['id'],
+            {'internal_transaction_id': mock_function.return_value},
+        )
         mock_function.assert_called_once()
 

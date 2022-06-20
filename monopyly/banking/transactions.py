@@ -365,14 +365,17 @@ def save_transaction(form, transaction_id=None):
 def record_new_transfer(transfer_data):
     """Record a new transfer given the data for populating the database."""
     db = BankTransactionHandler()
-    # Create a new internal transaction ID to assign to the transfer
-    internal_transaction_id = add_internal_transaction()
-    # Recreate the data dictionary since the mapping must be properly ordered
+    # Set the internal ID to `None` until the entry has been added successfully
     transfer_transaction_data = {
-        'internal_transaction_id': internal_transaction_id,
+        'internal_transaction_id': None,
         **transfer_data,
     }
-    # Add the transfer to the database
+    # Add the transfer transaction to the database
     transfer, subtransactions = db.add_entry(transfer_transaction_data)
+    # Create a new internal transaction ID to assign to the transfer
+    internal_transaction_id = add_internal_transaction()
+    # Update the entry with the newly assigned internal ID
+    mapping = {'internal_transaction_id': internal_transaction_id}
+    transfer, subtransactions = db.update_entry(transfer['id'], mapping)
     return transfer, subtransactions
 

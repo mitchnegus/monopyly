@@ -91,6 +91,20 @@ class TestCreditAccountHandler(TestHandler):
         with pytest.raises(ValueError):
             account_db.add_entry(mapping)
 
+    def test_add_entry_invalid_user(self, app, account_db):
+        query = ("SELECT COUNT(id) FROM credit_accounts"
+                 " WHERE bank_id = 1")
+        self.assertQueryEqualsCount(app, query, 1)
+        with pytest.raises(NotFound):
+            mapping = {
+                'bank_id': 1,
+                'statement_issue_day': 11,
+                'statement_due_day': 1,
+            }
+            account_db.add_entry(mapping)
+        # Check that the transaction was not added to a different account
+        self.assertQueryEqualsCount(app, query, 1)
+
     @pytest.mark.parametrize(
         'mapping',
         [{'bank_id': 2, 'statement_issue_day': 10, 'statement_due_day': 1},

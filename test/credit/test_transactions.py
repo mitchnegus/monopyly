@@ -161,11 +161,11 @@ class TestCreditTransactionHandler(TestHandler):
     @pytest.mark.parametrize(
         'mapping, exception',
         [[{'internal_transaction_id': None, 'invalid_field': 'Test',
-           'transaction_date': '2020-05-03', 'vendor': 'Baltic Avenue',
+           'transaction_date': '2022-05-03', 'vendor': 'Baltic Avenue',
            'subtransactions': [{'test': 1}]},
           ValueError],
          [{'internal_transaction_id': 2, 'statement_id': 4,
-           'transaction_date': '2020-05-03',
+           'transaction_date': '2022-05-03',
            'subtransactions': [{'test': 1}]},
           ValueError],
          [{'internal_transaction_id': 2, 'statement_id': 4,
@@ -175,6 +175,22 @@ class TestCreditTransactionHandler(TestHandler):
     def test_add_entry_invalid(self, transaction_db, mapping, exception):
         with pytest.raises(exception):
             transaction_db.add_entry(mapping)
+
+    def test_add_entry_invalid_user(self, app, transaction_db):
+        query = ("SELECT COUNT(id) FROM credit_transactions"
+                 " WHERE statement_id = 1")
+        self.assertQueryEqualsCount(app, query, 1)
+        with pytest.raises(NotFound):
+            mapping = {
+                'internal_transaction_id': 2,
+                'statement_id': 1,
+                'transaction_date': '2022-05-03',
+                'vendor': 'Baltic Avenue',
+                'subtransactions': [{'test': 1}],
+            }
+            transaction_db.add_entry(mapping)
+        # Check that the transaction was not added to a different account
+        self.assertQueryEqualsCount(app, query, 1)
 
     @pytest.mark.parametrize(
         'mapping',

@@ -162,9 +162,11 @@ class DatabaseHandler(ABC):
             f"     VALUES ({self._queries.reserve_places(mapping.values())})",
             (*mapping.values(),)
         )
-        self.db.commit()
         entry_id = self.cursor.lastrowid
         entry = self.get_entry(entry_id)
+        # Commit only after ensuring the entry was properly added
+        # (including only added for the correct user)
+        self.db.commit()
         return entry
 
     def update_entry(self, entry_id, mapping):
