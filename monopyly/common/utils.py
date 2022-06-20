@@ -21,7 +21,7 @@ def parse_date(given_date):
         - YYYY/[M]M/[D]D
         - [M]M/[D]D/[YY]YY
     Dates with a delimiter between time categories (day, month, year)
-    are not required to have two digit values (e.g. 'August' could be
+    are not required to have two digit values (e.g., 'August' could be
     indicated by '08' or just '8'). For dates that are given with a
     delimiter, it may be either "/", ".", or "-".
 

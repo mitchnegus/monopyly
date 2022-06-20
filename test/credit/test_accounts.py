@@ -132,6 +132,10 @@ class TestCreditAccountHandler(TestHandler):
         with pytest.raises(exception):
             account_db.update_entry(account_id, mapping)
 
+    def test_update_entry_value(self, account_db):
+        account = account_db.update_entry_value(2, 'statement_due_day', 1)
+        assert account['statement_due_day'] == 1
+
     @pytest.mark.parametrize(
         'entry_ids', [(2,), (2, 3)]
     )

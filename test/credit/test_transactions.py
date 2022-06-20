@@ -226,6 +226,11 @@ class TestCreditTransactionHandler(TestHandler):
         with pytest.raises(exception):
             transaction_db.update_entry(transaction_id, mapping)
 
+    def test_update_entry_value(self, transaction_db):
+        transaction = transaction_db.update_entry_value(2, 'transaction_date',
+                                                        date(2022, 5, 3))[0]
+        assert transaction['transaction_date'] == date(2022, 5, 3)
+
     @pytest.mark.parametrize(
         'entry_ids', [(4,), (4, 7)]
     )
@@ -373,7 +378,9 @@ class TestCreditSubtransactionsHandler(TestHandler):
     )
     def test_update_entry(self, app, subtransaction_db, subtransaction_id,
                           mapping):
-        subtransaction_db.update_entry(subtransaction_id, mapping)
+        subtransaction = subtransaction_db.update_entry(subtransaction_id,
+                                                        mapping)
+        assert subtransaction['note'] == 'TEST update'
         # Check that the entry was updated
         query = ("SELECT COUNT(id) FROM credit_subtransactions"
                  " WHERE note = 'TEST update'")
@@ -395,6 +402,11 @@ class TestCreditSubtransactionsHandler(TestHandler):
                                   mapping, exception):
         with pytest.raises(exception):
             subtransaction_db.update_entry(subtransaction_id, mapping)
+
+    def test_update_entry_value(self, subtransaction_db):
+        subtransaction = subtransaction_db.update_entry_value(2, 'note',
+                                                              'TEST update')
+        assert subtransaction['note'] == 'TEST update'
 
     @pytest.mark.parametrize(
         'entry_ids', [(2,), (2, 3)]

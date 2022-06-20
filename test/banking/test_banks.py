@@ -115,6 +115,10 @@ class TestBankHandler(TestHandler):
         with pytest.raises(exception):
             bank_db.update_entry(bank_id, mapping)
 
+    def test_update_entry_value(self, bank_db):
+        bank = bank_db.update_entry_value(2, 'bank_name', 'Corner Jail')
+        assert bank['bank_name'] == 'Corner Jail'
+
     @pytest.mark.parametrize(
         'entry_ids', [(2,), (2, 3)]
     )

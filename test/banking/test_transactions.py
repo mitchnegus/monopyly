@@ -203,6 +203,11 @@ class TestBankTransactionHandler(TestHandler):
         with pytest.raises(exception):
             transaction_db.update_entry(transaction_id, mapping)
 
+    def test_update_entry_value(self, transaction_db):
+        transaction = transaction_db.update_entry_value(5, 'transaction_date',
+                                                        date(2022, 5, 8))[0]
+        assert transaction['transaction_date'] == date(2022, 5, 8)
+
     @pytest.mark.parametrize(
         'entry_ids', [(4,), (4, 7)]
     )
@@ -337,7 +342,9 @@ class TestBankSubtransactionsHandler(TestHandler):
     )
     def test_update_entry(self, app, subtransaction_db, subtransaction_id,
                           mapping):
-        subtransaction_db.update_entry(subtransaction_id, mapping)
+        subtransaction = subtransaction_db.update_entry(subtransaction_id,
+                                                        mapping)
+        assert subtransaction['note'] == 'TEST update'
         # Check that the entry was updated
         query = ("SELECT COUNT(id) FROM bank_subtransactions"
                  " WHERE note = 'TEST update'")
@@ -359,6 +366,11 @@ class TestBankSubtransactionsHandler(TestHandler):
                                   mapping, exception):
         with pytest.raises(exception):
             subtransaction_db.update_entry(subtransaction_id, mapping)
+
+    def test_update_entry_value(self, subtransaction_db):
+        subtransaction = subtransaction_db.update_entry_value(2, 'note',
+                                                              'TEST update')
+        assert subtransaction['note'] == 'TEST update'
 
     @pytest.mark.parametrize(
         'entry_ids', [(2,), (2, 3)]
@@ -459,7 +471,7 @@ class TestSaveFormFunctions:
         mock_add_method = mock_handler_type.return_value.add_entry
         mock_add_method.return_value = (mock_unlinked_entry,
                                         mock_subtransactions)
-        mock_update_method = mock_handler_type.return_value.update_entry
+        mock_update_method = mock_handler_type.return_value.update_entry_value
         mock_update_method.return_value = (mock_linked_entry,
                                            mock_subtransactions)
         # Call the function and check for proper call signatures
@@ -469,7 +481,8 @@ class TestSaveFormFunctions:
         )
         mock_update_method.assert_called_once_with(
             mock_add_method.return_value[0]['id'],
-            {'internal_transaction_id': mock_function.return_value},
+            'internal_transaction_id',
+            mock_function.return_value,
         )
         mock_function.assert_called_once()
 

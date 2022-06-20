@@ -231,6 +231,11 @@ class TestCreditStatementHandler(TestHandler):
         with pytest.raises(exception):
             statement_db.update_entry(statement_id, mapping)
 
+    def test_update_entry_value(self, statement_db):
+        statement = statement_db.update_entry_value(2, 'issue_date',
+                                                    date(2020, 5, 20))
+        assert statement['issue_date'] == date(2020, 5, 20)
+
     @pytest.mark.parametrize(
         'entry_ids', [(2,), (2, 3)]
     )

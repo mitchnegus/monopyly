@@ -76,9 +76,14 @@ class TestDateOccurrenceFinder:
     def test_get_next_occurrence_of_day(self, day, given_date, next_date):
         assert get_next_occurrence_of_day(day, given_date) == next_date
 
-    @pytest.mark.skip(reason="not implemented")
+    @pytest.mark.parametrize(
+        'day, given_date',
+        [[30, date(2020, 2, 27)],  # this month has no day 30
+         [31, date(2020, 4, 30)]]   # this month has no day 31
+    )
     def test_get_next_occurrence_of_day_invalid(self, day, given_date):
-        assert False
+        with pytest.raises(ValueError):
+            get_next_occurrence_of_day(day, given_date)
 
 
 class TestFloatDedelimiter:

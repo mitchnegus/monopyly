@@ -14,11 +14,11 @@ from ..common.actions import get_user_database_entries, delete_database_entry
 from ..db.handler.queries import validate_field
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
-from ..banking.transactions import BankTransactionHandler, record_new_transfer
+from ..banking.transactions import BankTransactionHandler
 from . import credit_bp
 from .forms import *
 from .accounts import CreditAccountHandler
-from .cards import CreditCardHandler
+from .cards import CreditCardHandler, save_card
 from .statements import CreditStatementHandler
 from .transactions import (
     CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler,
@@ -41,93 +41,41 @@ def add_card():
     form = CreditCardForm()
     # Check if a card was submitted and add it to the database
     if request.method == 'POST':
-        if form.validate():
-            card_db = CreditCardHandler()
-            # Insert the new credit card into the database
-            card = card_db.add_entry(form.card_data)
-            card_to_replace = _get_card_to_replace(card)
+        card = save_card(form)
+        preceding_card = get_potential_preceding_card(card)
+        if preceding_card:
+            # Disable the form submit button
+            form.submit.render_kw = {'disabled': True}
             transfer_form = CardStatementTransferForm()
-            if card_to_replace:
-                # Disable the form submit button
-                form.submit.render_kw = {'disabled': True}
-                return render_template('credit/card_form/'
-                                       'card_form_page_new.html',
-                                       form=form,
-                                       card=card,
-                                       prior_card=card_to_replace,
-                                       transfer_statement_form=transfer_form)
-            else:
-                return redirect(url_for('credit.load_account',
-                                        account_id=card['account_id']))
+            return render_template('credit/card_form/card_form_page_new.html',
+                                   form=form,
+                                   card=card,
+                                   prior_card=preceding_card,
+                                   transfer_statement_form=transfer_form)
         else:
-            flash(form_err_msg)
-            print(form.errors)
+            return redirect(url_for('credit.load_account',
+                                    account_id=card['account_id']))
     return render_template('credit/card_form/card_form_page_new.html', form=form)
 
 
-def _get_card_to_replace(card):
-    """Get the card that this new card may be intended to replace (if any)."""
-    # Card must be active
-    if card['active']:
-        # Only one other active card must exist for this account
-        card_db = CreditCardHandler()
-        active_cards = card_db.get_entries(account_ids=(card['account_id'],),
-                                           active=True,
-                                           fields=('last_four_digits',))
-        other_active_cards = [_ for _ in active_cards if _['id'] != card['id']]
-        if len(other_active_cards) == 1:
-            other_card = other_active_cards[0]
-            # That active card must have statements with an unpaid balance
-            statement_db = CreditStatementHandler()
-            statements = statement_db.get_entries(card_ids=(other_card['id'],),
-                                                  fields=('balance',))
-            if statements:
-                latest_statement = statements[0]
-                if latest_statement['balance'] > 0:
-                    return other_card
-    # Card does not meet all of these conditions
-    return None
-
-
-@credit_bp.route('/_transfer_card_statement/<int:card_id>/<int:prior_card_id>',
-              methods=('POST',))
+@credit_bp.route('/_transfer_card_statement/<int:account_id>/<int:card_id>/'
+                 '<int:prior_card_id>',
+                 methods=('POST',))
 @login_required
-def transfer_statement(card_id, prior_card_id):
+def transfer_statement(account_id, card_id, prior_card_id):
     # Define and validate the form
     form = CardStatementTransferForm()
-    form.validate()
-    # Identify the account of the cards
-    card_db = CreditCardHandler()
-    card = card_db.get_entry(card_id)
-    account_id = card['account_id']
-    # If response is affirmative, transfer the statement to the new card
-    if form['transfer'].data == 'yes':
-        # Get the most recent statement
-        statement_db = CreditStatementHandler()
-        statement = statement_db.get_entries(card_ids=(prior_card_id,))[0]
-        # Update the latest statement with the new card (mapping has no 'id')
-        statement_mapping_fields = ('card_id', 'issue_date', 'due_date')
-        statement_mapping = {_: statement[_] for _ in statement_mapping_fields}
-        statement_mapping['card_id'] = card_id
-        statement_db.update_entry(statement['id'], statement_mapping)
-        # Deactivate the old card
-        prior_card = card_db.get_entry(prior_card_id)
-        card_mapping_fields = ('account_id', 'last_four_digits', 'active')
-        prior_card_mapping = {_:prior_card[_] for _ in card_mapping_fields}
-        prior_card_mapping['active'] = 0
-        card_db.update_entry(prior_card_id, prior_card_mapping)
+    transfer_credit_card_statement(form, card_id, prior_card_id)
     return redirect(url_for('credit.load_account', account_id=account_id))
 
 
 @credit_bp.route('/account/<int:account_id>')
 @login_required
 def load_account(account_id):
-    account_db = CreditAccountHandler()
-    card_db = CreditCardHandler()
     # Get the account information from the database
-    account = account_db.get_entry(account_id)
+    account = CreditAccountHandler().get_entry(account_id)
     # Get all cards with active cards at the end of the list
-    cards = card_db.get_entries(account_ids=(account_id,))[::-1]
+    cards = CreditCardHandler().get_entries(account_ids=(account_id,))[::-1]
     return render_template('credit/account_page.html',
                            account=account,
                            cards=cards)
@@ -136,16 +84,14 @@ def load_account(account_id):
 @credit_bp.route('/_update_card_status', methods=('POST',))
 @login_required
 def update_card_status():
-    card_db = CreditCardHandler()
     # Get the field from the AJAX request
     post_args = request.get_json()
     input_id = post_args['input_id']
-    active = post_args['active']
+    active = int(post_args['active'])
     # Get the card ID as the second component of the input's ID attribute
     card_id = input_id.split('-')[1]
     # Update the card in the database
-    mapping = {'active': int(active)}
-    card = card_db.update_entry(card_id, mapping)
+    card = CreditCardHandler().update_entry_value(card_id, 'active', active)
     return render_template('credit/card_graphic/card_front.html',
                            card=card)
 
@@ -162,12 +108,15 @@ def delete_card(card_id):
           methods=('POST',))
 @login_required
 def update_account_statement_issue_day(account_id):
-    account_db = CreditAccountHandler()
     # Get the field from the AJAX request
-    issue_day = request.get_json()
+    issue_day = int(request.get_json())
     # Update the account in the database
-    mapping = {'statement_issue_day': int(issue_day)}
-    account = account_db.update_entry(account_id, mapping)
+    account_db = CreditAccountHandler()
+    account = CreditAccountHandler().update_entry_value(
+        account_id,
+        'statement_issue_day',
+        issue_day,
+    )
     return str(account['statement_issue_day'])
 
 
@@ -175,12 +124,14 @@ def update_account_statement_issue_day(account_id):
           methods=('POST',))
 @login_required
 def update_account_statement_due_day(account_id):
-    account_db = CreditAccountHandler()
     # Get the field from the AJAX request
-    due_day = request.get_json()
+    due_day = int(request.get_json())
     # Update the account in the database
-    mapping = {'statement_due_day': int(due_day)}
-    account = account_db.update_entry(account_id, mapping)
+    account = CreditAccountHandler().update_entry_value(
+        account_id,
+        'statement_due_day',
+        due_day,
+    )
     return str(account['statement_due_day'])
 
 
@@ -194,8 +145,8 @@ def delete_account(account_id):
 @credit_bp.route('/statements')
 @login_required
 def load_statements():
-    card_db = CreditCardHandler()
     # Get all of the user's credit cards from the database
+    card_db = CreditCardHandler()
     all_cards = card_db.get_entries()
     active_cards = card_db.get_entries(active=True)
     # Get all of the user's statements for active cards from the database
@@ -223,29 +174,17 @@ def update_statements_display():
 @credit_bp.route('/statement/<int:statement_id>')
 @login_required
 def load_statement_details(statement_id):
-    bank_account_db = BankAccountHandler()
-    statement_db = CreditStatementHandler()
-    transaction_db = CreditTransactionHandler()
-    tag_db = CreditTagHandler()
-    # Get the statement information from the database
-    statement_fields = ('account_id', 'card_id', 'bank_name',
-                        'last_four_digits', 'issue_date', 'due_date',
-                        'balance', 'payment_date')
-    statement = statement_db.get_entry(statement_id, fields=statement_fields)
-    # Get all of the transactions for the statement from the database
-    sort_order = 'DESC'
-    transaction_fields = ('transaction_date', 'vendor', 'total', 'notes',
-                          'internal_transaction_id')
-    transactions = transaction_db.get_entries(statement_ids=(statement['id'],),
-                                              sort_order=sort_order,
-                                              fields=transaction_fields)
+    statement, transactions = get_credit_statement_details(statement_id)
     # Get bank accounts for potential payments
+    bank_account_db = BankAccountHandler()
     bank_accounts = bank_account_db.get_entries()
-    # Statistics
-    tag_totals = tag_db.get_totals(statement_ids=(statement['id'],))
-    tag_totals = {row['tag_name']: row['total'] for row in tag_totals}
-    tag_avgs = tag_db.get_statement_average_totals()
-    tag_avgs = {row['tag_name']: row['average_total'] for row in tag_avgs}
+    ## Statistics
+    #tag_db = CreditTagHandler()
+    #tag_totals = tag_db.get_totals(statement_ids=(statement['id'],))
+    #tag_totals = {row['tag_name']: row['total'] for row in tag_totals}
+    #tag_avgs = tag_db.get_statement_average_totals()
+    #tag_avgs = {row['tag_name']: row['average_total'] for row in tag_avgs}
+    tag_totals, tag_avgs = {}, {}
     return render_template('credit/statement_page.html',
                            statement=statement,
                            statement_transactions=transactions,
@@ -258,68 +197,38 @@ def load_statement_details(statement_id):
               methods=('POST',))
 @login_required
 def update_statement_due_date(statement_id):
-    statement_db = CreditStatementHandler()
     # Get the field from the AJAX request
-    due_date = request.get_json()
+    due_date = parse_date(request.get_json())
     # Update the statement in the database
-    mapping = {'due_date': parse_date(due_date)}
-    statement = statement_db.update_entry(statement_id, mapping)
+    statement = CreditStatementHandler().update_entry_value(
+        statement_id,
+        'due_date',
+        due_date,
+    )
     return str(statement['due_date'])
 
 
-@credit_bp.route('/_make_payment/<int:statement_id>',
+@credit_bp.route('/_pay_credit_card/<int:card_id>/<int:statement_id>',
               methods=('POST',))
 @login_required
-def make_payment(statement_id):
-    card_db = CreditCardHandler()
+def pay_credit_card(card_id, statement_id):
+    bank_account_db  = BankAccountHandler()
     statement_db = CreditStatementHandler()
-    transaction_db = CreditTransactionHandler()
-    # Get the field from the AJAX request
+    # Get the fields from the AJAX request
     post_args = request.get_json()
     payment_amount = dedelimit_float(post_args['payment_amount'])
     payment_date = parse_date(post_args['payment_date'])
     payment_account_id = int(post_args['payment_bank_account'])
-    # Add the payment as a transaction in the database
-    card_id = statement_db.get_entry(statement_id, fields=('card_id',))[1]
-    card = card_db.get_entry(card_id)
-    payment_statement = statement_db.infer_statement(card, payment_date,
-                                                     creation=True)
-    if payment_account_id:
-        bank_account_db  = BankAccountHandler()
-        # Ensure that the bank account belongs to the current user
-        bank_account_db.get_entry(payment_account_id)
-        # Populate a mapping for the transfer
-        card_name = f"{card['bank_name']}-{card['last_four_digits']}"
-        bank_mapping = {
-            'account_id': payment_account_id,
-            'transaction_date': payment_date,
-            'subtransactions': [{
-                'subtotal': -payment_amount,
-                'note': f"Credit card payment ({card_name})",
-            }]
-        }
-        transfer, subtransactions = record_new_transfer(bank_mapping)
-        internal_transaction_id = transfer['internal_transaction_id']
-    else:
-        internal_transaction_id = None
-    credit_mapping = {
-        'internal_transaction_id': internal_transaction_id,
-        'statement_id': payment_statement['id'],
-        'transaction_date': payment_date,
-        'vendor': card['bank_name'],
-        'subtransactions': [{
-            'subtotal': -payment_amount,
-            'note': 'Card payment',
-            'tags': ['Payments'],
-        }],
-    }
-    transaction_db.add_entry(credit_mapping)
+    # Pay towards the card balance
+    make_payment(card_id, payment_account_id, payment_date, payment_amount)
     # Get the current statement information from the database
     fields = ('card_id', 'bank_name', 'last_four_digits', 'issue_date',
               'due_date', 'balance', 'payment_date')
     statement = statement_db.get_entry(statement_id, fields=fields)
+    bank_accounts = bank_account_db.get_entries()
     return render_template('credit/statement_summary.html',
-                           statement=statement)
+                           statement=statement,
+                           bank_accounts=bank_accounts)
 
 
 @credit_bp.route('/transactions', defaults={'card_id': None})
@@ -367,7 +276,7 @@ def expand_transaction():
                                   fields=('tag_name',))
         tag_names = [tag['tag_name'] for tag in tags]
         subtransactions.append({**subtransaction, 'tags': tag_names})
-    return render_template('credit/transactions_table/subtransactions.html',
+    return render_template('common/transactions_table/subtransactions.html',
                            subtransactions=subtransactions)
 
 
@@ -376,8 +285,7 @@ def expand_transaction():
 def show_linked_transaction():
     post_args = request.get_json()
     transaction_id = post_args['transaction_id']
-    db = CreditTransactionHandler()
-    transaction = db.get_entry(transaction_id)
+    transaction = CreditTransactionHandler().get_entry(transaction_id)
     linked_transaction = get_linked_transaction(transaction)
     return render_template('common/transactions_table/'
                            'linked_transaction_overlay.html',
@@ -469,7 +377,7 @@ def add_subtransaction_fields():
     # NOTE: This is a hack (since `append_entry` method cannot be used in AJAX
     #       without reloading the form...)
     form_id = f'subtransactions-{new_index}'
-    sub_form = CreditTransactionForm.CreditSubtransactionForm(prefix=form_id)
+    sub_form = CreditTransactionForm.SubtransactionSubform(prefix=form_id)
     sub_form.id = form_id
     return render_template('credit/transaction_form/subtransaction_form.html',
                            sub_form=sub_form)

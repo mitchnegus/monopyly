@@ -44,7 +44,7 @@ def test_get_bank_account_details(mock_account_handler_type,
     mock_account_db = mock_account_handler_type()
     mock_account_db.get_entry.return_value = mock_account
     mock_transaction_db = mock_transaction_handler_type()
-    mock_transaction_db.get_entries.return_value = 'test entries'
+    mock_transaction_db.get_entries.return_value = ['test entries']
     default_args = {
         'account_ids': ('test id',),
         'sort_order': 'DESC',
@@ -53,10 +53,10 @@ def test_get_bank_account_details(mock_account_handler_type,
             'total',
             'balance',
             'notes',
-            'internal_transaction_id'
+            'internal_transaction_id',
         )
     }
-    assert get_bank_account_details(mock_account['id']) == (mock_account,
-                                                            'test entries')
+    details = get_bank_account_details(mock_account['id'])
+    assert details == (mock_account, ['test entries'])
     mock_transaction_db.get_entries.assert_called_once_with(**default_args)
 

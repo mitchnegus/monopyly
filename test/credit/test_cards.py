@@ -177,6 +177,10 @@ class TestCreditCardHandler(TestHandler):
         with pytest.raises(exception):
             card_db.update_entry(card_id, mapping)
 
+    def test_update_entry_value(self, card_db):
+        card = card_db.update_entry_value(2, 'last_four_digits', '4444')
+        assert card['last_four_digits'] == '4444'
+
     @pytest.mark.parametrize(
         'entry_ids', [(2,), (2, 3)]
     )

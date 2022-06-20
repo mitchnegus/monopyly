@@ -187,6 +187,11 @@ class TestBankAccountTypeHandler(TestHandler):
         with pytest.raises(exception):
             account_type_db.update_entry(account_type_id, mapping)
 
+    def test_update_entry_value(self, account_type_db):
+        account_type = account_type_db.update_entry_value(5, 'type_name',
+                                                          'Trustworthy Friend')
+        assert account_type['type_name'] == 'Trustworthy Friend'
+
     @pytest.mark.parametrize(
         'entry_ids', [(5,), (5, 6)]
     )
@@ -421,6 +426,10 @@ class TestBankAccountHandler(TestHandler):
                                   exception):
         with pytest.raises(exception):
             account_db.update_entry(account_id, mapping)
+
+    def test_update_entry_value(self, account_db):
+        account = account_db.update_entry_value(2, 'last_four_digits', '6666')
+        assert account['last_four_digits'] == '6666'
 
     @pytest.mark.parametrize(
         'entry_ids', [(2,), (2, 3)]

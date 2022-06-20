@@ -1,4 +1,4 @@
-"""Module describing logical actions (e.g. to be used in routes)."""
+"""Module describing logical actions (e.g., to be used in routes)."""
 
 
 def get_user_database_entries(database_handler_type, *args, **kwargs):

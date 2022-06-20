@@ -9,7 +9,7 @@
         Would you like to transfer that statement and all of the associated transactions to this card?
       </p>
 
-      <form action="{{ url_for('credit.transfer_statement', card_id=card['id'], prior_card_id=prior_card['id']) }}" method="post">
+      <form action="{{ url_for('credit.transfer_statement', account_id=card['account_id'], card_id=card['id'], prior_card_id=prior_card['id']) }}" method="post">
 
         <div class="form-field">
           {% for option in transfer_statement_form.transfer %}

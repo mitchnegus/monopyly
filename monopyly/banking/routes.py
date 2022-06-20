@@ -84,7 +84,7 @@ def expand_transaction():
     transaction_id = request.get_json().split('-')[-1]
     # Get the subtransactions
     subtransactions = subtransaction_db.get_entries((transaction_id,))
-    return render_template('credit/transactions_table/subtransactions.html',
+    return render_template('common/transactions_table/subtransactions.html',
                            subtransactions=subtransactions)
 
 
@@ -93,8 +93,7 @@ def expand_transaction():
 def show_linked_transaction():
     post_args = request.get_json()
     transaction_id = post_args['transaction_id']
-    db = BankTransactionHandler()
-    transaction = db.get_entry(transaction_id)
+    transaction = BankTransactionHandler().get_entry(transaction_id)
     linked_transaction = get_linked_transaction(transaction)
     return render_template('common/transactions_table/'
                            'linked_transaction_overlay.html',

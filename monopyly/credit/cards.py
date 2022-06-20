@@ -223,3 +223,4 @@ def save_card(form, card_id=None):
         # Insert the new transaction into the database
         card = db.add_entry(card_data)
     return card
+

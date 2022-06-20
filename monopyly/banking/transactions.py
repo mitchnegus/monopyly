@@ -375,7 +375,10 @@ def record_new_transfer(transfer_data):
     # Create a new internal transaction ID to assign to the transfer
     internal_transaction_id = add_internal_transaction()
     # Update the entry with the newly assigned internal ID
-    mapping = {'internal_transaction_id': internal_transaction_id}
-    transfer, subtransactions = db.update_entry(transfer['id'], mapping)
+    transfer, subtransactions = db.update_entry_value(
+        transfer['id'],
+        'internal_transaction_id',
+        internal_transaction_id,
+    )
     return transfer, subtransactions
 

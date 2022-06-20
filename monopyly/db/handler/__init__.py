@@ -165,7 +165,7 @@ class DatabaseHandler(ABC):
         entry_id = self.cursor.lastrowid
         entry = self.get_entry(entry_id)
         # Commit only after ensuring the entry was properly added
-        # (including only added for the correct user)
+        # (including that it belongs to the correct user)
         self.db.commit()
         return entry
 
@@ -203,9 +203,31 @@ class DatabaseHandler(ABC):
              " WHERE id = ?",
             (*mapping.values(), entry_id)
         )
-        self.db.commit()
         entry = self.get_entry(entry_id)
+        # Commit only after ensuring the entry was properly updated
+        # (including that it belongs to the correct user)
+        self.db.commit()
         return entry
+
+    def update_entry_value(self, entry_id, field, value):
+        """
+        Update a single value for an entry in the database.
+
+        Parameters
+        ––––––––––
+        entry_id : int
+            The ID of the entry to be updated.
+        field : str
+            The field to update for the given entry.
+        value :
+            The value to assign the field in the database entry.
+
+        Returns
+        –––––––
+        entry : sqlite3.Row
+            The saved entry.
+        """
+        return self.update_entry(entry_id, {field: value})
 
     def delete_entries(self, entry_ids):
         """Delete entries in the database given their IDs."""

@@ -95,8 +95,10 @@ CREATE TABLE bank_subtransactions (
 CREATE TABLE credit_accounts (
   id INTEGER,
   bank_id INTEGER NOT NULL,
-  statement_issue_day INTEGER NOT NULL,
-  statement_due_day INTEGER NOT NULL,
+  statement_issue_day INTEGER
+    CHECK(statement_issue_day > 0 AND statement_issue_day < 28),
+  statement_due_day INTEGER
+    CHECK(statement_due_day > 0 AND statement_due_day < 28),
   PRIMARY KEY (id),
   FOREIGN KEY (bank_id) REFERENCES banks (id)
     ON DELETE CASCADE
