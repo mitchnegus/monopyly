@@ -30,31 +30,6 @@
 
     </div>
 
-    <!-- NOT YET MATURE
-    <div id="statement-statistics">
-
-      <h2>Statistics</h2>
-
-      <table>
-        <tr>
-          <th>Tag</th>
-          <th>Total</th>
-          <th>Avg. Total</th>
-        </tr>
-        {% for tag in tag_totals %}
-          {% if not tag == 'Payments' %}
-            <tr>
-              <td>{{ tag }}</td>
-              <td>${{ tag_totals[tag]|currency }}</td>
-              <td>${{ tag_average_totals[tag]|currency }}</td>
-            </tr>
-          {% endif %}
-        {% endfor %}
-      </table>
-
-    </div>
-    -->
-
   </div>
 
 {% endblock %}
