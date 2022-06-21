@@ -181,11 +181,20 @@ def load_statement_details(statement_id):
     statement, transactions = get_statement_and_transactions(statement_id)
     # Get bank accounts for potential payments
     bank_accounts = BankAccountHandler.get_accounts()
+    # Statistics
+    tag_db = CreditTagHandler()
+    tag_totals = tag_db.get_totals(statement_ids=(statement['id'],))
+    tag_totals = {row['tag_name']: row['total'] for row in tag_totals}
+    tag_avgs = tag_db.get_statement_average_totals()
+    tag_avgs = {row['tag_name']: row['average_total'] for row in tag_avgs}
+    tag_totals, tag_avgs = {}, {}
     return render_template(
         "credit/statement_page.html",
         statement=statement,
         statement_transactions=transactions,
         bank_accounts=bank_accounts,
+        tag_totals=tag_totals,
+        tag_average_totals=tag_avgs,
     )
 
 
