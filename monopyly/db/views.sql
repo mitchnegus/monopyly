@@ -93,23 +93,23 @@ WITH view AS (
         0
       ), 2) statement_balance,
       /* Determine the total charges on an account for each statement */
-      COALESCE(
+      ROUND(COALESCE(
         SUM(charges) OVER (PARTITION BY account_id ORDER BY issue_date),
         0
-      ) statement_charge_total,
+      ), 2) statement_charge_total,
       /* Determine the total payments on an account for each transaction */
-      COALESCE(
+      ROUND(COALESCE(
         SUM(payments)
         OVER (PARTITION BY account_id ORDER BY transaction_date),
         0
-      ) daily_payment_total
+      ), 2) daily_payment_total
       FROM (
         SELECT
           statement_id,
           transaction_date,
           SUM(subtotal) subtotals,
-          CASE WHEN SUM(subtotal) >= 0 THEN SUM(subtotal) END charges,
-          CASE WHEN SUM(subtotal) < 0 THEN SUM(subtotal) END payments
+          CASE WHEN ROUND(SUM(subtotal), 2) >= 0 THEN SUM(subtotal) END charges,
+          CASE WHEN ROUND(SUM(subtotal), 2) < 0 THEN SUM(subtotal) END payments
         FROM credit_transactions
           INNER JOIN credit_subtransactions
             ON credit_subtransactions.transaction_id = credit_transactions.id
@@ -139,7 +139,7 @@ FROM credit_statements s
       /* Only compare balances for a single account */
       v1.account_id = v2.account_id
       /* Get times where payments offset charges */
-      AND ROUND(v1.statement_charge_total + v2.daily_payment_total) <= 0
+      AND ROUND(v1.statement_charge_total + v2.daily_payment_total, 2) <= 0
     ORDER BY v1.transaction_date
   ) v2
     ON v2.id = s.id
