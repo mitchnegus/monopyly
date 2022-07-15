@@ -1,25 +1,25 @@
 # Monopyly
 
-This is a package designed to help manage personal finances. 
+This is a package designed to help manage personal finances.
 The current functionality is fairly limited, with only the ability to track bank account and credit card history.
-Eventually the app will provide a full set of features including purchase history, investment profiles, and budgeting. 
+Eventually the app will provide a full set of features including purchase history, investment profiles, and budgeting.
 
-The app is designed to be run at a small scale. 
-Information is stored in a local SQLite database and accessed using a frontend served by Flask. 
+The app is designed to be run at a small scale.
+Information is stored in a local SQLite database and accessed using a frontend served by Flask.
 While the development version is hosted on the builtin Flask server, a more robust solution will be adopted if the app moves online.
 Despite its small scale, the app can support multiple users on any given instance.
 
 
 ## Installation
 
-The _Monopyly_ app is registered on the [Python Package Index (PyPI)](https://pypi.org/project/monopyly) for easy installation. 
+The _Monopyly_ app is registered on the [Python Package Index (PyPI)](https://pypi.org/project/monopyly) for easy installation.
 To install the app, simply run
 
 ```
 pip install monopyly
 ```
 
-The package requires a recent version of Python (3.7+). 
+The package requires a recent version of Python (3.7+).
 
 
 ## Getting started
@@ -46,7 +46,7 @@ Your username should now appear at the top right of the screen, and the 'Log In'
 
 ### Bank Accounts
 
-_Monopyly_ provides an accounting system for a user's bank transactions. 
+_Monopyly_ provides an accounting system for a user's bank transactions.
 Banks can be added from the 'Manage accounts' page, where a user will be able to specify bank information including the bank and account type.
 While some account types are preloaded into the _Monopyly_ database (such as checking accounts, savings accounts, and certificates of deposit) each user can add additional custom account types as they need them.
 
@@ -54,7 +54,7 @@ After you have created a bank account, either using a bank that already exists i
 
 <img src="img/bank-accounts.png" alt="bank accounts" width="800px" />
 
-Once at least one bank account has been added, you can head on back to the account homepage to view balances and add transactions. 
+Once at least one bank account has been added, you can head on back to the account homepage to view balances and add transactions.
 On the left side of the page, each bank will have a section in the 'Bank Accounts' box.
 By clicking the 'See account summaries' button, you will be transferred to a page showing all of the bank accounts at the given bank, as well as the account balances of each account.
 
@@ -106,8 +106,8 @@ Once the transaction information has been successfully entered and submitted, th
 <img src="img/credit-transactions.png" alt="transaction history" width="800px" />
 
 Card balances are also visible by visiting the pages for individual statements.
-A full history of statements for each card is available off the homepage. 
-Each statement's page gives the statement's balance, transactions, and due date. 
+A full history of statements for each card is available off the homepage.
+Each statement's page gives the statement's balance, transactions, and due date.
 
 <img src="img/statement-details.png" alt="statement details" width="800px" />
 

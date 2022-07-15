@@ -28,7 +28,7 @@ long_description = convert_markdown(raw_long_description,
                                     'mitchnegus',
                                     'monopyly')
 
-setup(
+metadata = dict(
     name='monopyly',
     version=name_version(MAJOR, MINOR, PATCH, DEV),
     description='A homemade personal finance manager.',
@@ -47,5 +47,9 @@ setup(
         'flask',
         'flask-wtf',
         'python-dateutil'
-    ]
+    ],
 )
+
+
+if __name__ == '__main__':
+    setup(**metadata)
