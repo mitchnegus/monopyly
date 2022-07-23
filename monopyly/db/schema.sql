@@ -16,167 +16,138 @@ DROP TABLE IF EXISTS credit_tag_links;
 
 /* Store user information */
 CREATE TABLE users (
-  id INTEGER,
+  id INTEGER PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
-  password TEXT NOT NULL,
-  PRIMARY KEY (id)
+  password TEXT NOT NULL
 );
 
 
 /* Store a common link for paired transactions */
 CREATE TABLE internal_transactions (
-  id INTEGER,
-  PRIMARY KEY (id)
+  id INTEGER PRIMARY KEY
 );
 
 /* Store information about banks */
 CREATE TABLE banks (
-  id INTEGER,
-  user_id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users (id),
   bank_name TEXT NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (user_id) REFERENCES users (id),
-  UNIQUE (user_id, bank_name)
+  UNIQUE(user_id, bank_name)
 );
 
 
 /* Store bank account type information */
 CREATE TABLE bank_account_types (
-  id INTEGER,
+  id INTEGER PRIMARY KEY,
   user_id INTEGER NOT NULL,
   type_name TEXT NOT NULL,
   type_abbreviation TEXT,
-  PRIMARY KEY (id),
-  UNIQUE (user_id, type_name)
+  UNIQUE(user_id, type_name)
 );
 
 
 /* Store bank account information */
 CREATE TABLE bank_accounts (
-  id INTEGER,
-  bank_id INTEGER NOT NULL,
-  account_type_id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
+  bank_id INTEGER NOT NULL REFERENCES banks (id)
+    ON DELETE CASCADE,
+  account_type_id INTEGER NOT NULL REFERENCES bank_account_types (id),
   last_four_digits TEXT NOT NULL,
   active INTEGER NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (bank_id) REFERENCES banks (id)
-    ON DELETE CASCADE,
-  FOREIGN KEY (account_type_id) REFERENCES bank_account_types (id),
-  UNIQUE (bank_id, last_four_digits, account_type_id)
+  UNIQUE(bank_id, account_type_id, last_four_digits)
 );
 
 
 /* Store bank transaction information */
 CREATE TABLE bank_transactions (
-  id INTEGER,
-  internal_transaction_id INTEGER DEFAULT NULL,
-  account_id INTEGER NOT NULL,
-  transaction_date DATE NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (internal_transaction_id) REFERENCES internal_transactions (id),
-  FOREIGN KEY (account_id) REFERENCES bank_accounts (id)
-    ON DELETE CASCADE
+  id INTEGER PRIMARY KEY,
+  internal_transaction_id INTEGER DEFAULT NULL REFERENCES internal_transactions (id),
+  account_id INTEGER NOT NULL REFERENCES bank_accounts (id)
+    ON DELETE CASCADE,
+  transaction_date DATE NOT NULL
 );
 
 
 /* Store bank subtransaction infromation */
 CREATE TABLE bank_subtransactions (
-  id INTEGER,
-  transaction_id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
+  transaction_id INTEGER NOT NULL REFERENCES bank_transactions (id)
+    ON DELETE CASCADE,
   subtotal REAL NOT NULL,
-  note TEXT NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (transaction_id) REFERENCES bank_transactions (id)
-    ON DELETE CASCADE
+  note TEXT NOT NULL
 );
 
 
 /* Store credit account information */
 CREATE TABLE credit_accounts (
-  id INTEGER,
-  bank_id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
+  bank_id INTEGER NOT NULL REFERENCES banks (id)
+    ON DELETE CASCADE,
   statement_issue_day INTEGER
     CHECK(statement_issue_day > 0 AND statement_issue_day < 28),
   statement_due_day INTEGER
-    CHECK(statement_due_day > 0 AND statement_due_day < 28),
-  PRIMARY KEY (id),
-  FOREIGN KEY (bank_id) REFERENCES banks (id)
-    ON DELETE CASCADE
+    CHECK(statement_due_day > 0 AND statement_due_day < 28)
 );
 
 
 /* Store credit card information */
 CREATE TABLE credit_cards (
-  id INTEGER,
-  account_id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
+  account_id INTEGER NOT NULL REFERENCES credit_accounts (id)
+    ON DELETE CASCADE,
   last_four_digits TEXT NOT NULL,
-  active INTEGER NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (account_id) REFERENCES credit_accounts (id)
-    ON DELETE CASCADE
+  active INTEGER NOT NULL
 );
 
 
 /* Store credit card statement information */
 CREATE TABLE credit_statements (
-  id INTEGER,
-  card_id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
+  card_id INTEGER NOT NULL REFERENCES credit_cards (id)
+    ON DELETE CASCADE,
   issue_date DATE NOT NULL,
-  due_date DATE NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (card_id) REFERENCES credit_cards (id)
-    ON DELETE CASCADE
+  due_date DATE NOT NULL
 );
 
 
 /* Store credit card transaction information */
 CREATE TABLE credit_transactions (
-  id INTEGER,
-  internal_transaction_id INTEGER DEFAULT NULL,
-  statement_id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
+  internal_transaction_id INTEGER DEFAULT NULL REFERENCES internal_transactions (id),
+  statement_id INTEGER NOT NULL REFERENCES credit_statements (id)
+    ON DELETE CASCADE,
   transaction_date DATE NOT NULL,
-  vendor TEXT NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (internal_transaction_id) REFERENCES internal_transactions (id),
-  FOREIGN KEY (statement_id) REFERENCES credit_statements (id)
-    ON DELETE CASCADE
+  vendor TEXT NOT NULL
 );
 
 
 /* Store subtransaction breakdown of transaction */
 CREATE TABLE credit_subtransactions (
-  id INTEGER,
-  transaction_id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
+  transaction_id INTEGER NOT NULL REFERENCES credit_transactions (id)
+    ON DELETE CASCADE,
   subtotal REAL NOT NULL,
-  note TEXT NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (transaction_id) REFERENCES credit_transactions (id)
-    ON DELETE CASCADE
+  note TEXT NOT NULL
 );
 
 
 /* Store credit card transaction tags */
 CREATE TABLE credit_tags (
-  id INTEGER,
-  parent_id INTEGER,
-  user_id INTEGER NOT NULL,
-  tag_name TEXT NOT NULL COLLATE NOCASE,
-  PRIMARY KEY (id),
-  FOREIGN KEY (parent_id) REFERENCES credit_tags (id)
+  id INTEGER PRIMARY KEY,
+  parent_id INTEGER REFERENCES credit_tags (id)
     ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users (id),
-  UNIQUE (user_id, tag_name)
+  user_id INTEGER NOT NULL REFERENCES users (id),
+  tag_name TEXT NOT NULL COLLATE NOCASE,
+  UNIQUE(user_id, tag_name)
 );
 
 
 /* Associate credit transactions with tags in a link table */
 CREATE TABLE credit_tag_links (
-  subtransaction_id INTEGER NOT NULL,
-  tag_id INTEGER NOT NULL,
-  PRIMARY KEY (subtransaction_id, tag_id),
-  FOREIGN KEY (subtransaction_id) REFERENCES credit_subtransactions (id)
+  subtransaction_id INTEGER NOT NULL REFERENCES credit_subtransactions (id)
     ON DELETE CASCADE,
-  FOREIGN KEY (tag_id) REFERENCES credit_tags (id)
-    ON DELETE CASCADE
+  tag_id INTEGER NOT NULL REFERENCES credit_tags (id)
+    ON DELETE CASCADE,
+  PRIMARY KEY (subtransaction_id, tag_id)
 );
 
