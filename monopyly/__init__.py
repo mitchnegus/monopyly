@@ -26,25 +26,23 @@ def create_app(test_config=None):
         # Load the test config if that is passed instead
         app.config.from_mapping(test_config)
 
-    # Ensure that the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
     # Allow the databases to be initialized from the command line
+    _ensure_instance_directory_exists(app)
     db.init_app(app)
-
     # Register the core functionality blueprint
     app.register_blueprint(core_bp)
-
     # Register the authentication blueprint
     app.register_blueprint(auth_bp)
-
     # Register the banking financials blueprint
     app.register_blueprint(banking_bp)
-
     # Register the credit card financials blueprint
     app.register_blueprint(credit_bp)
 
     return app
+
+
+def _ensure_instance_directory_exists(app):
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
