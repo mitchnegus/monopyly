@@ -1,30 +1,53 @@
 # Include variables
 include config.mk
 
+
 ## develop 	: Install the package in development mode
 .PHONY: develop
 develop:
-	python setup.py develop
+	$(PYTHON) setup.py develop
+
 
 ## install	: Install the package
 .PHONY: install
 install:
-	python setup.py install
+	$(PYTHON) setup.py install
+
 
 ## package	: Bundle the package for distribution
 .PHONY: package
 package:
-	python setup.py sdist bdist_wheel
+	$(PYTHON) setup.py sdist bdist_wheel
+
 
 ## upload		: Upload the package to PyPI
 .PHONY: upload
 upload:
-	python -m twine upload --skip-existing dist/*
+	$(PYTHON) -m twine upload --skip-existing dist/*
+
+
+## env		: Prepare a virtual environment to run the package
+.PHONY : env
+env : $(ENV)/.touchfile
+	@echo "The environment ($(ENV)) is up to date."
+
+
+# Create/update the virtual environment (based on `requirements.txt` etc.)
+# Uses touchfile as proxy for installed environment
+$(ENV)/.touchfile : $(REQS)
+	@echo "Installing/updating the environment ($(ENV))."
+	@if [ ! -d "$(ENV)" ]; then $(PYTHON) -m venv $(ENV); fi
+	@. $(ENV_ACTIVATE); \
+	pip install -r $(REQS)
+	@touch $(ENV)/.touchfile
+
 
 ## test		: Run tests
 .PHONY: test
 test:
-	pytest --cov=. --cov-config=$(COVERAGE_CONFIG) --cov-report html
+	@. $(ENV_ACTIVATE); \
+	pytest $(COVERAGE_OPTIONS) --cov-report html
+
 
 .PHONY: help
 help: Makefile
