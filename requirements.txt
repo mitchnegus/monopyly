@@ -8,4 +8,5 @@ pytest
 pytest-cov
 python-dateutil
 setuptools
+sqlalchemy
 werkzeug
