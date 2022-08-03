@@ -63,7 +63,7 @@ class TestBankHandler(TestHandler):
     def test_add_entry(self, app, bank_db):
         bank = bank_db.add_entry({'user_id': 3,
                                   'bank_name': 'JP Morgan Chance'})
-        assert bank['bank_name'] == 'JP Morgan Chance'
+        assert bank.bank_name == 'JP Morgan Chance'
         # Check that the entry was added
         query = ("SELECT COUNT(id) FROM banks"
                  " WHERE bank_name LIKE '%Chance'")
@@ -98,7 +98,7 @@ class TestBankHandler(TestHandler):
     )
     def test_update_entry(self, app, bank_db, mapping):
         bank = bank_db.update_entry(2, mapping)
-        assert bank['bank_name'] == 'Corner Jail'
+        assert bank.bank_name == 'Corner Jail'
         # Check that the entry was updated
         query = ("SELECT COUNT(id) FROM banks "
                  " WHERE bank_name LIKE 'Corner%'")
@@ -117,7 +117,7 @@ class TestBankHandler(TestHandler):
 
     def test_update_entry_value(self, bank_db):
         bank = bank_db.update_entry_value(2, 'bank_name', 'Corner Jail')
-        assert bank['bank_name'] == 'Corner Jail'
+        assert bank.bank_name == 'Corner Jail'
 
     @pytest.mark.parametrize(
         'entry_ids', [(2,), (2, 3)]

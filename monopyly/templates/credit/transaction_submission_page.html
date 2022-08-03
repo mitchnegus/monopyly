@@ -21,23 +21,23 @@
 
     <p>
       <b>Card:</b>
-      {{ transaction['bank_name'] }} ****-{{ transaction['last_four_digits'] }}
+      {{ transaction.statement.card.account.bank.bank_name }} ****-{{ transaction.statement.card.last_four_digits }}
     </p>
 
     <p>
       <b>Date: </b>
-      {{ transaction['transaction_date'] }}
+      {{ transaction.transaction_date }}
     </p>
 
     <p>
       <b>Vendor: </b>
-      {{ transaction['vendor'] }}
+      {{ transaction.vendor }}
     </p>
 
     {% if subtransactions|length > 1 %}
       <p>
         <b>Total: </b>
-        ${{ transaction['total']|currency }}
+        ${{ transaction.total|currency }}
       </p>
     {% endif %}
 
@@ -57,12 +57,12 @@
 
     <p>
       <b>Statement Date: </b>
-      {{ transaction['issue_date'] }}
+      {{ transaction.statement.issue_date }}
     </p>
 
     {% if g.user %}
       <br>
-      <a href="{{ url_for('credit.load_statement_details', statement_id=transaction['statement_id']) }}">
+      <a href="{{ url_for('credit.load_statement_details', statement_id=transaction.statement_id) }}">
         See the statement for this transaction
       </a>
       <br>
@@ -70,7 +70,7 @@
         See transaction history
       </a>
       <br>
-      <a href="{{ url_for('credit.update_transaction', transaction_id=transaction['id']) }}">
+      <a href="{{ url_for('credit.update_transaction', transaction_id=transaction.id) }}">
         Update this transaction
       </a>
       <br>
@@ -78,7 +78,7 @@
         Create a new transaction
       </a>
       <br>
-      <a href="{{ url_for('credit.add_transaction', card_id=transaction['card_id'], statement_id=transaction['statement_id']) }}">
+      <a href="{{ url_for('credit.add_transaction', card_id=transaction.statement.card_id, statement_id=transaction.statement_id) }}">
         Create a new transaction on this statement
       </a>
     {% endif %}

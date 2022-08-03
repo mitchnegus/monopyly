@@ -2,21 +2,21 @@
 Run a development server for the Monopyly app.
 """
 import os
+from pathlib import Path
+
 from flask import Flask
 
-from monopyly import db
-from monopyly.core import core_bp
-from monopyly.auth import auth_bp
-from monopyly.credit import credit_bp
-from monopyly.banking import banking_bp
+from monopyly.database import db, init_db_command, close_db, DB_PATH
+from monopyly.definitions import INSTANCE_PATH
 
 
 def create_app(test_config=None):
     # Create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_path=INSTANCE_PATH.resolve(),
+                instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='development key',
-        DATABASE=os.path.join(app.instance_path, 'monopyly.sqlite')
+        DATABASE=DB_PATH,
     )
 
     if test_config is None:
@@ -28,16 +28,8 @@ def create_app(test_config=None):
 
     # Allow the databases to be initialized from the command line
     _ensure_instance_directory_exists(app)
-    db.init_app(app)
-    # Register the core functionality blueprint
-    app.register_blueprint(core_bp)
-    # Register the authentication blueprint
-    app.register_blueprint(auth_bp)
-    # Register the banking financials blueprint
-    app.register_blueprint(banking_bp)
-    # Register the credit card financials blueprint
-    app.register_blueprint(credit_bp)
-
+    init_app(app)
+    register_blueprints(app)
     return app
 
 
@@ -46,3 +38,38 @@ def _ensure_instance_directory_exists(app):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+
+def init_app(app):
+    """Initialize the app."""
+    # Establish behavior for closing the database
+    app.teardown_appcontext(close_db)
+    # Register the database intialization with the app
+    app.cli.add_command(init_db_command)
+    # Prepare database access with SQLAlchemy
+    db.setup_engine()
+
+
+def register_blueprints(app):
+    """
+    Register blueprints with the app.
+
+    Notes
+    -----
+    Blueprints are imported in this function to avoid loading modules
+    that require database models before those models have been set up
+    via `init_app`.
+    """
+    # Register the core functionality blueprint
+    from monopyly.core.blueprint import bp as core_bp
+    app.register_blueprint(core_bp)
+    # Register the authentication blueprint
+    from monopyly.auth.blueprint import bp as auth_bp
+    app.register_blueprint(auth_bp)
+    # Register the banking financials blueprint
+    from monopyly.banking.blueprint import bp as banking_bp
+    app.register_blueprint(banking_bp)
+    # Register the credit card financials blueprint
+    from monopyly.credit.blueprint import bp as credit_bp
+    app.register_blueprint(credit_bp)
+

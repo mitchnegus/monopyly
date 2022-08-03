@@ -29,13 +29,13 @@ def parse_date(given_date):
     processing.
 
     Parameters
-    ––––––––––
+    ----------
     given_date : str, datetime.date
         A date given in one of the acceptable formats to be formatted
         consistently with the database.
 
     Returns
-    –––––––
+    -------
     date : datetime.date
         A Python `date` object based on the given date string.
     """

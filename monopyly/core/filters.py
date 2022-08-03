@@ -1,10 +1,10 @@
 """
 Filters defined for the application.
 """
-from . import core_bp
+from .blueprint import bp
 
 
-@core_bp.app_template_filter('currency')
+@bp.app_template_filter('currency')
 def make_currency(amount):
     """Return the amount to two decimal places (always shown)."""
     # Correct values of -0.00 to 0
@@ -12,7 +12,7 @@ def make_currency(amount):
     return f'{amount:,.2f}'
 
 
-@core_bp.app_template_filter('ordinal')
+@bp.app_template_filter('ordinal')
 def make_ordinal(integer):
     """
     Return the ordinal representation of an integer.
@@ -30,17 +30,17 @@ def make_ordinal(integer):
         -  101 => 101st
 
     Parameters
-    ––––––––––
+    ----------
     integer : int
         An integer to convert to its ordinal representation.
 
     Returns
-    –––––––
+    -------
     ordinal : str
         An integer's ordinal representation.
 
     Notes
-    –––––
+    -----
     This function is an adaptation of the one proposed by Stack Overflow user
     Florian Brucker (https://stackoverflow.com/a/50992575/8754471).
     """

@@ -3,7 +3,7 @@ Define database fields through an accessible Python mapping.
 """
 
 # Define database fields ('id' field is ommitted in all cases where it exists)
-DATABASE_FIELDS = {
+DATABASE_SCHEMA = {
     'users': (
         'username',
         'password',

@@ -8,18 +8,117 @@ from wtforms.fields import (
 )
 from wtforms.validators import Optional, DataRequired, Length
 
-from ..common.utils import parse_date
-from ..common.form_utils import (
-    EntryForm, EntrySubform, AcquisitionSubform, CustomChoiceSelectField,
-    Autocompleter, NumeralsOnly, SelectionNotBlank
+from ..database.models import (
+    Bank, CreditAccount, CreditCard, CreditStatementView,
+    CreditTransactionView, CreditSubtransaction
 )
+from ..common.utils import parse_date
+from ..common.forms import EntryForm, EntrySubform, AcquisitionSubform
+from ..common.forms.fields import CustomChoiceSelectField
+from ..common.forms.utils import Autocompleter
+from ..common.forms.validators import NumeralsOnly, SelectionNotBlank
 from ..banking.banks import BankHandler
+from ..banking.forms import BankSelectField, BankSubform
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
-from .transactions import (
-    CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler
-)
+
+
+class CreditAccountSelectField(CustomChoiceSelectField):
+    """Account field that uses the database to prepare field choices."""
+    _db_handler = CreditAccountHandler
+
+    def __init__(self, **kwargs):
+        super().__init__(label="Account", **kwargs)
+
+    @staticmethod
+    def _format_choice(account):
+        cards = CreditCardHandler.get_cards(account_ids=(account.id,))
+        digits = [f"*{card.last_four_digits}" for card in cards]
+        bank_name = account.bank.bank_name
+        # Display cards associated with the credit account in parentheses
+        display_name = f"{bank_name} (cards: {', '.join(digits)})"
+        return display_name
+
+
+class CreditCardForm(EntryForm):
+    """Form to input/edit credit cards."""
+
+    class AccountSubform(AcquisitionSubform):
+        """Form to input/edit account identification."""
+        _db_handler = CreditAccountHandler
+        # Fields to identify the bank information for the account
+        bank_info = FormField(BankSubform)
+        # Fields pertaining to the account
+        account_id = CreditAccountSelectField()
+        statement_issue_day = IntegerField('Statement Issue Day', [Optional()])
+        statement_due_day = IntegerField('Statement Due Day', [Optional()])
+
+        def get_account(self):
+            return self._produce_entry(self.account_id.data)
+
+        def _prepare_mapping(self):
+            # Mapping relies on knowing the bank, which must also be acquired
+            bank = self.bank_info.get_bank()
+            # Mapping must match format for `credit_accounts` database table
+            account_data = {
+                'bank_id': bank.id,
+                'statement_issue_day': self.statement_issue_day.data,
+                'statement_due_day': self.statement_due_day.data,
+            }
+            return account_data
+
+        def gather_entry_data(self, entry):
+            """Gather data for the form from the given database entry."""
+            if isinstance(entry, CreditAccount):
+                data = {
+                    'account_id': entry.id,
+                    'statement_issue_day': entry.statement_issue_day,
+                    'statement_due_day': entry.statement_due_day,
+                }
+            else:
+                self._raise_gather_fail_error((CreditAccount,), entry)
+            return data
+
+    # Fields to identify the account information for the card
+    account_info = FormField(AccountSubform)
+    # Fields pertaining to the card
+    last_four_digits = StringField(
+        'Last Four Digits',
+        validators=[DataRequired(), Length(4), NumeralsOnly()]
+    )
+    active = BooleanField('Active', default='checked')
+    submit = SubmitField('Save Card')
+
+    @property
+    def card_data(self):
+        """Produce a dictionary corresponding to a database card."""
+        account = self.account_info.get_account()
+        card_data = {
+            'account_id': account.id,
+            'last_four_digits': self.last_four_digits.data,
+            'active': self.active.data
+        }
+        return card_data
+
+    def gather_entry_data(self, entry):
+        """Gather data for the form from the given database entry."""
+        if isinstance(entry, CreditCard):
+            data = {
+                'last_four_digits': entry.last_four_digits,
+                'active': entry.active,
+            }
+            account_info = entry.account
+        else:
+            self._raise_gather_fail_error((CreditCard,), entry)
+        data['account_info'] = self.account_info.gather_entry_data(account_info)
+        return data
+
+
+class CardStatementTransferForm(EntryForm):
+    """Form indicating if an unpaid statement should be transferred to a new card."""
+    transfer = RadioField("transfer", choices=[("yes", "Yes"), ("no", "No")])
+    submit = SubmitField("Continue")
 
 
 class CreditTransactionForm(EntryForm):
@@ -27,9 +126,12 @@ class CreditTransactionForm(EntryForm):
 
     class StatementSubform(EntrySubform):
         """Form to input/edit credit statement identification."""
+        _db_handler = CreditStatementHandler
 
         class CardSubform(EntrySubform):
             """Form to input/edit credit account identification."""
+            _db_handler = CreditCardHandler
+            # Fields pertaining to the card
             bank_name = StringField('Bank')
             last_four_digits = StringField(
                 'Last Four Digits',
@@ -38,12 +140,25 @@ class CreditTransactionForm(EntryForm):
 
             def get_card(self):
                 """Get the credit card described by the form data."""
-                card_db = CreditCardHandler()
-                return card_db.find_card(self.bank_name.data,
-                                         self.last_four_digits.data)
+                return self._db_handler.find_card(
+                    self.bank_name.data,
+                    self.last_four_digits.data,
+                )
 
-        # Fields to identify the card/bank information for the transaction
+            def gather_entry_data(self, entry):
+                """Gather data for the form from the given database entry."""
+                if isinstance(entry, CreditCard):
+                    data = {
+                        'bank_name': entry.account.bank.bank_name,
+                        'last_four_digits': entry.last_four_digits,
+                    }
+                else:
+                    self._raise_gather_fail_error((CreditCard,), entry)
+                return data
+
+        # Fields to identify the card/bank information for the statement
         card_info = FormField(CardSubform)
+        # Fields pertaining to the statement
         issue_date = StringField('Statement Date', filters=[parse_date])
 
         def get_statement(self, transaction_date):
@@ -51,23 +166,71 @@ class CreditTransactionForm(EntryForm):
             # Get the card for the transaction
             card = self.card_info.get_card()
             if not card:
-                abort(404, 'A card matching the criteria was not found.')
-            statement_db = CreditStatementHandler()
-            # Get the statement corresponding to the card and issue date
+                msg = (
+                    "No statement was found because no cards matched the "
+                    "necessary criteria."
+                )
+                abort(404, msg)
+            return self.determine_statement(card, transaction_date)
+
+        def determine_statement(self, card, transaction_date):
+            """
+            Determine the statement based on the given information.
+
+            Given a credit card and transaction date, determine the
+            statement belonging to the transaction. If the form includes
+            a statement issue date, then either the matching statement
+            is returned, or a new matching statement is created.
+            Otherwise, a statement is inferred based on the given
+            transaction date (and, again, created if it does not already
+            exist in the database).
+
+            Parameters
+            ----------
+            card : database.models.CreditCard
+                The credit card used for this transaction.
+            transaction_date : datetime.date
+                The date of the transaction.
+
+            Returns
+            -------
+            statement : database.models.CreditStatementView
+                The credit statement belonging to this transaction.
+            """
             issue_date = self.issue_date.data
             if issue_date:
-                statement = statement_db.find_statement(card, issue_date)
+                statement = self._db_handler.find_statement(
+                    card.id, issue_date
+                )
                 # Create the statement if it does not already exist
                 if not statement:
-                    statement = statement_db.add_statement(card, issue_date)
+                    statement = self._db_handler.add_statement(
+                        card, issue_date
+                    )
             else:
                 # No issue date was given, so the statement must be inferred
-                statement = statement_db.infer_statement(
-                    card,
-                    transaction_date,
-                    creation=True
+                statement = self._db_handler.infer_statement(
+                    card, transaction_date, creation=True
                 )
             return statement
+
+        def gather_entry_data(self, entry):
+            """Gather data for the form from the given database entry."""
+            if isinstance(entry, CreditStatementView):
+                data = {
+                    'issue_date': entry.issue_date
+                }
+                card = entry.card
+            elif isinstance(entry, CreditCard):
+                data = {}
+                card = entry
+            else:
+                self._raise_gather_fail_error(
+                    (CreditStatementView, CreditCard), entry
+                )
+            # Prepare data for the card subforms
+            data['card_info'] = self.card_info.gather_entry_data(card)
+            return data
 
     class SubtransactionSubform(EntrySubform):
         """Form to input/edit credit card subtransactions."""
@@ -79,6 +242,31 @@ class CreditTransactionForm(EntryForm):
         )
         note = StringField('Note', [DataRequired()])
         tags = StringField('Tags')
+
+        @property
+        def subtransaction_data(self):
+            """
+            Produce a dictionary corresponding to a database subtransaction.
+            """
+            raw_tag_data = self.tags.data.split(',')
+            return {
+                'subtotal': self.subtotal.data,
+                'note': self.note.data,
+                'tags': [tag.strip() for tag in raw_tag_data if tag],
+            }
+
+        def gather_entry_data(self, entry):
+            """Gather data for the form from the given database entry."""
+            if isinstance(entry, CreditSubtransaction):
+                tag_names = [tag.tag_name for tag in entry.tags]
+                data = {
+                    'subtotal': entry.subtotal,
+                    'note': entry.note,
+                    'tags': ', '.join(tag_names),
+                }
+            else:
+                self._raise_gather_fail_error((CreditSubtransaction,), entry)
+            return data
 
     # Fields to identify the statement information for the transaction
     statement_info = FormField(StatementSubform)
@@ -93,15 +281,13 @@ class CreditTransactionForm(EntryForm):
     subtransactions = FieldList(FormField(SubtransactionSubform),
                                 min_entries=1)
     submit = SubmitField('Save Transaction')
-
-    class TransactionAutocompleter(Autocompleter):
-        """Tool to provide autocompletion suggestions for the form."""
-        _autocompletion_handler_map = {
-            'bank_name': BankHandler,
-            'last_four_digits': CreditCardHandler,
-            'vendor': CreditTransactionHandler,
-            'note': CreditSubtransactionHandler,
-        }
+    # Define an autcompleter for the form
+    _autocompleter = Autocompleter({
+        'bank_name': Bank,
+        'last_four_digits': CreditCard,
+        'vendor': CreditTransactionView,
+        'note': CreditSubtransaction,
+    })
 
     @property
     def transaction_data(self):
@@ -115,176 +301,68 @@ class CreditTransactionForm(EntryForm):
         subtransaction).
         """
         statement = self.get_transaction_statement()
-        # Internal transaction IDs are managed by the database handler
-        transaction_data = {'internal_transaction_id': None,
-                            'statement_id': statement['id']}
-        # Access data for each transaction-specific field
-        for field in ('transaction_date', 'vendor',):
-            transaction_data[field] = self[field].data
-        # Aggregate subtransaction information for the transaction
-        transaction_data['subtransactions'] = []
-        for form in self['subtransactions']:
-            subtransaction_data = {}
-            # Access data for each subtransaction-specific field
-            for field in ('subtotal', 'note'):
-                subtransaction_data[field] = form[field].data
-            # RETURN AN EMPTY LIST NOT A LIST WITH EMPTY STRING
-            raw_tag_data = form['tags'].data.split(',')
-            tag_data = [tag.strip() for tag in raw_tag_data if tag]
-            subtransaction_data['tags'] = tag_data
-            transaction_data['subtransactions'].append(subtransaction_data)
+        subtransactions_data = [
+            subform.subtransaction_data for subform in self.subtransactions
+        ]
+        transaction_data = {
+            'internal_transaction_id': None,
+            'statement_id': statement.id,
+            'transaction_date': self.transaction_date.data,
+            'vendor': self.vendor.data,
+            'subtransactions': subtransactions_data,
+        }
         return transaction_data
 
     def get_transaction_statement(self):
         """Get the credit card statement associated with the transaction."""
         return self.statement_info.get_statement(self.transaction_date.data)
 
-    def prepopulate_transaction(self, transaction):
-        """
-        Prepopulate the form with credit transaction information.
-        """
-        subtransaction_db = CreditSubtransactionHandler()
-        tag_db = CreditTagHandler()
-        subtransactions = subtransaction_db.get_entries((transaction['id'],))
-        subtransactions_data = []
-        for subtransaction in subtransactions:
-            subtransaction_ids = (subtransaction['id'],)
-            tags = tag_db.get_entries(subtransaction_ids=subtransaction_ids)
-            tag_list = ', '.join([tag['tag_name'] for tag in tags])
-            subtransaction_data = {**subtransaction, 'tags': tag_list}
-            subtransactions_data.append(subtransaction_data)
-        self.prepopulate(transaction, subtransactions=subtransactions_data)
+    def gather_entry_data(self, entry):
+        """Gather data for the form from the given database entry."""
+        if isinstance(entry, CreditTransactionView):
+            data = self._gather_transaction_data(entry)
+            statement_info = entry.statement
+        elif isinstance(entry, (CreditCard, CreditStatementView)):
+            data = {}
+            statement_info = entry
+        else:
+            self._raise_gather_fail_error(
+                (CreditCard, CreditStatementView),
+                entry,
+            )
+        # Prepare data for the statement/subtransaction subforms
+        data['statement_info'] = self.statement_info.gather_entry_data(
+            statement_info
+        )
+        return data
 
-    @classmethod
-    def autocomplete(cls, field):
-        """Provide autocompletion suggestions for form fields."""
-        return cls.TransactionAutocompleter.autocomplete(field)
-
-    @classmethod
-    def autocomplete_note(cls, vendor):
-        """
-        Provide autocompletion suggestions for the note field.
-
-        The note field should be sorted in two levels. The first items
-        in the list should be suggested notes based on transactions
-        performed at this vendor, since it's likely that a similar
-        note may be used at the vendor again. Then, once notes are
-        sorted by vendor, they should be organized by their frequency,
-        in the database, as is standard for autocompletion suggestions.
-
-        Parameters
-        ----------
-        vendor : str
-            The name of the vendor who's prior notes should be
-            prioritized in the autocompletion suggestions.
-
-        Returns
-        -------
-        suggestions : list of str
-            A list of strings giving transaction note suggestions,
-            first sorted by the named vendor, then by frequency of
-            occurrence in the database.
-        """
-        suggestions = cls.autocomplete('note')
-        db = CreditSubtransactionHandler()
-        entries = db.get_entries(fields=('vendor', 'note'))
-        # Generate a map of notes for the current vendor
-        note_by_vendor = {}
-        for entry in entries:
-            note = entry['note']
-            # Update note if not yet recorded or not yet associated with vendor
-            if not note_by_vendor.get(note):
-                note_by_vendor[note] = (entry['vendor'] == vendor)
-        suggestions.sort(key=note_by_vendor.get, reverse=True)
-        return suggestions
-
-
-
-class AccountSelectField(CustomChoiceSelectField):
-    """Account field that uses the database to prepare field choices."""
-    _db_handler_type = CreditAccountHandler
-
-    def __init__(self, **kwargs):
-        label = 'Account'
-        validators = [SelectionNotBlank()]
-        super().__init__(label, validators, coerce=int, **kwargs)
-
-    @staticmethod
-    def _format_choice(account):
-        card_db = CreditCardHandler()
-        cards = card_db.get_entries(account_ids=(account['id'],))
-        digits = [f"*{card['last_four_digits']}" for card in cards]
-        # Create a description for the account using the bank and card digits
-        display_name = f"{account['bank_name']} (cards: {', '.join(digits)})"
-        return display_name
-
-
-class CreditCardForm(EntryForm):
-    """Form to input/edit credit cards."""
-
-    class AccountSubform(AcquisitionSubform):
-        """Form to input/edit account identification."""
-        _db_handler_type = CreditAccountHandler
-        account_id = AccountSelectField()
-        bank_name = StringField('Bank')
-        statement_issue_day = IntegerField('Statement Issue Day', [Optional()])
-        statement_due_day = IntegerField('Statement Due Day', [Optional()])
-
-        def get_account(self):
-            return self.get_entry(self.account_id.data, creation=True)
-
-        def _prepare_mapping(self):
-            # Mapping relies on knowing the bank, which must also be acquired
-            bank_db = BankHandler()
-            bank_name = self.bank_name.data
-            banks = bank_db.get_entries(bank_names=(bank_name,))
-            if not banks:
-                bank_data = {
-                    'user_id': bank_db.user_id,
-                    'bank_name': bank_name
-                }
-                bank = bank_db.add_entry(bank_data)
-            else:
-                bank = banks[0]
-            # Mapping must match format for `credit_accounts` database table
-            account_data = {
-                'bank_id': bank['id'],
-                'statement_issue_day': self.statement_issue_day.data,
-                'statement_due_day': self.statement_due_day.data,
-            }
-            return account_data
-
-    account_info = FormField(AccountSubform)
-    last_four_digits = StringField(
-        'Last Four Digits',
-        validators=[DataRequired(), Length(4), NumeralsOnly()]
-    )
-    active = BooleanField('Active', default='checked')
-    submit = SubmitField('Save Card')
-
-    class CardAutocompleter(Autocompleter):
-        """Tool to provide autocompletion suggestions for the form."""
-        _autocompletion_handler_map = {
-            'bank_name': BankHandler,
+    def _gather_transaction_data(self, transaction):
+        """Gather transaction-specific data."""
+        subtransactions_data = self._gather_subtransactions_data(
+            transaction.subtransactions
+        )
+        data = {
+            'transaction_date': transaction.transaction_date,
+            'vendor': transaction.vendor,
+            'subtransactions': subtransactions_data,
         }
+        return data
 
-    @property
-    def card_data(self):
-        """Produce a dictionary corresponding to a database card."""
-        account = self.account_info.get_account()
-        card_data = {'account_id': account['id']}
-        for field in ('last_four_digits', 'active'):
-            card_data[field] = self[field].data
-        return card_data
+    def _gather_subtransactions_data(self, subtransactions):
+        """Gather subtransaction-specific data."""
+        subtransactions_data = []
+        for i, subtransaction in enumerate(subtransactions):
+            # Add a subtransaction subform if necessary
+            if i+1 > len(self.subtransactions):
+                self.subtransactions.append_entry()
+            # Use the subtransaction subform to gather data from the entry info
+            subtransactions_data.append(
+                self.subtransactions[i].gather_entry_data(subtransaction)
+            )
+        return subtransactions_data
 
     @classmethod
-    def autocomplete(cls, field):
+    def autocomplete(cls, field, **priority_sort_fields):
         """Provide autocompletion suggestions for form fields."""
-        return cls.CardAutocompleter.autocomplete(field)
-
-
-class CardStatementTransferForm(EntryForm):
-    """Form indicating if an unpaid statement should be transferred to a new card."""
-    transfer = RadioField("transfer", choices=[("yes", "Yes"), ("no", "No")])
-    submit = SubmitField("Continue")
+        return cls._autocompleter.autocomplete(field, **priority_sort_fields)
 

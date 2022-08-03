@@ -22,11 +22,6 @@ CREATE TABLE users (
 );
 
 
-/* Store a common link for paired transactions */
-CREATE TABLE internal_transactions (
-  id INTEGER PRIMARY KEY
-);
-
 /* Store information about banks */
 CREATE TABLE banks (
   id INTEGER PRIMARY KEY,
@@ -39,7 +34,7 @@ CREATE TABLE banks (
 /* Store bank account type information */
 CREATE TABLE bank_account_types (
   id INTEGER PRIMARY KEY,
-  user_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL REFERENCES users (id),
   type_name TEXT NOT NULL,
   type_abbreviation TEXT,
   UNIQUE(user_id, type_name)
@@ -51,7 +46,8 @@ CREATE TABLE bank_accounts (
   id INTEGER PRIMARY KEY,
   bank_id INTEGER NOT NULL REFERENCES banks (id)
     ON DELETE CASCADE,
-  account_type_id INTEGER NOT NULL REFERENCES bank_account_types (id),
+  account_type_id INTEGER NOT NULL REFERENCES bank_account_types (id)
+    ON DELETE CASCADE,
   last_four_digits TEXT NOT NULL,
   active INTEGER NOT NULL,
   UNIQUE(bank_id, account_type_id, last_four_digits)
@@ -83,9 +79,9 @@ CREATE TABLE credit_accounts (
   id INTEGER PRIMARY KEY,
   bank_id INTEGER NOT NULL REFERENCES banks (id)
     ON DELETE CASCADE,
-  statement_issue_day INTEGER
+  statement_issue_day INTEGER NOT NULL
     CHECK(statement_issue_day > 0 AND statement_issue_day < 28),
-  statement_due_day INTEGER
+  statement_due_day INTEGER NOT NULL
     CHECK(statement_due_day > 0 AND statement_due_day < 28)
 );
 
@@ -134,9 +130,9 @@ CREATE TABLE credit_subtransactions (
 /* Store credit card transaction tags */
 CREATE TABLE credit_tags (
   id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users (id),
   parent_id INTEGER REFERENCES credit_tags (id)
     ON DELETE CASCADE,
-  user_id INTEGER NOT NULL REFERENCES users (id),
   tag_name TEXT NOT NULL COLLATE NOCASE,
   UNIQUE(user_id, tag_name)
 );
@@ -149,5 +145,11 @@ CREATE TABLE credit_tag_links (
   tag_id INTEGER NOT NULL REFERENCES credit_tags (id)
     ON DELETE CASCADE,
   PRIMARY KEY (subtransaction_id, tag_id)
+);
+
+
+/* Store a common link for paired transactions */
+CREATE TABLE internal_transactions (
+  id INTEGER PRIMARY KEY
 );
 

@@ -1,39 +1,37 @@
 """
 Routes for banking financials.
 """
-from collections import Counter
+from itertools import islice
 
 from flask import redirect, render_template, request, url_for, jsonify
-from wtforms.validators import ValidationError
 
+from ..database import db_transaction
 from ..auth.tools import login_required
 from ..common.transactions import get_linked_transaction
-from ..common.actions import get_user_database_entries, delete_database_entry
-from . import banking_bp
+from .blueprint import bp
 from .forms import *
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler, save_account
-from .transactions import (
-    BankTransactionHandler, BankSubtransactionHandler, save_transaction
-)
+from .transactions import BankTransactionHandler, save_transaction
 from .actions import *
 
 
-@banking_bp.route('/accounts')
+@bp.route('/accounts')
 @login_required
 def load_accounts():
-    bank_accounts = get_user_bank_account_groupings()
-    account_types = get_user_database_entries(BankAccountTypeHandler)
+    banks = BankHandler.get_banks()
+    account_types = BankAccountTypeHandler.get_account_types()
     return render_template('banking/accounts_page.html',
-                           bank_accounts=bank_accounts,
+                           banks=banks,
                            account_types=account_types)
 
 
-@banking_bp.route('/add_account',
+@bp.route('/add_account',
                defaults={'bank_id': None},
                methods=('GET', 'POST'))
-@banking_bp.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
+@bp.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
 @login_required
+@db_transaction
 def add_account(bank_id):
     form = BankAccountForm()
     # Check if an account was submitted and add it to the database
@@ -42,24 +40,24 @@ def add_account(bank_id):
         return redirect(url_for('banking.load_accounts'))
     else:
         if bank_id:
-            bank = BankHandler().get_entry(bank_id)
-            form.prepopulate_bank(bank)
+            bank = BankHandler.get_entry(bank_id)
+            form.prepopulate(bank)
     return render_template('banking/account_form/account_form_page_new.html',
                            form=form)
 
 
-@banking_bp.route('/delete_account/<int:account_id>')
+@bp.route('/delete_account/<int:account_id>')
 @login_required
+@db_transaction
 def delete_account(account_id):
-    delete_database_entry(BankAccountHandler, account_id)
+    BankAccountHandler.delete_entry(account_id)
     return redirect(url_for('banking.load_accounts'))
 
 
-@banking_bp.route('/account_summaries/<int:bank_id>')
+@bp.route('/account_summaries/<int:bank_id>')
 @login_required
 def load_account_summaries(bank_id):
-    bank_db = BankHandler()
-    bank = bank_db.get_entry(bank_id)
+    bank = BankHandler.get_entry(bank_id)
     bank_balance, type_accounts = get_bank_account_summaries(bank_id)
     return render_template('banking/account_summaries_page.html',
                            bank=bank,
@@ -67,33 +65,36 @@ def load_account_summaries(bank_id):
                            type_accounts=type_accounts)
 
 
-@banking_bp.route('/account/<int:account_id>')
+@bp.route('/account/<int:account_id>')
 @login_required
 def load_account_details(account_id):
-    account, transactions = get_bank_account_details(account_id)
+    account = BankAccountHandler.get_entry(account_id)
+    transactions = BankTransactionHandler.get_transactions(
+        account_ids=(account_id,),
+        sort_order='DESC',
+    )
+    # Only display the first 100 transactions
     return render_template('banking/account_page.html',
                            account=account,
-                           account_transactions=transactions)
+                           account_transactions=islice(transactions, 100))
 
 
-@banking_bp.route('/_expand_transaction', methods=('POST',))
+@bp.route('/_expand_transaction', methods=('POST',))
 @login_required
 def expand_transaction():
-    subtransaction_db = BankSubtransactionHandler()
     # Get the transaction ID from the AJAX request
     transaction_id = request.get_json().split('-')[-1]
-    # Get the subtransactions
-    subtransactions = subtransaction_db.get_entries((transaction_id,))
+    transaction = BankTransactionHandler.get_entry(transaction_id)
     return render_template('common/transactions_table/subtransactions.html',
-                           subtransactions=subtransactions)
+                           subtransactions=transaction.subtransactions)
 
 
-@banking_bp.route('/_show_linked_transaction', methods=('POST',))
+@bp.route('/_show_linked_transaction', methods=('POST',))
 @login_required
 def show_linked_transaction():
     post_args = request.get_json()
     transaction_id = post_args['transaction_id']
-    transaction = BankTransactionHandler().get_entry(transaction_id)
+    transaction = BankTransactionHandler.get_entry(transaction_id)
     linked_transaction = get_linked_transaction(transaction)
     return render_template('common/transactions_table/'
                            'linked_transaction_overlay.html',
@@ -102,28 +103,29 @@ def show_linked_transaction():
                            linked_transaction=linked_transaction)
 
 
-@banking_bp.route('/add_transaction',
+@bp.route('/add_transaction',
                defaults={'bank_id': None, 'account_id': None},
                methods=('GET', 'POST'))
-@banking_bp.route('/add_transaction/<int:bank_id>',
+@bp.route('/add_transaction/<int:bank_id>',
                defaults={'account_id': None},
                methods=('GET', 'POST'))
-@banking_bp.route('/add_transaction/<int:bank_id>/<int:account_id>',
+@bp.route('/add_transaction/<int:bank_id>/<int:account_id>',
                methods=('GET', 'POST'))
 @login_required
+@db_transaction
 def add_transaction(bank_id, account_id):
     form = BankTransactionForm()
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
-        transaction, subtransactions = save_transaction(form)
+        transaction = save_transaction(form)
         return redirect(url_for('banking.load_account_details',
-                                account_id=transaction['account_id']))
+                                account_id=transaction.account_id))
     else:
         if account_id:
-            account = BankAccountHandler().get_entry(account_id)
+            account = BankAccountHandler.get_entry(account_id)
             form.prepopulate(account)
         elif bank_id:
-            bank = BankHandler().get_entry(bank_id)
+            bank = BankHandler.get_entry(bank_id)
             form.prepopulate(bank)
     # Display the form for accepting user input
     return render_template('banking/transaction_form/'
@@ -131,28 +133,29 @@ def add_transaction(bank_id, account_id):
                            update=False)
 
 
-@banking_bp.route('/update_transaction/<int:transaction_id>',
+@bp.route('/update_transaction/<int:transaction_id>',
               methods=('GET', 'POST'))
 @login_required
+@db_transaction
 def update_transaction(transaction_id):
     form = BankTransactionForm()
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
-        transaction, subtransactions = save_transaction(form, transaction_id)
+        transaction = save_transaction(form, transaction_id)
         return redirect(url_for('banking.load_account_details',
-                                account_id=transaction['account_id']))
+                                account_id=transaction.account_id))
     else:
-        transaction = BankTransactionHandler().get_entry(transaction_id)
-        form.prepopulate_transaction(transaction)
+        transaction = BankTransactionHandler.get_entry(transaction_id)
+        form.prepopulate(transaction)
     # Display the form for accepting user input
-    update = 'transfer' if transaction['internal_transaction_id'] else True
+    update = 'transfer' if transaction.internal_transaction_id else True
     return render_template('banking/transaction_form/'
                            'transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form,
                            update=update)
 
 
-@banking_bp.route('/_add_subtransaction_fields', methods=('POST',))
+@bp.route('/_add_subtransaction_fields', methods=('POST',))
 @login_required
 def add_subtransaction_fields():
     post_args = request.get_json()
@@ -167,11 +170,12 @@ def add_subtransaction_fields():
                            sub_form=sub_form)
 
 
-@banking_bp.route('/_add_transfer_fields', methods=('POST',))
+@bp.route('/_add_transfer_fields', methods=('POST',))
 @login_required
 def add_transfer_fields():
     # Redefine the form for the transaction (including the new transfer fields)
-    # NOTE: this is a hack (since `append_entry` method cannot be used in AJAX)
+    # NOTE: This is a hack (since `append_entry` method cannot be used in AJAX
+    #       without reloading the form...)
     form_id = 'transfer_account_info-0'
     sub_form = BankTransactionForm.AccountSubform(prefix=form_id)
     sub_form.id = form_id
@@ -179,17 +183,18 @@ def add_transfer_fields():
                            sub_form=sub_form, id_prefix='transfer')
 
 
-@banking_bp.route('/delete_transaction/<int:transaction_id>')
+@bp.route('/delete_transaction/<int:transaction_id>')
 @login_required
+@db_transaction
 def delete_transaction(transaction_id):
     # Get the account for the transaction to guide the page redirect
-    account_id = delete_database_entry(BankTransactionHandler, transaction_id,
-                                       return_field='account_id')
+    account_id = BankTransactionHandler.get_entry(transaction_id).account_id
+    BankTransactionHandler.delete_entry(transaction_id)
     return redirect(url_for('banking.load_account_details',
                             account_id=account_id))
 
 
-@banking_bp.route('/_suggest_transaction_autocomplete', methods=('POST',))
+@bp.route('/_suggest_transaction_autocomplete', methods=('POST',))
 @login_required
 def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request

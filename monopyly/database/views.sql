@@ -11,11 +11,9 @@ DROP VIEW IF EXISTS credit_statements_view;
 /* Prepare a view giving consolidated bank account type information */
 CREATE VIEW bank_account_types_view AS
 SELECT
-  id,
-  user_id,
-  type_name,
-  IFNULL(type_abbreviation, type_name) type_common_name
-FROM bank_account_types;
+  t.*,
+  IFNULL(t.type_abbreviation, t.type_name) type_common_name
+FROM bank_account_types AS t;
 
 
 /* Prepare a view giving enhanced bank account information */
@@ -35,10 +33,7 @@ GROUP BY a.id;
 CREATE VIEW bank_transactions_view AS
 WITH view AS (
   SELECT
-    t.id,
-    internal_transaction_id,
-    account_id,
-    transaction_date,
+    t.*,
     ROUND(SUM(subtotal), 2) total,
     GROUP_CONCAT(note, '; ') notes
   FROM bank_transactions AS t
@@ -47,27 +42,18 @@ WITH view AS (
   GROUP BY t.id
 )
 SELECT
-  id,
-  internal_transaction_id,
-  account_id,
-  transaction_date,
-  total,
+  view.*,
   ROUND(
     SUM(total) OVER (PARTITION BY account_id ORDER BY transaction_date, id),
     2
-  ) balance,
-  notes
+  ) balance
 FROM view;
 
 
 /* Prepare a view giving consolidated credit card transaction information */
 CREATE VIEW credit_transactions_view AS
 SELECT
-  t.id,
-  internal_transaction_id,
-  statement_id,
-  transaction_date,
-  vendor,
+  t.*,
   ROUND(SUM(subtotal), 2) total,
   GROUP_CONCAT(note, '; ') notes
 FROM credit_transactions AS t

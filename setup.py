@@ -5,9 +5,9 @@ from setuptools import setup, find_packages
 
 # Set the package version
 MAJOR = 1
-MINOR = 1
-PATCH = 1
-DEV = 0
+MINOR = 2
+PATCH = 0
+DEV = 1
 
 def name_version(major, minor, patch, dev):
     version_number = f'{MAJOR}.{MINOR}.{PATCH}'

@@ -5,30 +5,30 @@
     <div class="card-column grouping">
 
       <div>
-        <b>{{ card['bank_name'] }}</b> <span class="digits">{{ card['last_four_digits'] }}</span>
+        <b>{{ card.account.bank.bank_name }}</b> <span class="digits">{{ card.last_four_digits }}</span>
       </div>
 
       <div class="statement-blocks">
         {% for statement in card_statements[card] %}
-          {% if statement['balance'] is not none %}
+          {% if statement.balance is not none %}
 
-            <a class="statement-block button-block" href="{{ url_for('credit.load_statement_details', statement_id=statement['id']) }}">
+            <a class="statement-block button-block" href="{{ url_for('credit.load_statement_details', statement_id=statement.id) }}">
               <div class="date">
-                <div class="month">{{ statement['issue_date'].strftime('%b')|upper }}</div>
-                <div class="year">{{ statement['issue_date'].year }}</div>
+                <div class="month">{{ statement.issue_date.strftime('%b')|upper }}</div>
+                <div class="year">{{ statement.issue_date.year }}</div>
               </div>
               <div class="payment">
                 <div class="balance">
-                  ${{ statement['balance']|currency }}
+                  ${{ statement.balance|currency }}
                 </div>
-                {% if statement['payment_date'] %}
+                {% if statement.payment_date %}
                   <div class="paid-notice flip-text-gadget">
                     <div class="flip-text-inner">
                       <div class="front">
                         PAID
                       </div>
                       <div class="back">
-                        {{ statement['payment_date'] }}
+                        {{ statement.payment_date }}
                       </div>
                     </div>
                   </div>

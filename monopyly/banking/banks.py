@@ -1,7 +1,8 @@
 """
 Tools for interacting with banks in the database.
 """
-from ..db.handler import DatabaseHandler
+from ..database.handler import DatabaseHandler
+from ..database.models import Bank
 
 
 class BankHandler(DatabaseHandler):
@@ -9,84 +10,57 @@ class BankHandler(DatabaseHandler):
     A database handler for managing bank information.
 
     Parameters
-    ––––––––––
-    db : sqlite3.Connection
-        A connection to the database for interfacing.
+    ----------
     user_id : int
         The ID of the user who is the subject of database access. If not
         given, the handler defaults to using the logged-in user.
-    check_user : bool
-        A flag indicating whether the handler should check that the
-        provided user ID matches the logged-in user.
 
     Attributes
-    ––––––––––
+    ----------
     table : str
         The name of the database table that this handler manages.
     db : sqlite3.Connection
         A connection to the database for interfacing.
-    cursor : sqlite.Cursor
-        A cursor for executing database interactions.
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    table = 'banks'
+    model = Bank
 
-    def get_entries(self, bank_names=None, fields=None):
+    @classmethod
+    def get_banks(cls, bank_names=None):
         """
         Get banks from the database.
 
         Query the database to select bank fields. Banks can be filtered
-        by name. All fields are shown by default.
+        by name.
 
         Parameters
-        ––––––––––
-        bank_names : tuple of str, optional
+        ----------
+        bank_names : list of str, optional
             A sequence of bank names for which banks will be selected
             (if `None`, all banks will be selected).
-        fields : tuple of str, optional
-            A sequence of fields to select from the database (if `None`,
-            all fields will be selected). Can be any field in the
-            'banks' table.
 
         Returns
-        –––––––
-        banks : list of sqlite3.Row
-            A list of banks matching the criteria.
+        -------
+        banks : sqlalchemy.engine.ScalarResult
+            Returns bank entries matching the criteria.
         """
-        bank_filter = self._queries.filter_items(bank_names, 'bank_name',
-                                                 'AND')
-        query = (f"SELECT {self._queries.select_fields(fields, 'b.id')} "
-                  "  FROM banks AS b "
-                  " WHERE user_id = ? "
-                 f"       {bank_filter} ")
-        placeholders = (self.user_id, *self._queries.fill_places(bank_names))
-        banks = self.query_entries(query, placeholders)
-        return banks
+        criteria = [cls._filter_values(cls.model.bank_name, bank_names)]
+        return super().get_entries(*criteria)
 
-    def get_entry(self, bank_id, fields=None):
-        """Get a bank from the database given its ID."""
-        query = (f"SELECT {self._queries.select_fields(fields, 'b.id')} "
-                  "  FROM banks AS b "
-                  " WHERE b.id = ? AND user_id = ?")
-        placeholders = (bank_id, self.user_id)
-        abort_msg = f'Bank ID {bank_id} does not exist for the user.'
-        bank = self.query_entry(query, placeholders, abort_msg)
-        return bank
-
-    def delete_entries(self, entry_ids):
+    @classmethod
+    def delete_entry(cls, entry_id):
         """
-        Delete banks from the database.
+        Delete a bank from the database.
 
-        Given a set of bank IDs, delete the banks from the database.
-        Deleting an account will also delete all accounts (and
-        transactions) associated with that account.
+        Given a bank ID, delete the bank from the database. Deleting an
+        account will also delete all accounts (and transactions)
+        associated with that account.
 
         Parameters
-        ––––––––––
-        entry_ids : list of int
-            The IDs of banks to be deleted.
+        ----------
+        entry_id : int
+            The ID of the bank to be deleted.
         """
-        # Delete the given banks
-        super().delete_entries(entry_ids)
+        super().delete_entry(entry_id)
 

@@ -33,23 +33,23 @@
         {% for bank in bank_accounts %}
           <ul class="category">
 
-            <h4>{{ bank['bank_name'] }}</h4>
+            <h4>{{ bank.bank_name }}</h4>
             <li>
-              <a href="{{ url_for('banking.load_account_summaries', bank_id=bank['id']) }}">
+              <a href="{{ url_for('banking.load_account_summaries', bank_id=bank.id) }}">
                 See account summaries
               </a>
               <ul>
                 {% for account in bank_accounts[bank] %}
                   <li>
-                    <a href="{{ url_for('banking.load_account_details', account_id=account['id']) }}">
-                      {{ account['type_name'] }} {{ account['last_four_digits'] }}
+                    <a href="{{ url_for('banking.load_account_details', account_id=account.id) }}">
+                      {{ account.account_type.type_common_name }} {{ account.last_four_digits }}
                     </a>
                   </li>
                 {% endfor %}
               </ul>
             </li>
             <li>
-              <a href="{{ url_for('banking.add_transaction', bank_id=bank['id']) }}">
+              <a href="{{ url_for('banking.add_transaction', bank_id=bank.id) }}">
                 Create a new transaction
               </a>
             </li>
@@ -106,21 +106,21 @@
         {% for card in cards %}
           <ul class="category">
 
-            <h4>{{ card['bank_name'] }} {{ card['last_four_digits'] }}</h4>
-            {% if card['last_statement_id'] %}
+            <h4>{{ card.account.bank.bank_name }} {{ card.last_four_digits }}</h4>
+            {% if card.last_statement_id %}
               <li>
-                <a href="{{ url_for('credit.load_statement_details', statement_id=card['last_statement_id']) }}">
+                <a href="{{ url_for('credit.load_statement_details', statement_id=card.last_statement_id) }}">
                   See most recent statement
                 </a>
               </li>
             {% endif %}
             <li>
-              <a href="{{ url_for('credit.load_transactions', card_id=card['id']) }}">
+              <a href="{{ url_for('credit.load_transactions', card_id=card.id) }}">
                 See transaction history
               </a>
             </li>
             <li>
-              <a href="{{ url_for('credit.add_transaction', card_id=card['id']) }}">
+              <a href="{{ url_for('credit.add_transaction', card_id=card.id) }}">
                 Create a new transaction
               </a>
             </li>

@@ -1,52 +1,45 @@
 """
 Tools for interacting with the credit transactions in the database.
 """
-import datetime
 from sqlite3 import IntegrityError
 
-from ..common.form_utils import execute_on_form_validation
-from ..common.transactions import Transaction
-from ..db import DATABASE_FIELDS
-from ..db.handler import DatabaseHandler
+from sqlalchemy import insert
+
+from ..common.forms.utils import execute_on_form_validation
+from ..database import db
+from ..database.handler import DatabaseHandler, DatabaseViewHandler
+from ..database.models  import (
+    CreditCard, CreditTransaction, CreditTransactionView, CreditSubtransaction,
+    CreditTag
+)
 
 
-class CreditTransaction(Transaction):
-    """A credit transaction."""
-    subtype = 'credit'
-
-
-class CreditTransactionHandler(DatabaseHandler):
+class CreditTransactionHandler(DatabaseViewHandler):
     """
     A database handler for accessing credit transactions.
 
     Parameters
-    ––––––––––
-    db : sqlite3.Connection
-        A connection to the database for interfacing.
+    ----------
     user_id : int
         The ID of the user who is the subject of database access. If not
         given, the handler defaults to using the logged-in user.
-    check_user : bool
-        A flag indicating whether the handler should check that the
-        provided user ID matches the logged-in user.
 
     Attributes
-    ––––––––––
+    ----------
     table : str
         The name of the database table that this handler manages.
     db : sqlite3.Connection
         A connection to the database for interfacing.
-    cursor : sqlite.Cursor
-        A cursor for executing database interactions.
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    table = 'credit_transactions'
-    table_view = 'credit_transactions_view'
-    _entry_type = CreditTransaction
+    _model = CreditTransaction
+    _model_view = CreditTransactionView
 
-    def get_entries(self, card_ids=None, statement_ids=None, active=False,
-                    sort_order='DESC', fields=DATABASE_FIELDS[table_view]):
+    @classmethod
+    @DatabaseViewHandler.view_query
+    def get_transactions(cls, statement_ids=None, card_ids=None, active=None,
+                    sort_order='DESC'):
         """
         Get credit card transactions from the database.
 
@@ -58,303 +51,112 @@ class CreditTransactionHandler(DatabaseHandler):
         by either ascending or descending transaction date.
 
         Parameters
-        ––––––––––
-        card_ids : tuple of int, optional
-            A sequence of card IDs with which to filter transactions (if
-            `None`, all card IDs will be shown).
+        ----------
         statement_ids : tuple of str, optional
             A sequence of statement IDs with which to filter
             transactions (if `None`, all statement IDs will be shown).
+        card_ids : tuple of int, optional
+            A sequence of card IDs with which to filter transactions (if
+            `None`, all card IDs will be shown).
         active : bool, optional
             A flag indicating whether only transactions for active cards
-            will be returned. The default is `False` (all transactions
+            will be returned. The default is `None` (all transactions
             are returned).
         sort_order : {'ASC', 'DESC'}
             An indicator of whether the transactions should be ordered
             in ascending (oldest at top) or descending (newest at top)
             order.
-        fields : tuple of str, optional
-            A sequence of fields to select from the database (if `None`,
-            all fields will be selected). A field can be any column from
-            the 'credit_transactions', credit_statements',
-            'credit_cards', 'credit_accounts', or 'banks' tables.
 
         Returns
-        –––––––
-        transactions : list of sqlite3.Row
-            A list of credit card transactions matching the criteria.
+        -------
+        transactions : sqlalchemy.engine.ScalarResult
+            Returns credit card transactions matching the criteria.
         """
-        self._queries.validate_sort_order(sort_order)
-        card_filter = self._queries.filter_items(card_ids, 'card_id', 'AND')
-        statement_filter = self._queries.filter_items(statement_ids,
-                                                      'statement_id', 'AND')
-        active_filter = "AND active = 1" if active else ""
-        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
-                  "  FROM credit_transactions_view AS t "
-                  "       INNER JOIN credit_statements AS s "
-                  "          ON s.id = t.statement_id "
-                  "       INNER JOIN credit_cards AS c "
-                  "          ON c.id = s.card_id "
-                  "       INNER JOIN credit_accounts AS a "
-                  "          ON a.id = c.account_id "
-                  "       INNER JOIN banks AS b "
-                  "          ON b.id = a.bank_id "
-                  " WHERE user_id = ? "
-                 f"       {card_filter} {statement_filter} {active_filter} "
-                  " GROUP BY t.id "
-                 f" ORDER BY transaction_date {sort_order}")
-        placeholders = (self.user_id, *self._queries.fill_places(card_ids),
-                        *self._queries.fill_places(statement_ids))
-        transactions = self.query_entries(query, placeholders)
+        criteria = [
+            cls._filter_values(cls.model.statement_id, statement_ids),
+            cls._filter_values(CreditCard.id, card_ids),
+            cls._filter_value(CreditCard.active, active),
+        ]
+        transactions = super().get_entries(*criteria, sort_order=sort_order)
         return transactions
 
-    def get_entry(self, transaction_id, fields=None):
-        """
-        Get a transaction from the database given its ID.
+    @classmethod
+    def _customize_entries_query(cls, query, filters, sort_order):
+        query = super()._customize_entries_query(query, filters, sort_order)
+        # Group transactions and order by transaction date
+        query = query.group_by(cls.model.id)
+        query = cls._sort_query(
+            query,
+            (cls.model.transaction_date, sort_order),
+        )
+        return query
 
-        Accesses a set of fields for a given transaction. By default,
-        all fields for a transaction, the corresponding statement,
-        issuing credit card and account are returned.
-
-        Parameters
-        ––––––––––
-        transaction_id : int
-            The ID of the transaction to be found.
-        fields : tuple of str, optional
-            The fields (in either the transactions, statements, cards,
-            accounts, or banks tables) to be returned.
-
-        Returns
-        –––––––
-        transaction : sqlite3.Row
-            The transaction information from the database.
-        """
-        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
-                  "  FROM credit_transactions_view AS t "
-                  "       INNER JOIN credit_statements AS s "
-                  "          ON s.id = t.statement_id "
-                  "       INNER JOIN credit_cards AS c "
-                  "          ON c.id = s.card_id "
-                  "       INNER JOIN credit_accounts AS a "
-                  "          ON a.id = c.account_id "
-                  "       INNER JOIN banks AS b "
-                  "          ON b.id = a.bank_id "
-                  " WHERE user_id = ? AND t.id = ?")
-        placeholders = (self.user_id, transaction_id)
-        abort_msg = (f'Transaction ID {transaction_id} does not exist for the '
-                      'user.')
-        transaction = self.query_entry(query, placeholders, abort_msg)
-        return transaction
-
-    def add_entry(self, mapping):
+    @classmethod
+    def add_entry(cls, **field_values):
         """
         Add a transaction to the database.
 
-        Uses a mapping produced by a `CreditTransactionForm` to add a
-        new transaction into the database. The mapping includes
-        information for the transaction, along with information for all
+        Uses values acquired from a `CreditTransactionForm` to add a new
+        transaction into the database. The values include information
+        for the transaction, along with information for all
         subtransactions (including tags associated with each
         subtransaction).
 
         Parameters
-        ––––––––––
-        mapping : dict
-            A mapping between database fields and the value to be
-            entered into that field for the transaction. The mapping
-            also contains subtransaction information (including tags).
+        ----------
+        **field_values :
+            Values for each field in the transaction (including
+            subtransaction values and tags).
 
         Returns
-        –––––––
-        transaction : sqlite3.Row
+        -------
+        transaction : database.models.CreditTransaction
             The saved transaction.
-        subtransactions : list of sqlite3.Row
-            A list of subtransactions belonging to the saved transaction.
         """
-        subtransaction_db = CreditSubtransactionHandler()
-        # Override the default method to account for subtransactions
-        subtransactions_data = mapping.pop('subtransactions')
-        transaction = super().add_entry(mapping)
-        subtransactions = self._add_subtransactions(transaction['id'],
-                                                    subtransactions_data)
-        # Refresh the transaction information
-        transaction = self.get_entry(transaction['id'])
-        return transaction, subtransactions
+        # Extend the default method to account for subtransactions
+        subtransactions_data = field_values.pop('subtransactions')
+        transaction = super().add_entry(**field_values)
+        cls._add_subtransactions(transaction, subtransactions_data)
+        # Refresh the transaction with the subtransaction information
+        db.session.refresh(transaction)
+        return transaction
 
-    def update_entry(self, entry_id, mapping):
-        """Update a transaction (and its subtransactions) in the database."""
-        subtransaction_db = CreditSubtransactionHandler()
-        # Automatically populate the internal transaction ID field
-        transaction = self.get_entry(entry_id)
-        field = 'internal_transaction_id'
-        mapping[field] = transaction[field]
-        # Override the default method to account for subtransactions
-        subtransactions = subtransaction_db.get_entries((entry_id,))
-        if 'subtransactions' in mapping:
-            subtransactions_data = mapping.pop('subtransactions')
-            # Replace subtransactions when updating
-            subtransaction_db.delete_entries(
-                [subtransaction['id'] for subtransaction in subtransactions]
-            )
-            subtransactions = self._add_subtransactions(entry_id,
-                                                        subtransactions_data)
-        transaction = super().update_entry(entry_id, mapping)
-        return transaction, subtransactions
+    @classmethod
+    def update_entry(cls, entry_id, **field_values):
+        """Update a transaction in the database."""
+        # Extend the default method to account for subtransactions
+        subtransactions_data = field_values.pop('subtransactions', None)
+        transaction = super().update_entry(entry_id, **field_values)
+        if subtransactions_data:
+            # Replace all subtransactions when updating any subtransaction
+            for subtransaction in transaction.subtransactions:
+                db.session.delete(subtransaction)
+            cls._add_subtransactions(transaction, subtransactions_data)
+        # Refresh the transaction with the subtransaction information
+        db.session.refresh(transaction)
+        return transaction
 
-    def _add_subtransactions(self, transaction_id, subtransactions_data):
+    @staticmethod
+    def _add_subtransactions(transaction, subtransactions_data):
         """Add subtransactions to the database for the data given."""
-        subtransaction_db = CreditSubtransactionHandler()
-        # Assemble mappings to add subtransactions
-        subtransactions = []
         for subtransaction_data in subtransactions_data:
-            # Complete the mapping and add the subtransaction to the database
-            sub_mapping = {'transaction_id': transaction_id,
-                           **subtransaction_data}
-            subtransaction = subtransaction_db.add_entry(sub_mapping)
-            subtransactions.append(subtransaction)
-        return subtransactions
-
-
-class CreditSubtransactionHandler(DatabaseHandler):
-    """
-    A database handler for accessing credit subtransactions.
-
-    Parameters
-    ––––––––––
-    db : sqlite3.Connection
-        A connection to the database for interfacing.
-    user_id : int
-        The ID of the user who is the subject of database access. If not
-        given, the handler defaults to using the logged-in user.
-    check_user : bool
-        A flag indicating whether the handler should check that the
-        provided user ID matches the logged-in user.
-
-    Attributes
-    ––––––––––
-    table : str
-        The name of the database table that this handler manages.
-    db : sqlite3.Connection
-        A connection to the database for interfacing.
-    cursor : sqlite.Cursor
-        A cursor for executing database interactions.
-    user_id : int
-        The ID of the user who is the subject of database access.
-    """
-    table = 'credit_subtransactions'
-
-    def get_entries(self, transaction_ids=None, fields=None):
-        """
-        Get all subtransactions for a credit transaction.
-
-        Accesses a set of fields for subtransactions belonging to a set
-        of transactions. By default, all fields for the subtransactions
-        are returned.
-
-        Parameters
-        ––––––––––
-        transaction_ids : tuple of int, optional
-            The IDs of the transactions for which to retrieve
-            subtransactions.
-        fields : tuple of str, optional
-            The fields (in either the transactions, subtransactions,
-            statements, cards, or accounts tables) to be returned. By
-            default, all fields are returned.
-
-        Returns
-        –––––––
-        subtransactions : list of sqlite3.Row
-            A list of credit card subtransactions that are associated
-            with the given transaction.
-        """
-        transaction_filter = self._queries.filter_items(transaction_ids,
-                                                        'transaction_id',
-                                                        'AND')
-        query = (f"SELECT {self._queries.select_fields(fields, 's_t.id')} "
-                  "  FROM credit_subtransactions AS s_t "
-                  "       INNER JOIN credit_transactions AS t "
-                  "          ON t.id = s_t.transaction_id "
-                  "       INNER JOIN credit_statements AS s "
-                  "          ON s.id = t.statement_id "
-                  "       INNER JOIN credit_cards AS c "
-                  "          ON c.id = s.card_id "
-                  "       INNER JOIN credit_accounts AS a "
-                  "          ON a.id = c.account_id "
-                  "       INNER JOIN banks AS b "
-                  "          ON b.id = a.bank_id "
-                 f" WHERE user_id = ? {transaction_filter}")
-        placeholders = (self.user_id,
-                        *self._queries.fill_places(transaction_ids))
-        subtransactions = self.query_entries(query, placeholders)
-        return subtransactions
-
-    def get_entry(self, subtransaction_id, fields=None):
-        """
-        Get a subtransaction from the database given its ID.
-
-        Accesses a set of fields for a given subtransaction. By default,
-        all fields for a subtransaction, the corresponding statement,
-        issuing credit card and account are returned.
-
-        Parameters
-        ––––––––––
-        subtransaction_id : int
-            The ID of the subtransaction to be found.
-        fields : tuple of str, optional
-            The fields (in either the subtransactions, transactions,
-            statements, cards, or accounts tables) to be returned.
-
-        Returns
-        –––––––
-        subtransaction : sqlite3.Row
-            The subtransaction information from the database.
-        """
-        query = (f"SELECT {self._queries.select_fields(fields, 't.id')} "
-                  "  FROM credit_subtransactions AS s_t "
-                  "       INNER JOIN credit_transactions AS t "
-                  "          ON t.id = s_t.transaction_id "
-                  "       INNER JOIN credit_statements AS s "
-                  "          ON s.id = t.statement_id "
-                  "       INNER JOIN credit_cards AS c "
-                  "          ON c.id = s.card_id "
-                  "       INNER JOIN credit_accounts AS a "
-                  "          ON a.id = c.account_id "
-                  "       INNER JOIN banks AS b "
-                  "          ON b.id = a.bank_id "
-                  " WHERE user_id = ? AND s_t.id = ?")
-        placeholders = (self.user_id, subtransaction_id)
-        abort_msg = (f'Subtransaction ID {subtransaction_id} does not exist '
-                      'for the user.')
-        subtransaction = self.query_entry(query, placeholders, abort_msg)
-        return subtransaction
-
-    def add_entry(self, mapping):
-        """
-        Add a subtransaction to the database.
-
-        Uses a mapping produced by a `CreditTransactionForm` to add a
-        new subtransaction into the database. The mapping contains
-        information for the subtransaction, including the corresponding
-        transaction. The mapping also provides a list of tags that have
-        been assigned to the new subtransaction.
-
-        Parameters
-        ––––––––––
-        mapping : dict
-            A mapping between database fields and the value to be
-            entered into that field for the subtransaction.
-
-        Returns
-        –––––––
-        subtransaction : sqlite3.Row
-            The saved transaction.
-        """
-        tag_db = CreditTagHandler()
-        # Override the default method to account for tags
-        tags = mapping.pop('tags')
-        subtransaction = super().add_entry(mapping)
-        # Link tags to the subtransaction
-        tag_db.update_tag_links(subtransaction['id'], tags)
-        return subtransaction
+            tag_names = subtransaction_data.pop("tags")
+            # NOTE I don't believe that this adds new tags to the database
+            tags = []
+            for tag_name in tag_names:
+                leaf_tag = CreditTagHandler.find_tag(tag_name)
+                ancestor_tags = CreditTagHandler.get_ancestors(leaf_tag)
+                for tag in [*ancestor_tags, leaf_tag]:
+                    if tag not in tags:
+                        tags.append(tag)
+            subtransaction = CreditSubtransaction(
+                transaction_id=transaction.id,
+                **subtransaction_data,
+                tags=tags,
+            )
+            db.session.add(subtransaction)
+        # Flush to the database after all subtransactions have been added
+        db.session.flush()
 
 
 class CreditTagHandler(DatabaseHandler):
@@ -362,18 +164,13 @@ class CreditTagHandler(DatabaseHandler):
     A database handler for managing credit transaction tags.
 
     Parameters
-    ––––––––––
-    db : sqlite3.Connection
-        A connection to the database for interfacing.
+    ----------
     user_id : int
         The ID of the user who is the subject of database access. If not
         given, the handler defaults to using the logged-in user.
-    check_user : bool
-        A flag indicating whether the handler should check that the
-        provided user ID matches the logged-in user.
 
     Attributes
-    ––––––––––
+    ----------
     table : str
         The name of the database table that this handler manages.
     db : sqlite3.Connection
@@ -383,20 +180,19 @@ class CreditTagHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
-    table = 'credit_tags'
+    model = CreditTag
 
-    def get_entries(self, tag_names=None, transaction_ids=None,
-                    subtransaction_ids=None, fields=DATABASE_FIELDS[table],
-                    ancestors=True):
+    @classmethod
+    def get_tags(cls, tag_names=None, transaction_ids=None,
+                 subtransaction_ids=None, ancestors=True):
         """
         Get credit card transaction tags from the database.
 
         Query the database to select credit transaction tag fields. Tags
-        can be filtered by tag name or transaction. All fields for a tag
-        are shown by default.
+        can be filtered by tag name or transaction.
 
         Parameters
-        ––––––––––
+        ----------
         tag_names : tuple of str, optional
             A sequence of names of tags to be selected (if `None`, all
             tag names will be selected).
@@ -406,156 +202,87 @@ class CreditTagHandler(DatabaseHandler):
         subtransaction_ids : tuple of int, optional
             A sequence of subtransaction IDs for which tags will be
             selected (if `None`, all subtransaction tags will be selected).
-        fields : tuple of str, optional
-            A sequence of fields to select from the database (if `None`,
-            all fields will be selected). A field can be any column from
-            the 'credit_tags' table.
         ancestors : bool, optional
             A flag indicating whether the query should include tags
             that are ancestors of other tags in the list of returned
             tags. The default is `True` (ancestor tags are returned).
 
         Returns
-        –––––––
-        tags : list of sqlite3.Row
-            A list of credit card transaction tags matching the criteria.
+        -------
+        tags : list of database.models.CreditTag
+            Returns credit card transaction tags matching the criteria.
         """
-        name_filter = self._queries.filter_items(tag_names, 'tag_name', 'AND')
-        transaction_filter = self._queries.filter_items(transaction_ids,
-                                          'transaction_id', 'AND')
-        subtransaction_filter = self._queries.filter_items(subtransaction_ids,
-                                                           'subtransaction_id',
-                                                           'AND')
-        query = (f"SELECT {self._queries.select_fields(fields, 'DISTINCT tags.id')} "
-                  "  FROM credit_tags AS tags "
-                  "       LEFT OUTER JOIN credit_tag_links AS l "
-                  "          ON l.tag_id = tags.id "
-                  "       INNER JOIN credit_subtransactions AS s_t "
-                  "          ON s_t.id = l.subtransaction_id "
-                 f" WHERE user_id = ? {name_filter} "
-                 f"       {transaction_filter} {subtransaction_filter}")
-        placeholders = (self.user_id, *self._queries.fill_places(tag_names),
-                        *self._queries.fill_places(transaction_ids),
-                        *self._queries.fill_places(subtransaction_ids))
-        tags = self.query_entries(query, placeholders)
+        criteria = [
+            cls._filter_values(cls.model.tag_name, tag_names),
+            cls._filter_values(CreditTransaction.id, transaction_ids),
+            cls._filter_values(CreditSubtransaction.id, subtransaction_ids),
+        ]
+        tags = super().get_entries(*criteria).all()
         # If specified, remove ancestors from the list of tags
         if not ancestors:
             for tag in tags:
-                for ancestor in self.get_ancestors(tag['id']):
+                for ancestor in self.get_ancestors(tag.id):
                     if ancestor in tags:
                         tags.remove(ancestor)
         return tags
 
-    def get_entry(self, tag_id, fields=None):
-        """
-        Get a credit transaction tag from the database given its ID.
 
-        Accesses a set of fields for a given tag. By default, all fields
-        for a tag are returned.
+    @classmethod
+    def _filter_entries(cls, query, filters):
+        # Add a join to enable filtering by transaction ID or subtransaction ID
+        query = query.join(CreditSubtransaction) \
+                     .join(CreditTransactionView) \
+                     .join(CreditStatementView) \
+                     .join(CrediCard) \
+                     .join(Bank)
+        return super()._filter_entries(query, filters)
+
+    @classmethod
+    def get_subtags(cls, tag):
+        """
+        Get subcategories (children) of a given credit transaction tag.
 
         Parameters
-        ––––––––––
-        tag_id : int
-            The ID of the tag to be found.
-        fields : tuple of str, optional
-            The fields (in the tags table) to be returned.
+        ----------
+        tag : database.models.CreditTag
+            The parent tag for which to find subtags. (A value of `None`
+            indicates that top level tags should be found.)
 
         Returns
-        –––––––
-        tag : sqlite3.Row
-            The tag information from the database.
-        """
-        query = (f"SELECT {self._queries.select_fields(fields, 'tags.id')} "
-                  "  FROM credit_tags AS tags "
-                  " WHERE user_id = ? AND id = ?")
-        placeholders = (self.user_id, tag_id)
-        abort_msg = (f'Tag ID {tag_id} does not exist for the user.')
-        tag = self.query_entry(query, placeholders, abort_msg)
-        return tag
-
-    def get_subtags(self, tag_id, fields=None):
-        """
-        Get subcategories of a credit transaction tag.
-
-        Accesses a set of fields for children of a given tag. By
-        default, all fields for a tag are returned.
-
-        Parameters
-        ––––––––––
-        tag_id : int
-            The ID of the tag for which to find subtags.
-        fields : tuple of str, optional
-            The fields (in the tags table) to be returned.
-
-        Returns
-        –––––––
-        subtags : list of sqlite3.Row
+        -------
+        subtags : sqlalchemy.engine.ScalarResult
             A list of credit card transaction tags that are
-            subcategories of the given tag.
+            subcategories of the given parent tag.
         """
-        query = (f"SELECT {self._queries.select_fields(fields, 'tags.id')} "
-                  "  FROM credit_tags AS tags "
-                  " WHERE user_id = ? AND parent_id IS ?")
-        placeholders = (self.user_id, tag_id)
-        subtags = self.query_entries(query, placeholders)
+        query = cls.model.select_for_user()
+        # Filter the query to get only subtags of the given tag
+        parent_id = tag.id if tag else None
+        query = query.where(cls.model.parent_id == parent_id)
+        subtags = db.session.execute(query).scalars()
         return subtags
 
-    def get_supertag(self, tag_id, fields=None):
+    @classmethod
+    def get_supertag(cls, tag):
         """
         Get the supercategory (parent) of a credit transaction tag.
 
-        Accesses a set of fields for the parent of a given tag. By
-        default, all fields for a tag are returned.
-
         Parameters
-        ––––––––––
+        ----------
         tag_id : int
-            The ID of the tag for which to find supertags.
-        fields : tuple of str, optional
-            The fields (in the tags table) to be returned.
+            The child tag for which to find supertags.
 
         Returns
-        –––––––
-        supertag : sqlite3.Row, None
+        -------
+        supertag : database.models.CreditTag
             The credit card transaction tag that is the parent category
             of the given tag. Returns `None` if no parent tag is found.
         """
-        tag = self.get_entry(tag_id)
-        if tag['parent_id']:
-            supertag = self.get_entry(tag['parent_id'])
-        else:
-            supertag = None
+        parent_id = tag.parent_id
+        supertag = cls.get_entry(parent_id) if parent_id else None
         return supertag
 
-    def find_tag(self, tag_name, fields=None):
-        """
-        Find a tag using uniquely identifying characteristics.
-
-        Queries the database to find a transaction tag based on the
-        provided criteria (the tag's name).
-
-        Parameters
-        ––––––––––
-        tag_name : str
-            The name of the tag to be found.
-        fields : tuple of str, optional
-            The fields (in the tags table) to be returned.
-
-        Returns
-        –––––––
-        tag : sqlite3.Row
-            The tag entry matching the given criteria. If no matching
-            tag is found, returns `None`.
-        """
-        # Search the database for entries matching the criteria
-        query = (f"SELECT {self._queries.select_fields(fields, 'tags.id')} "
-                  "  FROM credit_tags AS tags "
-                 f" WHERE user_id = ? AND tag_name = ?")
-        placeholders = (self.user_id, tag_name)
-        tag = self.cursor.execute(query, placeholders).fetchone()
-        return tag
-
-    def get_heirarchy(self, parent_id=None):
+    @classmethod
+    def get_heirarchy(cls, parent_tag=None):
         """
         Get the heirarchy of tags as a dictionary.
 
@@ -566,24 +293,25 @@ class CreditTagHandler(DatabaseHandler):
         only of tags without parent tags.
 
         Parameters
-        ––––––––––
-        parent_id : int, None
-            The ID of the parent tag to use as the starting point when
-            recursing through the tree. If the parent ID is `None`, the
-            recursion begins at the highest level of tags.
+        ----------
+        parent_tag : database.models.CreditTag
+            The parent tag to use as the starting point when recursing
+            through the tree. If the parent is `None`, the recursion
+            begins at the highest level of tags.
 
         Returns
-        –––––––
+        -------
         heirarchy : dict
             The dictionary representing the user's tags. Keys are
-            sqlite3.Row objects.
+            `CreditTag` objects.
         """
         heirarchy = {}
-        for tag in self.get_subtags(parent_id):
-            heirarchy[tag] = self.get_heirarchy(tag['id'])
+        for tag in cls.get_subtags(parent_tag):
+            heirarchy[tag] = cls.get_heirarchy(tag)
         return heirarchy
 
-    def get_ancestors(self, tag_id):
+    @classmethod
+    def get_ancestors(cls, tag):
         """
         Get the ancestor tags of a given tag.
 
@@ -591,89 +319,45 @@ class CreditTagHandler(DatabaseHandler):
         a list of all tags that are ancestors of the given tag.
 
         Parameters
-        ––––––––––
-        tag_id : int
-            The ID of the tag for which to find ancestors.
+        ----------
+        tag : database.models.CreditTag
+            The tag for which to find ancestors.
 
         Returns
-        –––––––
-        ancestors : list of sqlite3.Row
+        -------
+        ancestors : list of database.models.CreditTag
             The ancestors of the given tag.
         """
         ancestors = []
-        ancestor = self.get_supertag(tag_id, fields=('tag_name',))
+        ancestor = cls.get_supertag(tag)
         while ancestor:
             ancestors.append(ancestor)
-            ancestor = self.get_supertag(ancestor['id'], fields=('tag_name',))
+            ancestor = cls.get_supertag(ancestor)
         return ancestors
 
-    def update_tag_links(self, subtransaction_id, tag_names):
+    @classmethod
+    def find_tag(cls, tag_name):
         """
-        Update the tag links for a transaction in the database.
+        Find a tag using uniquely identifying characteristics.
 
-        Given a subtransaction and a list of tag names, each tag is
-        applied to the subtransaction. Then, each existing tag that is
-        not in the list of tag names is disassociated with the
-        subtransaction. Tag names that do not already have database
-        entries are created.
+        Queries the database to find a transaction tag based on the
+        provided criteria (the tag's name).
 
         Parameters
-        ––––––––––
-        subtransaction_id : int
-            The ID of a subtransaction database entry that will be
-            assigned the tags.
-        tag_names : list of str
-            Tag names to be assigned to the given transactions.
+        ----------
+        tag_name : str
+            The name of the tag to be found.
+
+        Returns
+        -------
+        tag : database.models.CreditTag
+            The tag entry matching the given criteria. If no matching
+            tag is found, returns `None`.
         """
-        # Remove existing tags
-        for tag in self.get_entries(subtransaction_ids=(subtransaction_id,)):
-            # Unlink the tag from the subtransaction
-            self.unlink(tag['id'], subtransaction_id)
-        # Add the new tags
-        linked_tags = []
-        for tag_name in tag_names:
-            # Get the matching tag
-            tag = self.find_tag(tag_name, fields=('tag_name',))
-            # Create the tag if it does not already exist in the database
-            if not tag:
-                tag_data = {'parent_id': None,
-                            'user_id': self.user_id,
-                            'tag_name': tag_name}
-                tag = self.add_entry(tag_data)
-            # Link the tag to the transaction
-            if tag not in linked_tags:
-                # Link all ancestor tags with this tag
-                for ancestor in self.get_ancestors(tag['id']):
-                    if ancestor not in linked_tags:
-                        self.link(ancestor['id'], subtransaction_id)
-                        linked_tags.append(ancestor)
-                self.link(tag['id'], subtransaction_id)
-                linked_tags.append(tag)
-
-    def link(self, tag_id, subtransaction_id):
-        """Add a tag to the given subtransaction."""
-        # Add the subtransaction-tag link if the two are not already associated
-        try:
-            self.cursor.execute(
-                "INSERT INTO credit_tag_links (subtransaction_id, tag_id) "
-               f"     VALUES (?, ?)",
-                (subtransaction_id, tag_id)
-            )
-            self.db.commit()
-        except IntegrityError:
-            # The tag link already exists
-            pass
-
-    def unlink(self, tag_id, subtransaction_id):
-        """Remove a tag from the given subtransaction."""
-        # Delete the subtransaction-tag link
-        self.cursor.execute(
-            "DELETE "
-            "  FROM credit_tag_links "
-            " WHERE subtransaction_id = ? AND tag_id = ? ",
-            (subtransaction_id, tag_id)
-        )
-        self.db.commit()
+        criteria = [cls.model.tag_name == tag_name]
+        query = cls.model.select_for_user().where(*criteria)
+        tag = db.session.execute(query).scalar_one_or_none()
+        return tag
 
 
 @execute_on_form_validation
@@ -696,19 +380,22 @@ def save_transaction(form, transaction_id=None):
 
     Returns
     -------
-    transaction : Transaction
+    transaction : database.models.CreditTransactionView
         The saved transaction.
-    subtransactions : list of sqlite3.Row
-        The subtransactions of the saved transaction.
     """
-    db = CreditTransactionHandler()
     transaction_data = form.transaction_data
     if transaction_id:
+        transaction = CreditTransactionHandler.get_entry(transaction_id)
+        transaction_data.update(
+            internal_transaction_id=transaction.internal_transaction_id
+        )
         # Update the database with the updated transaction
-        transaction, subtransactions = db.update_entry(transaction_id,
-                                                       transaction_data)
+        transaction = CreditTransactionHandler.update_entry(
+            transaction_id,
+            **transaction_data,
+        )
     else:
         # Insert the new transaction into the database
-        transaction, subtransactions = db.add_entry(transaction_data)
-    return transaction, subtransactions
+        transaction = CreditTransactionHandler.add_entry(**transaction_data)
+    return transaction
 

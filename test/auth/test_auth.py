@@ -1,11 +1,12 @@
 """Tests for user authentication."""
 import pytest
 from flask import g, session
+from sqlalchemy import select
 
-from monopyly.db import get_db
+from monopyly.database import db
 
 
-def test_registration(client, app):
+def test_registration(client, user_table):
     # Check that the 'register' route is successfully reached
     assert client.get('/auth/register').status_code == 200
     # Perform a test registration
@@ -15,9 +16,9 @@ def test_registration(client, app):
     )
     assert '/auth/login' == response.headers['Location']
     # Check that the registration was successful
-    with app.app_context():
-        query = "SELECT * FROM users WHERE username = 'a'"
-        assert get_db().execute(query).fetchone() is not None
+    query = select(user_table).where(user_table.c.username == 'a')
+    with db.session as db_session:
+        assert db_session.execute(query).fetchone() is not None
 
 
 @pytest.mark.parametrize(
@@ -43,7 +44,7 @@ def test_login(client, auth):
     with client:
         client.get('/')
         assert session['user_id'] == 1
-        assert g.user['username'] == 'test'
+        assert g.user.username == 'test'
 
 
 @pytest.mark.parametrize(

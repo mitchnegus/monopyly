@@ -15,32 +15,35 @@
 {% block content %}
 
   <div id="bank-container">
-    {% for bank in bank_accounts %}
+    {% for bank in banks %}
+      {% set bank_accounts = bank.bank_accounts %}
+      {% if bank_accounts %}
 
-      <div class="bank-block grouping">
-        <h3>{{ bank['bank_name'] }}</h3>
+        <div class="bank-block grouping">
+          <h3>{{ bank.bank_name }}</h3>
 
-        <div class="account-blocks">
-          {% for account in bank_accounts[bank] %}
-            <div class="account-block">
+          <div class="account-blocks">
+            {% for account in bank_accounts %}
+              <div class="account-block">
 
-              <div class="account-info">
-                <span class="digits">{{ account['last_four_digits'] }}</span> <b>{{ account['type_name'] }}</b>
-             </div>
+                <div class="account-info">
+                  <span class="digits">{{ account.last_four_digits }}</span> <b>{{ account.account_type.type_name }}</b>
+               </div>
 
-              <div class="expanded">
-                <div class="options">
-                  <a class="icon-button action delete" href="{{ url_for('banking.delete_account', account_id=account['id']) }}" onclick="return confirm('Are you sure you want to delete this account?');">
-                  </a>
+                <div class="expanded">
+                  <div class="options">
+                    <a class="icon-button action delete" href="{{ url_for('banking.delete_account', account_id=account.id) }}" onclick="return confirm('Are you sure you want to delete this account?');">
+                    </a>
+                  </div>
                 </div>
-              </div>
 
-            </div>
-          {% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+
         </div>
 
-      </div>
-
+      {% endif %}
     {% endfor %}
   </div>
 
@@ -53,9 +56,9 @@
         {% for account_type in account_types %}
 
           <div class="account-type">
-            {{ account_type['type_name'] }}
-            {% if account_type['type_common_name'] != account_type['type_name'] %}
-              ({{ account_type['type_common_name'] }})
+            {{ account_type.type_name }}
+            {% if account_type.type_abbreviation %}
+              ({{ account_type.type_abbreviation }})
             {% endif %}
           </div>
 

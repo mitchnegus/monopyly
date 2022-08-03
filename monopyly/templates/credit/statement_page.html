@@ -23,7 +23,7 @@
       </div>
 
       <div id="statement-transactions-container" class="transactions-container">
-        {% with transactions = statement_transactions %}
+        {% with transactions = statement_transactions, full_view = False %}
           {% include 'credit/transactions_table/transactions.html' %}
         {% endwith %}
       </div>
@@ -40,7 +40,7 @@
     <div class="sidebar-menu">
 
       <div class="button">
-        <a class="action" href="{{ url_for('credit.add_transaction', card_id=statement['card_id'], statement_id=statement['id']) }}">
+        <a class="action" href="{{ url_for('credit.add_transaction', card_id=statement.card_id, statement_id=statement.id) }}">
           <img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
         </a>
       </div>
@@ -53,8 +53,8 @@
 {% block javascript %}
 
   <script>
-    const UPDATE_STATEMENT_DUE_DATE_ENDPOINT = "{{ url_for('credit.update_statement_due_date', statement_id=statement['id']) }}";
-    const MAKE_PAYMENT_ENDPOINT = "{{ url_for('credit.pay_credit_card', card_id=statement['card_id'], statement_id=statement['id']) }}";
+    const UPDATE_STATEMENT_DUE_DATE_ENDPOINT = "{{ url_for('credit.update_statement_due_date', statement_id=statement.id) }}";
+    const MAKE_PAYMENT_ENDPOINT = "{{ url_for('credit.pay_credit_card', card_id=statement.card_id, statement_id=statement.id) }}";
     const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
     const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
   </script>

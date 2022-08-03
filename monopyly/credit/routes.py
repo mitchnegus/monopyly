@@ -1,41 +1,42 @@
 """
 Routes for credit card financials.  """
+from itertools import islice
+
 from flask import (
-    g, redirect, render_template, flash, request, url_for, jsonify
+    Blueprint, g, redirect, render_template, flash, request, url_for, jsonify
 )
 from werkzeug.exceptions import abort
 from wtforms.validators import ValidationError
 
+from ..database import db_transaction
 from ..auth.tools import login_required
 from ..common.utils import parse_date, dedelimit_float, sort_by_frequency
-from ..common.form_utils import form_err_msg
+from ..common.forms import form_err_msg
 from ..common.transactions import get_linked_transaction
-from ..common.actions import get_user_database_entries, delete_database_entry
-from ..db.handler.queries import validate_field
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
 from ..banking.transactions import BankTransactionHandler
-from . import credit_bp
+from .blueprint import bp
 from .forms import *
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler, save_card
 from .statements import CreditStatementHandler
 from .transactions import (
-    CreditTransactionHandler, CreditSubtransactionHandler, CreditTagHandler,
-    save_transaction
+    CreditTransactionHandler, CreditTagHandler, save_transaction
 )
 from .actions import *
 
 
-@credit_bp.route('/cards')
+@bp.route('/cards')
 @login_required
 def load_cards():
-    cards = get_user_database_entries(CreditCardHandler)
+    cards = CreditCardHandler.get_cards()
     return render_template('credit/cards_page.html', cards=cards)
 
 
-@credit_bp.route('/add_card', methods=('GET', 'POST'))
+@bp.route('/add_card', methods=('GET', 'POST'))
 @login_required
+@db_transaction
 def add_card():
     # Define a form for a credit card
     form = CreditCardForm()
@@ -58,10 +59,11 @@ def add_card():
     return render_template('credit/card_form/card_form_page_new.html', form=form)
 
 
-@credit_bp.route('/_transfer_card_statement/<int:account_id>/<int:card_id>/'
+@bp.route('/_transfer_card_statement/<int:account_id>/<int:card_id>/'
                  '<int:prior_card_id>',
                  methods=('POST',))
 @login_required
+@db_transaction
 def transfer_statement(account_id, card_id, prior_card_id):
     # Define and validate the form
     form = CardStatementTransferForm()
@@ -69,20 +71,21 @@ def transfer_statement(account_id, card_id, prior_card_id):
     return redirect(url_for('credit.load_account', account_id=account_id))
 
 
-@credit_bp.route('/account/<int:account_id>')
+@bp.route('/account/<int:account_id>')
 @login_required
 def load_account(account_id):
     # Get the account information from the database
-    account = CreditAccountHandler().get_entry(account_id)
+    account = CreditAccountHandler.get_entry(account_id)
     # Get all cards with active cards at the end of the list
-    cards = CreditCardHandler().get_entries(account_ids=(account_id,))[::-1]
+    cards = CreditCardHandler.get_cards(account_ids=(account_id,)).all()
     return render_template('credit/account_page.html',
                            account=account,
-                           cards=cards)
+                           cards=reversed(cards))
 
 
-@credit_bp.route('/_update_card_status', methods=('POST',))
+@bp.route('/_update_card_status', methods=('POST',))
 @login_required
+@db_transaction
 def update_card_status():
     # Get the field from the AJAX request
     post_args = request.get_json()
@@ -91,120 +94,118 @@ def update_card_status():
     # Get the card ID as the second component of the input's ID attribute
     card_id = input_id.split('-')[1]
     # Update the card in the database
-    card = CreditCardHandler().update_entry_value(card_id, 'active', active)
+    card = CreditCardHandler.update_entry(card_id, active=active)
     return render_template('credit/card_graphic/card_front.html',
                            card=card)
 
 
-@credit_bp.route('/delete_card/<int:card_id>')
+@bp.route('/delete_card/<int:card_id>')
 @login_required
+@db_transaction
 def delete_card(card_id):
-    account_id = delete_database_entry(CreditCardHandler, card_id,
-                                       return_field='account_id')
+    account_id = CreditCardHandler.get_card(card_id).account_id
+    CreditCardHandler.delete_entry(card_id)
     return redirect(url_for('credit.load_account', account_id=account_id))
 
 
-@credit_bp.route('/_update_account_statement_issue_day/<int:account_id>',
+@bp.route('/_update_account_statement_issue_day/<int:account_id>',
           methods=('POST',))
 @login_required
+@db_transaction
 def update_account_statement_issue_day(account_id):
     # Get the field from the AJAX request
     issue_day = int(request.get_json())
     # Update the account in the database
-    account_db = CreditAccountHandler()
-    account = CreditAccountHandler().update_entry_value(
+    account = CreditAccountHandler.update_entry(
         account_id,
-        'statement_issue_day',
-        issue_day,
+        statement_issue_day=issue_day,
     )
     return str(account['statement_issue_day'])
 
 
-@credit_bp.route('/_update_account_statement_due_day/<int:account_id>',
+@bp.route('/_update_account_statement_due_day/<int:account_id>',
           methods=('POST',))
 @login_required
+@db_transaction
 def update_account_statement_due_day(account_id):
     # Get the field from the AJAX request
     due_day = int(request.get_json())
     # Update the account in the database
-    account = CreditAccountHandler().update_entry_value(
+    account = CreditAccountHandler.update_entry(
         account_id,
-        'statement_due_day',
-        due_day,
+        statement_due_day=due_day,
     )
     return str(account['statement_due_day'])
 
 
-@credit_bp.route('/delete_account/<int:account_id>')
+@bp.route('/delete_account/<int:account_id>')
 @login_required
+@db_transaction
 def delete_account(account_id):
-    delete_database_entry(CreditAccountHandler, account_id)
+    CreditAccountHandler.delete_entry(account_id)
     return redirect(url_for('credit.load_cards'))
 
 
-@credit_bp.route('/statements')
+@bp.route('/statements')
 @login_required
 def load_statements():
     # Get all of the user's credit cards from the database
-    card_db = CreditCardHandler()
-    all_cards = card_db.get_entries()
-    active_cards = card_db.get_entries(active=True)
-    # Get all of the user's statements for active cards from the database
+    all_cards = CreditCardHandler.get_cards()
+    active_cards = CreditCardHandler.get_cards(active=True)
     card_statements = get_card_statement_groupings(active_cards)
     return render_template('credit/statements_page.html',
                            filter_cards=all_cards,
                            card_statements=card_statements)
 
 
-@credit_bp.route('/_update_statements_display', methods=('POST',))
+@bp.route('/_update_statements_display', methods=('POST',))
 @login_required
 def update_statements_display():
-    card_db = CreditCardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     filter_ids = post_args['filter_ids']
     # Determine the cards from the arguments of POST method
-    cards = [card_db.find_card(*tag.split('-')) for tag in filter_ids]
+    cards = [
+        CreditCardHandler.find_card(*tag.split('-')) for tag in filter_ids
+    ]
+    card_statements = get_card_statement_groupings(cards)
     # Filter selected statements from the database
-    card_statements = get_card_statements(cards)
     return render_template('credit/statements.html',
                            card_statements=card_statements)
 
 
-@credit_bp.route('/statement/<int:statement_id>')
+@bp.route('/statement/<int:statement_id>')
 @login_required
 def load_statement_details(statement_id):
     statement, transactions = get_credit_statement_details(statement_id)
     # Get bank accounts for potential payments
-    bank_account_db = BankAccountHandler()
-    bank_accounts = bank_account_db.get_entries()
+    bank_accounts = BankAccountHandler.get_accounts()
     return render_template('credit/statement_page.html',
                            statement=statement,
                            statement_transactions=transactions,
                            bank_accounts=bank_accounts)
 
 
-@credit_bp.route('/_update_statement_due_date/<int:statement_id>',
+@bp.route('/_update_statement_due_date/<int:statement_id>',
               methods=('POST',))
 @login_required
+@db_transaction
 def update_statement_due_date(statement_id):
     # Get the field from the AJAX request
     due_date = parse_date(request.get_json())
     # Update the statement in the database
-    statement = CreditStatementHandler().update_entry_value(
+    statement = CreditStatementHandler.update_entry(
         statement_id,
-        'due_date',
-        due_date,
+        due_date=due_date,
     )
     return str(statement['due_date'])
 
 
-@credit_bp.route('/_pay_credit_card/<int:card_id>/<int:statement_id>',
+@bp.route('/_pay_credit_card/<int:card_id>/<int:statement_id>',
               methods=('POST',))
 @login_required
+@db_transaction
 def pay_credit_card(card_id, statement_id):
-    bank_account_db  = BankAccountHandler()
-    statement_db = CreditStatementHandler()
     # Get the fields from the AJAX request
     post_args = request.get_json()
     payment_amount = dedelimit_float(post_args['payment_amount'])
@@ -213,70 +214,56 @@ def pay_credit_card(card_id, statement_id):
     # Pay towards the card balance
     make_payment(card_id, payment_account_id, payment_date, payment_amount)
     # Get the current statement information from the database
-    fields = ('card_id', 'bank_name', 'last_four_digits', 'issue_date',
-              'due_date', 'balance', 'payment_date')
-    statement = statement_db.get_entry(statement_id, fields=fields)
-    bank_accounts = bank_account_db.get_entries()
+    statement = CreditStatementHandler.get_entry(statement_id)
+    bank_accounts = BankAccountHandler.get_accounts()
     return render_template('credit/statement_summary.html',
                            statement=statement,
                            bank_accounts=bank_accounts)
 
 
-@credit_bp.route('/transactions', defaults={'card_id': None})
-@credit_bp.route('/transactions/<int:card_id>', methods=('GET', 'POST'))
+@bp.route('/transactions', defaults={'card_id': None})
+@bp.route('/transactions/<int:card_id>', methods=('GET', 'POST'))
 @login_required
 def load_transactions(card_id):
-    card_db = CreditCardHandler()
-    transaction_db = CreditTransactionHandler()
     # Get all of the user's credit cards from the database (for the filter)
-    cards = card_db.get_entries()
+    cards = CreditCardHandler.get_cards()
     # Identify cards to be selected in the filter on page load
     if card_id:
         selected_card_ids = [card_id]
     else:
-        active_cards = card_db.get_entries(active=True)
-        selected_card_ids = [card['id'] for card in active_cards]
+        active_cards = CreditCardHandler.get_cards(active=True)
+        selected_card_ids = [card.id for card in active_cards]
     # Get all of the user's transactions for the selected cards
-    sort_order = 'DESC'
-    transaction_fields = ('account_id', 'bank_name', 'last_four_digits',
-                          'transaction_date', 'vendor', 'total', 'notes',
-                          'statement_id', 'issue_date',
-                          'internal_transaction_id')
-    transactions = transaction_db.get_entries(card_ids=selected_card_ids,
-                                              sort_order=sort_order,
-                                              fields=transaction_fields)
+    sort_order = "DESC"
+    transactions = CreditTransactionHandler.get_transactions(
+        card_ids=selected_card_ids,
+        sort_order=sort_order,
+    )
     return render_template('credit/transactions_page.html',
                            filter_cards=cards,
                            selected_card_ids=selected_card_ids,
                            sort_order=sort_order,
-                           transactions=transactions)
+                           transactions=islice(transactions, 100))
 
 
-@credit_bp.route('/_expand_transaction', methods=('POST',))
+@bp.route('/_expand_transaction', methods=('POST',))
 @login_required
 def expand_transaction():
-    subtransaction_db = CreditSubtransactionHandler()
-    tag_db = CreditTagHandler()
     # Get the transaction ID from the AJAX request
     transaction_id = request.get_json().split('-')[-1]
+    transaction = CreditTransactionHandler.get_entry(transaction_id)
     # Get the subtransactions
-    subtransactions = []
-    for subtransaction in subtransaction_db.get_entries((transaction_id,)):
-        # Collect the subtransaction information and pair it with matching tags
-        tags = tag_db.get_entries(subtransaction_ids=(subtransaction['id'],),
-                                  fields=('tag_name',))
-        tag_names = [tag['tag_name'] for tag in tags]
-        subtransactions.append({**subtransaction, 'tags': tag_names})
+    subtransactions = transaction.subtransactions
     return render_template('common/transactions_table/subtransactions.html',
                            subtransactions=subtransactions)
 
 
-@credit_bp.route('/_show_linked_transaction', methods=('POST',))
+@bp.route('/_show_linked_transaction', methods=('POST',))
 @login_required
 def show_linked_transaction():
     post_args = request.get_json()
     transaction_id = post_args['transaction_id']
-    transaction = CreditTransactionHandler().get_entry(transaction_id)
+    transaction = CreditTransactionHandler.get_entry(transaction_id)
     linked_transaction = get_linked_transaction(transaction)
     return render_template('common/transactions_table/'
                            'linked_transaction_overlay.html',
@@ -285,81 +272,84 @@ def show_linked_transaction():
                            linked_transaction=linked_transaction)
 
 
-@credit_bp.route('/_update_transactions_display', methods=('POST',))
+@bp.route('/_update_transactions_display', methods=('POST',))
 @login_required
 def update_transactions_display():
-    card_db = CreditCardHandler()
-    transaction_db = CreditTransactionHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     filter_ids = post_args['filter_ids']
     sort_order = 'ASC' if post_args['sort_order'] == 'asc' else 'DESC'
     # Determine the card IDs from the arguments of POST method
-    cards = [card_db.find_card(*tag.split('-')) for tag in filter_ids]
+    card_ids = []
+    for card_tag in filter_ids:
+        bank_name, last_four_digits = card_tag.split('-')
+        card = CreditCardHandler.find_card(bank_name, last_four_digits)
+        card_ids.append(card.id)
     # Filter selected transactions from the database
-    transaction_fields = ('account_id', 'bank_name', 'last_four_digits',
-                          'transaction_date', 'vendor', 'total', 'notes',
-                          'statement_id', 'issue_date')
-    transactions = transaction_db.get_entries([card['id'] for card in cards],
-                                              sort_order=sort_order,
-                                              fields=transaction_fields)
+    transactions = CreditTransactionHandler.get_transactions(
+        card_ids=card_ids,
+        sort_order=sort_order,
+    )
     return render_template('credit/transactions_table/transactions.html',
                            sort_order=sort_order,
-                           transactions=transactions)
+                           transactions=islice(transactions, 100),
+                           full_view=True)
 
 
-@credit_bp.route('/add_transaction',
+@bp.route('/add_transaction',
               defaults={'card_id': None, 'statement_id': None},
               methods=('GET', 'POST'))
-@credit_bp.route('/add_transaction/<int:card_id>',
+@bp.route('/add_transaction/<int:card_id>',
               defaults={'statement_id': None},
               methods=('GET', 'POST'))
-@credit_bp.route('/add_transaction/<int:card_id>/<int:statement_id>',
+@bp.route('/add_transaction/<int:card_id>/<int:statement_id>',
               methods=('GET', 'POST'))
 @login_required
+@db_transaction
 def add_transaction(card_id, statement_id):
     form = CreditTransactionForm()
     # Check if a transaction was submitted (and add it to the database)
     if request.method == 'POST':
-        transaction, subtransactions = save_transaction(form)
+        transaction = save_transaction(form)
         return render_template('credit/transaction_submission_page.html',
                                transaction=transaction,
-                               subtransactions=subtransactions,
+                               subtransactions=transaction.subtransactions,
                                update=False)
     else:
         if statement_id:
-            statement = CreditStatementHandler().get_entry(statement_id)
+            statement = CreditStatementHandler.get_entry(statement_id)
             form.prepopulate(statement)
         elif card_id:
-            card = CreditCardHandler().get_entry(card_id)
+            card = CreditCardHandler.get_entry(card_id)
             form.prepopulate(card)
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_new.html', form=form)
 
 
-@credit_bp.route('/update_transaction/<int:transaction_id>',
+@bp.route('/update_transaction/<int:transaction_id>',
               methods=('GET', 'POST'))
 @login_required
+@db_transaction
 def update_transaction(transaction_id):
     form = CreditTransactionForm()
     # Check if a transaction was updated (and update it in the database)
     if request.method == 'POST':
-        transaction, subtransactions = save_transaction(form, transaction_id)
+        transaction = save_transaction(form, transaction_id)
         return render_template('credit/transaction_submission_page.html',
                                transaction=transaction,
-                               subtransactions=subtransactions,
+                               subtransactions=transaction.subtransactions,
                                update=True)
     else:
-        transaction = CreditTransactionHandler().get_entry(transaction_id)
-        form.prepopulate_transaction(transaction)
+        transaction = CreditTransactionHandler.get_entry(transaction_id)
+        form.prepopulate(transaction)
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_update.html',
                            transaction_id=transaction_id, form=form)
 
 
-@credit_bp.route('/_add_subtransaction_fields', methods=('POST',))
+@bp.route('/_add_subtransaction_fields', methods=('POST',))
 @login_required
 def add_subtransaction_fields():
     post_args = request.get_json()
@@ -374,61 +364,62 @@ def add_subtransaction_fields():
                            sub_form=sub_form)
 
 
-@credit_bp.route('/delete_transaction/<int:transaction_id>')
+@bp.route('/delete_transaction/<int:transaction_id>')
 @login_required
+@db_transaction
 def delete_transaction(transaction_id):
-    delete_database_entry(CreditTransactionHandler, transaction_id)
+    CreditTransactionHandler.delete_entry(transaction_id)
     return redirect(url_for('credit.load_transactions'))
 
 
-@credit_bp.route('/tags')
+@bp.route('/tags')
 @login_required
 def load_tags():
-    tag_db = CreditTagHandler()
     # Get the tag heirarchy from the database
-    heirarchy = tag_db.get_heirarchy()
+    heirarchy = CreditTagHandler.get_heirarchy()
     return render_template('credit/tags_page.html',
                            tags_heirarchy=heirarchy)
 
-@credit_bp.route('/_add_tag', methods=('POST',))
+@bp.route('/_add_tag', methods=('POST',))
 @login_required
+@db_transaction
 def add_tag():
-    tag_db = CreditTagHandler()
     # Get the new tag (and potentially parent category) from the AJAX request
     post_args = request.get_json()
     tag_name = post_args['tag_name']
     parent_name = post_args.get('parent')
     # Check that the tag name does not already exist
-    if tag_db.get_entries(tag_names=(tag_name,)):
+    if CreditTagHandler.get_tags(tag_names=(tag_name,)):
         raise ValueError('The given tag name already exists. Tag names must '
                          'be unique.')
     if parent_name:
-        parent_id = tag_db.find_tag(parent_name, fields=())['id']
+        parent_id = CreditTagHandler.find_tag(parent_name).id
     else:
         parent_id = None
-    tag_data = {'parent_id': parent_id,
-                'user_id': g.user['id'],
-                'tag_name': tag_name}
-    tag = tag_db.add_entry(tag_data)
+    tag = CreditTagHandler.add_tag(
+        parent_id=parent_id,
+        user_id=g.user.id,
+        tag_name=tag_name,
+    )
     return render_template('credit/tag_tree/subtag_tree.html',
                            tag=tag,
                            tags_heirarchy={})
 
 
-@credit_bp.route('/_delete_tag/', methods=('POST',))
+@bp.route('/_delete_tag/', methods=('POST',))
 @login_required
+@db_transaction
 def delete_tag():
-    tag_db = CreditTagHandler()
     # Get the tag to be deleted from the AJAX request
     post_args = request.get_json()
     tag_name = post_args['tag_name']
-    tag = tag_db.find_tag(tag_name)
+    tag = CreditTagHandler.find_tag(tag_name)
     # Remove the tag from the database
-    tag_db.delete_entries((tag['id'],))
+    CreditTagHandler.delete_entry(tag.id)
     return ''
 
 
-@credit_bp.route('/_suggest_transaction_autocomplete', methods=('POST',))
+@bp.route('/_suggest_transaction_autocomplete', methods=('POST',))
 @login_required
 def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
@@ -438,11 +429,11 @@ def suggest_transaction_autocomplete():
         suggestions = CreditTransactionForm.autocomplete(field)
     else:
         vendor = post_args['vendor']
-        suggestions = CreditTransactionForm.autocomplete_note(vendor)
+        suggestions = CreditTransactionForm.autocomplete('note', vendor=vendor)
     return jsonify(suggestions)
 
 
-@credit_bp.route('/_suggest_card_autocomplete', methods=('POST',))
+@bp.route('/_suggest_card_autocomplete', methods=('POST',))
 @login_required
 def suggest_card_autocomplete():
     # Get the autocomplete field from the AJAX request
@@ -452,58 +443,61 @@ def suggest_card_autocomplete():
     return jsonify(suggestions)
 
 
-@credit_bp.route('/_infer_card', methods=('POST',))
+@bp.route('/_infer_card', methods=('POST',))
 @login_required
 def infer_card():
-    bank_db = BankHandler()
-    card_db = CreditCardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     bank_name = post_args['bank_name']
-    bank = bank_db.get_entries(bank_names=(bank_name,))[0]
+    bank = BankHandler.get_banks(bank_names=(bank_name,))[0]
     if 'digits' in post_args:
         last_four_digits = post_args['digits']
         # Try to infer card from digits alone
-        cards = card_db.get_entries(last_four_digits=(last_four_digits,),
-                               active=True)
+        cards = CreditCardHandler.get_cards(
+            last_four_digits=(last_four_digits,),
+            active=True,
+        )
         if len(cards) != 1:
             # Infer card from digits and bank if necessary
-            cards = card_db.get_entries(bank_ids=(bank['id'],),
-                                        last_four_digits=(last_four_digits,),
-                                        active=True)
+            cards = CreditCardHandler.get_cards(
+                bank_ids=(bank.id,),
+                last_four_digits=(last_four_digits,),
+                active=True,
+            )
     elif 'bank_name' in post_args:
         # Try to infer card from bank alone
-        cards = card_db.get_entries(bank_ids=(bank['id'],), active=True)
+        cards = CreditCardHandler.get_cards(bank_ids=(bank.id,), active=True)
     # Return an inferred card if a single card is identified
     if len(cards) == 1:
         # Return the card info if its is found
         card = cards[0]
-        response = {'bank_name': card['bank_name'],
-                    'digits': card['last_four_digits']}
+        response = {'bank_name': card.account.bank.bank_name,
+                    'digits': card.last_four_digits}
         return jsonify(response)
     else:
         return ''
 
 
-@credit_bp.route('/_infer_statement', methods=('POST',))
+@bp.route('/_infer_statement', methods=('POST',))
 @login_required
 def infer_statement():
-    bank_db = BankHandler()
-    card_db = CreditCardHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     bank_name = post_args['bank_name']
     last_four_digits = post_args['digits']
     transaction_date = parse_date(post_args['transaction_date'])
     # Determine the card used for the transaction from the given info
-    bank = bank_db.get_entries(bank_names=(bank_name,))[0]
-    cards = card_db.get_entries(bank_ids=(bank['id'],),
-                                last_four_digits=(last_four_digits,))
+    bank = BankHandler.get_banks(bank_names=(bank_name,))[0]
+    cards = CreditCardHandler.get_cards(
+        bank_ids=(bank.id,),
+        last_four_digits=(last_four_digits,),
+    )
     if len(cards) == 1 and transaction_date:
-        statement_db = CreditStatementHandler()
         # Determine the statement corresponding to the card and date
         card = cards[0]
-        statement = statement_db.infer_statement(card, transaction_date)
+        statement = CreditStatementHandler.infer_statement(
+            card, transaction_date
+        )
         # Check that a statement was found and that it belongs to the user
         if not statement:
             abort(404, 'A statement matching the criteria was not found.')
@@ -512,15 +506,14 @@ def infer_statement():
         return ''
 
 
-@credit_bp.route('/_infer_bank', methods=('POST',))
+@bp.route('/_infer_bank', methods=('POST',))
 @login_required
 def infer_bank():
-    account_db = CreditAccountHandler()
     # Separate the arguments of the POST method
     post_args = request.get_json()
     account_id = post_args['account_id']
-    account = account_db.get_entry(account_id)
+    account = CreditAccountHandler.get_entry(account_id)
     if not account:
         abort(404, 'An account with the given ID was not found.')
-    return account['bank_name']
+    return account.bank.bank_name
 

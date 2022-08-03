@@ -1,7 +1,7 @@
 {% for card in cards %}
 
-  <a class="credit-card-block" href="{{ url_for('credit.load_account', account_id=card['account_id']) }}">
-    <div class="credit-card {{'inactive' if not card['active'] else '' }}">
+  <a class="credit-card-block" href="{{ url_for('credit.load_account', account_id=card.account_id) }}">
+    <div class="credit-card {{'inactive' if not card.active else '' }}">
 
       <div class="card-face front">
         {% include 'credit/card_graphic/card_front.html' %}

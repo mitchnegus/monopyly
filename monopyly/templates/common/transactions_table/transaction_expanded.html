@@ -9,21 +9,21 @@
 
       <img class="less button" src="{{ url_for('static', filename='img/icons/x-thick.png') }}" />
 
-      {% if 'statement_id' in transaction.keys() %}
-        <a class="button" href="{{ url_for('credit.load_statement_details', statement_id=transaction['statement_id']) }}">
+      {% if 'statement_id' in transaction.__dict__.keys() %}
+        <a class="button" href="{{ url_for('credit.load_statement_details', statement_id=transaction.statement_id) }}">
           <img class="icon" src="{{ url_for('static', filename='img/icons/statement.png') }}" />
         </a>
       {% endif %}
 
-      {% if transaction['internal_transaction_id'] %}
-        <img class="link button" data-transaction-id="{{ transaction['id'] }}" src="{{ url_for('static', filename='img/icons/link.png') }}" />
+      {% if transaction.internal_transaction_id %}
+        <img class="link button" data-transaction-id="{{ transaction.id }}" src="{{ url_for('static', filename='img/icons/link.png') }}" />
       {% endif %}
 
-      <a class="button" href="{{ url_for(update_transaction_function, transaction_id=transaction['id']) }}">
+      <a class="button" href="{{ url_for(update_transaction_function, transaction_id=transaction.id) }}">
         <img class="edit icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
       </a>
 
-      <a class="action button delete" href="{{ url_for(delete_transaction_function, transaction_id=transaction['id']) }}" onclick="return confirm('Are you sure you want to delete this transaction?');">
+      <a class="action button delete" href="{{ url_for(delete_transaction_function, transaction_id=transaction.id) }}" onclick="return confirm('Are you sure you want to delete this transaction?');">
       </a>
 
     </div>

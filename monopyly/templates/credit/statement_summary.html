@@ -1,16 +1,16 @@
 <div id="statement-summary" class="summary-box">
 
   <div class="account suptitle">
-    {{ statement['bank_name'].upper() }} {{ statement['last_four_digits'] }}
+    {{ statement.card.account.bank.bank_name.upper() }} {{ statement.last_four_digits }}
   </div>
 
   <div id="issue-date" class="title">
-    {{ statement['issue_date'].strftime('%B %Y') }}
+    {{ statement.issue_date.strftime('%B %Y') }}
   </div>
 
   <div class="balance">
     <div>$</div>
-    <div>{{ statement['balance']|currency }}</div>
+    <div>{{ statement.balance|currency }}</div>
   </div>
 
   <div id="payment">
@@ -19,19 +19,19 @@
       <div>DUE</div>
       <div id="due-date" class="update-db-widget">
         <div class="widget-text">
-          <div class="widget-display">{{ statement['due_date'] }}</div>
-          <input class="widget-input" type="text" name="due_date" value="{{ statement['due_date'] }}" />
+          <div class="widget-display">{{ statement.due_date }}</div>
+          <input class="widget-input" type="text" name="due_date" value="{{ statement.due_date }}" />
         </div>
         <img class="widget-edit-button" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
       </div>
     </div>
 
-    {% if statement['payment_date'] %}
+    {% if statement.payment_date %}
 
       <div id="paid" class="paid-notice slide-text-gadget">
         <div class="sleeve">
           <div class="main">PAID</div>
-          <div class="reveal">{{ statement['payment_date'] }}</div>
+          <div class="reveal">{{ statement.payment_date }}</div>
         </div>
       </div>
 
@@ -43,7 +43,7 @@
 
           <div class="form-line">
             <div class="dollar-sign">$</div>
-            <input id="pay-amount" type="text" name="pay_amount" value="{{ statement['balance']|currency }}" maxlength="8"/>
+            <input id="pay-amount" type="text" name="pay_amount" value="{{ statement.balance|currency }}" maxlength="8"/>
             <input id="pay-date" type="text" name="pay_date" value="{{ date_today }}" maxlength="10"/>
           </div>
 
@@ -52,8 +52,8 @@
               <optgroup>
                 <option value="0">Select a bank</option>
                 {% for account in bank_accounts %}
-                  <option value="{{ account['id'] }}">
-                    {{ account['bank_name'] }} {{ account['type_name'] }} ({{ account['last_four_digits'] }})
+                  <option value="{{ account.id }}">
+                    {{ account.bank.bank_name }} {{ account.account_type.type_name }} ({{ account.last_four_digits }})
                   </option>
                 {% endfor %}
               </optgroup>

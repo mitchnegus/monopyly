@@ -4,9 +4,11 @@ Tools for dealing with the authorization blueprint.
 import functools
 
 from flask import g, redirect, session, url_for
+from sqlalchemy import select
 
-from ..db import get_db
-from . import auth_bp
+from ..database import db
+from ..database.models import User
+from .blueprint import bp
 
 
 def get_username_and_password(form):
@@ -16,17 +18,16 @@ def get_username_and_password(form):
     return username, password
 
 
-@auth_bp.before_app_request
+@bp.before_app_request
 def load_logged_in_user():
     # Match the user's information with the session
     user_id = session.get('user_id')
     if user_id is None:
         g.user = None
     else:
-        user_query = 'SELECT * FROM users WHERE id = ?'
-        db = get_db()
-        cursor = db.cursor()
-        g.user = cursor.execute(user_query, (user_id,)).fetchone()
+        query = select(User).where(User.id == user_id)
+        with db.session as db_session:
+            g.user = db_session.scalar(query)
 
 
 def login_required(view):

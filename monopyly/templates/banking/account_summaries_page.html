@@ -13,7 +13,7 @@
       </li>
 
       <li>
-        <a class="action button" href="{{ url_for('banking.add_account', bank_id=bank['id']) }}">
+        <a class="action button" href="{{ url_for('banking.add_account', bank_id=bank.id) }}">
           <img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
         </a>
       </li>
@@ -44,7 +44,7 @@
 {% block content %}
 
   <div id="bank-account-summaries-container">
-    <h2 class="bank">{{ bank['bank_name'] }} (${{ bank_balance|currency }})</h2>
+    <h2 class="bank">{{ bank.bank_name }} (${{ bank_balance|currency }})</h2>
 
     {% include 'banking/account_summaries.html' %}
 

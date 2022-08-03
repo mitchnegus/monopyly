@@ -2013,11 +2013,6 @@ form#card {
   min-width: 500px;
 }
 
-form#card #bank-field {
-  flex-basis: 65%;
-  min-width: 260px;
-}
-
 form#card #last-four-digits-field {
   flex-basis: 25%;
   min-width: 150px;
@@ -2032,8 +2027,13 @@ form#card #active-field label {
   text-align: center;
 }
 
-form#card #secondary-info.hidden {
+form#card .secondary-info.hidden {
   display: none;
+}
+
+form#card #bank-field {
+  flex-grow: 65%;
+  min-width: 260px;
 }
 
 form#card #statement-issue-day-field {

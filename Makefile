@@ -22,13 +22,13 @@ package:
 
 ## upload		: Upload the package to PyPI
 .PHONY: upload
-upload:
+upload :
 	$(PYTHON) -m twine upload --skip-existing dist/*
 
 
 ## env		: Prepare a virtual environment to run the package
-.PHONY : env
-env : $(ENV)/.touchfile
+.PHONY: env
+env: $(ENV)/.touchfile
 	@echo "The environment ($(ENV)) is up to date."
 
 
@@ -44,7 +44,7 @@ $(ENV)/.touchfile : $(REQS)
 
 ## test		: Run tests
 .PHONY: test
-test:
+test: env
 	@. $(ENV_ACTIVATE); \
 	pytest $(COVERAGE_OPTIONS) --cov-report html
 

@@ -2,13 +2,13 @@
 
   {% include field_title_template %}
 
-  {% for transaction in transactions[:100] %}
+  {% for transaction in transactions %}
 
-    {% if transaction['transaction_date']|string > date_today %}
+    {% if transaction.transaction_date|string > date_today %}
       {% set future = 'future' %}
     {% endif %}
 
-    <div id="transaction-{{ transaction['id'] }}" class="transaction {{ future }}">
+    <div id="transaction-{{ transaction.id }}" class="transaction {{ future }}">
       {% include 'common/transactions_table/transaction_condensed.html' %}
       {% include 'common/transactions_table/transaction_expanded.html' %}
     </div>

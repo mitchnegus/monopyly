@@ -91,6 +91,7 @@ VALUES (NULL, 1, '2020-04-20', 'Test vendor'),
        (NULL, 6, '2020-04-20', 'Pennsylvania Avenue'),
        (NULL, 6, '2020-05-10', 'Income Tax Board'),
        (NULL, 7, '2020-06-05', 'Reading Railroad'),
+       (NULL, 7, '2020-06-05', 'Boardwalk'),
        (NULL, 2, '2020-03-10', 'Community Chest');
 
 INSERT INTO credit_subtransactions
@@ -106,5 +107,6 @@ VALUES (1, 100.00, 'Test credit transaction'),
        (8, 26.87, 'Tough loss'),
        (9, 1600.00, 'Expensive house tour'),
        (10, -123.00, 'Refund'),
-       (11, 253.99, 'Conducting business');
+       (11, 253.99, 'Conducting business'),
+       (12, 12.34, 'Back for more...');
 

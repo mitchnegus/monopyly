@@ -11,11 +11,6 @@
 
     <div class="form-line">
 
-      <div id="bank-field" class="form-field autocomplete">
-        {{ form.account_info.bank_name.label }}
-        {{ form.account_info.bank_name }}
-      </div>
-
       <div id="last-four-digits-field" class="form-field">
         {{ form.last_four_digits.label }}
         {{ form.last_four_digits }}
@@ -30,17 +25,39 @@
 
   </div>
 
-  <div id="secondary-info" class="form-line hidden">
+  <div id="secondary-account-info" class="secondary-info hidden">
 
-    <div id="statement-issue-day-field" class="form-field">
-      {{ form.account_info.statement_issue_day.label }}
-      {{ form.account_info.statement_issue_day }}
+    <div class="form-line">
+
+      <div id="bank-field" class="form-field">
+        {{ form.account_info.bank_id.label }}
+        {{ form.account_info.bank_id }}
+      </div>
+
     </div>
 
 
-    <div id="statement-due-day-field" class="form-field">
-      {{ form.account_info.statement_due_day.label }}
-      {{ form.account_info.statement_due_day }}
+    <div id="secondary-bank-info" class="secondary-info form-line hidden">
+
+      <div id="bank-name-field" class="form-field">
+        {{ form.account_info.bank_name.label }}
+        {{ form.account_info.bank_name }}
+      </div>
+
+    </div>
+
+    <div class="form-line">
+
+      <div id="statement-issue-day-field" class="form-field">
+        {{ form.account_info.statement_issue_day.label }}
+        {{ form.account_info.statement_issue_day }}
+      </div>
+
+      <div id="statement-due-day-field" class="form-field">
+        {{ form.account_info.statement_due_day.label }}
+        {{ form.account_info.statement_due_day }}
+      </div>
+
     </div>
 
   </div>

@@ -1,7 +1,7 @@
 """Helper objects to improve modularity of tests."""
 import unittest
 
-from monopyly.db import get_db
+from monopyly.database import db
 
 
 helper = unittest.TestCase()
