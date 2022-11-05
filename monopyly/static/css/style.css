@@ -1889,14 +1889,14 @@ form#bank-transaction .bank-field {
   flex: 3;
 }
 
-form#bank-transaction .last-four-digits-field {
-  flex: 1;
-  min-width: 125px;
-}
-
 form#bank-transaction .account-type-field {
   flex: 1;
   min-width: 115px;
+}
+
+form#bank-transaction .last-four-digits-field {
+  flex: 1;
+  min-width: 125px;
 }
 
 form#bank-transaction .transaction-date-field {
