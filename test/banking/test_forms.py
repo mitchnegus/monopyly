@@ -6,7 +6,10 @@ import pytest
 from flask_wtf import FlaskForm
 from wtforms.fields import FormField
 
-from monopyly.database.models import Bank
+from monopyly.database.models import (
+    Bank, BankAccountTypeView, BankAccountView, BankTransactionView,
+    BankSubtransaction
+)
 from monopyly.banking.forms import (
     BankSelectField, BankAccountTypeSelectField, BankSubform,
     BankTransactionForm, BankAccountForm
@@ -70,6 +73,39 @@ class TestBankAccountTypeSelectField:
 def mock_bank(client_context):
     mock_bank = Mock(spec=Bank)
     return mock_bank
+
+
+@pytest.fixture
+def mock_account_type(client_context):
+    mock_account_type = Mock(spec=BankAccountTypeView)
+    return mock_account_type
+
+
+@pytest.fixture
+def mock_account(mock_bank, mock_account_type):
+    mock_account = Mock(spec=BankAccountView)
+    mock_account.bank = mock_bank
+    mock_account.account_type = mock_account_type
+    return mock_account
+
+
+@pytest.fixture
+def mock_transaction(mock_account):
+    mock_transaction = Mock(spec=BankTransactionView)
+    mock_transaction.account = mock_account
+    mock_transaction.subtransactions = [
+        Mock(spec=BankSubtransaction),
+        Mock(spec=BankSubtransaction),
+        Mock(spec=BankSubtransaction),
+    ]
+    return mock_transaction
+
+
+@pytest.fixture
+def mock_subtransaction(mock_transaction):
+    mock_subtransaction = Mock(spec=BankSubtransaction)
+    mock_subtransaction.transaction = mock_transaction
+    return mock_subtransaction
 
 
 class TestBankSubform:
@@ -212,7 +248,7 @@ class TestBankAccountForm:
                                                        mock_handler,
                                                        filled_account_form):
         account_type_subform = filled_account_form.account_type_info
-        # Mock the subform's mapping
+        # Mock the subform"s mapping
         mock_method.return_value = {"test": "mapping"}
         # Set the account type ID to 0, indicating that the account is a new submission
         account_type_subform.account_type_id.data = 0
@@ -235,217 +271,259 @@ class TestBankAccountForm:
         with pytest.raises(TypeError):
             account_form.gather_entry_data(None)
 
+    @patch("monopyly.banking.forms.BankAccountForm.process")
+    @patch("monopyly.banking.forms.BankAccountForm.gather_entry_data")
+    def test_prepopulate(self, mock_gather_method, mock_process_method,
+                         account_form, mock_account):
+        account_form.prepopulate(mock_account)
+        mock_process_method.assert_called_once_with(
+            data=mock_gather_method.return_value
+        )
 
-#@pytest.fixture
-#def transaction_form(client_context):
-#   form = BankTransactionForm()
-#   yield form
-#
-#
-#@pytest.fixture
-#def filled_transaction_form(transaction_form):
-#    # Mock the account info subform data
-#    transaction_form.account_info.bank_name.data = "Jail"
-#    transaction_form.account_info.last_four_digits.data = "5556"
-#    transaction_form.account_info.type_name.data = "Savings"
-#    # Mock the transaction data
-#    transaction_form.transaction_date.data = date(2020, 12, 25)
-#    # Mock the subtransaction subform data
-#    transaction_form.subtransactions[0].subtotal.data = 25.00
-#    transaction_form.subtransactions[0].note.data = "Christmas gift"
-#    yield transaction_form
-#
-#
-#@pytest.fixture
-#def transaction_form_with_transfer(transaction_form):
-#    transaction_form.transfer_account_info.append_entry()
-#    yield transaction_form
-#
-#
-## NOTE: use property to avoid indexing field list with 0 or 1 entry?
-#@pytest.fixture
-#def filled_transaction_form_with_transfer(filled_transaction_form):
-#    # Mock the transfer account info subform data
-#    filled_transaction_form.transfer_account_info.append_entry()
-#    account_info = filled_transaction_form.transfer_account_info[0]
-#    account_info.bank_name.data = "TheBank"
-#    account_info.last_four_digtis = "5557"
-#    account_info.type_name.data = "Certificate of Deposit"
-#    yield filled_transaction_form
-#
-#
-#class TestBankTransactionForm:
 
-    #def test_initialization(self, transaction_form):
-    #    form_fields = ("account_info", "transaction_date", "subtransactions",
-    #                   "transfer_account_info", "submit")
-    #    for field in form_fields:
-    #        assert hasattr(transaction_form, field)
+@pytest.fixture
+def transaction_form(client_context):
+   form = BankTransactionForm()
+   return form
 
-    #def test_account_info_subform_initialization(self, transaction_form):
-    #    subform_fields = ("bank_name", "last_four_digits", "type_name")
-    #    for field in subform_fields:
-    #        assert hasattr(transaction_form["account_info"], field)
 
-    #def test_subtransaction_subform_initialization(self, transaction_form):
-    #    subform_fields = ("subtotal", "note")
-    #    for subtransaction_form in transaction_form["subtransactions"]:
-    #       for field in subform_fields:
-    #            assert hasattr(subtransaction_form, field)
+@pytest.fixture
+def filled_transaction_form(transaction_form):
+    # Mock the account info subform data
+    transaction_form.account_info.bank_name.data = "Jail"
+    transaction_form.account_info.last_four_digits.data = "5556"
+    transaction_form.account_info.type_name.data = "Savings"
+    # Mock the transaction data
+    transaction_form.transaction_date.data = date(2020, 12, 25)
+    # Mock the subtransaction subform data
+    transaction_form.subtransactions[0].subtotal.data = 25.00
+    transaction_form.subtransactions[0].note.data = "Christmas gift"
+    return transaction_form
 
-    #def test_transaction_data(self, filled_transaction_form):
-    #    data = {
-    #        "internal_transaction_id": None,
-    #        "account_id": 2,
-    #        "transaction_date": date(2020, 12, 25),
-    #        "subtransactions": [
-    #            {"note": "Christmas gift", "subtotal": 25.00}
-    #        ],
-    #    }
-    #    assert filled_transaction_form.transaction_data == data
 
-    #def test_transfer_data(self, filled_transaction_form_with_transfer):
-    #    data = {
-    #        "internal_transaction_id": None,
-    #        "account_id": 4,
-    #        "transaction_date": date(2020, 12, 25),
-    #        "subtransactions": [
-    #            {"note": "Christmas gift", "subtotal": -25.00}
-    #        ],
-    #    }
-    #    assert filled_transaction_form_with_transfer.transfer_data == data
+@pytest.fixture
+def transaction_form_with_transfer(transaction_form):
+    transaction_form.transfer_accounts_info.append_entry()
+    return transaction_form
 
-    #def test_no_transfer_data(self, filled_transaction_form):
-    #    assert filled_transaction_form.transfer_data is None
 
-    #def test_get_transaction_account(self, filled_transaction_form):
-    #    account = filled_transaction_form.get_transaction_account()
-    #    assert account["id"] == 2
+# NOTE: use property to avoid indexing field list with 0 or 1 entry?
+@pytest.fixture
+def filled_transaction_form_with_transfer(filled_transaction_form):
+    # Mock the transfer account info subform data
+    filled_transaction_form.transfer_accounts_info.append_entry()
+    account_info = filled_transaction_form.transfer_account_info
+    account_info.bank_name.data = "TheBank"
+    account_info.last_four_digtis = "5557"
+    account_info.type_name.data = "Certificate of Deposit"
+    yield filled_transaction_form
 
-    #def test_get_transfer_account(self, filled_transaction_form_with_transfer):
-    #    account = filled_transaction_form_with_transfer.get_transfer_account()
-    #    assert account["id"] == 4
 
-    #@pytest.mark.parametrize(
-    #    "mock_entry",
-    #    [{"bank_id": 1,     # must be an integer for field compatibility
-    #      "bank_name": "Test Bank"},
-    #     {"account_id": 1,  # must be an integer for field compatibility
-    #      "bank_name": "Test Bank",
-    #      "last_four_digits": "2222",
-    #      "type_name": "test_type"}]
-    #)
-    #def test_prepopulate(self, transaction_form, mock_entry):
-    #    transaction_form.prepopulate(mock_entry)
-    #    # Check that the form data matches the expectation
-    #    transaction_form_data = {
-    #        "csrf_token": None,
-    #        "account_info": {
-    #            "bank_name": mock_entry.get("bank_name"),
-    #            "last_four_digits": mock_entry.get("last_four_digits"),
-    #            "type_name": mock_entry.get("type_name"),
-    #        },
-    #        "transaction_date": None,
-    #        "subtransactions": [{"subtotal": None, "note": None}],
-    #        "transfer_account_info": [],
-    #        "submit": False,
-    #    }
-    #    assert transaction_form.data == transaction_form_data
+class TestBankTransactionForm:
 
-    #@patch("monopyly.banking.forms.BankSubtransactionHandler")
-    #def test_prepopulate_transaction(self, mock_handler_type,
-    #                                 transaction_form):
-    #    # Mock the transaction
-    #    mock_transaction = {
-    #        "id": Mock(),
-    #        "internal_transaction_id": None,
-    #        "bank_id": 100,        # must be an integer for field compatibility
-    #        "bank_name": "Test Bank",
-    #        "account_id": 100,     # must be an integer for field compatibility
-    #        "last_four_digits": "2222",
-    #        "active": True,
-    #        "account_type_id": 100,# must be an integer for field compatibility
-    #        "type_name": "test_type",
-    #        "transaction_date": "2022-06-05",
-    #    }
-    #    # Mock the subtransactions returned by the mock handler
-    #    mock_subtransactions = [
-    #        {"subtotal": 100.00, "note": "test note one"},
-    #        {"subtotal": 200.00, "note": "test note two"},
-    #    ]
-    #    mock_db = mock_handler_type.return_value
-    #    mock_method = mock_db.get_entries
-    #    mock_method.return_value = mock_subtransactions
-    #    transaction_form.prepopulate_transaction(mock_transaction)
-    #    # Check that the form data matches the expectation
-    #    transaction_form_data = {
-    #        "csrf_token": None,
-    #        "account_info": {
-    #            "bank_name": mock_transaction["bank_name"],
-    #            "last_four_digits": mock_transaction["last_four_digits"],
-    #            "type_name": mock_transaction["type_name"],
-    #        },
-    #        "transaction_date": date(2022, 6, 5),
-    #        "subtransactions": mock_subtransactions,
-    #        "transfer_account_info": [],
-    #        "submit": False,
-    #    }
-    #    assert transaction_form.data == transaction_form_data
+    def test_initialization(self, transaction_form):
+        form_fields = ("account_info", "transaction_date", "subtransactions",
+                       "transfer_accounts_info", "submit")
+        for field in form_fields:
+            assert hasattr(transaction_form, field)
 
-    #@patch("monopyly.banking.forms.BankSubtransactionHandler")
-    #def test_prepopulate_transaction_no_transfer(self, mock_handler_type,
-    #                                             transaction_form):
-    #    # Mock the transaction
-    #    mock_transaction = {
-    #        "id": Mock(),
-    #        "bank_id": 1,     # must be an integer for field compatibility
-    #        "bank_name": "Test Bank",
-    #        "account_id": 1,  # must be an integer for field compatibility
-    #        "last_four_digits": "2222",
-    #        "user_id": Mock(),
-    #        "type_name": "test_type",
-    #        "transaction_date": "2022-06-05",
-    #    }
-    #    # Mock the subtransactions returned by the mock handler
-    #    mock_subtransactions = [
-    #        {"subtotal": 100.00, "note": "test note one"},
-    #        {"subtotal": 200.00, "note": "test note two"},
-    #    ]
-    #    mock_db = mock_handler_type.return_value
-    #    mock_method = mock_db.get_entries
-    #    mock_method.return_value = mock_subtransactions
-    #    transaction_form.prepopulate_transaction(mock_transaction)
-    #    # Check that the form data matches the expectation
-    #    transaction_form_data = {
-    #        "csrf_token": None,
-    #        "account_info": {
-    #            "bank_name": mock_transaction["bank_name"],
-    #            "last_four_digits": mock_transaction["last_four_digits"],
-    #            "type_name": mock_transaction["type_name"],
-    #        },
-    #        "transaction_date": date(2022, 6, 5),
-    #        "subtransactions": mock_subtransactions,
-    #        "transfer_account_info": [],
-    #        "submit": False,
-    #    }
-    #    assert transaction_form.data == transaction_form_data
+    def test_account_info_subform_initialization(self, transaction_form):
+        subform_fields = ("bank_name", "last_four_digits", "type_name")
+        for field in subform_fields:
+            assert hasattr(transaction_form.account_info, field)
 
-    #def test_autocompletion_fields(self):
-    #    autocompleter = BankTransactionForm.TransactionAutocompleter
-    #    autocompletion_fields = [
-    #        "bank_name",
-    #        "last_four_digits",
-    #        "type_name",
-    #        "note",
-    #    ]
-    #    assert autocompleter.autocompletion_fields == autocompletion_fields
+    def test_subtransaction_subform_initialization(self, transaction_form):
+        subform_fields = ("subtotal", "note")
+        for subtransaction_form in transaction_form.subtransactions:
+           for field in subform_fields:
+                assert hasattr(subtransaction_form, field)
 
-    #@patch(
-    #    "monopyly.banking.forms.BankTransactionForm.TransactionAutocompleter"
-    #)
-    #def test_autocomplete(self, mock_autocompleter):
-    #    mock_method = mock_autocompleter.autocomplete
-    #    suggestions = BankTransactionForm.autocomplete("test_field")
-    #    assert suggestions == mock_method.return_value
-    #    mock_method.assert_called_once_with("test_field")
+    @patch("monopyly.banking.forms.BankTransactionForm.get_transaction_account")
+    def test_transaction_data(self, mock_method, filled_transaction_form):
+        subtransaction = filled_transaction_form.subtransactions[0]
+        data = {
+            "internal_transaction_id": None,
+            "account_id": mock_method.return_value.id,
+            "transaction_date": filled_transaction_form.transaction_date.data,
+            "subtransactions": [{
+                "note": subtransaction.note.data,
+                "subtotal": subtransaction.subtotal.data,
+            }],
+        }
+        assert filled_transaction_form.transaction_data == data
+        # Check that there was actually only one subtransaction
+        assert len(filled_transaction_form.subtransactions) == 1
+
+    @patch("monopyly.banking.forms.BankTransactionForm.get_transfer_account")
+    def test_transfer_data(self, mock_method,
+                           filled_transaction_form_with_transfer):
+        subtransaction = filled_transaction_form_with_transfer.subtransactions[0]
+        data = {
+            "internal_transaction_id": None,
+            "account_id": mock_method.return_value.id,
+            "transaction_date": filled_transaction_form_with_transfer.transaction_date.data,
+            "subtransactions": [{
+                "note": subtransaction.note.data,
+                "subtotal": -subtransaction.subtotal.data,
+            }],
+        }
+        assert filled_transaction_form_with_transfer.transfer_data == data
+        # Check that there was actually only one subtransaction
+        assert len(filled_transaction_form_with_transfer.subtransactions) == 1
+
+    def test_no_transfer_data(self, filled_transaction_form):
+        assert filled_transaction_form.transfer_data is None
+
+    @patch("monopyly.banking.forms.BankTransactionForm.AccountSubform._db_handler")
+    def test_account_subform_get_account(self, mock_handler,
+                                         filled_transaction_form):
+        account_subform = filled_transaction_form.account_info
+        account = account_subform.get_account()
+        assert account == mock_handler.find_account.return_value
+        mock_handler.find_account.assert_called_with(
+            bank_name=account_subform.bank_name.data,
+            account_type_name=account_subform.type_name.data,
+            last_four_digits=account_subform.last_four_digits.data,
+        )
+
+    def test_account_subform_gather_account_data(self, transaction_form,
+                                                 mock_account):
+        account_subform = transaction_form.account_info
+        data = account_subform.gather_entry_data(mock_account)
+        expected_data = {
+            "bank_name": mock_account.bank.bank_name,
+            "last_four_digits": mock_account.last_four_digits,
+            "type_name": mock_account.account_type.type_name
+        }
+        assert data == expected_data
+
+    def test_account_subform_gather_bank_data(self, transaction_form,
+                                              mock_bank):
+        account_subform = transaction_form.account_info
+        data = account_subform.gather_entry_data(mock_bank)
+        expected_data = {
+            "bank_name": mock_bank.bank_name
+        }
+        assert data == expected_data
+
+    def test_account_subform_gather_data_invalid(self, transaction_form,
+                                                 mock_account):
+        account_subform = transaction_form.account_info
+        with pytest.raises(TypeError):
+            account_subform.gather_entry_data(None)
+
+    def test_subtransaction_subform_gather_data(self, transaction_form,
+                                                mock_subtransaction):
+        subtransaction_subform = transaction_form.subtransactions[0]
+        data = subtransaction_subform.gather_entry_data(mock_subtransaction)
+        expected_data = {
+            "subtotal": mock_subtransaction.subtotal,
+            "note": mock_subtransaction.note,
+        }
+        assert data == expected_data
+
+    def test_subtransaction_subform_gather_data_invalid(self,
+                                                        transaction_form):
+        subtransaction_subform = transaction_form.subtransactions[0]
+        with pytest.raises(TypeError):
+            subtransaction_subform.gather_entry_data(None)
+
+    @patch("monopyly.banking.forms.BankTransactionForm.AccountSubform.get_account")
+    def test_get_transaction_account(self, mock_method, transaction_form):
+        account = transaction_form.get_transaction_account()
+        assert account == mock_method.return_value
+
+    @patch("monopyly.banking.forms.BankTransactionForm.AccountSubform.get_account")
+    def test_get_transfer_account(self, mock_method,
+                                  transaction_form_with_transfer):
+        transfer_account = transaction_form_with_transfer.get_transfer_account()
+        assert transfer_account == mock_method.return_value
+
+    @patch(
+        "monopyly.banking.forms.BankTransactionForm.AccountSubform.gather_entry_data"
+    )
+    @patch(
+        "monopyly.banking.forms.BankTransactionForm.SubtransactionSubform"
+        ".gather_entry_data"
+    )
+    def test_gather_transaction_data(self, mock_subtransaction_method,
+                                     mock_account_method, transaction_form,
+                                     mock_transaction):
+        # NOTE: We must delete the "_formfield" attribute of the
+        # `SubtransactionForm.gather_entry_data` MagicMock object or else
+        # WTForms will think that it is an unbound field; perhaps WTForms
+        # should use a better method for determining unbound fields
+        del mock_subtransaction_method._formfield
+        data = transaction_form.gather_entry_data(mock_transaction)
+        expected_data = {
+            "transaction_date": mock_transaction.transaction_date,
+            "subtransactions": 3*[mock_subtransaction_method.return_value],
+            "account_info": mock_account_method.return_value
+        }
+        assert data == expected_data
+
+    @patch(
+        "monopyly.banking.forms.BankTransactionForm.AccountSubform.gather_entry_data"
+    )
+    def test_gather_account_data(self, mock_account_method, transaction_form,
+                                 mock_account):
+        data = transaction_form.gather_entry_data(mock_account)
+        expected_data = {
+            "account_info": mock_account_method.return_value
+        }
+        assert data == expected_data
+
+    @patch(
+        "monopyly.banking.forms.BankTransactionForm.AccountSubform.gather_entry_data"
+    )
+    def test_gather_bank_data(self, mock_account_method, transaction_form,
+                              mock_bank):
+        data = transaction_form.gather_entry_data(mock_bank)
+        expected_data = {
+            "account_info": mock_account_method.return_value
+        }
+        assert data == expected_data
+
+    def test_gather_data_invalid(self, transaction_form):
+        with pytest.raises(TypeError):
+            transaction_form.gather_entry_data(None)
+
+    @patch("monopyly.banking.forms.BankTransactionForm.process")
+    @patch("monopyly.banking.forms.BankTransactionForm.gather_entry_data")
+    def test_prepopulate(self, mock_gather_method, mock_process_method,
+                         transaction_form, mock_transaction):
+        transaction_form.prepopulate(mock_transaction)
+        mock_process_method.assert_called_once_with(
+            data=mock_gather_method.return_value
+        )
+
+    @pytest.mark.parametrize(
+        "field, sort_fields, top_expected_suggestions, expected_suggestions",
+        [("note", {},
+          [],
+          ["Jail subtransaction 1", "Jail subtransaction 2",
+           "Transfer in", "What else is there to do in Jail?",
+            "Credit card payment", "Transfer out",
+           '"Go" Corner ATM deposit']),
+         ("note",
+          {"bank_name": "Jail",
+           "last_four_digits": "5556",
+           "type_name": "Savings"},
+          ["Jail subtransaction 1", "Jail subtransaction 2",
+           "Transfer in", "What else is there to do in Jail?"],
+          ["Jail subtransaction 1", "Jail subtransaction 2",
+           "Transfer in", "What else is there to do in Jail?",
+            "Credit card payment", "Transfer out",
+           '"Go" Corner ATM deposit'])]
+    )
+    def test_autocomplete(self, transaction_form, field, sort_fields,
+                          top_expected_suggestions, expected_suggestions):
+        suggestions = transaction_form.autocomplete(field, **sort_fields)
+        top_suggestions = suggestions[:len(top_expected_suggestions)]
+        helper.assertCountEqual(top_suggestions, top_expected_suggestions)
+        helper.assertCountEqual(suggestions, expected_suggestions)
+
+    def test_autocomplete_invalid(self, transaction_form):
+        with pytest.raises(KeyError):
+            transaction_form.autocomplete("test_field")
 

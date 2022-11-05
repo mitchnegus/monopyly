@@ -61,8 +61,9 @@ def mock_statement(mock_card):
 
 
 @pytest.fixture
-def mock_transaction(client_context):
+def mock_transaction(mock_statement):
     mock_transaction = Mock(spec=CreditTransactionView)
+    mock_transaction.statement = mock_statement
     mock_transaction.subtransactions = [
         Mock(spec=CreditSubtransaction),
         Mock(spec=CreditSubtransaction),
@@ -72,8 +73,9 @@ def mock_transaction(client_context):
 
 
 @pytest.fixture
-def mock_subtransaction(client_context):
+def mock_subtransaction(mock_transaction):
     mock_subtransaction = Mock(spec=CreditSubtransaction)
+    mock_subtransaction.transaction = mock_transaction
     mock_subtransaction.tags = []
     for tag_name in ("Tag1", "Tag2", "Tag3"):
         mock_tag = Mock()
@@ -115,12 +117,12 @@ class TestCreditCardForm:
 
     @patch("monopyly.credit.forms.CreditCardForm.AccountSubform.get_account")
     def test_card_data(self, mock_method, filled_card_form):
-        data = {
+        expected_data = {
             "account_id": mock_method.return_value.id,
             "last_four_digits": filled_card_form.last_four_digits.data,
             "active": filled_card_form.active.data,
         }
-        assert filled_card_form.card_data == data
+        assert filled_card_form.card_data == expected_data
 
     @patch("monopyly.banking.forms.BankSubform.get_bank")
     def test_account_subform_prepare_mapping(self, mock_method, filled_card_form):
@@ -269,6 +271,8 @@ class TestCreditTransactionForm:
             }],
         }
         assert filled_transaction_form.transaction_data == expected_data
+        # Check that there was actually only one subtransaction
+        assert len(filled_transaction_form.subtransactions) == 1
 
     @patch(
         "monopyly.credit.forms.CreditTransactionForm.StatementSubform.CardSubform._db_handler"
@@ -278,7 +282,8 @@ class TestCreditTransactionForm:
         card = card_subform.get_card()
         assert card == mock_handler.find_card.return_value
         mock_handler.find_card.assert_called_with(
-            card_subform.bank_name.data, card_subform.last_four_digits.data
+            bank_name=card_subform.bank_name.data,
+            last_four_digits=card_subform.last_four_digits.data
         )
 
     def test_card_subform_gather_data(self, transaction_form, mock_card):
@@ -402,9 +407,8 @@ class TestCreditTransactionForm:
         with pytest.raises(TypeError):
             statement_subform.gather_entry_data(None)
 
-    def test_subtransaction_subform_gather_data(
-            self, transaction_form, mock_subtransaction
-    ):
+    def test_subtransaction_subform_gather_data(self, transaction_form,
+                                                mock_subtransaction):
         subtransaction_subform = transaction_form.subtransactions[0]
         data = subtransaction_subform.gather_entry_data(mock_subtransaction)
         expected_data = {

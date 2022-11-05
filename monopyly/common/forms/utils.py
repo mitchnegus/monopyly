@@ -74,12 +74,14 @@ class Autocompleter:
 
     def _sort_suggestions_by_field(self, suggestions, model, field, sort_field,
                                    precedence_value):
-        # Assume the user join will be sufficient
         sort_model = self._field_map[sort_field]
+        # Build the select query to use for sorting
         sort_query = model.select_for_user(
-            getattr(sort_model, sort_field),
-            getattr(model, field),
+            getattr(model, field),            # select the primary field
+            getattr(sort_model, sort_field),  # select the sorting field
+            guaranteed_joins=(sort_model,)    # ensure a joined sorting field
         )
+        # Execute the query and sort appropriately
         field_value_by_sort_field = {}
         for row in db.session.execute(sort_query):
             value = row[field]

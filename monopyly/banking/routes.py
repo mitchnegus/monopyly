@@ -176,7 +176,7 @@ def add_transfer_fields():
     # Redefine the form for the transaction (including the new transfer fields)
     # NOTE: This is a hack (since `append_entry` method cannot be used in AJAX
     #       without reloading the form...)
-    form_id = 'transfer_account_info-0'
+    form_id = 'transfer_accounts_info-0'
     sub_form = BankTransactionForm.AccountSubform(prefix=form_id)
     sub_form.id = form_id
     return render_template('banking/transaction_form/transfer_form.html',

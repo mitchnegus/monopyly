@@ -141,8 +141,8 @@ class CreditTransactionForm(EntryForm):
             def get_card(self):
                 """Get the credit card described by the form data."""
                 return self._db_handler.find_card(
-                    self.bank_name.data,
-                    self.last_four_digits.data,
+                    bank_name=self.bank_name.data,
+                    last_four_digits=self.last_four_digits.data,
                 )
 
             def gather_entry_data(self, entry):
@@ -220,20 +220,21 @@ class CreditTransactionForm(EntryForm):
                 data = {
                     'issue_date': entry.issue_date
                 }
-                card = entry.card
+                card_info = entry.card
             elif isinstance(entry, CreditCard):
                 data = {}
-                card = entry
+                card_info = entry
             else:
                 self._raise_gather_fail_error(
                     (CreditStatementView, CreditCard), entry
                 )
             # Prepare data for the card subforms
-            data['card_info'] = self.card_info.gather_entry_data(card)
+            data['card_info'] = self.card_info.gather_entry_data(card_info)
             return data
 
     class SubtransactionSubform(EntrySubform):
         """Form to input/edit credit card subtransactions."""
+        # Fields pertaining to the subtransaction
         subtotal = DecimalField(
             'Amount',
             validators=[DataRequired()],
@@ -278,10 +279,12 @@ class CreditTransactionForm(EntryForm):
     )
     vendor = StringField('Vendor', [DataRequired()])
     # Subtransaction fields (must be at least 1 subtransaction)
-    subtransactions = FieldList(FormField(SubtransactionSubform),
-                                min_entries=1)
+    subtransactions = FieldList(
+        FormField(SubtransactionSubform),
+        min_entries=1,
+    )
     submit = SubmitField('Save Transaction')
-    # Define an autcompleter for the form
+    # Define an autocompleter for the form
     _autocompleter = Autocompleter({
         'bank_name': Bank,
         'last_four_digits': CreditCard,
@@ -301,6 +304,13 @@ class CreditTransactionForm(EntryForm):
         subtransaction).
         """
         statement = self.get_transaction_statement()
+        return self._prepare_transaction_data(statement)
+
+    def get_transaction_statement(self):
+        """Get the credit card statement associated with the transaction."""
+        return self.statement_info.get_statement(self.transaction_date.data)
+
+    def _prepare_transaction_data(self, statement):
         subtransactions_data = [
             subform.subtransaction_data for subform in self.subtransactions
         ]
@@ -313,10 +323,6 @@ class CreditTransactionForm(EntryForm):
         }
         return transaction_data
 
-    def get_transaction_statement(self):
-        """Get the credit card statement associated with the transaction."""
-        return self.statement_info.get_statement(self.transaction_date.data)
-
     def gather_entry_data(self, entry):
         """Gather data for the form from the given database entry."""
         if isinstance(entry, CreditTransactionView):
@@ -327,8 +333,7 @@ class CreditTransactionForm(EntryForm):
             statement_info = entry
         else:
             self._raise_gather_fail_error(
-                (CreditCard, CreditStatementView),
-                entry,
+                (CreditCard, CreditStatementView), entry
             )
         # Prepare data for the statement/subtransaction subforms
         data['statement_info'] = self.statement_info.gather_entry_data(

@@ -64,12 +64,15 @@ class AuthorizedAccessMixin:
         return (g.user.id, *cls._alt_authorized_ids)
 
     @classmethod
-    def select_for_user(cls, *args, **kwargs):
+    def select_for_user(cls, *args, guaranteed_joins=(), **kwargs):
         if args:
             query = select(*args, **kwargs)
         else:
             query = select(cls, **kwargs)
         query = cls._join_user(query)
+        for target in guaranteed_joins:
+            if target not in cls._user_id_join_chain:
+                query = query.join(target)
         return query.options(
             with_loader_criteria(cls.user_id_model, cls._authorizing_criteria)
         )
@@ -77,8 +80,12 @@ class AuthorizedAccessMixin:
     @classmethod
     def _join_user(cls, query):
         """Perform joins necessary to link the current model to a `User`."""
+        from_arg = cls
         for join_model in cls._user_id_join_chain:
-            query = query.join(join_model)
+            # Specify left ("from") and right ("target") sides of joins exactly
+            target_arg = join_model
+            query = query.join_from(from_arg, target_arg)
+            from_arg = target_arg
         return query
 
 
@@ -202,7 +209,7 @@ class BankAccountView(AuthorizedAccessMixin, Model):
     active = Column(Integer, nullable=False)
     balance = Column(Float, nullable=False)
     # Relationships
-    account = relationship("BankAccount", viewonly=True, back_populates="view")
+    account = relationship("BankAccount", back_populates="view")
     bank = relationship("Bank", back_populates="bank_accounts")
     account_type = relationship(
         "BankAccountTypeView",
