@@ -2,7 +2,7 @@
 Generate banking forms for the user to complete.
 """
 from wtforms.fields import (
-    FormField, DecimalField, StringField, BooleanField, SubmitField, FieldList
+    FormField, FieldList, StringField, BooleanField, SubmitField
 )
 from wtforms.validators import Optional, DataRequired, Length
 
@@ -11,7 +11,9 @@ from ..database.models import (
     BankTransactionView, BankSubtransaction
 )
 from ..common.utils import parse_date
-from ..common.forms import EntryForm, EntrySubform, AcquisitionSubform
+from ..common.forms import (
+    EntryForm, EntrySubform, AcquisitionSubform, TransactionForm
+)
 from ..common.forms.fields import CustomChoiceSelectField
 from ..common.forms.utils import Autocompleter
 from ..common.forms.validators import NumeralsOnly
@@ -140,7 +142,7 @@ class BankAccountForm(EntryForm):
         return data
 
 
-class BankTransactionForm(EntryForm):
+class BankTransactionForm(TransactionForm):
     """Form to input/edit bank transactions."""
 
     class AccountSubform(EntrySubform):
@@ -176,26 +178,8 @@ class BankTransactionForm(EntryForm):
                 self._raise_gather_fail_error((BankAccountView, Bank), entry)
             return data
 
-    class SubtransactionSubform(EntrySubform):
+    class SubtransactionSubform(TransactionForm.SubtransactionSubform):
         """Form to input/edit bank subtransactions."""
-        # Fields pertaining to the subtransaction
-        subtotal = DecimalField(
-            'Amount',
-            validators=[DataRequired()],
-            filters=[lambda x: float(round(x, 2)) if x else None],
-            places=2,
-        )
-        note = StringField('Note', [DataRequired()])
-
-        @property
-        def subtransaction_data(self):
-            """
-            Produce a dictionary corresponding to a database subtransaction.
-            """
-            return {
-                'subtotal': self.subtotal.data,
-                'note': self.note.data,
-            }
 
         def gather_entry_data(self, entry):
             """Gather data for the form from the given database entry."""
@@ -210,12 +194,6 @@ class BankTransactionForm(EntryForm):
 
     # Fields to identify the bank account information for the transaction
     account_info = FormField(AccountSubform)
-    # Fields pertaining to the transaction
-    transaction_date = StringField(
-        'Transaction Date',
-        validators=[DataRequired()],
-        filters=[parse_date]
-    )
     # Subtransaction fields (must be at least 1 subtransaction)
     subtransactions = FieldList(
         FormField(SubtransactionSubform),
@@ -227,7 +205,6 @@ class BankTransactionForm(EntryForm):
         min_entries=0,
         max_entries=1,
     )
-    submit = SubmitField('Save Transaction')
     # Define an autocompleter for the form
     _autocompleter = Autocompleter({
         'bank_name': Bank,
@@ -285,15 +262,8 @@ class BankTransactionForm(EntryForm):
         return self.transfer_account_info.get_account()
 
     def _prepare_transaction_data(self, account):
-        subtransactions_data =  [
-            subform.subtransaction_data for subform in self['subtransactions']
-        ]
-        data = {
-            'internal_transaction_id': None,
-            'account_id': account.id,
-            'transaction_date': self['transaction_date'].data,
-            'subtransactions': subtransactions_data,
-        }
+        data = super()._prepare_transaction_data()
+        data["account_id"] = account.id
         return data
 
     def gather_entry_data(self, entry):
@@ -314,33 +284,4 @@ class BankTransactionForm(EntryForm):
             account_info
         )
         return data
-
-    def _gather_transaction_data(self, transaction):
-        """Gather transaction-specific data."""
-        subtransactions_data = self._gather_subtransactions_data(
-            transaction.subtransactions
-        )
-        data = {
-            'transaction_date': transaction.transaction_date,
-            'subtransactions': subtransactions_data,
-        }
-        return data
-
-    def _gather_subtransactions_data(self, subtransactions):
-        """Gather subtransaction-specific data."""
-        subtransactions_data = []
-        for i, subtransaction in enumerate(subtransactions):
-            # add a subtransaction subform if necessary
-            if i+1 > len(self.subtransactions):
-                self.subtransactions.append_entry()
-            # Use the subtransaction subform to gather data from the entry info
-            subtransactions_data.append(
-                self.subtransactions[i].gather_entry_data(subtransaction)
-            )
-        return subtransactions_data
-
-    @classmethod
-    def autocomplete(cls, field, **priority_sort_fields):
-        """Provide autocompletion suggestions for form fields."""
-        return cls._autocompleter.autocomplete(field, **priority_sort_fields)
 

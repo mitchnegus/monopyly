@@ -4,8 +4,12 @@ General form constructions.
 from abc import ABC, abstractmethod
 
 from flask_wtf import FlaskForm
-from wtforms.fields import SelectField, FormField, FieldList
+from wtforms.fields import (
+    SelectField, FormField, FieldList, DecimalField, StringField, SubmitField
+)
+from wtforms.validators import DataRequired
 
+from ..utils import parse_date
 from .validators import SelectionNotBlank
 
 
@@ -47,7 +51,7 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
                                   "entry in a form-specific subclass.")
 
     def _raise_gather_fail_error(self, permissible_entries, entry):
-        permissible_entries_string = ', '.join([
+        permissible_entries_string = ", ".join([
             f"`{_.__name__}`" for _ in permissible_entries
         ])
         raise TypeError(
@@ -60,7 +64,7 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
 class EntrySubform(EntryForm):
     """Subform disabling CSRF (CSRF is REQUIRED in encapsulating form)."""
     def __init__(self, *args, **kwargs):
-        super().__init__(meta={'csrf': False}, *args, **kwargs)
+        super().__init__(meta={"csrf": False}, *args, **kwargs)
 
 
 class AcquisitionSubform(EntrySubform):
@@ -91,4 +95,83 @@ class AcquisitionSubform(EntrySubform):
     @abstractmethod
     def _prepare_mapping(self):
         raise NotImplementedError("Prepare the mapping using a subclass.")
+
+
+class TransactionForm(EntryForm):
+    """An abstract form to input/edit generic transactions."""
+
+    class SubtransactionSubform(EntrySubform):
+        # Fields pertaining to the subtransaction
+        subtotal = DecimalField(
+            "Amount",
+            validators=[DataRequired()],
+            filters=[lambda x: float(round(x, 2)) if x else None],
+            places=2,
+        )
+        note = StringField("Note", [DataRequired()])
+
+        @property
+        def subtransaction_data(self):
+            data = {
+                "subtotal": self.subtotal.data,
+                "note": self.note.data,
+            }
+            return data
+
+        @abstractmethod
+        def gather_entry_data(self, entry):
+            raise NotImplementedError("Define how subtransaction data is "
+                                      "gathered from an entry in a subclass.")
+
+    # Fields pertaining to the transaction
+    transaction_date = StringField(
+        "Transaction Date",
+        validators=[DataRequired()],
+        filters=[parse_date]
+    )
+    # Subtransactions should be defined as a `FieldList` in a subclass
+    subtransactions = None
+    submit = SubmitField("Save Transaction")
+    # Define an autocompleter for the form (in a sublcass)
+    _autocompleter = None
+
+    def _prepare_transaction_data(self):
+        subtransactions_data =  [
+            subform.subtransaction_data for subform in self["subtransactions"]
+        ]
+        data = {
+            "internal_transaction_id": None,
+            "transaction_date": self["transaction_date"].data,
+            "subtransactions": subtransactions_data,
+        }
+        return data
+
+    def _gather_transaction_data(self, transaction):
+        """Gather transaction-specific data."""
+        subtransactions_data = self._gather_subtransactions_data(
+            transaction.subtransactions
+        )
+        data = {
+            "transaction_date": transaction.transaction_date,
+            "subtransactions": subtransactions_data,
+        }
+        return data
+
+    def _gather_subtransactions_data(self, subtransactions):
+        """Gather subtransaction-specific data."""
+        subtransactions_data = []
+        for i, subtransaction in enumerate(subtransactions):
+            # Add a subtransaction subform if necessary
+            if i+1 > len(self.subtransactions):
+                self.subtransactions.append_entry()
+            # Use the subtransaction subform to gather data from the entry info
+            subtransactions_data.append(
+                self.subtransactions[i].gather_entry_data(subtransaction)
+            )
+        return subtransactions_data
+
+    @classmethod
+    def autocomplete(cls, field, **priority_sort_fields):
+        """Provide autocompletion suggestions for form fields."""
+        return cls._autocompleter.autocomplete(field, **priority_sort_fields)
 

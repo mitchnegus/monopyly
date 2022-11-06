@@ -3,4 +3,5 @@ from ._forms import (
     EntryForm,
     EntrySubform,
     AcquisitionSubform,
+    TransactionForm,
 )
