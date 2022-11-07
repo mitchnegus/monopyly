@@ -97,9 +97,14 @@ class User(Model):
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
     # Relationships
-    banks = relationship("Bank", back_populates="user")
+    banks = relationship(
+        "Bank",
+        back_populates="user",
+        cascade="all, delete",
+    )
     bank_account_types = relationship(
         "BankAccountTypeView",
+        viewonly=True,
         back_populates="user",
     )
 
@@ -113,8 +118,16 @@ class Bank(AuthorizedAccessMixin, Model):
     bank_name = Column(String, nullable=False)
     # Relationships
     user = relationship("User", back_populates="banks")
-    bank_accounts = relationship("BankAccountView", back_populates="bank")
-    credit_accounts = relationship("CreditAccount", back_populates="bank")
+    bank_accounts = relationship(
+        "BankAccountView",
+        viewonly=True,
+        back_populates="bank",
+    )
+    credit_accounts = relationship(
+        "CreditAccount",
+        back_populates="bank",
+        cascade="all, delete",
+    )
 
 
 class BankAccountType(AuthorizedAccessMixin, Model):
@@ -153,6 +166,7 @@ class BankAccountTypeView(AuthorizedAccessMixin, Model):
     user = relationship("User", back_populates="bank_account_types")
     accounts = relationship(
         "BankAccountView",
+        viewonly=True,
         back_populates="account_type",
         # Add note about why using `lazy="dynamic"`
         #   (e.g., because we need to use the property below?)
@@ -213,10 +227,12 @@ class BankAccountView(AuthorizedAccessMixin, Model):
     bank = relationship("Bank", back_populates="bank_accounts")
     account_type = relationship(
         "BankAccountTypeView",
+        viewonly=True,
         back_populates="accounts",
     )
     transactions = relationship(
         "BankTransactionView",
+        viewonly=True,
         back_populates="account"
     )
 
@@ -301,6 +317,7 @@ class BankSubtransaction(AuthorizedAccessMixin, Model):
     # Relationships
     transaction = relationship(
         "BankTransactionView",
+        viewonly=True,
         back_populates="subtransactions",
     )
 
@@ -318,7 +335,11 @@ class CreditAccount(AuthorizedAccessMixin, Model):
     # ((Should probably have an 'active' field))
     # Relationships
     bank = relationship("Bank", back_populates="credit_accounts")
-    cards = relationship("CreditCard", back_populates="account")
+    cards = relationship(
+        "CreditCard",
+        back_populates="account",
+        cascade="all, delete",
+    )
 
 
 class CreditCard(AuthorizedAccessMixin, Model):
@@ -336,7 +357,11 @@ class CreditCard(AuthorizedAccessMixin, Model):
     active = Column(Integer, nullable=False)
     # Relationships
     account = relationship("CreditAccount", back_populates="cards")
-    statements = relationship("CreditStatementView", back_populates="card")
+    statements = relationship(
+        "CreditStatementView",
+        viewonly=True,
+        back_populates="card",
+    )
 
 
 class CreditStatement(AuthorizedAccessMixin, Model):
@@ -376,6 +401,7 @@ class CreditStatementView(AuthorizedAccessMixin, Model):
     card = relationship("CreditCard", back_populates="statements")
     transactions = relationship(
         "CreditTransactionView",
+        viewonly=True,
         back_populates="statement"
     )
 
@@ -445,6 +471,7 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
     )
     statement = relationship(
         "CreditStatementView",
+        viewonly=True,
         back_populates="transactions",
     )
     subtransactions = relationship(
@@ -484,6 +511,7 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
     # Relationships
     transaction = relationship(
         "CreditTransactionView",
+        viewonly=True,
         back_populates="subtransactions",
     )
     tags = relationship(

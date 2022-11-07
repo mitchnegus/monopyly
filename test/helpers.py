@@ -1,6 +1,9 @@
 """Helper objects to improve modularity of tests."""
 import unittest
 
+from sqlalchemy import inspect, select
+from sqlalchemy.sql.expression import func
+
 from monopyly.database import db
 
 
@@ -10,16 +13,20 @@ helper = unittest.TestCase()
 class TestHandler:
 
     @classmethod
-    def assertMatchEntry(cls, reference, entry):
-        assert tuple(entry) == reference
+    def assertMatchEntry(cls, entry, reference):
+        assert isinstance(entry, type(reference))
+        for column in inspect(type(entry)).columns:
+            field = column.name
+            assert getattr(entry, field) == getattr(reference, field)
 
     @classmethod
-    def assertMatchEntries(cls, reference, entries, order=False):
-        if order:
-            for row, entry in zip(reference, entries):
-                cls.assertMatchEntry(row, entry)
-        else:
-            helper.assertCountEqual(map(tuple, entries), reference)
+    def assertMatchEntries(cls, entries, references, order=False):
+        if not order:
+            # Order does not matter, so sort both entries and references by ID
+            entries = sorted(entries, key=lambda entry: entry.id)
+            references = sorted(references, key=lambda reference: reference.id)
+        for entry, reference in zip(entries, references):
+            cls.assertMatchEntry(entry, reference)
 
     @classmethod
     def assertContainEntry(cls, reference, entry):
@@ -32,11 +39,12 @@ class TestHandler:
             cls.assertContainEntry(row, entry)
 
     @classmethod
-    def assertQueryEqualsCount(cls, app, query, count):
-        with app.app_context():
-            db = get_db()
-            db_count = db.execute(query).fetchone()[0]
-            assert db_count == count
+    def assertNumberOfMatches(cls, number, field, *criteria):
+        query = select(func.count(field))
+        if criteria:
+            query = query.where(*criteria)
+        count = db.session.execute(query).scalar()
+        assert count == number
 
 
 class TestGrouper:

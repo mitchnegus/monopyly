@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 
 from flask import g
 from werkzeug.exceptions import abort
+from sqlalchemy import inspect
 from sqlalchemy.exc import NoResultFound
 
 from . import db
@@ -236,7 +237,11 @@ class DatabaseHandler(ABC):
         """
         cls._confirm_manipulation_authorization(entry_id)
         entry = db.session.get(cls.model, entry_id)
+        entry_fields = [column.name for column in inspect(cls.model).columns]
         for field, value in field_values.items():
+            if field not in entry_fields:
+                raise ValueError("A value cannot be updated in the "
+                                f"nonexistent field {field}.")
             setattr(entry, field, value)
         db.session.flush()
         # Confirm that this was an authorized entry by the user
@@ -254,8 +259,10 @@ class DatabaseHandler(ABC):
             The ID of the entry to be deleted.
         """
         cls._confirm_manipulation_authorization(entry_id)
+        print(cls.model)
         entry = db.session.get(cls.model, entry_id)
         db.session.delete(entry)
+        db.session.flush()
 
     @classmethod
     def _confirm_manipulation_authorization(cls, entry_id):
