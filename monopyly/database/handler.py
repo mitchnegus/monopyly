@@ -188,7 +188,7 @@ class DatabaseHandler(ABC):
             entry = db.session.execute(query).scalar_one()
         except NoResultFound:
             abort_msg = (f"The entry with ID {entry_id} does not exist for "
-                          "the user")
+                          "the current user.")
             abort(404, abort_msg)
         return entry
 
@@ -259,7 +259,6 @@ class DatabaseHandler(ABC):
             The ID of the entry to be deleted.
         """
         cls._confirm_manipulation_authorization(entry_id)
-        print(cls.model)
         entry = db.session.get(cls.model, entry_id)
         db.session.delete(entry)
         db.session.flush()
@@ -267,7 +266,7 @@ class DatabaseHandler(ABC):
     @classmethod
     def _confirm_manipulation_authorization(cls, entry_id):
         # Confirm (via access) that the user may manipulate the entry
-        cls.get_entry(entry_id)
+        return cls.get_entry(entry_id)
 
 
 class DatabaseViewHandler(DatabaseHandler):

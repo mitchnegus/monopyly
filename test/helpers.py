@@ -13,20 +13,20 @@ helper = unittest.TestCase()
 class TestHandler:
 
     @classmethod
-    def assertMatchEntry(cls, entry, reference):
+    def assertEntryMatch(cls, entry, reference):
         assert isinstance(entry, type(reference))
         for column in inspect(type(entry)).columns:
             field = column.name
             assert getattr(entry, field) == getattr(reference, field)
 
     @classmethod
-    def assertMatchEntries(cls, entries, references, order=False):
+    def assertEntriesMatch(cls, entries, references, order=False):
         if not order:
             # Order does not matter, so sort both entries and references by ID
             entries = sorted(entries, key=lambda entry: entry.id)
             references = sorted(references, key=lambda reference: reference.id)
         for entry, reference in zip(entries, references):
-            cls.assertMatchEntry(entry, reference)
+            cls.assertEntryMatch(entry, reference)
 
     @classmethod
     def assertContainEntry(cls, reference, entry):

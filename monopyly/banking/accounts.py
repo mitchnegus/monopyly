@@ -1,6 +1,7 @@
 """
 Tools for interacting with bank accounts in the database.
 """
+from werkzeug.exceptions import abort
 from sqlalchemy import select
 import sqlalchemy.sql.functions as sql_func
 
@@ -115,6 +116,15 @@ class BankAccountTypeHandler(DatabaseViewHandler):
         """
         super().delete_entry(entry_id)
 
+    @classmethod
+    def _confirm_manipulation_authorization(cls, entry_id):
+        account_type = super()._confirm_manipulation_authorization(entry_id)
+        # Limit manipulation to only the user (excluding common entries)
+        if account_type.user_id != cls.user_id:
+            abort_msg = ("The current user is not authorized to manipulate "
+                         "this account type entry.")
+            abort(404, abort_msg)
+
 
 class BankAccountHandler(DatabaseViewHandler):
     """
@@ -176,6 +186,10 @@ class BankAccountHandler(DatabaseViewHandler):
         query = cls.model.select_for_user(sql_func.sum(cls.model.balance))
         query = query.where(Bank.id == bank_id)
         balance = db.session.execute(query).scalar()
+        if balance is None:
+            abort_msg = ("No balance was found for the given combination of "
+                         "user and account.")
+            abort(404, abort_msg)
         return balance
 
     @classmethod
