@@ -51,7 +51,7 @@ VALUES
       (4, 58.90, 'What else is there to do in Jail?'),
       (5, -109.21, 'Credit card payment'),
       (6, -300.00, 'Transfer out'),
-      (7, 200.00, '"Go" Corner ATM deposit');
+      (7, 200.00, '''Go'' Corner ATM deposit');
 
 INSERT INTO credit_accounts
        (bank_id, statement_issue_day, statement_due_day)

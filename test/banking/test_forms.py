@@ -503,8 +503,8 @@ class TestBankTransactionForm:
           [],
           ["Jail subtransaction 1", "Jail subtransaction 2",
            "Transfer in", "What else is there to do in Jail?",
-            "Credit card payment", "Transfer out",
-           '"Go" Corner ATM deposit']),
+           "Credit card payment", "Transfer out",
+           "'Go' Corner ATM deposit"]),
          ("note",
           {"bank_name": "Jail",
            "last_four_digits": "5556",
@@ -513,8 +513,8 @@ class TestBankTransactionForm:
            "Transfer in", "What else is there to do in Jail?"],
           ["Jail subtransaction 1", "Jail subtransaction 2",
            "Transfer in", "What else is there to do in Jail?",
-            "Credit card payment", "Transfer out",
-           '"Go" Corner ATM deposit'])]
+           "Credit card payment", "Transfer out",
+           "'Go' Corner ATM deposit"])]
     )
     def test_autocomplete(self, transaction_form, field, sort_fields,
                           top_expected_suggestions, expected_suggestions):

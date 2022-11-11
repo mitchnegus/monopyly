@@ -125,7 +125,7 @@ class TestBankAccountTypeHandler(TestHandler):
     )
     def test_add_entry(self, account_type_handler, mapping):
         account_type = account_type_handler.add_entry(**mapping)
-        # Check that the entry was properly created
+        # Check that the entry object was properly created
         assert account_type.type_name == "Well Stocked Hand"
         # Check that the entry was added to the database
         self.assertNumberOfMatches(
@@ -159,7 +159,7 @@ class TestBankAccountTypeHandler(TestHandler):
         }
         with pytest.raises(NotFound):
             account_type_handler.add_entry(**mapping)
-        # Rollback and ensure the transaction was not added for the test user
+        # Rollback and ensure the entry was not added for the test user
         db.session.close()
         self.assertNumberOfMatches(
             1, BankAccountType.id, BankAccountType.user_id == 1
@@ -173,22 +173,23 @@ class TestBankAccountTypeHandler(TestHandler):
     )
     def test_update_entry(self, account_type_handler, mapping):
         account_type = account_type_handler.update_entry(5, **mapping)
+        # Check that the entry object was properly updated
         assert account_type.type_name == "Trustworthy Friend"
-        # Check that the entry was updated
+        # Check that the entry was updated in the database
         self.assertNumberOfMatches(
             1, BankAccountType.id, BankAccountType.type_name.like("%Friend")
         )
 
     @pytest.mark.parametrize(
         "account_type_id, mapping, exception",
-        [[2, {"user_id": 3, "type_name": "Test"},           # default value
-          NotFound],
-         [3, {"user_id": 3, "type_name": "Test"},           # wrong user
-          NotFound],
-         [5, {"user_id": 3, "invalid_field": "Test"},       # invalid field
-          ValueError],
-         [7, {"user_id": 3, "type_name": "Test"},           # nonexistent ID
-          NotFound]]
+        [[2, {"user_id": 3, "type_name": "Test"},
+          NotFound],                                        # global user
+         [3, {"user_id": 3, "type_name": "Test"},
+          NotFound],                                        # wrong user
+         [5, {"user_id": 3, "invalid_field": "Test"},
+          ValueError],                                      # invalid field
+         [7, {"user_id": 3, "type_name": "Test"},
+          NotFound]]                                        # nonexistent ID
     )
     def test_update_entry_invalid(self, account_type_handler, account_type_id,
                                   mapping, exception):
@@ -202,8 +203,8 @@ class TestBankAccountTypeHandler(TestHandler):
         self.assertNumberOfMatches(
             0, BankAccountType.id, BankAccountType.id == entry_id
         )
-
-    # INCLUDE TEST FOR CASCADING ENTRY DELETION
+        # Check that the cascading entries were deleted
+        # INCLUDE TEST FOR CASCADING ENTRY DELETION
 
     @pytest.mark.parametrize(
         "entry_id, exception",
@@ -224,14 +225,7 @@ def account_handler(client_context):
 
 class TestBankAccountHandler(TestHandler):
 
-#    # References only include entries accessible to the authorized login
-#    reference = {
-#        "keys": ("id", "bank_id", "account_type_id", "last_four_digits",
-#                 "active"),
-#        "rows": [(2, 2, 1, "5556", 1),
-#                 (3, 2, 2, "5556", 0),
-#                 (4, 3, 3, "5557", 1)]
-#    }
+    # References only include entries accessible to the authorized login
     db_reference = [
         BankAccountView(id=2, bank_id=2, account_type_id=1,
                         last_four_digits="5556", active=1, balance=443.90),
@@ -331,7 +325,7 @@ class TestBankAccountHandler(TestHandler):
     )
     def test_add_entry(self, account_handler, mapping):
         account = account_handler.add_entry(**mapping)
-        # Check that the entry was properly created
+        # Check that the entry object was properly created
         assert account.last_four_digits == "6666"
         # Check that the entry was added to the database
         self.assertNumberOfMatches(
@@ -349,7 +343,7 @@ class TestBankAccountHandler(TestHandler):
         with pytest.raises(exception):
             account_handler.add_entry(**mapping)
 
-    def test_add_entry_invalid_user(self, app, account_handler):
+    def test_add_entry_invalid_user(self, account_handler):
         # Count the number of bank accounts owned by  the test user
         self.assertNumberOfMatches(1, BankAccount.id, BankAccount.id == 1)
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
@@ -361,7 +355,7 @@ class TestBankAccountHandler(TestHandler):
                 "active": 1,
             }
             account_handler.add_entry(**mapping)
-        # Rollback and ensure the transaction was not added for the test user
+        # Rollback and ensure the entry was not added for the test user
         self.assertNumberOfMatches(1, BankAccount.id, BankAccount.id == 1)
 
     @pytest.mark.parametrize(
@@ -372,20 +366,21 @@ class TestBankAccountHandler(TestHandler):
     )
     def test_update_entry(self, account_handler, mapping):
         account = account_handler.update_entry(2, **mapping)
+        # Check that the entry object was properly updated
         assert account.last_four_digits == "6666"
-        # Check that the entry was updated
+        # Check that the entry was updated in the database
         self.assertNumberOfMatches(
             1, BankAccount.id, BankAccount.last_four_digits == "6666"
         )
 
     @pytest.mark.parametrize(
         "account_id, mapping, exception",
-        [[1, {"bank_id": 2, "last_four_digits": "6666"},    # another user
-          NotFound],
-         [2, {"bank_id": 2, "invalid_field": "Test"},       # invalid field
-          ValueError],
-         [5, {"bank_id": 2, "last_four_digits": "6666"},    # nonexistent ID
-          NotFound]]
+        [[1, {"bank_id": 2, "last_four_digits": "6666"},
+          NotFound],                                        # wrong user
+         [2, {"bank_id": 2, "invalid_field": "Test"},
+          ValueError],                                      # invalid field
+         [5, {"bank_id": 2, "last_four_digits": "6666"},
+          NotFound]]                                        # nonexistent ID
     )
     def test_update_entry_invalid(self, account_handler, account_id, mapping,
                                   exception):
@@ -399,12 +394,9 @@ class TestBankAccountHandler(TestHandler):
         self.assertNumberOfMatches(
             0, BankAccount.id, BankAccount.id == entry_id
         )
-
-    def test_delete_cascading_entries(self, account_handler):
-        account_handler.delete_entry(3)
         # Check that the cascading entries were deleted
         self.assertNumberOfMatches(
-            0, BankTransaction.id, BankTransaction.account_id == 3
+            0, BankTransaction.id, BankTransaction.account_id == entry_id
         )
 
     @pytest.mark.parametrize(
