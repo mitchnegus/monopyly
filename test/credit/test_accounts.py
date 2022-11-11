@@ -1,165 +1,149 @@
 """Tests for the credit module managing credit card accounts."""
 import pytest
 from werkzeug.exceptions import NotFound
+from sqlalchemy.exc import IntegrityError
 
+from monopyly.database import db
+from monopyly.database.models import CreditAccount, CreditCard
 from monopyly.credit.accounts import CreditAccountHandler
 from ..helpers import TestHandler
 
 
 @pytest.fixture
-def account_db(client_context):
-    account_db = CreditAccountHandler()
-    yield account_db
+def account_handler(client_context):
+    return CreditAccountHandler
 
 
 class TestCreditAccountHandler(TestHandler):
 
     # References only include entries accessible to the authorized login
-    reference = {
-        'keys': ('id', 'bank_id', 'statement_issue_day', 'statement_due_day'),
-        'rows': [(2, 2, 10, 5),
-                 (3, 3, 20, 12)]
-    }
+    db_reference = [
+        CreditAccount(id=2, bank_id=2, statement_issue_day=10,
+                      statement_due_day=5),
+        CreditAccount(id=3, bank_id=3, statement_issue_day=20,
+                      statement_due_day=12),
+    ]
 
-    def test_initialization(self, account_db):
-        assert account_db.table == 'credit_accounts'
-        assert account_db.user_id == 3
-
-    @pytest.mark.parametrize(
-        'bank_ids, fields, reference_entries',
-        [[None, None,
-          reference['rows']],
-         [None, ('bank_id', 'statement_issue_day'),
-          [row[:3] for row in reference['rows']]],
-         [(2,), ('bank_id', 'statement_issue_day'),
-          [row[:3] for row in reference['rows'][:1]]]]
-    )
-    def test_get_entries(self, account_db, bank_ids, fields,
-                         reference_entries):
-        accounts = account_db.get_entries(bank_ids, fields)
-        if fields:
-            self.assertMatchEntries(reference_entries, accounts)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntries(reference_entries, accounts)
+    def test_initialization(self, account_handler):
+        assert account_handler.model == CreditAccount
+        assert account_handler.table == 'credit_accounts'
+        assert account_handler.user_id == 3
 
     @pytest.mark.parametrize(
-        'account_id, fields, reference_entry',
-        [[2, None,
-          reference['rows'][0]],
-         [3, None,
-          reference['rows'][1]],
-         [2, ('bank_id', 'statement_issue_day'),
-          reference['rows'][0][:3]]]
+        'bank_ids, reference_entries',
+        [[None, db_reference],
+         [(2,), db_reference[:1]]]
     )
-    def test_get_entry(self, account_db, account_id, fields, reference_entry):
-        account = account_db.get_entry(account_id, fields)
-        if fields:
-            self.assertMatchEntry(reference_entry, account)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntry(reference_entry, account)
+    def test_get_entries(self, account_handler, bank_ids, reference_entries):
+        accounts = account_handler.get_accounts(bank_ids)
+        self.assertEntriesMatch(accounts, reference_entries)
+
+    @pytest.mark.parametrize(
+        'account_id, reference_entry',
+        [[2, db_reference[0]],
+         [3, db_reference[1]]]
+    )
+    def test_get_entry(self, account_handler, account_id, reference_entry):
+        account = account_handler.get_entry(account_id)
+        self.assertEntryMatch(account, reference_entry)
 
     @pytest.mark.parametrize(
         'account_id, exception',
         [[1, NotFound],  # Not the logged in user
          [4, NotFound]]  # Not in the database
     )
-    def test_get_entry_invalid(self, account_db, account_id, exception):
+    def test_get_entry_invalid(self, account_handler, account_id, exception):
         with pytest.raises(exception):
-            account_db.get_entry(account_id)
+            account_handler.get_entry(account_id)
 
     @pytest.mark.parametrize(
         'mapping',
         [{'bank_id': 2, 'statement_issue_day': 11, 'statement_due_day': 1},
          {'bank_id': 3, 'statement_issue_day': 21, 'statement_due_day': 1}]
     )
-    def test_add_entry(self, app, account_db, mapping):
-        account = account_db.add_entry(mapping)
-        assert account['statement_due_day'] == 1
-        # Check that the entry was added
-        query = ("SELECT COUNT(id) FROM credit_accounts"
-                 " WHERE statement_due_day = 1")
-        self.assertQueryEqualsCount(app, query, 1)
+    def test_add_entry(self, account_handler, mapping):
+        account = account_handler.add_entry(**mapping)
+        # Check that the entry object was properly created
+        assert account.statement_due_day == 1
+        # Check that the entry was added to the database
+        self.assertNumberOfMatches(
+            1, CreditAccount.id, CreditAccount.statement_due_day == 1
+        )
 
     @pytest.mark.parametrize(
-        'mapping',
-        [{'bank_id': 2, 'invalid_field': 'Test', 'statement_due_day': 1},
-         {'bank_id': 3, 'statement_issue_day': 21}]
+        'mapping, exception',
+        [[{'bank_id': 2, 'invalid_field': 'Test', 'statement_due_day': 1},
+         TypeError],
+         [{'bank_id': 3, 'statement_issue_day': 21},
+         IntegrityError]]
     )
-    def test_add_entry_invalid(self, account_db, mapping):
-        with pytest.raises(ValueError):
-            account_db.add_entry(mapping)
+    def test_add_entry_invalid(self, account_handler, mapping, exception):
+        with pytest.raises(exception):
+            account_handler.add_entry(**mapping)
 
-    def test_add_entry_invalid_user(self, app, account_db):
-        query = ("SELECT COUNT(id) FROM credit_accounts"
-                 " WHERE bank_id = 1")
-        self.assertQueryEqualsCount(app, query, 1)
+    def test_add_entry_invalid_user(self, app, account_handler):
+        # Count the number of bank accounts owned by  the test user
+        self.assertNumberOfMatches(1, CreditAccount.id, CreditAccount.id == 1)
+        # Ensure that 'mr.monopyly' cannot add an entry for the test user
         with pytest.raises(NotFound):
             mapping = {
-                'bank_id': 1,
-                'statement_issue_day': 11,
-                'statement_due_day': 1,
+                "bank_id": 1,
+                "statement_issue_day": 11,
+                "statement_due_day": 1,
             }
-            account_db.add_entry(mapping)
-        # Check that the transaction was not added to a different account
-        self.assertQueryEqualsCount(app, query, 1)
+            account_handler.add_entry(**mapping)
+        # Rollback and ensure the entry was not added for the test user
+        db.session.close()
+        self.assertNumberOfMatches(
+            1, CreditAccount.id, CreditAccount.bank_id == 1
+        )
 
     @pytest.mark.parametrize(
         'mapping',
         [{'bank_id': 2, 'statement_issue_day': 10, 'statement_due_day': 1},
          {'bank_id': 2, 'statement_due_day': 1}]
     )
-    def test_update_entry(self, app, account_db, mapping):
-        account = account_db.update_entry(2, mapping)
-        assert account['statement_due_day'] == 1
-        # Check that the entry was updated
-        query = ("SELECT COUNT(id) FROM credit_accounts"
-                 " WHERE statement_due_day = 1")
-        self.assertQueryEqualsCount(app, query, 1)
+    def test_update_entry(self, account_handler, mapping):
+        account = account_handler.update_entry(2, **mapping)
+        # Check that the entry object was properly updated
+        assert account.statement_due_day == 1
+        # Check that the entry was updated in the database
+        self.assertNumberOfMatches(
+            1, CreditAccount.id, CreditAccount.statement_due_day == 1
+        )
 
     @pytest.mark.parametrize(
-        'account_id, mapping, exception',
-        [[1, {'bank_id': 2, 'statement_due_day': 1},  # another user
-          NotFound],
-         [2, {'bank_id': 2, 'invalid_field': 'Test'},
-          ValueError],
-         [4, {'bank_id': 2, 'statement_due_day': 1},  # nonexistent ID
-          NotFound]]
+        "account_id, mapping, exception",
+        [[1, {"bank_id": 2, "statement_due_day": 1},
+          NotFound],                                        # wrong user
+         [2, {"bank_id": 2, "invalid_field": "Test"},
+          ValueError],                                      # invalid field
+         [4, {"bank_id": 2, "statement_due_day": 1},
+          NotFound]]                                        # nonexistent ID
     )
-    def test_update_entry_invalid(self, account_db, account_id, mapping,
+    def test_update_entry_invalid(self, account_handler, account_id, mapping,
                                   exception):
         with pytest.raises(exception):
-            account_db.update_entry(account_id, mapping)
+            account_handler.update_entry(account_id, **mapping)
 
-    def test_update_entry_value(self, account_db):
-        account = account_db.update_entry_value(2, 'statement_due_day', 1)
-        assert account['statement_due_day'] == 1
-
-    @pytest.mark.parametrize(
-        'entry_ids', [(2,), (2, 3)]
-    )
-    def test_delete_entries(self, app, account_db, entry_ids):
-        account_db.delete_entries(entry_ids)
-        # Check that the entries were deleted
-        for entry_id in entry_ids:
-            query = ("SELECT COUNT(id) FROM credit_accounts"
-                    f" WHERE id = {entry_id}")
-            self.assertQueryEqualsCount(app, query, 0)
-
-    def test_delete_cascading_entries(self, app, account_db):
-        account_db.delete_entries((3,))
+    @pytest.mark.parametrize('entry_id', [2, 3])
+    def test_delete_entry(self, account_handler, entry_id):
+        account_handler.delete_entry(entry_id)
+        # Check that the entry was deleted
+        self.assertNumberOfMatches(
+            0, CreditAccount.id, CreditAccount.id == entry_id
+        )
         # Check that the cascading entries were deleted
-        query = ("SELECT COUNT(id) FROM credit_cards"
-                f" WHERE account_id = 3")
-        self.assertQueryEqualsCount(app, query, 0)
+        self.assertNumberOfMatches(
+            0, CreditCard.id, CreditCard.account_id == entry_id
+        )
 
     @pytest.mark.parametrize(
-        'entry_ids, exception',
-        [[(1,), NotFound],   # should not be able to delete other user entries
-         [(4,), NotFound]]   # should not be able to delete nonexistent entries
+        'entry_id, exception',
+        [[1, NotFound],   # should not be able to delete other user entries
+         [4, NotFound]]   # should not be able to delete nonexistent entries
     )
-    def test_delete_entries_invalid(self, account_db, entry_ids, exception):
+    def test_delete_entry_invalid(self, account_handler, entry_id, exception):
         with pytest.raises(exception):
-            account_db.delete_entries(entry_ids)
+            account_handler.delete_entry(entry_id)
 

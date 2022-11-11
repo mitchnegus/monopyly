@@ -106,8 +106,8 @@ class TestBankAccountTypeHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "type_name, type_abbreviation",
-        [("Certificate of Deposit", "CoD"),
-         (None, None)]
+        [["Certificate of Deposit", "CoD"],
+         [None, None]]
     )
     def test_find_account_type_none_exist(self, account_type_handler,
                                           type_name, type_abbreviation):
@@ -300,13 +300,12 @@ class TestBankAccountHandler(TestHandler):
         account = account_handler.find_account(
             bank_name, account_type_name, last_four_digits
         )
-        print(account)
         self.assertEntryMatch(account, reference_entry)
 
     @pytest.mark.parametrize(
         "bank_name, account_type_name, last_four_digits, reference_entry",
-        [("Jail", "6666", None, None),
-         (None, None, None, None)]
+        [["Jail", "6666", None, None],
+         [None, None, None, None]]
     )
     def test_find_account_none_exist(self, account_handler, bank_name,
                                      last_four_digits, account_type_name,
@@ -356,7 +355,8 @@ class TestBankAccountHandler(TestHandler):
             }
             account_handler.add_entry(**mapping)
         # Rollback and ensure the entry was not added for the test user
-        self.assertNumberOfMatches(1, BankAccount.id, BankAccount.id == 1)
+        db.session.close()
+        self.assertNumberOfMatches(1, BankAccount.id, BankAccount.bank_id == 1)
 
     @pytest.mark.parametrize(
         "mapping",

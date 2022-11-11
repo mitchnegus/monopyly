@@ -499,22 +499,22 @@ class TestBankTransactionForm:
 
     @pytest.mark.parametrize(
         "field, sort_fields, top_expected_suggestions, expected_suggestions",
-        [("note", {},
-          [],
-          ["Jail subtransaction 1", "Jail subtransaction 2",
+        [["note", {},
+          (),
+          ("Jail subtransaction 1", "Jail subtransaction 2",
            "Transfer in", "What else is there to do in Jail?",
            "Credit card payment", "Transfer out",
-           "'Go' Corner ATM deposit"]),
-         ("note",
+           "'Go' Corner ATM deposit")],
+         ["note",
           {"bank_name": "Jail",
            "last_four_digits": "5556",
            "type_name": "Savings"},
-          ["Jail subtransaction 1", "Jail subtransaction 2",
-           "Transfer in", "What else is there to do in Jail?"],
-          ["Jail subtransaction 1", "Jail subtransaction 2",
+          ("Jail subtransaction 1", "Jail subtransaction 2",
+           "Transfer in", "What else is there to do in Jail?"),
+          ("Jail subtransaction 1", "Jail subtransaction 2",
            "Transfer in", "What else is there to do in Jail?",
            "Credit card payment", "Transfer out",
-           "'Go' Corner ATM deposit"])]
+           "'Go' Corner ATM deposit")]]
     )
     def test_autocomplete(self, transaction_form, field, sort_fields,
                           top_expected_suggestions, expected_suggestions):

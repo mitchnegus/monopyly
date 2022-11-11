@@ -496,22 +496,22 @@ class TestCreditTransactionForm:
 
     @pytest.mark.parametrize(
         "field, sort_fields, top_expected_suggestions, expected_suggestions",
-        [("vendor", {},                       # sorted by frequency (only)
-          ["Boardwalk"],
-          ["Income Tax Board", "Pennsylvania Avenue",
+        [["vendor", {},                       # sorted by frequency [only]
+          ("Boardwalk",),
+          ("Income Tax Board", "Pennsylvania Avenue",
            "Park Place", "Community Chest",
            "Electric Company", "Water Works",
            "Reading Railroad", "JP Morgan Chance",
            "Top Left Corner", "Marvin Gardens",
-           "Boardwalk"]),
-         ("note", {"vendor": "Park Place"},   # sorted by vendor key, then note frequency
-          ["One for the park", "One for the place"],
-          ["Parking (thought it was free)", "Expensive house tour",
+           "Boardwalk")],
+         ["note", {"vendor": "Park Place"},   # sorted by vendor key, then note frequency
+          ("One for the park", "One for the place"),
+          ("Parking (thought it was free)", "Expensive house tour",
            "Conducting business", "Tough loss",
            "Electric bill", "Refund",
            "Merry-go-round", "Credit card payment",
            "One for the park", "One for the place",
-           "Expensive real estate", "Back for more..."])]
+           "Expensive real estate", "Back for more...")]]
     )
     def test_autocomplete(self, transaction_form, field, sort_fields,
                           top_expected_suggestions, expected_suggestions):
