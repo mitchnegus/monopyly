@@ -38,8 +38,8 @@ class TestCreditCardHandler(TestHandler):
          [None, None, ("3335",), None, db_reference[:1]],
          [None, None, None, 1, db_reference[:2]]]
     )
-    def test_get_entries(self, card_handler, bank_ids, account_ids,
-                         last_four_digits, active, reference_entries):
+    def test_get_cards(self, card_handler, bank_ids, account_ids,
+                       last_four_digits, active, reference_entries):
         cards = card_handler.get_cards(bank_ids, account_ids, last_four_digits,
                                        active)
         self.assertEntriesMatch(cards, reference_entries)
@@ -74,12 +74,12 @@ class TestCreditCardHandler(TestHandler):
         self.assertEntryMatch(card, reference_entry)
 
     @pytest.mark.parametrize(
-        "bank_name, last_four_digits, reference_entry",
-        [["Jail", "6666", None],
-         [None, None, None]]
+        "bank_name, last_four_digits",
+        [["Jail", "6666"],
+         [None, None]]
     )
     def test_find_card_none_exist(self, card_handler, bank_name,
-                                  last_four_digits, reference_entry):
+                                  last_four_digits):
         card = card_handler.find_card(bank_name, last_four_digits)
         assert card is None
 

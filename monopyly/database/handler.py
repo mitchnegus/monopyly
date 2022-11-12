@@ -94,7 +94,7 @@ class DatabaseHandler(ABC):
         return entries
 
     @classmethod
-    def find_entry(cls, *filters, sort_order=None):
+    def find_entry(cls, *filters, sort_order=None, require_unique=True):
         """
         Find an entry using uniquely identifying characteristics.
 
@@ -104,8 +104,14 @@ class DatabaseHandler(ABC):
             Criteria to use when applying filters to the query.
             (If all criteria are `None`, the returned entry will be
             `None`.)
-        sort_order : ...
-            ...
+        sort_order : str
+            The order to use when sorting values returned by the
+            database query.
+        require_unique : bool
+            A flag indicating whether a found entry must be the one and
+            only entry matching the criteria. The default is `True`, and
+            if an entry is not the only one matching the criteria, an
+            error is raised.
 
         Returns
         -------
@@ -119,7 +125,11 @@ class DatabaseHandler(ABC):
         # Query entries from the authorized user
         query = cls.model.select_for_user()
         query = cls._customize_entries_query(query, filters, sort_order)
-        entry = db.session.execute(query).scalar_one_or_none()
+        results = db.session.execute(query)
+        if require_unique:
+            entry = results.scalar_one_or_none()
+        else:
+            entry = results.scalar()
         return entry
 
     @classmethod
@@ -327,8 +337,10 @@ class DatabaseViewHandler(DatabaseHandler):
 
     @classmethod
     @view_query
-    def find_entry(cls, *filters, sort_order=None):
-        return super().find_entry(*filters, sort_order=sort_order)
+    def find_entry(cls, *filters, sort_order=None, require_unique=True):
+        return super().find_entry(
+            *filters, sort_order=sort_order, require_unique=require_unique
+        )
 
     @classmethod
     @view_query

@@ -1,265 +1,257 @@
 """Tests for the credit module managing credit card statements."""
 from datetime import date
-from sqlite3 import IntegrityError
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 from werkzeug.exceptions import NotFound
+from sqlalchemy.exc import StatementError
 
-from monopyly.credit.cards import CreditStatementHandler
+from monopyly.database.models import (
+    CreditStatement, CreditStatementView, CreditTransaction
+)
+from monopyly.credit.statements import CreditStatementHandler
 from ..helpers import TestHandler
 
 
 @pytest.fixture
-def statement_db(client_context):
-    statement_db = CreditStatementHandler()
-    yield statement_db
+def statement_handler(client_context):
+    return CreditStatementHandler
 
 
 class TestCreditStatementHandler(TestHandler):
 
+    statement2_balance = 1.00
+    statement3_balance = (43.21+30.00+35.00) + statement2_balance
+    statement6_balance = (1600.00-123.00)
+    statement4_balance = (99.00+6500.00-109.21) + statement3_balance
+    statement7_balance = (253.99+12.34) + statement6_balance
+    statement5_balance = 26.87 + statement4_balance
     # References only include entries accessible to the authorized login
-    #   - ordered by date (most recent first)
-    reference = {
-        'keys': ('id', 'card_id', 'issue_date', 'due_date'),
-        'rows': [(5, 3, date(2020, 6, 15), date(2020, 7, 5)),
-                 (7, 4, date(2020, 6, 15), date(2020, 7, 3)),
-                 (4, 3, date(2020, 5, 15), date(2020, 6, 5)),
-                 (6, 4, date(2020, 5, 15), date(2020, 6, 3)),
-                 (3, 3, date(2020, 4, 15), date(2020, 5, 5)),
-                 (2, 2, date(2020, 3, 15), date(2020, 4, 5))]
-    }
-    view_reference = {
-        'keys': ('id', 'card_id', 'issue_date', 'due_date', 'balance',
-                 'payment_date'),
-        'rows': [(5, 3, date(2020, 6, 15), date(2020, 7, 5), 26.87+6599.00,
-                  None),
-                 (7, 4, date(2020, 6, 15), date(2020, 7, 3), 1477+253.99,
-                  None),
-                 (4, 3, date(2020, 5, 15), date(2020, 6, 5), 6599.00,
-                  None),
-                 (6, 4, date(2020, 5, 15), date(2020, 6, 3), 1477.00,
-                  None),
-                 (3, 3, date(2020, 4, 15), date(2020, 5, 5), 108.21+1.00,
-                  date(2020, 5, 4)),
-                 (2, 2, date(2020, 3, 15), date(2020, 4, 5), 1.00,
-                  date(2020, 5, 4))]
-    }
+    #   - ordered by issue date (most recent first)
+    db_reference = [
+        CreditStatementView(id=5, card_id=3, issue_date=date(2020, 6, 10),
+                            due_date=date(2020, 7, 5),
+                            balance=round(statement5_balance, 2),
+                            payment_date=None),
+        CreditStatementView(id=7, card_id=4, issue_date=date(2020, 6, 10),
+                            due_date=date(2020, 7, 3),
+                            balance=round(statement7_balance, 2),
+                            payment_date=None),
+        CreditStatementView(id=4, card_id=3, issue_date=date(2020, 5, 10),
+                            due_date=date(2020, 6, 5),
+                            balance=round(statement4_balance, 2),
+                            payment_date=None),
+        CreditStatementView(id=6, card_id=4, issue_date=date(2020, 5, 10),
+                            due_date=date(2020, 6, 3),
+                            balance=round(statement6_balance, 2),
+                            payment_date=None),
+        CreditStatementView(id=3, card_id=3, issue_date=date(2020, 4, 15),
+                            due_date=date(2020, 5, 5),
+                            balance=round(statement3_balance, 2),
+                            payment_date=date(2020, 5, 4)),
+        CreditStatementView(id=2, card_id=2, issue_date=date(2020, 3, 15),
+                            due_date=date(2020, 4, 5),
+                            balance=round(statement2_balance, 2),
+                            payment_date=date(2020, 5, 4)),
+    ]
 
-    def test_initialization(self, statement_db):
-        assert statement_db.table == 'credit_statements'
-        assert statement_db.user_id == 3
+    def test_initialization(self, statement_handler):
+        assert statement_handler.model == CreditStatement
+        assert statement_handler.table == "credit_statements"
+        assert statement_handler.table_view == "credit_statements_view"
+        assert statement_handler.user_id == 3
+
+    def test_model_view_access(self, statement_handler):
+        assert statement_handler.model == CreditStatement
+        statement_handler._view_context = True
+        assert statement_handler.model == CreditStatementView
+        statement_handler._view_context = False
 
     @pytest.mark.parametrize(
-        'card_ids, bank_ids, active, sort_order, fields, '
-        'reference_entries',
-        [[None, None, False, 'DESC', None,
-          view_reference['rows']],
-         [None, None, False, 'DESC', ('card_id', 'issue_date'),
-          [row[:3] for row in view_reference['rows']]],
-         [(3,), None, False, 'DESC', ('card_id', 'issue_date'),
-          [view_reference['rows'][0][:3],
-           view_reference['rows'][2][:3],
-           view_reference['rows'][4][:3]]],
-         [None, (2,), False, 'DESC', ('card_id', 'issue_date'),
-          [view_reference['rows'][0][:3],
-           view_reference['rows'][2][:3],
-           view_reference['rows'][4][:3],
-           view_reference['rows'][5][:3]]],
-         [None, None, True, 'DESC', ('card_id', 'issue_date'),
-          [row[:3] for row in view_reference['rows'][:5]]],
-         [None, None, False, 'ASC', ('card_id', 'issue_date'),
-          [view_reference['rows'][5][:3],
-           view_reference['rows'][4][:3],
-           view_reference['rows'][2][:3],
-           view_reference['rows'][3][:3],
-           view_reference['rows'][0][:3],
-           view_reference['rows'][1][:3]]]]
+        "card_ids, bank_ids, active, sort_order, reference_entries",
+        [[None, None, None, "DESC",                     # defaults
+          db_reference],
+         [(3,), None, None, "DESC",
+          [db_reference[0], db_reference[2], db_reference[4]]],
+         [None, (2,), None, "DESC",
+          [db_reference[0], db_reference[2], db_reference[4], db_reference[5]]],
+         [None, None, False, "DESC",                    # card 2 inactive
+          db_reference[6:]],
+         [None, None, True, "DESC",
+          db_reference[:6]],
+         [None, None, False, "ASC",
+          db_reference[::-1]]]
     )
-    def test_get_entries(self, statement_db, card_ids, bank_ids, active,
-                         sort_order, fields, reference_entries):
-        statements = statement_db.get_entries(card_ids, bank_ids, active,
-                                              sort_order, fields)
-        if fields:
-            self.assertMatchEntries(reference_entries, statements, order=True)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntries(reference_entries, statements)
+    def test_get_statements(self, statement_handler, card_ids, bank_ids, active,
+                            sort_order, reference_entries):
+        statements = statement_handler.get_statements(
+            card_ids, bank_ids, active, sort_order
+        )
+        self.assertEntriesMatch(statements, reference_entries, order=True)
 
     @pytest.mark.parametrize(
-        'statement_id, fields, reference_entry',
-        [[3, None,
-          view_reference['rows'][4]],
-         [4, None,
-          view_reference['rows'][2]],
-         [3, ('card_id', 'issue_date'),
-          view_reference['rows'][4][:3]]]
+        "statement_id, reference_entry",
+        [[3, db_reference[4]],
+         [4, db_reference[2]]]
     )
-    def test_get_entry(self, statement_db, statement_id, fields, reference_entry):
-        statement = statement_db.get_entry(statement_id, fields)
-        if fields:
-            self.assertMatchEntry(reference_entry, statement)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntry(reference_entry, statement)
+    def test_get_entry(self, statement_handler, statement_id, reference_entry):
+        statement = statement_handler.get_entry(statement_id)
+        self.assertEntryMatch(statement, reference_entry)
 
     @pytest.mark.parametrize(
-        'statement_id, exception',
+        "statement_id, exception",
         [[1, NotFound],  # Not the logged in user
          [8, NotFound]]  # Not in the database
     )
-    def test_get_entry_invalid(self, statement_db, statement_id, exception):
+    def test_get_entry_invalid(self, statement_handler, statement_id, exception):
         with pytest.raises(exception):
-            statement_db.get_entry(statement_id)
+            statement_handler.get_entry(statement_id)
 
     @pytest.mark.parametrize(
-        'card, issue_date, fields, reference_entry',
-        [[{'id': 3}, date(2020, 5, 15), None,
-          view_reference['rows'][2]],
-         [{'id': 4}, date(2020, 5, 15), None,
-          view_reference['rows'][3]],
-         [{'id': 3}, None, None,
-          view_reference['rows'][0]],
-         [{'id': 3}, date(2020, 5, 15), ('card_id', 'issue_date'),
-          view_reference['rows'][2][:3]]]
+        "card_id, issue_date, reference_entry",
+        [[3, date(2020, 5, 10), db_reference[2]],
+         [4, date(2020, 5, 10), db_reference[3]],
+         [3, None, db_reference[0]]]
     )
-    def test_find_statement(self, statement_db, card, issue_date, fields,
+    def test_find_statement(self, statement_handler, card_id, issue_date,
                             reference_entry):
-        statement = statement_db.find_statement(card, issue_date, fields)
-        if fields:
-            self.assertMatchEntry(reference_entry, statement)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntry(reference_entry, statement)
+        statement = statement_handler.find_statement(card_id, issue_date)
+        self.assertEntryMatch(statement, reference_entry)
 
     @pytest.mark.parametrize(
-        'card, issue_date, fields, reference_entry',
-        [({'id': 3}, date(2020, 12, 1), None,
-          None)]
+        "card_id, issue_date",
+        [[3, date(2020, 12, 1)],
+         [None, None]]
     )
-    def test_find_statement_none_exist(self, statement_db, card, issue_date,
-                                       fields, reference_entry):
-        statement = statement_db.find_statement(card, issue_date, fields)
+    def test_find_statement_none_exist(self, statement_handler, card_id,
+                                       issue_date):
+        statement = statement_handler.find_statement(card_id, issue_date)
         assert statement is None
 
     @pytest.mark.parametrize(
-        'card, transaction_date, creation, statement_found, statement_added',
-        [[{'id': 1, 'statement_issue_day': 1}, date(2020, 5, 5), False,
-          True, False],
-         [{'id': 3, 'statement_issue_day': 10}, date(2020, 6, 10), False,
-          True, False],
-         [{'id': 3, 'statement_issue_day': 10}, date(2020, 6, 20), False,
-          False, False],  # statement does not exist (do not create)
-         [{'id': 3, 'statement_issue_day': 10}, date(2020, 6, 20), True,
-          False, True]]   # statement does not exist (do create)
+        "card_id, statement_issue_day, statement_due_day, transaction_date, "
+        "creation, inferred_statement_id",
+        [[1, 1, 20, date(2020, 5, 5), False, None],    # should fail, invalid user
+         [3, 10, 5, date(2020, 5, 1), False, 4],
+         [3, 10, 5, date(2020, 6, 5), False, 5],
+         [3, 10, 5, date(2020, 6, 20), True, 8],      # create new statement
+         [3, 10, 5, date(2020, 6, 20), False, None]]  # do not create new statement
     )
-    @patch('monopyly.credit.statements.CreditStatementHandler.add_statement')
-    @patch('monopyly.credit.statements.CreditStatementHandler.find_statement')
-    def test_infer_statement(self, find_statement_method, add_statement_method,
-                             statement_db, card, transaction_date, creation,
-                             statement_found, statement_added):
-        find_statement_method.return_value = statement_found
-        add_statement_method.return_value = statement_added
-        statement = statement_db.infer_statement(card, transaction_date,
-                                                 creation)
-        assert statement == (statement_found or statement_added)
+    def test_infer_statement(self, statement_handler, card_id,
+                             statement_issue_day, statement_due_day,
+                             transaction_date, creation,
+                             inferred_statement_id):
+        # Mock the inputs required for inference
+        mock_card = Mock()
+        mock_card.id = card_id
+        mock_card.account.statement_issue_day = statement_issue_day
+        mock_card.account.statement_due_day = statement_due_day
+        # Test that the inference action produces the expected behavior
+        statement = statement_handler.infer_statement(
+            mock_card, transaction_date, creation=creation
+        )
+        if inferred_statement_id is None:
+            assert statement is None
+        else:
+            assert statement.id == inferred_statement_id
 
     @pytest.mark.parametrize(
-        'card, issue_date, due_date, expected_due_date',
-        [[{'id': 3, 'statement_due_day': 5},
-          date(2020, 7, 15), None, date(2020, 8, 5)],
-         [{'id': 3, 'statement_due_day': 5},
-          date(2020, 7, 15), date(2020, 8, 6), date(2020, 8, 6)],
-         [{'id': 4, 'statement_due_day': 3},
-          date(2020, 7, 15), None, date(2020, 8, 3)]]
+        "card_id, statement_due_day, issue_date, due_date, expected_due_date",
+        [[3, 5, date(2020, 7, 15), None, date(2020, 8, 5)],
+         [3, 5, date(2020, 7, 15), date(2020, 8, 6), date(2020, 8, 6)],
+         [4, 3, date(2020, 7, 15), None, date(2020, 8, 3)]]
     )
-    def test_add_statement(self, app, statement_db, card, issue_date,
-                           due_date, expected_due_date):
-        statement = statement_db.add_statement(card, issue_date, due_date)
-        assert statement['due_date'] == expected_due_date
-        # Check that the entry was added
-        query = ("SELECT COUNT(id) FROM credit_statements"
-                f" WHERE due_date = DATE('{expected_due_date}')")
-        self.assertQueryEqualsCount(app, query, 1)
+    def test_add_statement(self, statement_handler, card_id, statement_due_day,
+                           issue_date, due_date, expected_due_date):
+        mock_card = Mock()
+        mock_card.id = card_id
+        mock_card.account.statement_due_day = statement_due_day
+        statement = statement_handler.add_statement(
+            mock_card, issue_date, due_date
+        )
+        # Check that the entry object was properly created
+        assert statement.due_date == expected_due_date
+        # Check that the entry was added to the database
+        self.assertNumberOfMatches(
+            1,
+            CreditStatement.id,
+            CreditStatement.due_date == expected_due_date
+        )
 
     @pytest.mark.parametrize(
-        'card, issue_date, due_date, exception',
-        [[{}, date(2020, 7, 15), None, KeyError],
-         [{'id': 3, 'statement_due_day': 5}, None, None, AttributeError],
-         [{'id': 3, 'statement_due_day': 5}, None, 'test', IntegrityError]]
+        "card_id, statement_due_day, issue_date, due_date, exception",
+        [[None, None, date(2020, 7, 15), None, AttributeError],
+         [3, 5, None, None, AttributeError],
+         [3, 5, None, "test", StatementError]]
     )
-    def test_add_entry_invalid(self, statement_db, card, issue_date, due_date,
+    def test_add_entry_invalid(self, statement_handler, card_id,
+                               statement_due_day, issue_date, due_date,
                                exception):
+        if card_id is None and statement_due_day is None:
+            mock_card = None
+        else:
+            mock_card = Mock()
+            mock_card.id = card_id
+            mock_card.account.statement_due_day = statement_due_day
         with pytest.raises(exception):
-            statement_db.add_statement(card, issue_date, due_date)
+            statement_handler.add_statement(mock_card, issue_date, due_date)
 
-    def test_add_entry_invalid_user(self, app, statement_db):
-        query = ("SELECT COUNT(id) FROM credit_statements"
-                 " WHERE card_id = 1")
-        self.assertQueryEqualsCount(app, query, 1)
-        with pytest.raises(NotFound):
-            card = {'id': 1, 'statement_due_day': 5}
-            statement_db.add_statement(card, date(2020, 8, 3),
-                                       date(2020, 8, 6))
-        # Check that the transaction was not added to a different account
-        self.assertQueryEqualsCount(app, query, 1)
-
-    @pytest.mark.parametrize(
-        'mapping',
-        [{'card_id': 2, 'issue_date': '2020-05-20', 'due_date': '2020-06-05'},
-         {'card_id': 2, 'issue_date': '2020-05-20'}]
-    )
-    def test_update_entry(self, app, statement_db, mapping):
-        statement = statement_db.update_entry(2, mapping)
-        assert statement['issue_date'] == date(2020, 5, 20)
-        # Check that the entry was updated
-        query = ("SELECT COUNT(id) FROM credit_statements"
-                 " WHERE issue_date = '2020-05-20'")
-        self.assertQueryEqualsCount(app, query, 1)
+    def test_add_entry_invalid_user(self, statement_handler):
+        mapping = {
+            "card_id": 1,
+            "issue_date": date(2020, 8, 1),
+            "due_date": date(2020, 8, 20),
+        }
+        # Ensure that 'mr.monopyly' cannot add an entry for the test user
+        self.assert_invalid_user_entry_add_fails(
+            statement_handler, mapping, invalid_user_id=1, invalid_matches=1
+        )
 
     @pytest.mark.parametrize(
-        'statement_id, mapping, exception',
-        [[1, {'card_id': 2, 'issue_date': '2020-05-20'},  # another user
-          NotFound],
-         [2, {'card_id': 2, 'invalid_field': 'Test'},
-          ValueError],
-         [8, {'card_id': 2, 'issue_date': '2020-05-20'},  # nonexistent ID
-          NotFound]]
+        "mapping",
+        [{"card_id": 2, "issue_date": date(2020, 5 ,20),
+          "due_date": date(2020, 6, 5)},
+         {"card_id": 2, "issue_date": date(2020, 5 ,20)}]
     )
-    def test_update_entry_invalid(self, statement_db, statement_id, mapping,
-                                  exception):
+    def test_update_entry(self, statement_handler, mapping):
+        statement = statement_handler.update_entry(2, **mapping)
+        # Check that the entry object was properly updated
+        assert statement.issue_date == date(2020, 5, 20)
+        # Check that the entry was updated in the database
+        self.assertNumberOfMatches(
+            1,
+            CreditStatement.id,
+            CreditStatement.issue_date == date(2020, 5, 20)
+        )
+
+    @pytest.mark.parametrize(
+        "statement_id, mapping, exception",
+        [[1, {"card_id": 2, "issue_date": date(2020, 5, 20)},
+          NotFound],                                        # wrong user
+         [2, {"card_id": 2, "invalid_field": "Test"},
+          ValueError],                                      # invalid field
+         [8, {"card_id": 2, "issue_date": date(2020, 5, 20)},
+          NotFound]]                                        # nonexistent ID
+    )
+    def test_update_entry_invalid(self, statement_handler, statement_id,
+                                  mapping, exception):
         with pytest.raises(exception):
-            statement_db.update_entry(statement_id, mapping)
+            statement_handler.update_entry(statement_id, **mapping)
 
-    def test_update_entry_value(self, statement_db):
-        statement = statement_db.update_entry_value(2, 'issue_date',
-                                                    date(2020, 5, 20))
-        assert statement['issue_date'] == date(2020, 5, 20)
-
-    @pytest.mark.parametrize(
-        'entry_ids', [(2,), (2, 3)]
-    )
-    def test_delete_entries(self, app, statement_db, entry_ids):
-        statement_db.delete_entries(entry_ids)
-        # Check that the entries were deleted
-        for entry_id in entry_ids:
-            query = ("SELECT COUNT(id) FROM credit_statements"
-                    f" WHERE id = {entry_id}")
-            self.assertQueryEqualsCount(app, query, 0)
-
-    def test_delete_cascading_entries(self, app, statement_db):
-        statement_db.delete_entries((3,))
+    @pytest.mark.parametrize("entry_id", [2, 3])
+    def test_delete_entry(self, statement_handler, entry_id):
+        self.assert_entry_deletion_succeeds(statement_handler, entry_id)
         # Check that the cascading entries were deleted
-        query = ("SELECT COUNT(id) FROM credit_transactions"
-                f" WHERE statement_id = 3")
-        self.assertQueryEqualsCount(app, query, 0)
+        self.assertNumberOfMatches(
+            0, CreditTransaction.id, CreditTransaction.statement_id == entry_id
+        )
 
     @pytest.mark.parametrize(
-        'entry_ids, exception',
-        [[(1,), NotFound],   # should not be able to delete other user entries
-         [(10,), NotFound]]  # should not be able to delete nonexistent entries
+        "entry_id, exception",
+        [[1, NotFound],   # should not be able to delete other user entries
+         [10, NotFound]]  # should not be able to delete nonexistent entries
     )
-    def test_delete_entries_invalid(self, statement_db, entry_ids, exception):
+    def test_delete_entry_invalid(self, statement_handler, entry_id, exception):
         with pytest.raises(exception):
-            statement_db.delete_entries(entry_ids)
+            statement_handler.delete_entry(entry_id)
 

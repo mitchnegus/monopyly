@@ -228,6 +228,12 @@ class TestBankAccountHandler(TestHandler):
         assert account_handler.table_view == "bank_accounts_view"
         assert account_handler.user_id == 3
 
+    def test_model_view_access(self, account_handler):
+        assert account_handler.model == BankAccount
+        account_handler._view_context = True
+        assert account_handler.model == BankAccountView
+        account_handler._view_context = False
+
     @pytest.mark.parametrize(
         "bank_ids, account_type_ids, reference_entries",
         [[None, None, db_reference],
@@ -290,13 +296,12 @@ class TestBankAccountHandler(TestHandler):
         self.assertEntryMatch(account, reference_entry)
 
     @pytest.mark.parametrize(
-        "bank_name, account_type_name, last_four_digits, reference_entry",
-        [["Jail", "6666", None, None],
-         [None, None, None, None]]
+        "bank_name, account_type_name, last_four_digits",
+        [["Jail", "6666", None],
+         [None, None, None]]
     )
     def test_find_account_none_exist(self, account_handler, bank_name,
-                                     last_four_digits, account_type_name,
-                                     reference_entry):
+                                     last_four_digits, account_type_name):
         account = account_handler.find_account(
             bank_name, account_type_name, last_four_digits
         )

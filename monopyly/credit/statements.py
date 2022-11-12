@@ -66,7 +66,7 @@ class CreditStatementHandler(DatabaseViewHandler):
         criteria = [
             cls._filter_values(cls.model.card_id, card_ids),
             cls._filter_values(CreditAccount.bank_id, bank_ids),
-            cls._filter_values(CreditCard.active, active),
+            cls._filter_value(CreditCard.active, active),
         ]
         statements = super().get_entries(*criteria, sort_order=sort_order)
         return statements
@@ -101,7 +101,9 @@ class CreditStatementHandler(DatabaseViewHandler):
             cls._filter_value(CreditCard.id, card_id),
             cls._filter_value(cls.model.issue_date, issue_date)
         ]
-        statement = super().find_entry(*criteria, sort_order="DESC")
+        statement = super().find_entry(
+            *criteria, sort_order="DESC", require_unique=False
+        )
         return statement
 
     @classmethod

@@ -34,13 +34,13 @@ class TestBankTransactionHandler(TestHandler):
         BankTransactionView(id=4, internal_transaction_id=None, account_id=2,
                             transaction_date=date(2020, 5, 6), total=58.90,
                             notes="What else is there to do in Jail?",
-                            balance=443.90),
+                            balance=85+300+58.90),
         BankTransactionView(id=6, internal_transaction_id=1, account_id=3,
                             transaction_date=date(2020, 5, 5), total=-300.00,
-                            notes="Transfer out", balance=-409.21),
+                            notes="Transfer out", balance=(-300-109.21)),
         BankTransactionView(id=3, internal_transaction_id=1, account_id=2,
                             transaction_date=date(2020, 5, 5), total=300.00,
-                            notes="Transfer in", balance=385.00),
+                            notes="Transfer in", balance=(300+85.00)),
         BankTransactionView(id=5, internal_transaction_id=2, account_id=3,
                             transaction_date=date(2020, 5, 4), total=-109.21,
                             notes="Credit card payment", balance=-109.21),
@@ -60,15 +60,24 @@ class TestBankTransactionHandler(TestHandler):
         assert transaction_handler.table_view == "bank_transactions_view"
         assert transaction_handler.user_id == 3
 
+    def test_model_view_access(self, transaction_handler):
+        assert transaction_handler.model == BankTransaction
+        transaction_handler._view_context = True
+        assert transaction_handler.model == BankTransactionView
+        transaction_handler._view_context = False
+
     @pytest.mark.parametrize(
         "account_ids, active, sort_order, reference_entries",
-        [[None, None, "DESC", db_reference],            # defaults
-         [(2, 3), None, "DESC", db_reference[2:]],
+        [[None, None, "DESC",                           # defaults
+          db_reference],
+         [(2, 3), None, "DESC",
+          db_reference[2:]],
          [None, True, "DESC",                           # account 3 inactive
          [row for row in db_reference if row.account_id != 3]],
          [None, False, "DESC",
          [row for row in db_reference if row.account_id == 3]],
-         [None, None, "ASC", db_reference[::-1]]]
+         [None, None, "ASC",
+          db_reference[::-1]]]
     )
     def test_get_transactions(self, transaction_handler, account_ids, active,
                               sort_order, reference_entries):

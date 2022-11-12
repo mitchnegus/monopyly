@@ -33,7 +33,7 @@ class TestCreditAccountHandler(TestHandler):
         [[None, db_reference],
          [(2,), db_reference[:1]]]
     )
-    def test_get_entries(self, account_handler, bank_ids, reference_entries):
+    def test_get_accounts(self, account_handler, bank_ids, reference_entries):
         accounts = account_handler.get_accounts(bank_ids)
         self.assertEntriesMatch(accounts, reference_entries)
 
