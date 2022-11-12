@@ -3,7 +3,6 @@ import pytest
 from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
 
-from monopyly.database import db
 from monopyly.database.models import Bank, BankAccount
 from monopyly.banking.banks import BankHandler
 from ..helpers import TestHandler
@@ -72,18 +71,14 @@ class TestBankHandler(TestHandler):
             bank_handler.add_entry(**mapping)
 
     def test_add_entry_invalid_user(self, bank_handler):
-        # Count the number of banks owned by the test user
-        self.assertNumberOfMatches(1, Bank.id, Bank.user_id == 1)
-        # Ensure that 'mr.monopyly' cannot add an entry for the test user
         mapping = {
             "user_id": 1,
             "bank_name": "JP Morgan Chance",
         }
-        with pytest.raises(NotFound):
-            bank_handler.add_entry(**mapping)
-        # Rollback and ensure the entry was not added for the test user
-        db.session.close()
-        self.assertNumberOfMatches(1, Bank.id, Bank.user_id == 1)
+        # Ensure that 'mr.monopyly' cannot add an entry for the test user
+        self.assert_invalid_user_entry_add_fails(
+            bank_handler, mapping, invalid_user_id=1, invalid_matches=1
+        )
 
     @pytest.mark.parametrize(
         "mapping",
@@ -112,9 +107,7 @@ class TestBankHandler(TestHandler):
 
     @pytest.mark.parametrize("entry_id", [2, 3])
     def test_delete_entry(self, bank_handler, entry_id):
-        bank_handler.delete_entry(entry_id)
-        # Check that the entry was deleted
-        self.assertNumberOfMatches(0, Bank.id, Bank.id == entry_id)
+        self.assert_entry_deletion_succeeds(bank_handler, entry_id)
         # Check that the cascading entries were deleted
         self.assertNumberOfMatches(
             0, BankAccount.id, BankAccount.bank_id == entry_id

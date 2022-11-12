@@ -3,7 +3,6 @@ import pytest
 from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
 
-from monopyly.database import db
 from monopyly.database.models import CreditAccount, CreditCard
 from monopyly.credit.accounts import CreditAccountHandler
 from ..helpers import TestHandler
@@ -81,21 +80,15 @@ class TestCreditAccountHandler(TestHandler):
         with pytest.raises(exception):
             account_handler.add_entry(**mapping)
 
-    def test_add_entry_invalid_user(self, app, account_handler):
-        # Count the number of bank accounts owned by  the test user
-        self.assertNumberOfMatches(1, CreditAccount.id, CreditAccount.id == 1)
+    def test_add_entry_invalid_user(self, account_handler):
+        mapping = {
+            "bank_id": 1,
+            "statement_issue_day": 11,
+            "statement_due_day": 1,
+        }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        with pytest.raises(NotFound):
-            mapping = {
-                "bank_id": 1,
-                "statement_issue_day": 11,
-                "statement_due_day": 1,
-            }
-            account_handler.add_entry(**mapping)
-        # Rollback and ensure the entry was not added for the test user
-        db.session.close()
-        self.assertNumberOfMatches(
-            1, CreditAccount.id, CreditAccount.bank_id == 1
+        self.assert_invalid_user_entry_add_fails(
+            account_handler, mapping, invalid_user_id=1, invalid_matches=1
         )
 
     @pytest.mark.parametrize(
@@ -128,11 +121,7 @@ class TestCreditAccountHandler(TestHandler):
 
     @pytest.mark.parametrize('entry_id', [2, 3])
     def test_delete_entry(self, account_handler, entry_id):
-        account_handler.delete_entry(entry_id)
-        # Check that the entry was deleted
-        self.assertNumberOfMatches(
-            0, CreditAccount.id, CreditAccount.id == entry_id
-        )
+        self.assert_entry_deletion_succeeds(account_handler, entry_id)
         # Check that the cascading entries were deleted
         self.assertNumberOfMatches(
             0, CreditCard.id, CreditCard.account_id == entry_id

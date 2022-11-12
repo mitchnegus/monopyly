@@ -1,6 +1,8 @@
 """Helper objects to improve modularity of tests."""
 import unittest
 
+import pytest
+from werkzeug.exceptions import NotFound
 from sqlalchemy import inspect, select
 from sqlalchemy.sql.expression import func
 
@@ -45,6 +47,34 @@ class TestHandler:
             query = query.where(*criteria)
         count = db.session.execute(query).scalar()
         assert count == number
+
+    @classmethod
+    def assert_invalid_user_entry_add_fails(cls, handler, mapping,
+                                            invalid_user_id, invalid_matches):
+        # Count the number of the entry type owned by the invalid user
+        cls.assertNumberOfMatches(
+            invalid_matches,
+            handler.model.id,
+            handler.model.id == invalid_user_id
+        )
+        # Ensure that the mapping cannot be added for the invalid user
+        with pytest.raises(NotFound):
+            handler.add_entry(**mapping)
+        # Rollback and ensure the entry was not added for the invalid user
+        db.session.close()
+        cls.assertNumberOfMatches(
+            invalid_matches,
+            handler.model.id,
+            handler.model.id == invalid_user_id
+        )
+
+    @classmethod
+    def assert_entry_deletion_succeeds(cls, handler, entry_id):
+        handler.delete_entry(entry_id)
+        # Check that the entry was deleted
+        cls.assertNumberOfMatches(
+            0, handler.model.id, handler.model.id == entry_id
+        )
 
 
 class TestGrouper:

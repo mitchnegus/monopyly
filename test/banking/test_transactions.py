@@ -6,7 +6,6 @@ import pytest
 from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
 
-from monopyly.database import db
 from monopyly.database.models import (
     BankTransaction, BankTransactionView, BankSubtransaction
 )
@@ -138,28 +137,16 @@ class TestBankTransactionHandler(TestHandler):
             transaction_handler.add_entry(**mapping)
 
     def test_add_entry_invalid_user(self, transaction_handler):
-        # Count the number of bank transactions owned by the test user
-        self.assertNumberOfMatches(
-            1, BankTransaction.id, BankTransaction.account_id == 1
-        )
-        # Count the total number of bank subtransactions
-        self.assertNumberOfMatches(8, BankSubtransaction.id)
+        mapping = {
+            "internal_transaction_id": 2,
+            "account_id": 1,
+            "transaction_date": date(2022, 5, 8),
+            "subtransactions": self.mock_subtransaction_mappings,
+        }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        with pytest.raises(NotFound):
-            mapping = {
-                "internal_transaction_id": 2,
-                "account_id": 1,
-                "transaction_date": date(2022, 5, 8),
-                "subtransactions": self.mock_subtransaction_mappings,
-            }
-            transaction_handler.add_entry(**mapping)
-        # Rollback and ensure the entry was not added for the test user
-        db.session.close()
-        self.assertNumberOfMatches(
-            1, BankTransaction.id, BankTransaction.account_id == 1
+        self.assert_invalid_user_entry_add_fails(
+            transaction_handler, mapping, invalid_user_id=1, invalid_matches=1
         )
-        # The total number of subtransactions should also remain unchanged
-        self.assertNumberOfMatches(8, BankSubtransaction.id)
 
     @pytest.mark.parametrize(
         "mapping",
@@ -207,11 +194,7 @@ class TestBankTransactionHandler(TestHandler):
 
     @pytest.mark.parametrize("entry_id", [4, 7])
     def test_delete_entry(self, transaction_handler, entry_id):
-        transaction_handler.delete_entry(entry_id)
-        # Check that the entry was deleted
-        self.assertNumberOfMatches(
-            0, BankTransaction.id, BankTransaction.id == entry_id
-        )
+        self.assert_entry_deletion_succeeds(transaction_handler, entry_id)
         # Check that the cascading entries were deleted
         self.assertNumberOfMatches(
             0,

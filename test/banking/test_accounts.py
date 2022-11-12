@@ -5,7 +5,6 @@ import pytest
 from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
 
-from monopyly.database import db
 from monopyly.database.models import (
     Bank, BankAccountType, BankAccountTypeView, BankAccount, BankAccountView,
     BankTransaction
@@ -147,22 +146,14 @@ class TestBankAccountTypeHandler(TestHandler):
             account_type_handler.add_entry(**mapping)
 
     def test_add_entry_invalid_user(self, account_type_handler):
-        # Count the number of bank account types owned by the test user
-        self.assertNumberOfMatches(
-            1, BankAccountType.id, BankAccountType.user_id == 1
-        )
-        # Ensure that 'mr.monopyly' cannot add an entry for the test user
         mapping = {
             "user_id": 1,
             "type_name": "Well Stocked Hand",
             "type_abbreviation": "Paper",
         }
-        with pytest.raises(NotFound):
-            account_type_handler.add_entry(**mapping)
-        # Rollback and ensure the entry was not added for the test user
-        db.session.close()
-        self.assertNumberOfMatches(
-            1, BankAccountType.id, BankAccountType.user_id == 1
+        # Ensure that 'mr.monopyly' cannot add an entry for the test user
+        self.assert_invalid_user_entry_add_fails(
+            account_type_handler, mapping, invalid_user_id=1, invalid_matches=1
         )
 
     @pytest.mark.parametrize(
@@ -198,11 +189,7 @@ class TestBankAccountTypeHandler(TestHandler):
 
     @pytest.mark.parametrize("entry_id", [5, 6])
     def test_delete_entry(self, account_type_handler, entry_id):
-        account_type_handler.delete_entry(entry_id)
-        # Check that the entry was deleted
-        self.assertNumberOfMatches(
-            0, BankAccountType.id, BankAccountType.id == entry_id
-        )
+        self.assert_entry_deletion_succeeds(account_type_handler, entry_id)
         # Check that the cascading entries were deleted
         # INCLUDE TEST FOR CASCADING ENTRY DELETION
 
@@ -343,20 +330,16 @@ class TestBankAccountHandler(TestHandler):
             account_handler.add_entry(**mapping)
 
     def test_add_entry_invalid_user(self, account_handler):
-        # Count the number of bank accounts owned by  the test user
-        self.assertNumberOfMatches(1, BankAccount.id, BankAccount.id == 1)
+        mapping = {
+            "bank_id": 1,
+            "account_type_id": 5,
+            "last_four_digits": "6666",
+            "active": 1,
+        }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        with pytest.raises(NotFound):
-            mapping = {
-                "bank_id": 1,
-                "account_type_id": 5,
-                "last_four_digits": "6666",
-                "active": 1,
-            }
-            account_handler.add_entry(**mapping)
-        # Rollback and ensure the entry was not added for the test user
-        db.session.close()
-        self.assertNumberOfMatches(1, BankAccount.id, BankAccount.bank_id == 1)
+        self.assert_invalid_user_entry_add_fails(
+            account_handler, mapping, invalid_user_id=1, invalid_matches=1
+        )
 
     @pytest.mark.parametrize(
         "mapping",
@@ -389,11 +372,7 @@ class TestBankAccountHandler(TestHandler):
 
     @pytest.mark.parametrize("entry_id", [2, 3])
     def test_delete_entry(self, account_handler, entry_id):
-        account_handler.delete_entry(entry_id)
-        # Check that the entry was deleted
-        self.assertNumberOfMatches(
-            0, BankAccount.id, BankAccount.id == entry_id
-        )
+        self.assert_entry_deletion_succeeds(account_handler, entry_id)
         # Check that the cascading entries were deleted
         self.assertNumberOfMatches(
             0, BankTransaction.id, BankTransaction.account_id == entry_id
