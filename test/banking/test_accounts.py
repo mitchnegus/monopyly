@@ -76,7 +76,7 @@ class TestBankAccountTypeHandler(TestHandler):
     def test_get_entry(self, account_type_handler, account_type_id,
                        reference_entry):
         account_type = account_type_handler.get_entry(account_type_id)
-        self.assertEntryMatch(account_type, reference_entry)
+        self.assertEntryMatches(account_type, reference_entry)
 
     @pytest.mark.parametrize(
         "account_type_id, exception",
@@ -101,7 +101,7 @@ class TestBankAccountTypeHandler(TestHandler):
         account_type = account_type_handler.find_account_type(
             type_name, type_abbreviation
         )
-        self.assertEntryMatch(account_type, reference_entry)
+        self.assertEntryMatches(account_type, reference_entry)
 
     @pytest.mark.parametrize(
         "type_name, type_abbreviation",
@@ -252,7 +252,7 @@ class TestBankAccountHandler(TestHandler):
     )
     def test_get_entry(self, account_handler, account_id, reference_entry):
         account = account_handler.get_entry(account_id)
-        self.assertEntryMatch(account, reference_entry)
+        self.assertEntryMatches(account, reference_entry)
 
     @pytest.mark.parametrize(
         "account_id, exception",
@@ -293,7 +293,7 @@ class TestBankAccountHandler(TestHandler):
         account = account_handler.find_account(
             bank_name, account_type_name, last_four_digits
         )
-        self.assertEntryMatch(account, reference_entry)
+        self.assertEntryMatches(account, reference_entry)
 
     @pytest.mark.parametrize(
         "bank_name, account_type_name, last_four_digits",

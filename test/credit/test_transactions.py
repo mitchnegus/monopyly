@@ -1,468 +1,333 @@
 """Tests for the credit module managing transactions/subtransactions."""
 from datetime import date
-from unittest.mock import patch
-from sqlite3 import IntegrityError
+from unittest.mock import patch, Mock
 
 import pytest
 from werkzeug.exceptions import NotFound
+from sqlalchemy.exc import IntegrityError
 
+from monopyly.database.models import (
+    CreditTransaction, CreditTransactionView, CreditSubtransaction, CreditTag
+)
 from monopyly.credit.transactions import (
-    CreditTransactionHandler, CreditSubtransactionHandler, save_transaction
+    CreditTransactionHandler, save_transaction
 )
 from ..helpers import TestHandler
 
 
 @pytest.fixture
-def transaction_db(client_context):
-    transaction_db = CreditTransactionHandler()
-    yield transaction_db
+def transaction_handler(client_context):
+    return CreditTransactionHandler
+
+
+def _mock_subtransaction_mappings():
+    # Use a function to regenerate mappings (avoid persisting mutations)
+    mock_tags = [Mock(name=f"Mock tag {_+1}") for _ in range(3)]
+    mappings = [
+        {"subtotal": 100.00, "note": "Mock subtransaction mapping 1",
+         "tags": mock_tags[:2]},
+        {"subtotal": 200.00, "note": "Mock subtransaction mapping 2",
+         "tags": mock_tags[:1]},
+    ]
+    return mappings
 
 
 @pytest.fixture
-def subtransaction_db(client_context):
-    subtransaction_db = CreditSubtransactionHandler()
-    yield subtransaction_db
+def mock_subtransaction_mappings():
+    return _mock_subtransaction_mappings()
+
+
+@pytest.fixture
+def mock_tags():
+    mock_tags = [
+        CreditTag(id=100, user_id=1, parent_id=None, tag_name="Mock tag 1"),
+        CreditTag(id=101, user_id=1, parent_id=100, tag_name="Mock tag 2"),
+        CreditTag(id=102, user_id=1, parent_id=None, tag_name="Mock tag 3"),
+    ]
+    return mock_tags
 
 
 class TestCreditTransactionHandler(TestHandler):
 
     # References only include entries accessible to the authorized login
     #   - ordered by date (most recent first)
-    reference = {
-        'keys': ('id', 'internal_transaction_id', 'statement_id',
-                 'transaction_date', 'vendor'),
-        'rows': [(11, None, 7, date(2020, 6, 5), 'Reading Railroad'),
-                 (8, None, 5, date(2020, 5, 30), 'Water Works'),
-                 (10, None, 6, date(2020, 5, 10), 'Income Tax Board'),
-                 (7, 2, 4, date(2020, 5, 4), 'JP Morgan Chance'),
-                 (6, None, 4, date(2020, 5, 1), 'Marvin Gardens'),
-                 (5, None, 4, date(2020, 4, 25), 'Electric Company'),
-                 (9, None, 6, date(2020, 4, 20), 'Pennsylvania Avenue'),
-                 (2, None, 2, date(2020, 4, 13), 'Top Left Corner'),
-                 (4, None, 3, date(2020, 4, 5), 'Park Place'),
-                 (3, None, 3, date(2020, 3, 20), 'Boardwalk'),
-                 (12, None, 2, date(2020, 3, 10), 'Community Chest')]
-    }
-    view_reference = {
-        'keys': ('id', 'internal_transaction_id', 'statement_id',
-                 'transaction_date', 'vendor', 'total', 'notes'),
-        'rows': [(11, None, 7, date(2020, 6, 5), 'Reading Railroad',
-                  253.99, 'Conducting business'),
-                 (8, None, 5, date(2020, 5, 30), 'Water Works',
-                  26.87, 'Tough loss'),
-                 (10, None, 6, date(2020, 5, 10), 'Income Tax Board',
-                  -123.00, 'Refund'),
-                 (7, 2, 4, date(2020, 5, 4), 'JP Morgan Chance',
-                  -109.21, 'Credit card payment'),
-                 (6, None, 4, date(2020, 5, 1), 'Marvin Gardens',
-                  6500.00, 'Expensive real estate'),
-                 (5, None, 4, date(2020, 4, 25), 'Electric Company',
-                  99.00, 'Electric bill'),
-                 (9, None, 6, date(2020, 4, 20), 'Pennsylvania Avenue',
-                  1600.00, 'Expensive house tour'),
-                 (2, None, 2, date(2020, 4, 13), 'Top Left Corner',
-                  1.00, 'Parking (thought it was free)'),
-                 (4, None, 3, date(2020, 4, 5), 'Park Place',
-                  65.00, 'One for the park; One for the place'),
-                 (3, None, 3, date(2020, 3, 20), 'Boardwalk',
-                  43.21, 'Merry-go-round'),
-                 (12, None, 2, date(2020, 3, 10), 'Community Chest',
-                  None, None)]
-    }
+    db_reference = [
+        CreditTransactionView(id=12, internal_transaction_id=None,
+                              statement_id=7,
+                              transaction_date=date(2020, 6, 5),
+                              vendor="Boardwalk", total=12.34,
+                              notes="Back for more..."),
+        CreditTransactionView(id=11, internal_transaction_id=None,
+                              statement_id=7,
+                              transaction_date=date(2020, 6, 5),
+                              vendor="Reading Railroad", total=253.99,
+                              notes="Conducting business"),
+        CreditTransactionView(id=8, internal_transaction_id=None,
+                              statement_id=5,
+                              transaction_date=date(2020, 5, 30),
+                              vendor="Water Works", total=26.87,
+                              notes="Tough loss"),
+        CreditTransactionView(id=10, internal_transaction_id=None,
+                              statement_id=6,
+                              transaction_date=date(2020, 5, 10),
+                              vendor="Income Tax Board", total=-123.00,
+                              notes="Refund"),
+        CreditTransactionView(id=7, internal_transaction_id=2,
+                              statement_id=4,
+                              transaction_date=date(2020, 5, 4),
+                              vendor="JP Morgan Chance", total=-109.21,
+                              notes="Credit card payment"),
+        CreditTransactionView(id=6, internal_transaction_id=None,
+                              statement_id=4,
+                              transaction_date=date(2020, 5, 1),
+                              vendor="Marvin Gardens", total=6500.00,
+                              notes="Expensive real estate"),
+        CreditTransactionView(id=5, internal_transaction_id=None,
+                              statement_id=4,
+                              transaction_date=date(2020, 4, 25),
+                              vendor="Electric Company", total=99.00,
+                              notes="Electric bill"),
+        CreditTransactionView(id=9, internal_transaction_id=None,
+                              statement_id=6,
+                              transaction_date=date(2020, 4, 20),
+                              vendor="Pennsylvania Avenue", total=1600.00,
+                              notes="Expensive house tour"),
+        CreditTransactionView(id=2, internal_transaction_id=None,
+                              statement_id=2,
+                              transaction_date=date(2020, 4, 13),
+                              vendor="Top Left Corner", total=1.00,
+                              notes="Parking (thought it was free)"),
+        CreditTransactionView(id=4, internal_transaction_id=None,
+                              statement_id=3,
+                              transaction_date=date(2020, 4, 5),
+                              vendor="Park Place", total=65.00,
+                              notes="One for the park; One for the place"),
+        CreditTransactionView(id=3, internal_transaction_id=None,
+                              statement_id=3,
+                              transaction_date=date(2020, 3, 20),
+                              vendor="Boardwalk", total=43.21,
+                              notes="Merry-go-round"),
+        CreditTransactionView(id=13, internal_transaction_id=None,
+                              statement_id=2,
+                              transaction_date=date(2020, 3, 10),
+                              vendor="Community Chest", total=None,
+                              notes=None),  # transaction without subtransactions
+    ]
 
-    def test_initialization(self, transaction_db):
-        assert transaction_db.table == 'credit_transactions'
-        assert transaction_db.table_view == 'credit_transactions_view'
-        assert transaction_db.user_id == 3
+    def test_initialization(self, transaction_handler):
+        assert transaction_handler.model == CreditTransaction
+        assert transaction_handler.table == "credit_transactions"
+        assert transaction_handler.table_view == "credit_transactions_view"
+        assert transaction_handler.user_id == 3
+
+    def test_model_view_access(self, transaction_handler):
+        assert transaction_handler.model == CreditTransaction
+        transaction_handler._view_context = True
+        assert transaction_handler.model == CreditTransactionView
+        transaction_handler._view_context = False
 
     @pytest.mark.parametrize(
-        'card_ids, statement_ids, active, sort_order, fields, '
-        'reference_entries',
-        [[None, None, False, 'DESC', None,  # defaults
-          view_reference['rows']],
-         [None, None, False, 'DESC', view_reference['keys'][1:],
-          view_reference['rows']],
-         [(2, 3), None, False, 'DESC', view_reference['keys'][1:],
-          [row for row in view_reference['rows'] if row[2] in (2, 3, 4, 5)]],
-         [None, (3,), False, 'DESC', view_reference['keys'][1:],
-          [row for row in view_reference['rows'] if row[2] == 3]],
-         [None, None, True, 'DESC', view_reference['keys'][1:],
-          [row for row in view_reference['rows'] if row[2] != 2]],
-         [None, None, False, 'ASC', view_reference['keys'][1:],
-          view_reference['rows'][::-1]]]
+        "statement_ids, card_ids, active, sort_order, reference_entries",
+        [[None, None, None, "DESC",             # defaults
+          db_reference],
+         [(3, ), None, None, "DESC",
+          [row for row in db_reference if row.statement_id == 3]],
+         [None, (2, 3), None, "DESC",
+          [row for row in db_reference if row.statement_id in (2, 3, 4, 5)]],
+         [None, None, True, "DESC",             # card 2 (statement 2) inactive
+          [row for row in db_reference if row.statement_id != 2]],
+         [None, None, False, "DESC",
+          [row for row in db_reference if row.statement_id == 2]],
+         [None, None, None, "ASC",
+          db_reference[::-1]]]
     )
-    def test_get_entries(self, transaction_db, card_ids, statement_ids, active,
-                         sort_order, fields, reference_entries):
-        transactions = transaction_db.get_entries(card_ids, statement_ids,
-                                                  active, sort_order, fields)
-        if fields:
-            self.assertMatchEntries(reference_entries, transactions,
-                                    order=True)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntries(reference_entries, transactions)
+    def test_get_transactions(self, transaction_handler, statement_ids,
+                              card_ids, active, sort_order, reference_entries):
+        transactions = transaction_handler.get_transactions(
+            statement_ids, card_ids, active, sort_order
+        )
+        self.assertEntriesMatch(
+            transactions, reference_entries, order=True
+        )
 
     @pytest.mark.parametrize(
-        'transaction_id, fields, reference_entry',
-        [[2, None,
-          view_reference['rows'][7]],
-         [3, None,
-          view_reference['rows'][9]],
-         [2, ('transaction_date', 'vendor'),
-          (view_reference['rows'][7][0],
-           view_reference['rows'][7][3],
-           view_reference['rows'][7][4])],
-         [2, ('vendor', 'total', 'notes'),  # use fields from the view
-          (view_reference['rows'][7][0],
-           view_reference['rows'][7][4],
-           view_reference['rows'][7][5],
-           view_reference['rows'][7][6])]]
+        "transaction_id, reference_entry",
+        [[2, db_reference[8]],
+         [3, db_reference[10]]]
     )
-    def test_get_entry(self, transaction_db, transaction_id, fields,
+    def test_get_entry(self, transaction_handler, transaction_id,
                        reference_entry):
-        transaction = transaction_db.get_entry(transaction_id, fields)
-        if fields:
-            self.assertMatchEntry(reference_entry, transaction)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntry(reference_entry, transaction)
+        transaction = transaction_handler.get_entry(transaction_id)
+        self.assertEntryMatches(transaction, reference_entry)
 
     @pytest.mark.parametrize(
-        'transaction_id',
-        [1,   # Not the logged in user
-         13]  # Not in the database
-    )
-    def test_get_entry_invalid(self, transaction_db, transaction_id):
-        with pytest.raises(NotFound):
-            transaction_db.get_entry(transaction_id)
-
-    @pytest.mark.parametrize(
-        'mapping',
-        [{'internal_transaction_id': None, 'statement_id': 4,
-          'transaction_date': '2020-05-03', 'vendor': 'Baltic Avenue',
-          'subtransactions': [{'test': 1}]},
-         {'internal_transaction_id': 2, 'statement_id': 6,
-          'transaction_date': '2020-05-03', 'vendor': 'Mediterranean Avenue',
-          'subtransactions': [{'test': 1}]}]
-    )
-    @patch(
-        'monopyly.credit.transactions.CreditSubtransactionHandler.add_entry',
-        return_value='new subtransaction'
-    )
-    def test_add_entry(self, mock_method, app, transaction_db, mapping):
-        transaction, subtransactions = transaction_db.add_entry(mapping)
-        assert transaction['transaction_date'] == date(2020, 5, 3)
-        assert subtransactions == ['new subtransaction']
-        # Check that the entry was added
-        query = ("SELECT COUNT(id) FROM credit_transactions"
-                 " WHERE transaction_date = '2020-05-03'")
-        self.assertQueryEqualsCount(app, query, 1)
-
-    @pytest.mark.parametrize(
-        'mapping, exception',
-        [[{'internal_transaction_id': None, 'invalid_field': 'Test',
-           'transaction_date': '2022-05-03', 'vendor': 'Baltic Avenue',
-           'subtransactions': [{'test': 1}]},
-          ValueError],
-         [{'internal_transaction_id': 2, 'statement_id': 4,
-           'transaction_date': '2022-05-03',
-           'subtransactions': [{'test': 1}]},
-          ValueError],
-         [{'internal_transaction_id': 2, 'statement_id': 4,
-           'transaction_date': '2022-05-03', 'vendor': 'Baltic Avenue'},
-          KeyError]]
-    )
-    def test_add_entry_invalid(self, transaction_db, mapping, exception):
-        with pytest.raises(exception):
-            transaction_db.add_entry(mapping)
-
-    def test_add_entry_invalid_user(self, app, transaction_db):
-        query = ("SELECT COUNT(id) FROM credit_transactions"
-                 " WHERE statement_id = 1")
-        self.assertQueryEqualsCount(app, query, 1)
-        with pytest.raises(NotFound):
-            mapping = {
-                'internal_transaction_id': 2,
-                'statement_id': 1,
-                'transaction_date': '2022-05-03',
-                'vendor': 'Baltic Avenue',
-                'subtransactions': [{'test': 1}],
-            }
-            transaction_db.add_entry(mapping)
-        # Check that the transaction was not added to a different account
-        self.assertQueryEqualsCount(app, query, 1)
-
-    @pytest.mark.parametrize(
-        'mapping',
-        [{'internal_transaction_id': None, 'statement_id': 4,
-          'transaction_date': '2022-05-03', 'subtransactions': [{'test': 1}]},
-         {'transaction_date': '2022-05-03'}]
-    )
-    @patch(
-        'monopyly.credit.transactions.CreditSubtransactionHandler.add_entry',
-        return_value='new subtransaction'
-    )
-    def test_update_entry(self, mock_method, app, transaction_db, mapping):
-        transaction, subtransactions = transaction_db.update_entry(5, mapping)
-        assert transaction['transaction_date'] == date(2022, 5, 3)
-        if 'subtransactions' in mapping:
-            assert subtransactions == ['new subtransaction']
-        # Check that the entry was updated
-        query = ("SELECT COUNT(id) FROM credit_transactions"
-                 " WHERE transaction_date = '2022-05-03'")
-        self.assertQueryEqualsCount(app, query, 1)
-
-    @pytest.mark.parametrize(
-        'transaction_id, mapping, exception',
-        [[1, {'statement_id': 1, 'transaction_date': '2020-05-03'},
-          NotFound],  # another user
-         [5, {'statement_id': 4, 'invalid_field': 'Test'},
-          ValueError],
-         [13, {'statement_id': 4, 'transaction_date': '2022-05-03'},
-          NotFound]]   # nonexistent ID
-    )
-    def test_update_entry_invalid(self, transaction_db, transaction_id,
-                                  mapping, exception):
-        with pytest.raises(exception):
-            transaction_db.update_entry(transaction_id, mapping)
-
-    def test_update_entry_value(self, transaction_db):
-        transaction = transaction_db.update_entry_value(2, 'transaction_date',
-                                                        date(2022, 5, 3))[0]
-        assert transaction['transaction_date'] == date(2022, 5, 3)
-
-    @pytest.mark.parametrize(
-        'entry_ids', [(4,), (4, 7)]
-    )
-    def test_delete_entries(self, app, transaction_db, entry_ids):
-        transaction_db.delete_entries(entry_ids)
-        # Check that the entries were deleted
-        for entry_id in entry_ids:
-            query = ("SELECT COUNT(id) FROM credit_transactions"
-                    f" WHERE id = {entry_id}")
-            self.assertQueryEqualsCount(app, query, 0)
-
-    def test_delete_cascading_entries(self, app, transaction_db):
-        transaction_db.delete_entries((2,))
-        # Check that the cascading entries were deleted
-        query = ("SELECT COUNT(id) FROM credit_subtransactions"
-                f" WHERE transaction_id = 2")
-        self.assertQueryEqualsCount(app, query, 0)
-
-    @pytest.mark.parametrize(
-        'entry_ids, exception',
-        [[(1,), NotFound],    # should not be able to delete other user entries
-         [(13,), NotFound]]   # should not be able to delete nonexistent entries
-    )
-    def test_delete_entries_invalid(self, transaction_db, entry_ids,
-                                    exception):
-        with pytest.raises(exception):
-            transaction_db.delete_entries(entry_ids)
-
-
-class TestCreditSubtransactionsHandler(TestHandler):
-
-    # References only include entries accessible to the authorized login
-    reference = {
-        'keys': ('id', 'transaction_id', 'subtotal', 'note'),
-        'rows': [(2, 2, 1.00, 'Parking (thought it was free)'),
-                 (3, 3, 43.21, 'Merry-go-round'),
-                 (4, 4, 30.00, 'One for the park'),
-                 (5, 4, 35.00, 'One for the place'),
-                 (6, 5, 99.00, 'Electric bill'),
-                 (7, 6, 6500.00, 'Expensive real estate'),
-                 (8, 7, -109.21, 'Credit card payment'),
-                 (9, 8, 26.87, 'Tough loss'),
-                 (10, 9, 1600.00, 'Expensive house tour'),
-                 (11, 10, -123.00, 'Refund'),
-                 (12, 11, 253.99, 'Conducting business')]
-    }
-
-    def test_initialization(self, subtransaction_db):
-        assert subtransaction_db.table == 'credit_subtransactions'
-        assert subtransaction_db.user_id == 3
-
-    @pytest.mark.parametrize(
-        'transaction_ids, fields, reference_entries',
-        [[None, None,
-          reference['rows']],
-         [(2, 3, 4, 5), None,
-          reference['rows'][:5]],
-         [None, ('subtotal', 'note'),
-          [(row[0], row[2], row[3]) for row in reference['rows']]],
-         [(2, 3, 4, 5), ('subtotal', 'note'),
-          [(row[0], row[2], row[3]) for row in reference['rows'][:5]]]]
-    )
-    def test_get_entries(self, subtransaction_db, transaction_ids, fields,
-                         reference_entries):
-        subtransactions = subtransaction_db.get_entries(transaction_ids,
-                                                         fields)
-        if fields:
-            self.assertMatchEntries(reference_entries, subtransactions)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntries(reference_entries, subtransactions)
-
-    @pytest.mark.parametrize(
-        'subtransaction_id, fields, reference_entry',
-        [[2, None,
-          reference['rows'][0]],
-         [3, None,
-          reference['rows'][1]],
-         [4, None,
-          reference['rows'][2]],
-         [2, ('subtotal',),
-          (reference['rows'][0][1], reference['rows'][0][2])]]
-    )
-    def test_get_entry(self, subtransaction_db, subtransaction_id, fields,
-                       reference_entry):
-        subtransaction = subtransaction_db.get_entry(subtransaction_id, fields)
-        if fields:
-            self.assertMatchEntry(reference_entry, subtransaction)
-        else:
-            # Leaving fields unspecified acquires all fields from many tables
-            self.assertContainEntry(reference_entry, subtransaction)
-
-    @pytest.mark.parametrize(
-        'subtransaction_id, exception',
+        "transaction_id, exception",
         [[1, NotFound],   # Not the logged in user
-         [13, NotFound]]  # Not in the database
+         [14, NotFound]]  # Not in the database
     )
-    def test_get_entry_invalid(self, subtransaction_db, subtransaction_id,
+    def test_get_entry_invalid(self, transaction_handler, transaction_id,
                                exception):
         with pytest.raises(exception):
-            subtransaction_db.get_entry(subtransaction_id)
+            transaction_handler.get_entry(transaction_id)
 
     @pytest.mark.parametrize(
-        'mapping',
-        [{'transaction_id': 4, 'subtotal': 40.00,
-          'note': 'TEST subtransaction',  # sibling subtransactions exist
-          'tags': ['test tag']},
-         {'transaction_id': 12, 'subtotal': 250.00,
-          'note': 'TEST subtransaction',  # first subtransaction
-          'tags': ['test tag']},
-         {'transaction_id': 12, 'subtotal': 250.00,
-          'note': 'TEST subtransaction',  # first subtransaction, no tags
-          'tags': []}]
+        "mapping",
+        [{"internal_transaction_id": None, "statement_id": 4,
+          "transaction_date": date(2020, 5, 3), "vendor": "Baltic Avenue",
+          "subtransactions": _mock_subtransaction_mappings()},
+         {"internal_transaction_id": 2, "statement_id": 6,
+          "transaction_date": date(2020, 5, 3),
+          "vendor": "Mediterranean Avenue",
+          "subtransactions": _mock_subtransaction_mappings()}]
     )
-    @patch('monopyly.credit.transactions.CreditTagHandler.update_tag_links')
-    def test_add_entry(self, mock_method, app, subtransaction_db, mapping):
-        subtransaction_db.add_entry(mapping)
-        # Check that the entry was added
-        query = ("SELECT COUNT(id) FROM credit_subtransactions"
-                 " WHERE note = 'TEST subtransaction'")
-        self.assertQueryEqualsCount(app, query, 1)
+    @patch("monopyly.credit.transactions.CreditTagHandler.get_tags")
+    def test_add_entry(self, mock_method, transaction_handler, mock_tags,
+                       mapping):
+        # Mock the tags found by the tag handler
+        mock_method.return_value = mock_tags[:2]
+        # Add the entry
+        transaction = transaction_handler.add_entry(**mapping)
+        # Check that the entry object was properly created
+        assert transaction.transaction_date == date(2020, 5, 3)
+        assert len(transaction.subtransactions) == 2
+        assert isinstance(transaction.subtransactions[0], CreditSubtransaction)
+        assert transaction.subtransactions[0].subtotal == 100.00
+        # Check that the entry was added to the database
+        self.assertNumberOfMatches(
+            1,
+            CreditTransaction.id,
+            CreditTransaction.transaction_date == date(2020, 5, 3)
+        )
 
     @pytest.mark.parametrize(
-        'mapping, exception',
-        [[{'transaction_id': 4, 'invalid_field': 'Test', 'note': 'TEST',
-           'tags': ['test tag']},
-          ValueError],
-         [{'transaction_id': 4, 'subtotal': 5.00, 'tags': ['test tag']},
-          ValueError],
-         [{'transaction_id': 13, 'subtotal': 5.00, 'note': 'TEST',
-           'tags': ['test tag']},
-          IntegrityError]]  # transaction does not exist
+        "mapping, exception",
+        [[{"internal_transaction_id": None, "invalid_field": "Test",
+           "transaction_date": date(2022, 5, 3), "vendor": "Baltic Avenue",
+           "subtransactions": _mock_subtransaction_mappings()},
+          TypeError],
+         [{"internal_transaction_id": 2, "statement_id": 4,
+           "transaction_date": date(2022, 5, 3),
+           "subtransactions": _mock_subtransaction_mappings()},
+          IntegrityError],
+         [{"internal_transaction_id": 2, "statement_id": 4,
+           "transaction_date": date(2022, 5, 3), "vendor": "Baltic Avenue"},
+          KeyError]]
     )
-    def test_add_entry_invalid(self, subtransaction_db, mapping, exception):
+    def test_add_entry_invalid(self, transaction_handler, mapping, exception):
         with pytest.raises(exception):
-            subtransaction_db.add_entry(mapping)
+            transaction_handler.add_entry(**mapping)
 
-    @pytest.mark.skip(reason="never update subtransactions; only replace")
+    def test_add_entry_invalid_user(self, transaction_handler,
+                                    mock_subtransaction_mappings):
+        mapping = {
+            "internal_transaction_id": 2,
+            "statement_id": 1,
+            "transaction_date": date(2022, 5, 3),
+            "vendor": "Baltic Avenue",
+            "subtransactions": mock_subtransaction_mappings,
+        }
+        # Ensure that 'mr.monopyly' cannot add an entry for the test user
+        self.assert_invalid_user_entry_add_fails(
+            transaction_handler, mapping, invalid_user_id=1, invalid_matches=1
+        )
+
     @pytest.mark.parametrize(
-        'subtransaction_id, mapping',
-        [[2, {'transaction_id': 2, 'subtotal': 41.00, 'note': 'TEST update',
-              'tags': ['test tag']}],
-         [4, {'transaction_id': 4, 'subtotal': 58.90, 'note': 'TEST update'}],
-         [4, {'transaction_id': 4, 'note': 'TEST update'}]]
+        "mapping",
+        [{"internal_transaction_id": None, "statement_id": 4,
+          "transaction_date": date(2022, 5, 3),
+          "subtransactions": _mock_subtransaction_mappings()},
+         {"transaction_date": date(2022, 5, 3)}]
     )
-    def test_update_entry(self, app, subtransaction_db, subtransaction_id,
+    @patch("monopyly.credit.transactions.CreditTagHandler.get_tags")
+    def test_update_entry(self, mock_method, transaction_handler, mock_tags,
                           mapping):
-        subtransaction = subtransaction_db.update_entry(subtransaction_id,
-                                                        mapping)
-        assert subtransaction['note'] == 'TEST update'
-        # Check that the entry was updated
-        query = ("SELECT COUNT(id) FROM credit_subtransactions"
-                 " WHERE note = 'TEST update'")
-        self.assertQueryEqualsCount(app, query, 1)
+        # Mock the tags found by the tag handler
+        mock_method.return_value = mock_tags[:2]
+        # Add the entry
+        transaction = transaction_handler.update_entry(5, **mapping)
+        # Check that the entry object was properly updated
+        assert transaction.transaction_date == date(2022, 5, 3)
+        if "subtransactions" in mapping:
+            subtransaction_count = len(mapping["subtransactions"])
+            first_subtotal = 100.00
+        else:
+            subtransaction_count = 1
+            first_subtotal = 99.00
+        assert len(transaction.subtransactions) == subtransaction_count
+        assert transaction.subtransactions[0].subtotal == first_subtotal
+        # Check that the entry was updated in the database
+        self.assertNumberOfMatches(
+            1,
+            CreditTransaction.id,
+            CreditTransaction.transaction_date == date(2022, 5, 3)
+        )
 
-    @pytest.mark.skip(reason="never update subtransactions; only replace")
     @pytest.mark.parametrize(
-        'subtransaction_id, mapping, exception',
-        [[1, {'transaction_id': 1, 'note': 'TEST update'},  # another user
-          NotFound],
-         [2, {'transaction_id': 2, 'invalid_field': 'Test'},
-          ValueError],
-         [9, {'transaction_id': 2, 'note': 'TEST update'},  # nonexistent ID
-          NotFound],
-         [8, {'transaction_id': 9, 'note': 'TEST update'},  # nonexistent
-          IntegrityError]]                                  # transaction ID
+        "transaction_id, mapping, exception",
+        [[1, {"statement_id": 1, "transaction_date": date(2022, 5, 3)},
+          NotFound],                                        # wrong user
+         [5, {"statement_id": 4, "invalid_field": "Test"},
+          ValueError],                                      # invalid field
+         [14, {"statement_id": 4, "transaction_date": date(2022, 5, 3)},
+          NotFound]]                                        # nonexistent ID
     )
-    def test_update_entry_invalid(self, subtransaction_db, subtransaction_id,
+    def test_update_entry_invalid(self, transaction_handler, transaction_id,
                                   mapping, exception):
         with pytest.raises(exception):
-            subtransaction_db.update_entry(subtransaction_id, mapping)
+            transaction_handler.update_entry(transaction_id, **mapping)
 
-    def test_update_entry_value(self, subtransaction_db):
-        subtransaction = subtransaction_db.update_entry_value(2, 'note',
-                                                              'TEST update')
-        assert subtransaction['note'] == 'TEST update'
-
-    @pytest.mark.parametrize(
-        'entry_ids', [(2,), (2, 3)]
-    )
-    def test_delete_entries(self, app, subtransaction_db, entry_ids):
-        subtransaction_db.delete_entries(entry_ids)
-        # Check that the entries were deleted
-        for entry_id in entry_ids:
-            query = ("SELECT COUNT(id) FROM credit_subtransactions"
-                    f" WHERE id = {entry_id}")
-            self.assertQueryEqualsCount(app, query, 0)
+    @pytest.mark.parametrize("entry_id", [4, 7])
+    def test_delete_entry(self, transaction_handler, entry_id):
+        self.assert_entry_deletion_succeeds(transaction_handler, entry_id)
+        # Check that the cascading entries were deleted
+        self.assertNumberOfMatches(
+            0,
+            CreditSubtransaction.id,
+            CreditSubtransaction.transaction_id == entry_id,
+        )
 
     @pytest.mark.parametrize(
-        'entry_ids, exception',
-        [[(1,), NotFound],   # should not be able to delete other user entries
-         [(13,), NotFound]]  # should not be able to delete nonexistent entries
+        "entry_id, exception",
+        [[1, NotFound],    # should not be able to delete other user entries
+         [14, NotFound]]   # should not be able to delete nonexistent entries
     )
-    def test_delete_entries_invalid(self, subtransaction_db, entry_ids,
+    def test_delete_entry_invalid(self, transaction_handler, entry_id,
                                     exception):
         with pytest.raises(exception):
-            subtransaction_db.delete_entries(entry_ids)
+            transaction_handler.delete_entry(entry_id)
 
 
 class TestSaveFormFunctions:
 
-    @patch('monopyly.credit.transactions.CreditTransactionHandler')
-    @patch('monopyly.credit.forms.CreditTransactionForm')
-    def test_save_new_transaction(self, mock_form, mock_handler_type):
-        # Mock the return values and data
-        mock_method = mock_handler_type.return_value.add_entry
-        mock_transaction = {'id': 0, 'internal_transaction_id': 0}
-        mock_subtransactions = ['subtransactions']
-        mock_method.return_value = ({'id': 0, 'internal_transaction_id': 0},
-                                    ['subtransactions'])
-        mock_form.transaction_data = {'key': 'test transaction data'}
+    @patch("monopyly.credit.transactions.CreditTransactionHandler")
+    @patch("monopyly.credit.forms.CreditTransactionForm")
+    def test_save_new_transaction(self, mock_form, mock_handler):
+        # Mock the form and primary method
+        mock_form.transaction_data = {"key": "test transaction data"}
+        mock_method = mock_handler.add_entry
         # Call the function and check for proper call signatures
-        transaction, subtransactions = save_transaction(mock_form)
-        mock_method.assert_called_once_with(mock_form.transaction_data)
-        assert transaction == mock_transaction
-        assert subtransactions == mock_subtransactions
+        transaction = save_transaction(mock_form)
+        mock_method.assert_called_once_with(**mock_form.transaction_data)
+        assert transaction == mock_method.return_value
 
-    @patch('monopyly.credit.transactions.CreditTransactionHandler')
-    @patch('monopyly.credit.forms.CreditTransactionForm')
-    def test_save_updated_transaction(self, mock_form, mock_handler_type):
-        # Mock the return values and data
-        mock_method = mock_handler_type.return_value.update_entry
-        mock_transaction = {'id': 0, 'internal_transaction_id': 0}
-        mock_subtransactions = ['subtransactions']
-        mock_method.return_value = (mock_transaction, mock_subtransactions)
-        mock_form.transaction_data = {'key': 'test transaction data'}
+    @patch("monopyly.credit.transactions.CreditTransactionHandler")
+    @patch("monopyly.credit.forms.CreditTransactionForm")
+    def test_save_updated_transaction(self, mock_form, mock_handler):
+        # Mock the form and primary method
+        mock_form.transaction_data = {"key": "test transaction data"}
+        mock_method = mock_handler.update_entry
+        update_transaction = mock_handler.get_entry.return_value
+        # Mock the expected final set of transaction data
+        mock_transaction_data = {
+            "internal_transaction_id": update_transaction.internal_transaction_id,
+            **mock_form.transaction_data,
+        }
         # Call the function and check for proper call signatures
         transaction_id = 2
-        transaction, subtransactions = save_transaction(mock_form,
-                                                        transaction_id)
-        mock_method.assert_called_once_with(transaction_id,
-                                            mock_form.transaction_data)
-        assert transaction == mock_transaction
-        assert subtransactions == mock_subtransactions
+        transaction = save_transaction(mock_form, transaction_id)
+        mock_method.assert_called_once_with(
+            transaction_id,
+            **mock_transaction_data,
+        )
+        assert transaction == mock_method.return_value
 

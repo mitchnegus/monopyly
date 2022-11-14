@@ -15,7 +15,7 @@ helper = unittest.TestCase()
 class TestHandler:
 
     @classmethod
-    def assertEntryMatch(cls, entry, reference):
+    def assertEntryMatches(cls, entry, reference):
         assert isinstance(entry, type(reference))
         for column in inspect(type(entry)).columns:
             field = column.name
@@ -28,7 +28,7 @@ class TestHandler:
             entries = sorted(entries, key=lambda entry: entry.id)
             references = sorted(references, key=lambda reference: reference.id)
         for entry, reference in zip(entries, references):
-            cls.assertEntryMatch(entry, reference)
+            cls.assertEntryMatches(entry, reference)
 
     @classmethod
     def assertContainEntry(cls, reference, entry):

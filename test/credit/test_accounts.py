@@ -44,7 +44,7 @@ class TestCreditAccountHandler(TestHandler):
     )
     def test_get_entry(self, account_handler, account_id, reference_entry):
         account = account_handler.get_entry(account_id)
-        self.assertEntryMatch(account, reference_entry)
+        self.assertEntryMatches(account, reference_entry)
 
     @pytest.mark.parametrize(
         'account_id, exception',

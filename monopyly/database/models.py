@@ -485,12 +485,12 @@ tag_link_table = Table(
     # reflected; perhaps explore or wait until sqlalchemy 2.0
     "credit_tag_links",
     Model.metadata,
-    Column("tag_id", ForeignKey("credit_tags.id"), primary_key=True),
     Column(
         "subtransaction_id",
         ForeignKey("credit_subtransactions.id"),
         primary_key=True,
-    )
+    ),
+    Column("tag_id", ForeignKey("credit_tags.id"), primary_key=True),
 )
 
 
@@ -516,7 +516,7 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
     )
     tags = relationship(
         "CreditTag",
-        secondary="credit_tag_links",
+        secondary=tag_link_table,
         back_populates="subtransactions",
     )
 
@@ -532,7 +532,7 @@ class CreditTag(AuthorizedAccessMixin, Model):
     # Relationships
     subtransactions = relationship(
         "CreditSubtransaction",
-        secondary="credit_tag_links",
+        secondary=tag_link_table,
         back_populates="tags",
     )
 

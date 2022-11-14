@@ -43,7 +43,7 @@ class DatabaseHandler(ABC):
     @abstractmethod
     def model(cls):
         # The handler must have a defined model
-        None
+        raise NotImplementedError("Define a model in a subclass.")
 
     @classmethod
     @property
@@ -301,7 +301,7 @@ class DatabaseViewHandler(DatabaseHandler):
     @abstractmethod
     def _model_view(cls):
         # The handler must have a defined model view
-        None
+        raise NotImplementedError("Define a model in a subclass.")
 
     @classmethod
     @property

@@ -1,16 +1,12 @@
 """
 Tools for interacting with the credit transactions in the database.
 """
-from sqlite3 import IntegrityError
-
-from sqlalchemy import insert
-
 from ..common.forms.utils import execute_on_form_validation
 from ..database import db
 from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models  import (
-    CreditCard, CreditTransaction, CreditTransactionView, CreditSubtransaction,
-    CreditTag
+    Bank, CreditAccount, CreditCard, CreditStatementView, CreditTransaction,
+    CreditTransactionView, CreditSubtransaction, CreditTag, tag_link_table
 )
 
 
@@ -142,13 +138,7 @@ class CreditTransactionHandler(DatabaseViewHandler):
         for subtransaction_data in subtransactions_data:
             tag_names = subtransaction_data.pop("tags")
             # NOTE I don't believe that this adds new tags to the database
-            tags = []
-            for tag_name in tag_names:
-                leaf_tag = CreditTagHandler.find_tag(tag_name)
-                ancestor_tags = CreditTagHandler.get_ancestors(leaf_tag)
-                for tag in [*ancestor_tags, leaf_tag]:
-                    if tag not in tags:
-                        tags.append(tag)
+            tags = CreditTagHandler.get_tags(tag_names, ancestors=True)
             subtransaction = CreditSubtransaction(
                 transaction_id=transaction.id,
                 **subtransaction_data,
@@ -184,7 +174,7 @@ class CreditTagHandler(DatabaseHandler):
 
     @classmethod
     def get_tags(cls, tag_names=None, transaction_ids=None,
-                 subtransaction_ids=None, ancestors=True):
+                 subtransaction_ids=None, ancestors=None):
         """
         Get credit card transaction tags from the database.
 
@@ -204,8 +194,13 @@ class CreditTagHandler(DatabaseHandler):
             selected (if `None`, all subtransaction tags will be selected).
         ancestors : bool, optional
             A flag indicating whether the query should include tags
-            that are ancestors of other tags in the list of returned
-            tags. The default is `True` (ancestor tags are returned).
+            that are the ancestor tags of other explictly selected tags
+            returned from the database based on selection criteria. If
+            `True`, all tags matching the criteria will be returned
+            along with their ancestor tags. If `False`, any tag that is
+            an ancestor of another tag in the list will be removed from
+            the list. The default is `None`, in which case all tags
+            matching the criteria will be returned, and no others.
 
         Returns
         -------
@@ -218,23 +213,32 @@ class CreditTagHandler(DatabaseHandler):
             cls._filter_values(CreditSubtransaction.id, subtransaction_ids),
         ]
         tags = super().get_entries(*criteria).all()
-        # If specified, remove ancestors from the list of tags
-        if not ancestors:
+        if ancestors is True:
+            # Add all ancestors for each tag in the list
             for tag in tags:
-                for ancestor in self.get_ancestors(tag.id):
+                for ancestor in cls.get_ancestors(tag):
+                    if ancestor not in tags:
+                        tags.append(ancestor)
+        elif ancestors is False:
+            # Remove ancestors of other tags in the list from the list
+            for tag in tags:
+                for ancestor in cls.get_ancestors(tag):
                     if ancestor in tags:
                         tags.remove(ancestor)
         return tags
 
-
     @classmethod
     def _filter_entries(cls, query, filters):
         # Add a join to enable filtering by transaction ID or subtransaction ID
-        query = query.join(CreditSubtransaction) \
+        query = query.join(tag_link_table) \
+                     .join(CreditSubtransaction) \
                      .join(CreditTransactionView) \
                      .join(CreditStatementView) \
-                     .join(CrediCard) \
+                     .join(CreditCard) \
+                     .join(CreditAccount) \
                      .join(Bank)
+        # Only get distinct tag entries
+        query = query.distinct()
         return super()._filter_entries(query, filters)
 
     @classmethod

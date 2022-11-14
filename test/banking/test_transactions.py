@@ -1,6 +1,6 @@
 """Tests for the banking module managing transactions/subtransactions."""
 from datetime import date
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 from werkzeug.exceptions import NotFound
@@ -18,6 +18,21 @@ from ..helpers import TestHandler
 @pytest.fixture
 def transaction_handler(client_context):
     return BankTransactionHandler
+
+
+def _mock_subtransaction_mappings():
+    # Use a function to regenerate mappings (avoid persisting mutations)
+    mock_tags = [Mock(name=f"Mock tag {_+1}") for _ in range(3)]
+    mappings = [
+        {"subtotal": 1000.00, "note": "Mock subtransaction mapping 1"},
+        {"subtotal": 2000.00, "note": "Mock subtransaction mapping 2"},
+    ]
+    return mappings
+
+
+@pytest.fixture
+def mock_subtransaction_mappings():
+    return _mock_subtransaction_mappings()
 
 
 class TestBankTransactionHandler(TestHandler):
@@ -48,10 +63,6 @@ class TestBankTransactionHandler(TestHandler):
                             transaction_date=date(2020, 5, 4), total=85.00,
                             notes="Jail subtransaction 1; Jail subtransaction 2",
                             balance=85.00),
-    ]
-    mock_subtransaction_mappings = [
-        {"subtotal": 100.00, "note": "Mock subtransaction mapping 1"},
-        {"subtotal": 200.00, "note": "Mock subtransaction mapping 2"},
     ]
 
     def test_initialization(self, transaction_handler):
@@ -94,11 +105,11 @@ class TestBankTransactionHandler(TestHandler):
     def test_get_entry(self, transaction_handler, transaction_id,
                        reference_entry):
         transaction = transaction_handler.get_entry(transaction_id)
-        self.assertEntryMatch(transaction, reference_entry)
+        self.assertEntryMatches(transaction, reference_entry)
 
     @pytest.mark.parametrize(
         "transaction_id, exception",
-        [[1, NotFound],  # Not the logged in user
+        [[1, NotFound],   # Not the logged in user
          [9, NotFound]]   # Not in the database
     )
     def test_get_entry_invalid(self, transaction_handler, transaction_id,
@@ -110,17 +121,18 @@ class TestBankTransactionHandler(TestHandler):
         "mapping",
         [{"internal_transaction_id": None, "account_id": 3,
           "transaction_date": date(2022, 5, 8),
-          "subtransactions": mock_subtransaction_mappings},
+          "subtransactions": _mock_subtransaction_mappings()},
          {"internal_transaction_id": 2, "account_id": 3,
           "transaction_date": date(2022, 5, 8),
-          "subtransactions": mock_subtransaction_mappings}]
+          "subtransactions": _mock_subtransaction_mappings()}]
     )
     def test_add_entry(self, transaction_handler, mapping):
         transaction = transaction_handler.add_entry(**mapping)
         # Check that the entry object was properly created
         assert transaction.transaction_date == date(2022, 5, 8)
         assert len(transaction.subtransactions) == 2
-        assert transaction.subtransactions[0].subtotal == 100.00
+        assert isinstance(transaction.subtransactions[0], BankSubtransaction)
+        assert transaction.subtransactions[0].subtotal == 1000.00
         # Check that the entry was added to the database
         self.assertNumberOfMatches(
             1,
@@ -132,10 +144,10 @@ class TestBankTransactionHandler(TestHandler):
         "mapping, exception",
         [[{"internal_transaction_id": None, "invalid_field": "Test",
           "transaction_date": date(2022, 5, 8),
-          "subtransactions": mock_subtransaction_mappings},
+          "subtransactions": _mock_subtransaction_mappings()},
           TypeError],
          [{"internal_transaction_id": 2, "account_id": 3,
-          "subtransactions": mock_subtransaction_mappings},
+          "subtransactions": _mock_subtransaction_mappings()},
           IntegrityError],
          [{"internal_transaction_id": 2, "account_id": 3,
            "transaction_date": date(2022, 5, 8)},
@@ -145,12 +157,13 @@ class TestBankTransactionHandler(TestHandler):
         with pytest.raises(exception):
             transaction_handler.add_entry(**mapping)
 
-    def test_add_entry_invalid_user(self, transaction_handler):
+    def test_add_entry_invalid_user(self, transaction_handler,
+                                    mock_subtransaction_mappings):
         mapping = {
             "internal_transaction_id": 2,
             "account_id": 1,
             "transaction_date": date(2022, 5, 8),
-            "subtransactions": self.mock_subtransaction_mappings,
+            "subtransactions": mock_subtransaction_mappings,
         }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
         self.assert_invalid_user_entry_add_fails(
@@ -163,7 +176,7 @@ class TestBankTransactionHandler(TestHandler):
           "transaction_date": date(2022, 5, 8)},
          {"internal_transaction_id": None, "account_id": 3,
           "transaction_date": date(2022, 5, 8),
-          "subtransactions": mock_subtransaction_mappings},
+          "subtransactions": _mock_subtransaction_mappings()},
          {"internal_transaction_id": None,
           "transaction_date": date(2022, 5, 8)}]
     )
@@ -173,7 +186,7 @@ class TestBankTransactionHandler(TestHandler):
         assert transaction.transaction_date == date(2022, 5, 8)
         if "subtransactions" in mapping:
             subtransaction_count = len(mapping["subtransactions"])
-            first_subtotal = 100.00
+            first_subtotal = 1000.00
         else:
             # The subtransaction was not updated for the transaction (ID=5)
             subtransaction_count = 1
@@ -189,11 +202,11 @@ class TestBankTransactionHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "transaction_id, mapping, exception",
-        [[1, {"account_id": 1, "transaction_date": "2020-05-08"},
+        [[1, {"account_id": 1, "transaction_date": date(2022, 5, 8)},
           NotFound],                                        # wrong user
          [5, {"account_id": 3, "invalid_field": "Test"},
           ValueError],                                      # invalid field
-         [9, {"account_id": 3, "transaction_date": "2022-05-08"},
+         [9, {"account_id": 3, "transaction_date": date(2022, 5, 8)},
           NotFound]]                                        # nonexistent ID
     )
     def test_update_entry_invalid(self, transaction_handler, transaction_id,
@@ -263,10 +276,9 @@ class TestSaveFormFunctions:
         # Mock the form and primary method
         mock_form.transaction_data = {"key": "test transaction data"}
         mock_form.transfer_data = None
-        mock_existing_transaction = mock_handler.get_entry.return_value
         mock_method = mock_handler.update_entry
         update_transaction = mock_handler.get_entry.return_value
-        # Mock the expeected final set of transaction data
+        # Mock the expected final set of transaction data
         mock_transaction_data = {
             "internal_transaction_id": update_transaction.internal_transaction_id,
             **mock_form.transaction_data,

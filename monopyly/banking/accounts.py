@@ -2,7 +2,6 @@
 Tools for interacting with bank accounts in the database.
 """
 from werkzeug.exceptions import abort
-from sqlalchemy import select
 import sqlalchemy.sql.functions as sql_func
 
 from ..common.forms.utils import execute_on_form_validation

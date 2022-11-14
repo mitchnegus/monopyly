@@ -51,7 +51,7 @@ class TestCreditCardHandler(TestHandler):
     )
     def test_get_entry(self, card_handler, card_id, reference_entry):
         card = card_handler.get_entry(card_id)
-        self.assertEntryMatch(card, reference_entry)
+        self.assertEntryMatches(card, reference_entry)
 
     @pytest.mark.parametrize(
         "card_id, exception",
@@ -71,7 +71,7 @@ class TestCreditCardHandler(TestHandler):
     def test_find_card(self, card_handler, bank_name, last_four_digits,
                        reference_entry):
         card = card_handler.find_card(bank_name, last_four_digits)
-        self.assertEntryMatch(card, reference_entry)
+        self.assertEntryMatches(card, reference_entry)
 
     @pytest.mark.parametrize(
         "bank_name, last_four_digits",

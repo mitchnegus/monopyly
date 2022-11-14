@@ -43,7 +43,7 @@ class TestBankHandler(TestHandler):
     )
     def test_get_entry(self, bank_handler, bank_id, reference_entry):
         bank = bank_handler.get_entry(bank_id)
-        self.assertEntryMatch(bank, reference_entry)
+        self.assertEntryMatches(bank, reference_entry)
 
     @pytest.mark.parametrize(
         "bank_id, exception",

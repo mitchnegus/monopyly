@@ -96,7 +96,7 @@ class TestCreditStatementHandler(TestHandler):
     )
     def test_get_entry(self, statement_handler, statement_id, reference_entry):
         statement = statement_handler.get_entry(statement_id)
-        self.assertEntryMatch(statement, reference_entry)
+        self.assertEntryMatches(statement, reference_entry)
 
     @pytest.mark.parametrize(
         "statement_id, exception",
@@ -116,7 +116,7 @@ class TestCreditStatementHandler(TestHandler):
     def test_find_statement(self, statement_handler, card_id, issue_date,
                             reference_entry):
         statement = statement_handler.find_statement(card_id, issue_date)
-        self.assertEntryMatch(statement, reference_entry)
+        self.assertEntryMatches(statement, reference_entry)
 
     @pytest.mark.parametrize(
         "card_id, issue_date",
