@@ -1,6 +1,5 @@
+"""Tests for routes in the core blueprint."""
 from unittest.mock import patch
-
-import pytest
 
 
 def test_index(client, auth):

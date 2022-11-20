@@ -37,16 +37,6 @@ class TestHandler:
             cls.assertEntryMatches(entry, reference)
 
     @classmethod
-    def assertContainEntry(cls, reference, entry):
-        for value in reference:
-            assert value in entry
-
-    @classmethod
-    def assertContainEntries(cls, reference, entries):
-        for row, entry in zip(reference, entries):
-            cls.assertContainEntry(row, entry)
-
-    @classmethod
     def assertNumberOfMatches(cls, number, field, *criteria):
         query = select(func.count(field))
         if criteria:
@@ -81,16 +71,4 @@ class TestHandler:
         cls.assertNumberOfMatches(
             0, handler.model.id, handler.model.id == entry_id
         )
-
-
-class TestGrouper:
-
-    @staticmethod
-    def compare_groupings(grouping, expected_id_groupings):
-        for category_entry, entries in grouping.items():
-            # Use IDs as a proxy for testing the full database query result
-            category_id = category_entry['id']
-            assert category_id in expected_id_groupings
-            for entry in entries:
-                assert entry['id'] in expected_id_groupings[category_id]
 
