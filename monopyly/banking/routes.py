@@ -13,7 +13,7 @@ from .forms import *
 from .banks import BankHandler
 from .accounts import BankAccountTypeHandler, BankAccountHandler, save_account
 from .transactions import BankTransactionHandler, save_transaction
-from .actions import *
+from .actions import get_bank_account_type_grouping
 
 
 @bp.route('/accounts')
@@ -58,7 +58,8 @@ def delete_account(account_id):
 @login_required
 def load_account_summaries(bank_id):
     bank = BankHandler.get_entry(bank_id)
-    bank_balance, type_accounts = get_bank_account_summaries(bank_id)
+    bank_balance = BankAccountHandler.get_bank_balance(bank_id)
+    type_accounts = get_bank_account_type_grouping(bank_id)
     return render_template('banking/account_summaries_page.html',
                            bank=bank,
                            bank_balance=bank_balance,

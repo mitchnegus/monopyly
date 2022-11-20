@@ -1,62 +1,25 @@
 """Tests for the actions performed by the banking blueprint."""
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 
-import pytest
-
-from monopyly.banking.actions import *
-from test.helpers import TestGrouper
+from monopyly.banking.actions import get_bank_account_type_grouping
 
 
-class TestGroupingActions(TestGrouper):
-
-    def test_get_user_bank_account_groupings(self, client_context):
-        account_id_groupings = {2: [2, 3], 3: [4]}
-        groupings = get_user_bank_account_groupings()
-        self.compare_groupings(groupings, account_id_groupings)
-
-    @pytest.mark.parametrize(
-        'bank_id, account_id_groupings',
-        [[2, {1: [2], 2: [3]}],
-         [3, {3: [4]}]]
-    )
-    def test_get_bank_account_type_groupings(self, client_context, bank_id,
-                                             account_id_groupings):
-        groupings = get_bank_account_type_groupings(bank_id)
-        self.compare_groupings(groupings, account_id_groupings)
-
-
-@patch('monopyly.banking.actions.get_bank_account_type_groupings')
-@patch('monopyly.banking.actions.BankAccountHandler')
-def test_get_bank_account_summaries(mock_handler_type, mock_function):
-    mock_db = mock_handler_type()
-    mock_db.get_bank_balance.return_value = 'test balance'
-    mock_function.return_value = 'test groupings'
-    bank_id = Mock()
-    assert get_bank_account_summaries(bank_id) == ('test balance',
-                                                   'test groupings')
-
-
-@patch('monopyly.banking.actions.BankTransactionHandler')
-@patch('monopyly.banking.actions.BankAccountHandler')
-def test_get_bank_account_details(mock_account_handler_type,
-                                  mock_transaction_handler_type):
-    mock_account = {'id': 'test id'}
-    mock_account_db = mock_account_handler_type()
-    mock_account_db.get_entry.return_value = mock_account
-    mock_transaction_db = mock_transaction_handler_type()
-    mock_transaction_db.get_entries.return_value = ['test entries']
-    default_args = {
-        'account_ids': ('test id',),
-        'sort_order': 'DESC',
-        'fields': (
-            'transaction_date',
-            'total',
-            'balance',
-            'notes',
-            'internal_transaction_id',
-        )
-    }
-    details = get_bank_account_details(mock_account['id'])
-    assert details == (mock_account, ['test entries'])
-    mock_transaction_db.get_entries.assert_called_once_with(**default_args)
+@patch('monopyly.banking.actions.BankAccountHandler.get_accounts')
+@patch('monopyly.banking.actions.BankAccountTypeHandler.get_types_for_bank')
+def test_get_bank_account_type_grouping(mock_types_method, mock_accounts_method):
+    # Mock the inputs and external return values
+    mock_bank_id = Mock()
+    mock_account_types = [Mock() for _ in range(3)]
+    mock_types_method.return_value = mock_account_types
+    # Check that the returned summary matches the expected format
+    type_accounts = get_bank_account_type_grouping(mock_bank_id)
+    assert len(type_accounts) == len(mock_account_types)
+    expected_calls = [
+        call(bank_ids=(mock_bank_id,), account_type_ids=(mock_account_type.id,))
+        for mock_account_type in mock_account_types
+    ]
+    assert mock_accounts_method.mock_calls == expected_calls
+    for key, mock_account_type in zip(type_accounts, mock_account_types):
+        assert key == mock_account_type
+        assert type_accounts[mock_account_type] == mock_accounts_method.return_value
 

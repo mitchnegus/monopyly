@@ -2,10 +2,8 @@
 from .accounts import BankAccountHandler, BankAccountTypeHandler
 
 
-def get_bank_account_summaries(bank_id):
-    """Get a summary of accounts for the given bank."""
-    # Get the total balance of all accounts at the bank
-    bank_balance = BankAccountHandler.get_bank_balance(bank_id)
+def get_bank_account_type_grouping(bank_id):
+    """Get a summary of accounts for the given bank, grouped by type."""
     # Get a grouping (by account type) of accounts at the given bank
     type_accounts = {}
     for account_type in BankAccountTypeHandler.get_types_for_bank(bank_id):
@@ -14,5 +12,5 @@ def get_bank_account_summaries(bank_id):
             bank_ids=(bank_id,),
             account_type_ids=(account_type.id,),
         )
-    return bank_balance, type_accounts
+    return type_accounts
 
