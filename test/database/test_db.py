@@ -1,8 +1,4 @@
 """Tests for the database."""
-import sqlite3
-
-import pytest
-
 from monopyly.database import db
 
 
