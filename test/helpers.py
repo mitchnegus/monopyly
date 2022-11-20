@@ -27,6 +27,12 @@ class TestHandler:
             # Order does not matter, so sort both entries and references by ID
             entries = sorted(entries, key=lambda entry: entry.id)
             references = sorted(references, key=lambda reference: reference.id)
+        else:
+            # Convert the items to lists to ensure they are the same length
+            entries = list(entries)
+            references = list(references)
+        assert len(entries) == len(references)
+        # Compare the list elements
         for entry, reference in zip(entries, references):
             cls.assertEntryMatches(entry, reference)
 

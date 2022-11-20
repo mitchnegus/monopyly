@@ -375,10 +375,10 @@ def delete_transaction(transaction_id):
 @bp.route('/tags')
 @login_required
 def load_tags():
-    # Get the tag heirarchy from the database
-    heirarchy = CreditTagHandler.get_heirarchy()
+    # Get the tag hierarchy from the database
+    hierarchy = CreditTagHandler.get_hierarchy()
     return render_template('credit/tags_page.html',
-                           tags_heirarchy=heirarchy)
+                           tags_hierarchy=hierarchy)
 
 @bp.route('/_add_tag', methods=('POST',))
 @login_required
@@ -403,7 +403,7 @@ def add_tag():
     )
     return render_template('credit/tag_tree/subtag_tree.html',
                            tag=tag,
-                           tags_heirarchy={})
+                           tags_hierarchy={})
 
 
 @bp.route('/_delete_tag/', methods=('POST',))

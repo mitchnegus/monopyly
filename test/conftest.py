@@ -5,17 +5,68 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from sqlalchemy.orm import Session
 
 from monopyly import create_app
 from monopyly.database import db, init_db
 
 
-with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
-    _data_sql = f.read().decode('utf-8')
+TEST_DIR = Path(__file__).parent
 
 
-@pytest.fixture(autouse=True)
-def temporary_database():
+# Load the SQLite instructions adding the preloaded testing data
+with Path(TEST_DIR, "data.sql").open("rb") as test_data_preload_file:
+    TEST_DATA_SQL = test_data_preload_file.read().decode('utf-8')
+
+
+def _provide_test_app(test_database_path):
+    # Create a testing app
+    app = create_app({
+        'TESTING': True,
+        'DATABASE': test_database_path
+    })
+    # Initialize the test database
+    with app.app_context():
+        init_db()
+        # Use a raw connection to the SQLite DBAPI to load entire files
+        raw_conn = db.engine.raw_connection()
+        raw_conn.executescript(TEST_DATA_SQL)
+        raw_conn.close()
+        # TEMP?: Access tables
+        # (again, would have failed during app initialization)
+        db.access_tables()
+    return app
+
+
+# Build a test database, use it in an app, and then create a test client
+
+@pytest.fixture(scope="session")
+def testing_database():
+    db_fd, db_path = tempfile.mkstemp()
+    # Make sure that the database location is overwritten
+    with patch('monopyly.database.DB_PATH', new=Path(db_path)):
+        yield namedtuple('TemporaryFile', ['fd', 'path'])(db_fd, db_path)
+    # After function execution, close the file and remove it
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+@pytest.fixture(scope="session")
+def app(testing_database):
+    app = _provide_test_app(testing_database.path)
+    yield app
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+# Repeat the construction process, but now without session scoping to reset
+# the database after a successful transaction
+
+@pytest.fixture
+def transaction_testing_database():
     db_fd, db_path = tempfile.mkstemp()
     # Make sure that the database location is overwritten
     with patch('monopyly.database.DB_PATH', new=Path(db_path)):
@@ -26,27 +77,16 @@ def temporary_database():
 
 
 @pytest.fixture
-def app(temporary_database):
-    # Create a testing app
-    app = create_app({
-        'TESTING': True,
-        'DATABASE': temporary_database.path
-    })
-    # Initialize the test database
-    with app.app_context():
-        init_db()
-        # Use a raw connection to the SQLite DBAPI to load entire files
-        raw_conn = db.engine.raw_connection()
-        raw_conn.executescript(_data_sql)
-        raw_conn.close()
-        # TEMP?: Access tables (again, would have failed during app initialization)
-        db.access_tables()
+def transaction_app(transaction_testing_database):
+    # Generate an app object that persists for only one transaction
+    app = _provide_test_app(transaction_testing_database.path)
     yield app
 
 
 @pytest.fixture
-def client(app):
-    return app.test_client()
+def transaction_client(transaction_app):
+    # Generate a client that persists for only one transaction
+    return transaction_app.test_client()
 
 
 @pytest.fixture
@@ -75,7 +115,7 @@ def auth(client):
 
 
 @pytest.fixture
-def client_context(app, client, auth):
+def client_context(client, auth):
     auth.login('mr.monopyly', 'MONOPYLY')
     with client:
         # Context variables (e.g. `g`) may be accessed only after response

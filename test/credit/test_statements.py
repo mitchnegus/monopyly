@@ -29,7 +29,7 @@ class TestCreditStatementHandler(TestHandler):
     # References only include entries accessible to the authorized login
     #   - ordered by issue date (most recent first)
     db_reference = [
-        CreditStatementView(id=5, card_id=3, issue_date=date(2020, 6, 10),
+        CreditStatementView(id=5, card_id=3, issue_date=date(2020, 6, 11),
                             due_date=date(2020, 7, 5),
                             balance=round(statement5_balance, 2),
                             payment_date=None),
@@ -37,7 +37,7 @@ class TestCreditStatementHandler(TestHandler):
                             due_date=date(2020, 7, 3),
                             balance=round(statement7_balance, 2),
                             payment_date=None),
-        CreditStatementView(id=4, card_id=3, issue_date=date(2020, 5, 10),
+        CreditStatementView(id=4, card_id=3, issue_date=date(2020, 5, 11),
                             due_date=date(2020, 6, 5),
                             balance=round(statement4_balance, 2),
                             payment_date=None),
@@ -76,10 +76,10 @@ class TestCreditStatementHandler(TestHandler):
          [None, (2,), None, "DESC",
           [db_reference[0], db_reference[2], db_reference[4], db_reference[5]]],
          [None, None, False, "DESC",                    # card 2 inactive
-          db_reference[6:]],
+          db_reference[5:]],
          [None, None, True, "DESC",
-          db_reference[:6]],
-         [None, None, False, "ASC",
+          db_reference[:5]],
+         [None, None, None, "ASC",
           db_reference[::-1]]]
     )
     def test_get_statements(self, statement_handler, card_ids, bank_ids, active,
@@ -109,7 +109,7 @@ class TestCreditStatementHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "card_id, issue_date, reference_entry",
-        [[3, date(2020, 5, 10), db_reference[2]],
+        [[3, date(2020, 5, 11), db_reference[2]],
          [4, date(2020, 5, 10), db_reference[3]],
          [3, None, db_reference[0]]]
     )
@@ -132,10 +132,10 @@ class TestCreditStatementHandler(TestHandler):
         "card_id, statement_issue_day, statement_due_day, transaction_date, "
         "creation, inferred_statement_id",
         [[1, 1, 20, date(2020, 5, 5), False, None],    # should fail, invalid user
-         [3, 10, 5, date(2020, 5, 1), False, 4],
-         [3, 10, 5, date(2020, 6, 5), False, 5],
-         [3, 10, 5, date(2020, 6, 20), True, 8],      # create new statement
-         [3, 10, 5, date(2020, 6, 20), False, None]]  # do not create new statement
+         [3, 11, 5, date(2020, 5, 1), False, 4],
+         [3, 11, 5, date(2020, 6, 5), False, 5],
+         [3, 11, 5, date(2020, 6, 20), True, 8],      # create new statement
+         [3, 11, 5, date(2020, 6, 20), False, None]]  # do not create new statement
     )
     def test_infer_statement(self, statement_handler, card_id,
                              statement_issue_day, statement_due_day,
@@ -209,9 +209,9 @@ class TestCreditStatementHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "mapping",
-        [{"card_id": 2, "issue_date": date(2020, 5 ,20),
+        [{"card_id": 2, "issue_date": date(2020, 5, 20),
           "due_date": date(2020, 6, 5)},
-         {"card_id": 2, "issue_date": date(2020, 5 ,20)}]
+         {"card_id": 2, "issue_date": date(2020, 5, 20)}]
     )
     def test_update_entry(self, statement_handler, mapping):
         statement = statement_handler.update_entry(2, **mapping)

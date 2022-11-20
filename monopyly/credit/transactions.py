@@ -209,7 +209,7 @@ class CreditTagHandler(DatabaseHandler):
         """
         criteria = [
             cls._filter_values(cls.model.tag_name, tag_names),
-            cls._filter_values(CreditTransaction.id, transaction_ids),
+            cls._filter_values(CreditTransactionView.id, transaction_ids),
             cls._filter_values(CreditSubtransaction.id, subtransaction_ids),
         ]
         tags = super().get_entries(*criteria).all()
@@ -286,40 +286,40 @@ class CreditTagHandler(DatabaseHandler):
         return supertag
 
     @classmethod
-    def get_heirarchy(cls, parent_tag=None):
+    def get_hierarchy(cls, root_tag=None):
         """
-        Get the heirarchy of tags as a dictionary.
+        Get the hierarchy of tags as a dictionary.
 
         Recurses through the tags database to return a dictionary
         representation of the tags. The dictionary has keys representing
         each tag, and each key is paired to a similar dictionary of
         subtags for that tag. The top level of the dictionary consists
-        only of tags without parent tags.
+        only of tags without root tags.
 
         Parameters
         ----------
-        parent_tag : database.models.CreditTag
-            The parent tag to use as the starting point when recursing
+        root_tag : database.models.CreditTag
+            The root tag to use as the starting point when recursing
             through the tree. If the parent is `None`, the recursion
             begins at the highest level of tags.
 
         Returns
         -------
-        heirarchy : dict
+        hierarchy : dict
             The dictionary representing the user's tags. Keys are
             `CreditTag` objects.
         """
-        heirarchy = {}
-        for tag in cls.get_subtags(parent_tag):
-            heirarchy[tag] = cls.get_heirarchy(tag)
-        return heirarchy
+        hierarchy = {}
+        for tag in cls.get_subtags(root_tag):
+            hierarchy[tag] = cls.get_hierarchy(tag)
+        return hierarchy
 
     @classmethod
     def get_ancestors(cls, tag):
         """
         Get the ancestor tags of a given tag.
 
-        Traverses the heirarchy, starting from the given tag and returns
+        Traverses the hierarchy, starting from the given tag and returns
         a list of all tags that are ancestors of the given tag.
 
         Parameters

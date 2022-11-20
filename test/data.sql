@@ -73,8 +73,8 @@ INSERT INTO credit_statements
 VALUES (1, '2020-05-15', '2020-06-05'),
        (2, '2020-03-15', '2020-04-05'),
        (3, '2020-04-15', '2020-05-05'),
-       (3, '2020-05-10', '2020-06-05'),
-       (3, '2020-06-10', '2020-07-05'),
+       (3, '2020-05-11', '2020-06-05'),
+       (3, '2020-06-11', '2020-07-05'),
        (4, '2020-05-10', '2020-06-03'),
        (4, '2020-06-10', '2020-07-03');
 
@@ -109,4 +109,23 @@ VALUES (1, 100.00, 'Test credit transaction'),
        (10, -123.00, 'Refund'),
        (11, 253.99, 'Conducting business'),
        (12, 12.34, 'Back for more...');
+
+INSERT INTO credit_tags
+       (user_id, parent_id, tag_name)
+VALUES (1, NULL, 'Test tag'),
+       (3, NULL, 'Transportation'),
+       (3, 2, 'Parking'),
+       (3, 2, 'Railroad'),
+       (3, NULL, 'Utilities'),
+       (3, 5, 'Electricity');
+
+INSERT INTO credit_tag_links
+       (subtransaction_id, tag_id)
+VALUES (1, 1),   -- 'Test credit transaction' --> 'Test tag'
+       (2, 2),   -- 'Parking (...)' --> 'Transportation'
+       (2, 3),   -- 'Parking (...)' --> 'Transportation'/'Parking'
+       (6, 5),   -- 'Electric bill' --> 'Utilities'
+       (6, 6),   -- 'Electric bill' --> 'Utilities'/'Electricity'
+       (12, 2),  -- 'Conducting business' --> 'Transportation'
+       (12, 4);  -- 'Conducting business' --> 'Transportation'/'Railroad'
 

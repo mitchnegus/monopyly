@@ -6,11 +6,11 @@ from sqlalchemy import select
 from monopyly.database import db
 
 
-def test_registration(client, user_table):
+def test_registration(transaction_client, user_table):
     # Check that the 'register' route is successfully reached
-    assert client.get('/auth/register').status_code == 200
+    assert transaction_client.get('/auth/register').status_code == 200
     # Perform a test registration
-    response = client.post(
+    response = transaction_client.post(
         '/auth/register',
         data={'username': 'a', 'password': 'a'}
     )
@@ -27,8 +27,9 @@ def test_registration(client, user_table):
      ('a', '', b'Password is required.'),
      ('test', 'test', b'User test is already registered.')]
 )
-def test_register_validate_input(client, username, password, message):
-    response = client.post(
+def test_register_validate_input(transaction_client, username, password,
+                                 message, user_table):
+    response = transaction_client.post(
         '/auth/register',
         data={'username': username, 'password': password}
     )
