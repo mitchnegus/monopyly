@@ -1365,7 +1365,7 @@ form .autocomplete-box .item.active {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  height: 50px;
+  height: 40px;
   width: 100%;
 }
 
@@ -1395,6 +1395,10 @@ form .autocomplete-box .item.active {
   text-align: right;
 }
 
+#linked-transaction-display .linked-transaction .description-header {
+  display: flex;
+}
+
 #linked-transaction-display .linked-transaction .description-header .account {
   flex: 4;
   padding-right: 10px;
@@ -1406,6 +1410,13 @@ form .autocomplete-box .item.active {
   font-size: 16pt;
   font-weight: bold;
   text-transform: uppercase;
+}
+
+#linked-transaction-display .linked-transaction .description-header .total {
+  flex: 1;
+  margin-top: auto;
+  font-size: 20pt;
+  font-weight: bold;
 }
 
 #linked-transaction-display .linked-transaction .notes {
