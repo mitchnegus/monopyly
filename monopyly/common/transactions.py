@@ -3,7 +3,7 @@ Tools for building a common transaction interface.
 """
 from ..database import db
 from ..database.models import (
-    BankTransactionView, BankAccountTypeView, CreditTransactionView
+    BankAccountTypeView, BankTransactionView, CreditTransactionView
 )
 
 
@@ -33,15 +33,12 @@ def get_linked_transaction(transaction):
         transaction.id,
         internal_transaction_id
     )
-    if linked_transaction:
-        linked_transaction.subtype = "bank"
-    else:
+    if not linked_transaction:
         # Otherwise, check if there is a matching credit transaction
         linked_transaction = _get_linked_credit_transaction(
             transaction.id,
             internal_transaction_id
         )
-        linked_transaction.subtype = "credit"
     return linked_transaction
 
 
