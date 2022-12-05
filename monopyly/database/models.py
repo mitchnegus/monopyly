@@ -1,9 +1,11 @@
+from datetime import date
+
 from flask import g
 from sqlalchemy import (
     Table, Column, Integer, Float, String, Date, ForeignKey, select
 )
 from sqlalchemy.orm import (
-    declarative_base, relationship, object_session, with_loader_criteria
+    declarative_base, relationship, with_loader_criteria
 )
 
 
@@ -13,11 +15,13 @@ class ModelBase:
 
     def _format_repr_attr(self, name):
         value = getattr(self, name)
-        value_str = f"'{value}'" if type(value) is str else f"{value}"
+        value_str = f"{value}"
         # Abbreviate the string if it's longer than a set length
         abbrev_len = 25
-        if len(value_str) >= abbrev_len:
+        if len(value_str) > abbrev_len:
             value_str = f"{value_str[:abbrev_len]}..."
+        if type(value) in (str, date):
+            value_str = f"'{value_str}'"
         return f"{name}={value_str}"
 
     def __repr__(self):
@@ -98,6 +102,7 @@ class User(Model):
     password = Column(String, nullable=False)
     # Relationships
     banks = relationship(
+
         "Bank",
         back_populates="user",
         cascade="all, delete",
@@ -173,14 +178,6 @@ class BankAccountTypeView(AuthorizedAccessMixin, Model):
         lazy="dynamic",
     )
 
-    @property
-    def user_accounts(self):
-        # Some account types are shared; enable account loading by user
-        query = self.accounts.statement.join(Bank).where(
-            (Bank.user_id == g.user.id),
-        )
-        return object_session(self).execute(query).scalars()
-
 
 class BankAccount(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_accounts"
@@ -242,6 +239,8 @@ class BankTransaction(AuthorizedAccessMixin, Model):
     _repr_attributes = ("id", "internal_transaction_id", "account_id",
                         "transaction_date")
     _user_id_join_chain = (BankAccountView, Bank)
+    # Denote the transaction subtype
+    subtype = "bank"
     # Columns
     id = Column(Integer, primary_key=True)
     internal_transaction_id = Column(
@@ -269,6 +268,8 @@ class BankTransactionView(AuthorizedAccessMixin, Model):
     _repr_attributes = ("id", "internal_transaction_id", "account_id",
                         "transaction_date", "total", "notes", "balance")
     _user_id_join_chain = (BankAccountView, Bank)
+    # Denote the transaction subtype
+    subtype = "bank"
     # Columns
     id = Column(Integer, ForeignKey('bank_transactions.id'), primary_key=True)
     internal_transaction_id = Column(
@@ -412,6 +413,8 @@ class CreditTransaction(AuthorizedAccessMixin, Model):
                         "transaction_date", "vendor")
     _user_id_join_chain = (CreditStatementView, CreditCard, CreditAccount,
                            Bank)
+    # Denote the transaction subtype
+    subtype = "credit"
     # Columns
     id = Column(Integer, primary_key=True)
     internal_transaction_id = Column(
@@ -440,6 +443,8 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
                         "transaction_date", "vendor", "total", "notes")
     _user_id_join_chain = (CreditStatementView, CreditCard, CreditAccount,
                            Bank)
+    # Denote the transaction subtype
+    subtype = "credit"
     # Columns
     id = Column(
         Integer,
@@ -523,7 +528,7 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
 
 class CreditTag(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_tags"
-    _repr_attributes = ("user_id", "parent_id", "tag_name")
+    _repr_attributes = ("id", "user_id", "parent_id", "tag_name")
     # Columns
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
