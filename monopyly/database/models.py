@@ -170,9 +170,6 @@ class BankAccountTypeView(AuthorizedAccessMixin, Model):
         "BankAccountView",
         viewonly=True,
         back_populates="account_type",
-        # Add note about why using `lazy="dynamic"`
-        #   (e.g., because we need to use the property below?)
-        lazy="dynamic",
     )
 
 
