@@ -44,6 +44,9 @@ def init_app(app):
     app.cli.add_command(init_db_command)
     # Prepare database access with SQLAlchemy
     db.setup_engine()
+    if not app.config["TESTING"]:
+        # Only access/load tables if not testing (not yet set up in tests)
+        db.access_tables()
 
 
 def register_blueprints(app):

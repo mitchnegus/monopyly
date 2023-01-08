@@ -1,6 +1,7 @@
 import os
 import tempfile
 from collections import namedtuple
+from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
@@ -21,16 +22,13 @@ with Path(TEST_DIR, "data.sql").open("rb") as test_data_preload_file:
 
 
 def populate_test_database(app):
-    # Initialize the test database
-    with app.app_context():
-        init_db()
-        # Use a raw connection to the SQLite DBAPI to load entire files
-        raw_conn = db.engine.raw_connection()
-        raw_conn.executescript(TEST_DATA_SQL)
-        raw_conn.close()
-        # TEMP?: Access tables
-        # (again, would have failed during app initialization)
-        db.access_tables()
+    # Use a raw connection to the SQLite DBAPI to load entire files
+    raw_conn = db.engine.raw_connection()
+    raw_conn.executescript(TEST_DATA_SQL)
+    raw_conn.close()
+    # Access the tables with the database engine
+    db.access_tables()
+
 
 def provide_test_app(test_database_path):
     # Create a testing app
@@ -39,14 +37,14 @@ def provide_test_app(test_database_path):
         'DATABASE': test_database_path
     })
     # Initialize the test database
+    with app.app_context():
+        init_db()
     populate_test_database(app)
     return app
 
 
-# Build a test database, use it in an app, and then create a test client
-
-@pytest.fixture(scope="session")
-def testing_database():
+@contextmanager
+def testing_database_context():
     db_fd, db_path = tempfile.mkstemp()
     # Make sure that the database location is overwritten
     with patch('monopyly.database.DB_PATH', new=Path(db_path)):
@@ -56,10 +54,13 @@ def testing_database():
     os.unlink(db_path)
 
 
+# Build a test database, use it in an app, and then create a test client
+
 @pytest.fixture(scope="session")
-def app(testing_database):
-    app = provide_test_app(testing_database.path)
-    yield app
+def app():
+    with testing_database_context() as test_db:
+        app = provide_test_app(test_db.path)
+        yield app
 
 
 @pytest.fixture
@@ -76,21 +77,11 @@ def runner(app):
 # the database after a successful transaction
 
 @pytest.fixture
-def transaction_testing_database():
-    db_fd, db_path = tempfile.mkstemp()
-    # Make sure that the database location is overwritten
-    with patch('monopyly.database.DB_PATH', new=Path(db_path)):
-        yield namedtuple('TemporaryFile', ['fd', 'path'])(db_fd, db_path)
-    # After function execution, close the file and remove it
-    os.close(db_fd)
-    os.unlink(db_path)
-
-
-@pytest.fixture
-def transaction_app(transaction_testing_database):
-    # Generate an app object that persists for only one transaction
-    app = provide_test_app(transaction_testing_database.path)
-    yield app
+def transaction_app():
+    with testing_database_context() as test_db:
+        # Generate an app object that persists for only one transaction
+        app = provide_test_app(test_db.path)
+        yield app
 
 
 @pytest.fixture

@@ -53,17 +53,10 @@ class _SQLAlchemy:
         self._base.query = self.scoped_session.query_property()
         # Add metadata
         self.metadata = MetaData()
-        self.access_tables()
 
     def access_tables(self):
-        # Temporary?
-        from sqlalchemy import exc
         for table_name in DATABASE_SCHEMA.keys():
-            # Tables have not been created when this is first called in testing
-            try:
-                Table(table_name, db.metadata, autoload_with=db.engine)
-            except exc.NoSuchTableError:
-                pass
+            Table(table_name, db.metadata, autoload_with=db.engine)
 
 
 db = _SQLAlchemy()
