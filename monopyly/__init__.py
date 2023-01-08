@@ -1,7 +1,6 @@
 """
 Run a development server for the Monopyly app.
 """
-import os
 from pathlib import Path
 
 from flask import Flask
@@ -11,6 +10,8 @@ from monopyly.definitions import INSTANCE_PATH
 
 
 def create_app(test_config=None):
+    # Ensure that the instance path exists
+    INSTANCE_PATH.mkdir(parents=True, exist_ok=True)
     # Create and configure the app
     app = Flask(
         __name__,
@@ -30,17 +31,9 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     # Allow the databases to be initialized from the command line
-    _ensure_instance_directory_exists(app)
     init_app(app)
     register_blueprints(app)
     return app
-
-
-def _ensure_instance_directory_exists(app):
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
 
 
 def init_app(app):
