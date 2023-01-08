@@ -24,7 +24,7 @@ from .statements import CreditStatementHandler
 from .transactions import (
     CreditTransactionHandler, CreditTagHandler, save_transaction
 )
-from .actions import *
+from .actions import get_card_statement_grouping, make_payment
 
 
 @bp.route('/cards')
@@ -152,7 +152,7 @@ def load_statements():
     # Get all of the user's credit cards from the database
     all_cards = CreditCardHandler.get_cards()
     active_cards = CreditCardHandler.get_cards(active=True)
-    card_statements = get_card_statement_groupings(active_cards)
+    card_statements = get_card_statement_grouping(active_cards)
     return render_template('credit/statements_page.html',
                            filter_cards=all_cards,
                            card_statements=card_statements)
@@ -168,7 +168,7 @@ def update_statements_display():
     cards = [
         CreditCardHandler.find_card(*tag.split('-')) for tag in filter_ids
     ]
-    card_statements = get_card_statement_groupings(cards)
+    card_statements = get_card_statement_grouping(cards)
     # Filter selected statements from the database
     return render_template('credit/statements.html',
                            card_statements=card_statements)
@@ -177,7 +177,11 @@ def update_statements_display():
 @bp.route('/statement/<int:statement_id>')
 @login_required
 def load_statement_details(statement_id):
-    statement, transactions = get_credit_statement_details(statement_id)
+    statement = CreditStatementHandler.get_entry(statement_id)
+    transactions = CreditTransactionHandler.get_transactions(
+        statement_ids=(statement_id,),
+        sort_order="DESC",
+    )
     # Get bank accounts for potential payments
     bank_accounts = BankAccountHandler.get_accounts()
     return render_template('credit/statement_page.html',

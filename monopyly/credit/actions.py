@@ -6,7 +6,7 @@ from .statements import CreditStatementHandler
 from .transactions import CreditTransactionHandler
 
 
-def get_card_statement_groupings(cards):
+def get_card_statement_grouping(cards):
     """
     Get groupings (by card) of credit card statements.
 
@@ -57,17 +57,15 @@ def get_potential_preceding_card(card):
             account_ids=(card.account_id,),
             active=True,
         )
-        other_active_cards = [
-            card for card in active_cards if card.id != card.id
-        ]
+        other_active_cards = [_ for _ in active_cards if _.id != card.id]
         if len(other_active_cards) == 1:
             other_card = other_active_cards[0]
             # That active card must have statements with an unpaid balance
             statements = CreditStatementHandler.get_statements(
                 card_ids=(other_card.id,),
             )
-            if statements:
-                latest_statement = statements[0]
+            latest_statement = statements.first()
+            if latest_statement:
                 if latest_statement.balance > 0:
                     return other_card
     # Card does not meet all of these conditions
@@ -78,13 +76,15 @@ def get_potential_preceding_card(card):
 def transfer_credit_card_statement(form, card_id, prior_card_id):
     """Transfer a credit statement between cards based on form input."""
     # If response is affirmative, transfer the statement to the new card
-    if form['transfer'].data == 'yes':
+    if form.transfer.data == 'yes':
         # Get the prior card's most recent statement; assign it to the new card
         statements = CreditStatementHandler.get_statements(
             card_ids=(prior_card_id,)
         )
-        statement = statements.scalar_one()
-        CreditStatementHandler.update_entry(statement.id, card_id=card_id)
+        latest_statement = statements.first()
+        CreditStatementHandler.update_entry(
+            latest_statement.id, card_id=card_id
+        )
         # Deactivate the old card
         prior_card = CreditCardHandler.get_entry(prior_card_id)
         CreditCardHandler.update_entry(prior_card_id, active=0)
@@ -98,9 +98,10 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
     ----------
     card_id : int
         The ID of the credit card towards which to make a payment.
-    payment_account_id : int
+    payment_account_id : int, None
         The ID of the bank account from which to draw money to make the
-        payment.
+        payment. If the argument is `None` than no paying account is
+        registered.
     payment_date : datetime.date
         The date on which to make the payment.
     payment_amount : float
@@ -142,15 +143,3 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
         }],
     }
     CreditTransactionHandler.add_entry(**credit_mapping)
-
-
-def get_credit_statement_details(statement_id):
-    """Get default statement details (e.g., the account and transactions)."""
-    # Get the statement information from the database
-    statement = CreditStatementHandler.get_entry(statement_id)
-    # Get all of the transactions for the statement from the database
-    transactions = CreditTransactionHandler.get_transactions(
-        statement_ids=(statement.id,),
-        sort_order="DESC",
-    )
-    return statement, transactions

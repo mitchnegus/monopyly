@@ -338,4 +338,3 @@ class TestAlternateModels:
         authorized_model = AuthorizedModel()
         with pytest.raises(AttributeError):
             authorized_model.select_for_user()
-

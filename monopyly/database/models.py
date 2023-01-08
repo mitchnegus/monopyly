@@ -77,9 +77,7 @@ class AuthorizedAccessMixin:
         for target in guaranteed_joins:
             if target not in cls._user_id_join_chain:
                 query = query.join(target)
-        return query.options(
-            with_loader_criteria(cls.user_id_model, cls._authorizing_criteria)
-        )
+        return query.where(cls._authorizing_criteria)
 
     @classmethod
     def _join_user(cls, query):
@@ -102,7 +100,6 @@ class User(Model):
     password = Column(String, nullable=False)
     # Relationships
     banks = relationship(
-
         "Bank",
         back_populates="user",
         cascade="all, delete",

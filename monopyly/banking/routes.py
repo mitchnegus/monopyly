@@ -59,7 +59,7 @@ def delete_account(account_id):
 def load_account_summaries(bank_id):
     bank = BankHandler.get_entry(bank_id)
     bank_balance = BankAccountHandler.get_bank_balance(bank_id)
-    type_accounts = get_bank_account_type_grouping(bank_id)
+    type_accounts = get_bank_account_type_grouping(bank)
     return render_template('banking/account_summaries_page.html',
                            bank=bank,
                            bank_balance=bank_balance,

@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from flask import g
 from sqlalchemy.orm import Session
 
 from monopyly import create_app
@@ -19,12 +20,7 @@ with Path(TEST_DIR, "data.sql").open("rb") as test_data_preload_file:
     TEST_DATA_SQL = test_data_preload_file.read().decode('utf-8')
 
 
-def _provide_test_app(test_database_path):
-    # Create a testing app
-    app = create_app({
-        'TESTING': True,
-        'DATABASE': test_database_path
-    })
+def populate_test_database(app):
     # Initialize the test database
     with app.app_context():
         init_db()
@@ -35,6 +31,15 @@ def _provide_test_app(test_database_path):
         # TEMP?: Access tables
         # (again, would have failed during app initialization)
         db.access_tables()
+
+def provide_test_app(test_database_path):
+    # Create a testing app
+    app = create_app({
+        'TESTING': True,
+        'DATABASE': test_database_path
+    })
+    # Initialize the test database
+    populate_test_database(app)
     return app
 
 
@@ -53,13 +58,18 @@ def testing_database():
 
 @pytest.fixture(scope="session")
 def app(testing_database):
-    app = _provide_test_app(testing_database.path)
+    app = provide_test_app(testing_database.path)
     yield app
 
 
 @pytest.fixture
 def client(app):
-    return app.test_client()
+    yield app.test_client()
+
+
+@pytest.fixture
+def runner(app):
+    return app.test_cli_runner()
 
 
 # Repeat the construction process, but now without session scoping to reset
@@ -79,20 +89,17 @@ def transaction_testing_database():
 @pytest.fixture
 def transaction_app(transaction_testing_database):
     # Generate an app object that persists for only one transaction
-    app = _provide_test_app(transaction_testing_database.path)
+    app = provide_test_app(transaction_testing_database.path)
     yield app
 
 
 @pytest.fixture
 def transaction_client(transaction_app):
     # Generate a client that persists for only one transaction
-    return transaction_app.test_client()
+    yield transaction_app.test_client()
 
 
-@pytest.fixture
-def runner(app):
-    return app.test_cli_runner()
-
+# Use the app/client for authorization
 
 class AuthActions:
 
@@ -116,11 +123,11 @@ def auth(client):
 
 @pytest.fixture
 def client_context(client, auth):
-    auth.login('mr.monopyly', 'MONOPYLY')
+    auth.login(username="mr.monopyly", password="MONOPYLY")
     with client:
         # Context variables (e.g. `g`) may be accessed only after response
         client.get('/')
-        yield client_context
+        yield
 
 
 @pytest.fixture
