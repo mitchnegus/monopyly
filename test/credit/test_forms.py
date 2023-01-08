@@ -506,7 +506,7 @@ class TestCreditTransactionForm:
            "Boardwalk")],
          ["note", {"vendor": "Park Place"},   # sorted by vendor key, then note frequency
           ("One for the park", "One for the place"),
-          ("Parking (thought it was free)", "Expensive house tour",
+          ("Parking (thought it was free)", "Big house tour",
            "Conducting business", "Tough loss",
            "Electric bill", "Refund",
            "Merry-go-round", "Credit card payment",

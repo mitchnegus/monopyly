@@ -105,8 +105,8 @@ VALUES (1, 100.00, 'Test credit transaction'),
        (6, 6500.00, 'Expensive real estate'),
        (7, -109.21, 'Credit card payment'),
        (8, 26.87, 'Tough loss'),
-       (9, 1600.00, 'Expensive house tour'),
-       (10, -123.00, 'Refund'),
+       (9, 1600.00, 'Big house tour'),
+       (10, -1230.00, 'Refund'),
        (11, 253.99, 'Conducting business'),
        (12, 12.34, 'Back for more...');
 

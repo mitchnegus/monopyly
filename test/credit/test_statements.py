@@ -22,7 +22,7 @@ class TestCreditStatementHandler(TestHandler):
 
     statement2_balance = 1.00
     statement3_balance = (43.21+30.00+35.00) + statement2_balance
-    statement6_balance = (1600.00-123.00)
+    statement6_balance = (1600.00-1230.00)
     statement4_balance = (99.00+6500.00-109.21) + statement3_balance
     statement7_balance = (253.99+12.34) + statement6_balance
     statement5_balance = 26.87 + statement4_balance
