@@ -1,9 +1,10 @@
 """
-Routes for credit card financials.  """
+Routes for credit card financials.
+"""
 from itertools import islice
 
 from flask import (
-    Blueprint, g, redirect, render_template, flash, request, url_for, jsonify
+    g, redirect, render_template, flash, request, url_for, jsonify
 )
 from werkzeug.exceptions import abort
 from wtforms.validators import ValidationError
