@@ -35,3 +35,17 @@ def test_credits(client):
     response = client.get("/credits")
     assert b"<h1>Credits</h1>" in response.data
 
+
+def test_login_required(client, auth):
+    response = client.get("/settings")
+    assert b"Settings" not in response.data
+    assert b"Redirecting..." in response.data
+    auth.login()
+    response = client.get("/settings")
+    assert b"Settings" in response.data
+
+
+def test_settings(client, auth):
+    auth.login()
+    response = client.get("/settings")
+    assert b"Settings coming soon..." in response.data

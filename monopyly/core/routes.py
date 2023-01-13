@@ -4,6 +4,7 @@ Routes for core functionality.
 from flask import g, render_template
 
 from ..database import db
+from ..auth.tools import login_required
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
 from ..credit.cards import CreditCardHandler
@@ -41,6 +42,13 @@ def index():
 def about():
     return render_template('about.html')
 
+
 @bp.route('/credits')
 def credits():
     return render_template('credits.html')
+
+
+@bp.route('/settings')
+@login_required
+def settings():
+    return render_template('settings.html')
