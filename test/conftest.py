@@ -113,8 +113,13 @@ def auth(client):
 
 
 @pytest.fixture
-def client_context(client, auth):
+def authorization(auth):
     auth.login(username="mr.monopyly", password="MONOPYLY")
+    yield
+
+
+@pytest.fixture
+def client_context(client, authorization):
     with client:
         # Context variables (e.g. `g`) may be accessed only after response
         client.get('/')

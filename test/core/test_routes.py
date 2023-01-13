@@ -45,7 +45,6 @@ def test_login_required(client, auth):
     assert b"Settings" in response.data
 
 
-def test_settings(client, auth):
-    auth.login()
+def test_settings(client, authorization):
     response = client.get("/settings")
     assert b"Settings coming soon..." in response.data
