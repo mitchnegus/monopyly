@@ -25,7 +25,9 @@ from .statements import CreditStatementHandler
 from .transactions import (
     CreditTransactionHandler, CreditTagHandler, save_transaction
 )
-from .actions import get_card_statement_grouping, make_payment
+from .actions import (
+    get_card_statement_grouping, get_potential_preceding_card, make_payment
+)
 
 
 @bp.route('/cards')
