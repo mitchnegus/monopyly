@@ -8,7 +8,7 @@ from sqlalchemy import select, insert
 from ..database import db, db_transaction
 from ..database.models import User
 from .blueprint import bp
-from .tools import get_username_and_password
+from .actions import get_username_and_password
 
 
 @bp.route('/register', methods=('GET', 'POST'))

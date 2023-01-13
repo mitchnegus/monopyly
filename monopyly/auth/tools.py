@@ -11,13 +11,6 @@ from ..database.models import User
 from .blueprint import bp
 
 
-def get_username_and_password(form):
-    """Get username and password from a form."""
-    username = form['username']
-    password = form['password']
-    return username, password
-
-
 @bp.before_app_request
 def load_logged_in_user():
     # Match the user's information with the session
