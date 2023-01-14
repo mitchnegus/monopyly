@@ -62,9 +62,11 @@ def add_card():
     return render_template('credit/card_form/card_form_page_new.html', form=form)
 
 
-@bp.route('/_transfer_card_statement/<int:account_id>/<int:card_id>/'
-                 '<int:prior_card_id>',
-                 methods=('POST',))
+@bp.route(
+    '/_transfer_card_statement'
+    '/<int:account_id>/<int:card_id>/<int:prior_card_id>',
+    methods=('POST',)
+)
 @login_required
 @db_transaction
 def transfer_statement(account_id, card_id, prior_card_id):
@@ -106,7 +108,7 @@ def update_card_status():
 @login_required
 @db_transaction
 def delete_card(card_id):
-    account_id = CreditCardHandler.get_card(card_id).account_id
+    account_id = CreditCardHandler.get_entry(card_id).account_id
     CreditCardHandler.delete_entry(card_id)
     return redirect(url_for('credit.load_account', account_id=account_id))
 
