@@ -31,6 +31,8 @@ def populate_test_database(app):
 
 
 def provide_test_app(test_database_path):
+    # Create a new database object for testing
+    db.create(db_path=test_database_path)
     # Create a testing app
     app = create_app({
         'TESTING': True,
@@ -39,6 +41,7 @@ def provide_test_app(test_database_path):
     # Initialize the test database
     with app.app_context():
         init_db()
+        app._db = db.save_state()
     populate_test_database(app)
     return app
 
@@ -46,51 +49,13 @@ def provide_test_app(test_database_path):
 @contextmanager
 def testing_database_context():
     db_fd, db_path = tempfile.mkstemp()
-    # Make sure that the database location is overwritten
-    with patch('monopyly.database.DB_PATH', new=Path(db_path)):
-        yield namedtuple('TemporaryFile', ['fd', 'path'])(db_fd, db_path)
+    yield namedtuple('TemporaryFile', ['fd', 'path'])(db_fd, db_path)
     # After function execution, close the file and remove it
     os.close(db_fd)
     os.unlink(db_path)
 
 
-# Build a test database, use it in an app, and then create a test client
-
-@pytest.fixture(scope="session")
-def app():
-    with testing_database_context() as test_db:
-        app = provide_test_app(test_db.path)
-        yield app
-
-
-@pytest.fixture
-def client(app):
-    yield app.test_client()
-
-
-@pytest.fixture
-def runner(app):
-    return app.test_cli_runner()
-
-
-# Repeat the construction process, but now without session scoping to reset
-# the database after a successful transaction
-
-@pytest.fixture
-def transaction_app():
-    with testing_database_context() as test_db:
-        # Generate an app object that persists for only one transaction
-        app = provide_test_app(test_db.path)
-        yield app
-
-
-@pytest.fixture
-def transaction_client(transaction_app):
-    # Generate a client that persists for only one transaction
-    yield transaction_app.test_client()
-
-
-# Use the app/client for authorization
+# Use an app/client for authorization
 
 class AuthActions:
 
@@ -105,6 +70,32 @@ class AuthActions:
 
     def logout(self):
         return self._client.get('/auth/logout')
+
+
+# Build a test database, use it in an app, and then create a test client
+
+@pytest.fixture(scope="session")
+def _app():
+    with testing_database_context() as test_db:
+        app = provide_test_app(test_db.path)
+        yield app
+
+
+@pytest.fixture
+def app(_app):
+    # The global database object needs to be refreshed
+    db.load_state(_app._db)
+    yield _app
+
+
+@pytest.fixture
+def client(app):
+    yield app.test_client()
+
+
+@pytest.fixture
+def runner(app):
+    return app.test_cli_runner()
 
 
 @pytest.fixture
@@ -125,6 +116,36 @@ def client_context(client, authorization):
         client.get('/')
         yield
 
+
+# Repeat the construction process, but now without session scoping to reset
+# the database after a successful transaction
+
+@pytest.fixture
+def transaction_app():
+    with testing_database_context() as test_db:
+        # Generate an app object that persists for only one transaction
+        transaction_app = provide_test_app(test_db.path)
+        yield transaction_app
+
+
+@pytest.fixture
+def transaction_client(transaction_app):
+    # Generate a client that persists for only one transaction
+    yield transaction_app.test_client()
+
+
+@pytest.fixture
+def transaction_auth(transaction_client):
+    return AuthActions(transaction_client)
+
+
+@pytest.fixture
+def transaction_authorization(transaction_auth):
+    transaction_auth.login(username="mr.monopyly", password="MONOPYLY")
+    yield
+
+
+# Streamline access to the database user table
 
 @pytest.fixture
 def user_table():

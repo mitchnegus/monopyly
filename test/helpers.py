@@ -1,4 +1,5 @@
 """Helper objects to improve modularity of tests."""
+import functools
 import unittest
 
 import pytest
@@ -75,14 +76,44 @@ class TestHandler:
 
 class TestRoutes:
 
+    _client = None
+    _transaction_client = None
     blueprint_prefix = None
+
+    @property
+    def client(self):
+        if self._transaction_client:
+            return self._transaction_client
+        return self._client
 
     @pytest.fixture(autouse=True)
     def _get_client(self, client):
-        self.client = client
+        # Get a client object that will persist for all tests
+        self._client = client
+        yield
+        # Reset the client on teardown
+        self._client = None
+
+    @pytest.fixture
+    def _get_transaction_client(self, transaction_client):
+        # Get a transaction client that will persist for only the current test
+        self._transaction_client = transaction_client
+        yield
+        # Reset the transaction client on teardown
+        self._transaction_client = None
+
+    def transaction_client_lifetime(test_method):
+        # Decorate methods to use the transaction client instead of the
+        # standard client (the client will persist for only the current test)
+        @pytest.mark.usefixtures("_get_transaction_client")
+        @functools.wraps(test_method)
+        def wrapper(self, *args, **kwargs):
+            test_method(self, *args, **kwargs)
+        return wrapper
 
     def route_loader(method):
         # Load the route accounting for the blueprint
+        @functools.wraps(method)
         def wrapper(self, route, *args, **kwargs):
             if self.blueprint_prefix is not None:
                 route =  f"/{self.blueprint_prefix}{route}"

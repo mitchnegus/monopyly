@@ -23,14 +23,44 @@ DB_NAME = 'monopyly.sqlite'
 DB_PATH = Path(INSTANCE_PATH, DB_NAME)
 
 
+class SQLAlchemy:
+    """
+    Store SQLAlchemy database objects.
+
+    This is a wrapper for the `_SQLAlchemy` object. The wrapped object
+    stores the database information and is the primary vehicle for
+    interacting with the SQLAlchemy API. This object facilitates testing,
+    to enable the state of that wrapped database object to be preserved
+    over the course of many tests. (This is a major efficiency
+    enhancement, as the database does not need to be recreated and/or
+    repopulated for each test.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.create(*args, **kwargs)
+
+    def __getattr__(self, item):
+        return getattr(self._db, item)
+
+    def create(self, *args, **kwargs):
+        self._db = _SQLAlchemy(*args, **kwargs)
+
+    def save_state(self):
+        return self._db
+
+    def load_state(self, db):
+        self._db = db
+
+
 class _SQLAlchemy:
     """Store SQLAlchemy database objects."""
     _base = Model
 
-    def __init__(self):
-        engine = None
-        metadata = None
-        scoped_session = None
+    def __init__(self, db_path=None):
+        self._path = db_path if db_path else DB_PATH
+        self.engine = None
+        self.metadata = None
+        self.scoped_session = None
 
     @property
     def tables(self):
@@ -44,7 +74,7 @@ class _SQLAlchemy:
     def setup_engine(self, echo_engine=False):
         """Setup the database engine, a session factory, and metadata."""
         # Create the engine using the custom database URL
-        db_url = f"{DIALECT}+{DBAPI}:///{DB_PATH}"
+        db_url = f"{DIALECT}+{DBAPI}:///{self._path}"
         self.engine = create_engine(db_url, echo=echo_engine)
         # Use a session factory to generate sessions
         session_kwargs = {"bind": self.engine, "autoflush": False, "future": True}
@@ -56,10 +86,10 @@ class _SQLAlchemy:
 
     def access_tables(self):
         for table_name in DATABASE_SCHEMA.keys():
-            Table(table_name, db.metadata, autoload_with=db.engine)
+            Table(table_name, self.metadata, autoload_with=self.engine)
 
 
-db = _SQLAlchemy()
+db = SQLAlchemy()
 
 
 def db_transaction(func):
