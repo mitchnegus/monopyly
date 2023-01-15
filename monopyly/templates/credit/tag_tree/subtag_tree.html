@@ -10,8 +10,8 @@
 
   <ul class="tags subtags">
 
-      {% for tag in tags_heirarchy %}
-        {% with tags_heirarchy = tags_heirarchy[tag] %}
+      {% for tag in tags_hierarchy %}
+        {% with tags_hierarchy = tags_hierarchy[tag] %}
           {% include 'credit/tag_tree/subtag_tree.html' %}
         {% endwith %}
       {% endfor %}

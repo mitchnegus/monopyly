@@ -231,7 +231,7 @@ def pay_credit_card(card_id, statement_id):
 
 
 @bp.route('/transactions', defaults={'card_id': None})
-@bp.route('/transactions/<int:card_id>', methods=('GET', 'POST'))
+@bp.route('/transactions/<int:card_id>')
 @login_required
 def load_transactions(card_id):
     # Get all of the user's credit cards from the database (for the filter)
