@@ -26,9 +26,9 @@ def load_accounts():
                            account_types=account_types)
 
 
-@bp.route('/add_account',
-               defaults={'bank_id': None},
-               methods=('GET', 'POST'))
+@bp.route(
+    '/add_account', defaults={'bank_id': None}, methods=('GET', 'POST')
+)
 @bp.route('/add_account/<int:bank_id>', methods=('GET', 'POST'))
 @login_required
 @db_transaction
