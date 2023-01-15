@@ -21,16 +21,20 @@ with Path(TEST_DIR, "data.sql").open("rb") as test_data_preload_file:
     TEST_DATA_SQL = test_data_preload_file.read().decode('utf-8')
 
 
-def populate_test_database(app):
-    # Use a raw connection to the SQLite DBAPI to load entire files
-    raw_conn = db.engine.raw_connection()
-    raw_conn.executescript(TEST_DATA_SQL)
-    raw_conn.close()
-    # Access the tables with the database engine
-    db.access_tables()
-
-
 def provide_test_app(test_database_path):
+    """
+    Provide a Flask application configured for testing.
+
+    Create a Flask application configured for testing that points to the
+    test database. Given the path to the test database (ideally a
+    temporary file), the database is initialized for the newly created
+    app. The `SQLAlchemy` reference object (`monopyly.database.db`) is
+    used to save the "state" of the database (e.g., the engine,
+    metadata, tables, etc.) to the app object. This allows the global
+    database reference to be updated for tests that should use a fresh
+    copy of the database, and then restore this database state to the
+    global variable when returning to use a previously created version.
+    """
     # Create a new database object for testing
     db.create(db_path=test_database_path)
     # Create a testing app
@@ -46,8 +50,30 @@ def provide_test_app(test_database_path):
     return app
 
 
+def populate_test_database(app):
+    """
+    Use a raw connection to the SQLite DBAPI to load entire files
+
+    Establish a raw connection to the database and use it to populate
+    the database tables with the preloaded test data.
+    """
+    raw_conn = db.engine.raw_connection()
+    raw_conn.executescript(TEST_DATA_SQL)
+    raw_conn.close()
+    # Once loaded, access the tables with the database engine
+    db.access_tables()
+
+
 @contextmanager
 def testing_database_context():
+    """
+    Create a temporary file for the database.
+
+    This context manager creates a temporary file that is used for the
+    testing database. The temporary file persists as long as the context
+    survives, and the temporary file is removed after the context
+    lifetime is completed.
+    """
     db_fd, db_path = tempfile.mkstemp()
     yield namedtuple('TemporaryFile', ['fd', 'path'])(db_fd, db_path)
     # After function execution, close the file and remove it
