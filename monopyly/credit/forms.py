@@ -57,7 +57,7 @@ class CreditCardForm(EntryForm):
         statement_due_day = IntegerField('Statement Due Day', [Optional()])
 
         def get_account(self):
-            return self._produce_entry(self.account_id.data)
+            return self._produce_entry_from_field("account_id")
 
         def _prepare_mapping(self):
             # Mapping relies on knowing the bank, which must also be acquired

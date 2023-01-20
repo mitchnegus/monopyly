@@ -19,8 +19,8 @@ class TestCreditAccountHandler(TestHandler):
     db_reference = [
         CreditAccount(id=2, bank_id=2, statement_issue_day=10,
                       statement_due_day=5),
-        CreditAccount(id=3, bank_id=3, statement_issue_day=20,
-                      statement_due_day=12),
+        CreditAccount(id=3, bank_id=3, statement_issue_day=6,
+                      statement_due_day=27),
     ]
 
     def test_initialization(self, account_handler):

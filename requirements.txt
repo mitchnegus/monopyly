@@ -1,11 +1,12 @@
-coverage
+beautifulsoup4     # test dependency
+coverage           # test dependency
 flask
 flask-wtf
-ipython
+ipython            # dev dependency?
 numpy
 pip
-pytest
-pytest-cov
+pytest 	           # test dependency
+pytest-cov         # test dependency
 python-dateutil
 setuptools
 sqlalchemy

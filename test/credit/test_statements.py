@@ -29,20 +29,20 @@ class TestCreditStatementHandler(TestHandler):
     # References only include entries accessible to the authorized login
     #   - ordered by issue date (most recent first)
     db_reference = [
-        CreditStatementView(id=5, card_id=3, issue_date=date(2020, 6, 11),
+        CreditStatementView(id=5, card_id=3, issue_date=date(2020, 6, 10),
                             due_date=date(2020, 7, 5),
                             balance=round(statement5_balance, 2),
                             payment_date=None),
-        CreditStatementView(id=7, card_id=4, issue_date=date(2020, 6, 10),
-                            due_date=date(2020, 7, 3),
+        CreditStatementView(id=7, card_id=4, issue_date=date(2020, 6, 6),
+                            due_date=date(2020, 6, 27),
                             balance=round(statement7_balance, 2),
                             payment_date=None),
-        CreditStatementView(id=4, card_id=3, issue_date=date(2020, 5, 11),
+        CreditStatementView(id=4, card_id=3, issue_date=date(2020, 5, 10),
                             due_date=date(2020, 6, 5),
                             balance=round(statement4_balance, 2),
                             payment_date=None),
-        CreditStatementView(id=6, card_id=4, issue_date=date(2020, 5, 10),
-                            due_date=date(2020, 6, 3),
+        CreditStatementView(id=6, card_id=4, issue_date=date(2020, 5, 6),
+                            due_date=date(2020, 5, 27),
                             balance=round(statement6_balance, 2),
                             payment_date=None),
         CreditStatementView(id=3, card_id=3, issue_date=date(2020, 4, 15),
@@ -109,8 +109,8 @@ class TestCreditStatementHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "card_id, issue_date, reference_entry",
-        [[3, date(2020, 5, 11), db_reference[2]],
-         [4, date(2020, 5, 10), db_reference[3]],
+        [[3, date(2020, 5, 10), db_reference[2]],
+         [4, date(2020, 5, 6), db_reference[3]],
          [3, None, db_reference[0]]]
     )
     def test_find_statement(self, statement_handler, card_id, issue_date,
@@ -132,10 +132,10 @@ class TestCreditStatementHandler(TestHandler):
         "card_id, statement_issue_day, statement_due_day, transaction_date, "
         "creation, inferred_statement_id",
         [[1, 1, 20, date(2020, 5, 5), False, None],    # should fail, invalid user
-         [3, 11, 5, date(2020, 5, 1), False, 4],
-         [3, 11, 5, date(2020, 6, 5), False, 5],
-         [3, 11, 5, date(2020, 6, 20), True, 8],      # create new statement
-         [3, 11, 5, date(2020, 6, 20), False, None]]  # do not create new statement
+         [3, 10, 5, date(2020, 5, 1), False, 4],
+         [3, 10, 5, date(2020, 6, 5), False, 5],
+         [3, 10, 5, date(2020, 6, 20), True, 8],      # create new statement
+         [3, 10, 5, date(2020, 6, 20), False, None]]  # do not create new statement
     )
     def test_infer_statement(self, statement_handler, card_id,
                              statement_issue_day, statement_due_day,

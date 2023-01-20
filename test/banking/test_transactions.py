@@ -40,9 +40,6 @@ class TestBankTransactionHandler(TestHandler):
     # References only include entries accessible to the authorized login
     #   - ordered by date (most recent first)
     db_reference = [
-        BankTransactionView(id=8, internal_transaction_id=None, account_id=4,
-                            transaction_date=date(2020, 5, 7), total=None,
-                            notes=None, balance=200.00),
         BankTransactionView(id=7, internal_transaction_id=None, account_id=4,
                             transaction_date=date(2020, 5, 6), total=200.00,
                             notes="'Go' Corner ATM deposit", balance=200.00),
@@ -82,7 +79,7 @@ class TestBankTransactionHandler(TestHandler):
         [[None, None, "DESC",                           # defaults
           db_reference],
          [(2, 3), None, "DESC",
-          db_reference[2:]],
+          db_reference[1:]],
          [None, True, "DESC",                           # account 3 inactive
          [row for row in db_reference if row.account_id != 3]],
          [None, False, "DESC",
@@ -99,8 +96,8 @@ class TestBankTransactionHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "transaction_id, reference_entry",
-        [[2,db_reference[6]],
-         [3, db_reference[4]]]
+        [[2, db_reference[5]],
+         [3, db_reference[3]]]
     )
     def test_get_entry(self, transaction_handler, transaction_id,
                        reference_entry):
@@ -110,7 +107,7 @@ class TestBankTransactionHandler(TestHandler):
     @pytest.mark.parametrize(
         "transaction_id, exception",
         [[1, NotFound],   # Not the logged in user
-         [9, NotFound]]   # Not in the database
+         [8, NotFound]]   # Not in the database
     )
     def test_get_entry_invalid(self, transaction_handler, transaction_id,
                                exception):
@@ -206,7 +203,7 @@ class TestBankTransactionHandler(TestHandler):
           NotFound],                                        # wrong user
          [5, {"account_id": 3, "invalid_field": "Test"},
           ValueError],                                      # invalid field
-         [9, {"account_id": 3, "transaction_date": date(2022, 5, 8)},
+         [8, {"account_id": 3, "transaction_date": date(2022, 5, 8)},
           NotFound]]                                        # nonexistent ID
     )
     def test_update_entry_invalid(self, transaction_handler, transaction_id,
@@ -227,7 +224,7 @@ class TestBankTransactionHandler(TestHandler):
     @pytest.mark.parametrize(
         "entry_id, exception",
         [[1, NotFound],   # should not be able to delete other user entries
-         [9, NotFound]]   # should not be able to delete nonexistent entries
+         [8, NotFound]]   # should not be able to delete nonexistent entries
     )
     def test_delete_entry_invalid(self, transaction_handler, entry_id,
                                     exception):

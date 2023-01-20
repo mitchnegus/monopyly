@@ -138,6 +138,7 @@ class TestBankSubform:
     @patch("monopyly.banking.forms.BankSubform._db_handler")
     def test_bank_subform_get_bank(self, mock_handler, client_context):
         subform = self.SampleForm().bank_info
+        subform.bank_id.data = 100
         # Test that an existing bank entry is returned
         bank = subform.get_bank()
         assert bank == mock_handler.get_entry.return_value

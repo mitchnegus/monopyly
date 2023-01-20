@@ -125,7 +125,7 @@ def test_transfer_credit_card_statement(client_context, transfer):
 def test_make_payment(client_context):
     transaction_date = date(2020, 7, 1)
     make_payment(4, 3, transaction_date, 100.00)
-    payment_bank_transaction = BankTransactionHandler.get_entry(9)
+    payment_bank_transaction = BankTransactionHandler.get_entry(8)
     assert payment_bank_transaction.internal_transaction_id == 4
     assert payment_bank_transaction.account_id == 3
     assert payment_bank_transaction.transaction_date == transaction_date

@@ -6,11 +6,10 @@ import { executeAjaxRequest } from './modules/ajax.js';
 
 (function() {
 
-  const endpoint = INFER_BANK_ENDPOINT;
   // Identify the account selection box for a new card
   let $inputAccount = $('form#card #account_info-account_id');
-  let $inputBank = $('form#card #account_info-bank_id');
-  let $inputBankName = $('form#card #account_info-bank_name');
+  let $inputBank = $('form#card #account_info-bank_info-bank_id');
+  let $inputBankName = $('form#card #account_info-bank_info-bank_name');
   let $secondaryAccountInfo = $('form#card #secondary-account-info');
   let $secondaryBankInfo = $('form#card #secondary-bank-info');
   // Set the value for the 'New account'/'New bank' options

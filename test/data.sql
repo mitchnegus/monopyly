@@ -38,9 +38,8 @@ VALUES (NULL, 1, '2020-05-04'),  -- 'Test Bank' savings transaction on 2020-05-0
        (NULL, 2, '2020-05-06'),  -- 'Jail' savings transaction on 2020-05-06
        (2, 3, '2020-05-04'),     -- 'Jail' checking payment on 2020-05-04
        (1, 3, '2020-05-05'),     -- 'Jail' checking transaction on 2020-05-05 (link)
-       (NULL, 4, '2020-05-06'),  -- 'TheBank' CD transaction on 2020-05-06
-       (NUll, 4, '2020-05-07');  -- 'TheBank' CD transaction on 2020-05-07
-                                      /* (with no defined subtransactions) */
+       (NULL, 4, '2020-05-06');  -- 'TheBank' CD transaction on 2020-05-06
+
 INSERT INTO bank_subtransactions
       (transaction_id, subtotal, note)
 VALUES
@@ -57,7 +56,7 @@ INSERT INTO credit_accounts
        (bank_id, statement_issue_day, statement_due_day)
 VALUES (1, 1, 20),
        (2, 10, 5),
-       (3, 20, 12);
+       (3, 6, 27);
 
 INSERT INTO credit_cards
        (account_id, last_four_digits, active)
@@ -69,14 +68,14 @@ VALUES (1, '3333', 1),
 INSERT INTO credit_statements
        (card_id, issue_date, due_date)
        /* Note: `issue_date` intentionally different from `statement_issue_day`
-                as this connection is typical but not required */
+                in some cases, as this connection is typical but not required */
 VALUES (1, '2020-05-15', '2020-06-05'),
        (2, '2020-03-15', '2020-04-05'),
        (3, '2020-04-15', '2020-05-05'),
-       (3, '2020-05-11', '2020-06-05'),
-       (3, '2020-06-11', '2020-07-05'),
-       (4, '2020-05-10', '2020-06-03'),
-       (4, '2020-06-10', '2020-07-03');
+       (3, '2020-05-10', '2020-06-05'),
+       (3, '2020-06-10', '2020-07-05'),
+       (4, '2020-05-06', '2020-05-27'),
+       (4, '2020-06-06', '2020-06-27');
 
 INSERT INTO credit_transactions
        (internal_transaction_id, statement_id, transaction_date, vendor)

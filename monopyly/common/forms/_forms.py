@@ -82,12 +82,16 @@ class AcquisitionSubform(EntrySubform):
     def _db_handler(self):
         raise NotImplementedError("Define the attribute in a subclass.")
 
-    def _produce_entry(self, form_entry_id):
-        """Produce an entry matching the subform data."""
+    def _produce_entry_from_field(self, form_entry_id_field_name):
+        """Produce an entry matching an ID field in the subform data."""
+        form_entry_id_field = getattr(self, form_entry_id_field_name)
+        form_entry_id = int(form_entry_id_field.data)
         # If the entry is a new entry, create it from the form data
         if form_entry_id == 0:
             data = self._prepare_mapping()
             entry = self._db_handler.add_entry(**data)
+            # Set the form field to match the newly added value
+            form_entry_id_field.data = entry.id
         else:
             entry = self._db_handler.get_entry(form_entry_id)
         return entry

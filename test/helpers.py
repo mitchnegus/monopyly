@@ -6,6 +6,7 @@ import pytest
 from werkzeug.exceptions import NotFound
 from sqlalchemy import inspect, select
 from sqlalchemy.sql.expression import func
+from bs4 import BeautifulSoup
 
 from monopyly.database import db
 
@@ -120,6 +121,7 @@ class TestRoutes:
             method(self, route, *args, **kwargs)
             # Save the response as HTML
             self.html = self.response.data.decode("utf-8")
+            self.soup = BeautifulSoup(self.html, "html.parser")
         return wrapper
 
     @route_loader

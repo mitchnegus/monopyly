@@ -40,7 +40,8 @@ def provide_test_app(test_database_path):
     # Create a testing app
     app = create_app({
         'TESTING': True,
-        'DATABASE': test_database_path
+        'DATABASE': test_database_path,
+        'WTF_CSRF_ENABLED': False,
     })
     # Initialize the test database
     with app.app_context():

@@ -11,7 +11,7 @@ DEV = 1
 
 def name_version(major, minor, patch, dev):
     version_number = f'{MAJOR}.{MINOR}.{PATCH}'
-    suffix = f'{.dev{dev}' if dev else ''
+    suffix = f'.dev{dev}' if dev else ''
     return version_number + suffix
 
 

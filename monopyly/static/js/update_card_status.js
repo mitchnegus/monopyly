@@ -28,7 +28,7 @@ import {
 		const cardActive = $checkbox.is(':checked');
 		const rawData = {
 			'input_id': $checkbox[0].id,
-			'active': cardActive
+			'active': cardActive,
 		};
 		replaceDisplayContentsAjaxRequest(endpoint, rawData, $cardFront);
 		if (cardActive) {

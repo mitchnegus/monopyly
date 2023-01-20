@@ -6,6 +6,7 @@ from itertools import islice
 from flask import (
     g, redirect, render_template, flash, request, url_for, jsonify
 )
+from sqlalchemy.exc import MultipleResultsFound
 from werkzeug.exceptions import abort
 from wtforms.validators import ValidationError
 
@@ -26,7 +27,8 @@ from .transactions import (
     CreditTransactionHandler, CreditTagHandler, save_transaction
 )
 from .actions import (
-    get_card_statement_grouping, get_potential_preceding_card, make_payment
+    get_card_statement_grouping, get_potential_preceding_card, make_payment,
+    transfer_credit_card_statement
 )
 
 
@@ -56,9 +58,9 @@ def add_card():
                                    card=card,
                                    prior_card=preceding_card,
                                    transfer_statement_form=transfer_form)
-        else:
-            return redirect(url_for('credit.load_account',
-                                    account_id=card['account_id']))
+        return redirect(
+            url_for('credit.load_account', account_id=card.account_id)
+        )
     return render_template('credit/card_form/card_form_page_new.html', form=form)
 
 
@@ -125,7 +127,7 @@ def update_account_statement_issue_day(account_id):
         account_id,
         statement_issue_day=issue_day,
     )
-    return str(account['statement_issue_day'])
+    return str(account.statement_issue_day)
 
 
 @bp.route('/_update_account_statement_due_day/<int:account_id>',
@@ -140,7 +142,7 @@ def update_account_statement_due_day(account_id):
         account_id,
         statement_due_day=due_day,
     )
-    return str(account['statement_due_day'])
+    return str(account.statement_due_day)
 
 
 @bp.route('/delete_account/<int:account_id>')
@@ -207,7 +209,7 @@ def update_statement_due_date(statement_id):
         statement_id,
         due_date=due_date,
     )
-    return str(statement['due_date'])
+    return str(statement.due_date)
 
 
 @bp.route('/_pay_credit_card/<int:card_id>/<int:statement_id>',
@@ -405,7 +407,7 @@ def add_tag():
         parent_id = CreditTagHandler.find_tag(parent_name).id
     else:
         parent_id = None
-    tag = CreditTagHandler.add_tag(
+    tag = CreditTagHandler.add_entry(
         parent_id=parent_id,
         user_id=g.user.id,
         tag_name=tag_name,
@@ -415,7 +417,7 @@ def add_tag():
                            tags_hierarchy={})
 
 
-@bp.route('/_delete_tag/', methods=('POST',))
+@bp.route('/_delete_tag', methods=('POST',))
 @login_required
 @db_transaction
 def delete_tag():
@@ -442,49 +444,34 @@ def suggest_transaction_autocomplete():
     return jsonify(suggestions)
 
 
-@bp.route('/_suggest_card_autocomplete', methods=('POST',))
-@login_required
-def suggest_card_autocomplete():
-    # Get the autocomplete field from the AJAX request
-    post_args = request.get_json()
-    field = post_args['field']
-    suggestions = CreditCardForm.autocomplete(field)
-    return jsonify(suggestions)
-
-
 @bp.route('/_infer_card', methods=('POST',))
 @login_required
 def infer_card():
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    bank_name = post_args['bank_name']
-    bank = BankHandler.get_banks(bank_names=(bank_name,))[0]
-    if 'digits' in post_args:
-        last_four_digits = post_args['digits']
-        # Try to infer card from digits alone
-        cards = CreditCardHandler.get_cards(
-            last_four_digits=(last_four_digits,),
-            active=True,
-        )
-        if len(cards) != 1:
-            # Infer card from digits and bank if necessary
-            cards = CreditCardHandler.get_cards(
-                bank_ids=(bank.id,),
-                last_four_digits=(last_four_digits,),
-                active=True,
-            )
-    elif 'bank_name' in post_args:
-        # Try to infer card from bank alone
-        cards = CreditCardHandler.get_cards(bank_ids=(bank.id,), active=True)
+    bank_name = post_args["bank_name"]
+    bank = BankHandler.get_banks(bank_names=(bank_name,)).first()
+    # Determine criteria for drawing inference
+    criteria = {"active": True}
+    if bank:
+        criteria["bank_ids"] = (bank.id,)
+    if "digits" in post_args:
+        criteria["last_four_digits"] = (post_args["digits"],)
+    # Determine the card used for the transaction from the given info
+    cards = CreditCardHandler.get_cards(**criteria)
+    try:
+        card = cards.one_or_none()
+    except MultipleResultsFound:
+        card = None
     # Return an inferred card if a single card is identified
-    if len(cards) == 1:
-        # Return the card info if its is found
-        card = cards[0]
-        response = {'bank_name': card.account.bank.bank_name,
-                    'digits': card.last_four_digits}
+    if card:
+        response = {
+            "bank_name": card.account.bank.bank_name,
+            "digits": card.last_four_digits,
+        }
         return jsonify(response)
     else:
-        return ''
+        return ""
 
 
 @bp.route('/_infer_statement', methods=('POST',))
@@ -492,37 +479,30 @@ def infer_card():
 def infer_statement():
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    bank_name = post_args['bank_name']
-    last_four_digits = post_args['digits']
-    transaction_date = parse_date(post_args['transaction_date'])
+    bank_name = post_args["bank_name"]
+    bank = BankHandler.get_banks(bank_names=(bank_name,)).first()
+    # Determine criteria for drawing inference
+    card_criteria = {"active": True}
+    if bank:
+        card_criteria["bank_ids"] = (bank.id,)
+    if "digits" in post_args:
+        card_criteria["last_four_digits"] = (post_args['digits'],)
     # Determine the card used for the transaction from the given info
-    bank = BankHandler.get_banks(bank_names=(bank_name,))[0]
-    cards = CreditCardHandler.get_cards(
-        bank_ids=(bank.id,),
-        last_four_digits=(last_four_digits,),
-    )
-    if len(cards) == 1 and transaction_date:
+    cards = CreditCardHandler.get_cards(**card_criteria)
+    try:
+        card = cards.one_or_none()
+    except MultipleResultsFound:
+        card = None
+    if card and "transaction_date" in post_args:
         # Determine the statement corresponding to the card and date
-        card = cards[0]
+        transaction_date = parse_date(post_args['transaction_date'])
         statement = CreditStatementHandler.infer_statement(
             card, transaction_date
         )
         # Check that a statement was found and that it belongs to the user
         if not statement:
             abort(404, 'A statement matching the criteria was not found.')
-        return str(statement['issue_date'])
+        return str(statement.issue_date)
     else:
         return ''
-
-
-@bp.route('/_infer_bank', methods=('POST',))
-@login_required
-def infer_bank():
-    # Separate the arguments of the POST method
-    post_args = request.get_json()
-    account_id = post_args['account_id']
-    account = CreditAccountHandler.get_entry(account_id)
-    if not account:
-        abort(404, 'An account with the given ID was not found.')
-    return account.bank.bank_name
 

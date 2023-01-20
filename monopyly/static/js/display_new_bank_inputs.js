@@ -6,12 +6,12 @@ import { displayInput } from './modules/display_new_choice_form_input.js';
 
 (function() {
 
-  // Identify the account selection box for a new card
-  let $fieldBankName = $('form#bank-account #bank-name-field');
+  // Display the bank name input box for the new bank
   let $inputBank = $('form#bank-account #bank_info-bank_id');
+  let $fieldBankName = $('form#bank-account #bank-name-field');
   displayInput(
+    $inputBank,
     $fieldBankName,
-    $inputBank
   );
 
 })();

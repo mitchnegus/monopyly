@@ -59,7 +59,7 @@ class BankSubform(AcquisitionSubform):
 
     def get_bank(self):
         """Get the bank described by the form data."""
-        return self._produce_entry(self.bank_id.data)
+        return self._produce_entry_from_field("bank_id")
 
     def _prepare_mapping(self):
         bank_name = self.bank_name.data
@@ -96,7 +96,7 @@ class BankAccountForm(EntryForm):
 
         def get_account_type(self):
             """Get the bank account type described by the form data."""
-            return self._produce_entry(self.account_type_id.data)
+            return self._produce_entry_from_field("account_type_id")
 
         def _prepare_mapping(self):
             # Mapping must match format for `bank_account_types` database table
