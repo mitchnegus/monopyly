@@ -232,6 +232,22 @@ class TestBankingRoutes(TestRoutes):
             assert f"transaction-{id_}" in self.html
         assert "Do not pass GO, do not collect $200" in self.html
 
+    def test_add_subtransaction_fields(self, authorization):
+        self.post_route(
+            "/_add_subtransaction_fields",
+            json={"subtransaction_count": 1}
+        )
+        assert 'id="subtransactions-2"' in self.html
+        assert "subtransactions-2-subtotal" in self.html
+        assert "subtransactions-2-note" in self.html
+
+    def test_add_transfer_field(self, authorization):
+        self.post_route("/_add_transfer_field")
+        assert 'id="transfer_accounts_info-0"' in self.html
+        assert "transfer_accounts_info-0-bank_name" in self.html
+        assert "transfer_accounts_info-0-type_name" in self.html
+        assert "transfer_accounts_info-0-last_four_digits" in self.html
+
     @TestRoutes.transaction_client_lifetime
     def test_delete_transaction(self, transaction_authorization):
         self.get_route("/delete_transaction/4", follow_redirects=True)

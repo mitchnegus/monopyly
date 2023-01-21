@@ -6,7 +6,7 @@
   <script>
     const AUTOCOMPLETE_ENDPOINT = "{{ url_for('banking.suggest_transaction_autocomplete') }}";
     const ADD_SUBTRANSACTION_FORM_ENDPOINT = "{{ url_for('banking.add_subtransaction_fields') }}";
-    const ADD_TRANSFER_FORM_ENDPOINT = "{{ url_for('banking.add_transfer_fields') }}";
+    const ADD_TRANSFER_FORM_ENDPOINT = "{{ url_for('banking.add_transfer_field') }}";
   </script>
   <script type="module" src="{{ url_for('static', filename='js/autocomplete_banking_transaction.js') }}">
   </script>

@@ -2,7 +2,7 @@
 
   {{ form.hidden_tag() }}
 
-  {% with sub_form = form.account_info, id_prefix = 'transaction' %}
+  {% with subform = form.account_info, id_prefix = 'transaction' %}
     {% include 'banking/transaction_form/bank_info_form.html' %}
   {% endwith %}
 
@@ -16,7 +16,7 @@
   </div>
 
   <div id="subtransactions">
-    {% for sub_form in form.subtransactions %}
+    {% for subform in form.subtransactions %}
       {% include 'banking/transaction_form/subtransaction_form.html' %}
     {% endfor %}
   </div>

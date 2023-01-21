@@ -14,6 +14,7 @@ from ..database import db_transaction
 from ..auth.tools import login_required
 from ..common.utils import parse_date, dedelimit_float, sort_by_frequency
 from ..common.forms import form_err_msg
+from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import get_linked_transaction
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
@@ -364,15 +365,15 @@ def update_transaction(transaction_id):
 @login_required
 def add_subtransaction_fields():
     post_args = request.get_json()
-    new_index = post_args['subtransaction_count'] + 1
-    # Redefine the form for the transaction (including using entered info)
-    # NOTE: This is a hack (since `append_entry` method cannot be used in AJAX
-    #       without reloading the form...)
-    form_id = f'subtransactions-{new_index}'
-    sub_form = CreditTransactionForm.SubtransactionSubform(prefix=form_id)
-    sub_form.id = form_id
+    subtransaction_count = int(post_args['subtransaction_count'])
+    # Add a new subtransaction to the form
+    new_subform = extend_field_list_for_ajax(
+        CreditTransactionForm,
+        "subtransactions",
+        subtransaction_count,
+    )
     return render_template('credit/transaction_form/subtransaction_form.html',
-                           sub_form=sub_form)
+                           subform=new_subform)
 
 
 @bp.route('/delete_transaction/<int:transaction_id>')

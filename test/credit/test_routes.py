@@ -358,6 +358,16 @@ class TestCreditRoutes(TestRoutes):
         assert "$-2,345.00" in self.html
         assert "Bigger refund" in self.html
 
+    def test_add_subtransaction_fields(self, authorization):
+        self.post_route(
+            "/_add_subtransaction_fields",
+            json={"subtransaction_count": 1}
+        )
+        assert 'id="subtransactions-2"' in self.html
+        assert "subtransactions-2-subtotal" in self.html
+        assert "subtransactions-2-note" in self.html
+        assert "subtransactions-2-tags" in self.html
+
     @TestRoutes.transaction_client_lifetime
     def test_delete_transaction(self, transaction_authorization):
         self.get_route("/delete_transaction/8", follow_redirects=True)

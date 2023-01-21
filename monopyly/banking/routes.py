@@ -7,6 +7,7 @@ from flask import redirect, render_template, request, url_for, jsonify
 
 from ..database import db_transaction
 from ..auth.tools import login_required
+from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import get_linked_transaction
 from .blueprint import bp
 from .forms import *
@@ -160,28 +161,28 @@ def update_transaction(transaction_id):
 @login_required
 def add_subtransaction_fields():
     post_args = request.get_json()
-    new_index = post_args['subtransaction_count'] + 1
-    # Redefine the form for the transaction (including using entered info)
-    # NOTE: This is a hack (since `append_entry` method cannot be used in AJAX
-    #       without reloading the form...)
-    form_id = f'subtransactions-{new_index}'
-    sub_form = BankTransactionForm.SubtransactionSubform(prefix=form_id)
-    sub_form.id = form_id
+    subtransaction_count = post_args['subtransaction_count']
+    # Add a new subtransaction to the form
+    new_subform = extend_field_list_for_ajax(
+        BankTransactionForm,
+        "subtransactions",
+        subtransaction_count,
+    )
     return render_template('banking/transaction_form/subtransaction_form.html',
-                           sub_form=sub_form)
+                           subform=new_subform)
 
 
-@bp.route('/_add_transfer_fields', methods=('POST',))
+@bp.route('/_add_transfer_field', methods=('POST',))
 @login_required
-def add_transfer_fields():
-    # Redefine the form for the transaction (including the new transfer fields)
-    # NOTE: This is a hack (since `append_entry` method cannot be used in AJAX
-    #       without reloading the form...)
-    form_id = 'transfer_accounts_info-0'
-    sub_form = BankTransactionForm.AccountSubform(prefix=form_id)
-    sub_form.id = form_id
+def add_transfer_field():
+    # Add a new transfer field to the form
+    new_subform = extend_field_list_for_ajax(
+        BankTransactionForm,
+        "transfer_accounts_info",
+        field_list_count=0,
+    )
     return render_template('banking/transaction_form/transfer_form.html',
-                           sub_form=sub_form, id_prefix='transfer')
+                           subform=new_subform, id_prefix='transfer')
 
 
 @bp.route('/delete_transaction/<int:transaction_id>')
