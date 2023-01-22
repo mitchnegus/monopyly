@@ -42,7 +42,7 @@ metadata = dict(
     packages=find_packages(),
     include_package_data=True,
     scripts=['scripts/monopyly', 'scripts/backup_db.py'],
-    python_requires='>=3.7',
+    python_requires='>=3.9',
     install_requires=[
         'flask',
         'flask-wtf',

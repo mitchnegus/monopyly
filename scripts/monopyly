@@ -22,7 +22,7 @@ if not os.path.isfile(os.path.join(INSTANCE_DIR, 'monopyly.sqlite')):
 server = subprocess.Popen(['flask', 'run'])
 
 # Run the default web browser
-time.sleep(0.01)
+time.sleep(0.1)
 webbrowser.open('http://127.0.0.1:5000/')
 
 # Run the script until it's terminated

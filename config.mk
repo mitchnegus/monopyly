@@ -1,5 +1,5 @@
 # Coverage configuration
-PYTHON = python3
+PYTHON = python3.9
 PIP = $(PYTHON) -m pip
 # Package
 PACKAGE = monopyly

@@ -113,7 +113,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 def init_db_command():
     """Clear the existing data and create new tables."""
     init_db()
-    click.echo(f"Initialized the database ({current_app.config['DATABASE']})")
+    click.echo(f"Initialized the database ('{current_app.config['DATABASE']}')")
 
 
 def init_db():

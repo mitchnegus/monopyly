@@ -44,8 +44,7 @@ def init_app(app):
     app.cli.add_command(init_db_command)
     # Prepare database access with SQLAlchemy
     db.setup_engine()
-    if not app.config["TESTING"]:
-        # Only access/load tables if not testing (not yet set up in tests)
+    if not app.config["TESTING"] and Path(app.config["DATABASE"]).exists():
         db.access_tables()
 
 
