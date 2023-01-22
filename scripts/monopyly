@@ -1,8 +1,15 @@
 #!/usr/bin/env python
+"""
+A script to launch the Monopyly application.
+"""
 import os
+import argparse
 import time
+import signal
 import subprocess
 import webbrowser
+from pathlib import Path
+from threading import Event
 
 
 # Set the Flask system variables
@@ -10,25 +17,68 @@ os.environ['FLASK_APP'] = 'monopyly'
 os.environ['FLASK_ENV'] = 'development'
 
 # Set the application specific system variables
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-BASE_DIR = os.path.dirname(SCRIPT_DIR)
-INSTANCE_DIR = os.path.join(BASE_DIR, 'var/monopyly-instance')
+SCRIPT_DIR = Path(__file__).parent
+BASE_DIR = SCRIPT_DIR.parent
+INSTANCE_DIR = BASE_DIR / "var" / "monopyly-instance"
 
-# Initialize the database if it does not exist yet
-if not os.path.isfile(os.path.join(INSTANCE_DIR, 'monopyly.sqlite')):
-    os.system('flask init-db')
 
-# Run Flask
-server = subprocess.Popen(['flask', 'run'])
+def main(host=None, port=None):
+    initialize_database("monopyly.sqlite")
+    run_app(host, port)
+    # Run the default web browser
+    time.sleep(1)
+    port = "5000" if port is None else port
+    webbrowser.open(f"http://127.0.0.1:{port}/")
+    wait_for_exit()
 
-# Run the default web browser
-time.sleep(0.1)
-webbrowser.open('http://127.0.0.1:5000/')
 
-# Run the script until it's terminated
-while True:
-    try:
-        time.sleep(1)
-    except KeyboardInterrupt:
-        print('\nClosing the Monopyly app...')
-        break
+def parse_arguments():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--host",
+        help="The host address where the app will be run."
+    )
+    parser.add_argument(
+        "--port",
+        help="The port where the app will be accessible."
+    )
+    return parser.parse_args()
+
+
+def initialize_database(database_name):
+    """Initialize the database for the given name."""
+    database_path = INSTANCE_DIR / database_name
+    if not database_path.is_file():
+        os.system('flask init-db')
+
+
+def run_app(host, port):
+    """Run the Monopyly application."""
+    command = ["flask", "run"]
+    if host:
+        command.extend(["--host", host])
+    if port:
+        command.extend(["--port", port])
+    server = subprocess.Popen(command)
+
+
+def wait_for_exit():
+    """Wait for the exit command (e.g., keyboard interrupt) to be issued."""
+    for sig in ("TERM", "HUP", "INT"):
+        signal.signal(getattr(signal, "SIG"+sig), _quit)
+    while not _exit.is_set():
+        _exit.wait(1)
+
+
+def _quit(signo, _frame):
+    """Send the signal to quit the app."""
+    print('\nClosing the Monopyly app...')
+    _exit.set()
+
+
+_exit = Event()
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    main(host=args.host, port=args.port)
+
