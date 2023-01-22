@@ -54,8 +54,10 @@
 - Minor cosmetic enhancements
 
 
-## 1.1.1 (in progress)
+## 1.2.0
 
+- Database backend converted to use SQLAlchemy
+- Complete test suite created
 - Banking interface updated to use subtransactions
 - Added the ability to transfer statements when a new credit card is added to an account
 - Fixed error on handling subtransactions in credit forms
