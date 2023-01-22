@@ -24,9 +24,11 @@ def convert_markdown(raw_markdown, github_user, github_repo):
 
 
 raw_long_description = open('README.md').read()
-long_description = convert_markdown(raw_long_description,
-                                    'mitchnegus',
-                                    'monopyly')
+long_description = convert_markdown(
+    raw_long_description,
+    "mitchnegus",
+    "monopyly",
+)
 
 metadata = dict(
     name='monopyly',
@@ -41,15 +43,22 @@ metadata = dict(
     download_url='https://pypi.org/project/monopyly',
     packages=find_packages(),
     include_package_data=True,
-    scripts=['scripts/monopyly', 'scripts/backup_db.py'],
+    package_data = {
+        "": ["database/*.sql"]
+    },
+    scripts=[
+        "scripts/monopyly",
+        "scripts/backup_db.py",
+    ],
     python_requires='>=3.9',
     install_requires=[
         'flask',
         'flask-wtf',
-        'python-dateutil'
+        'python-dateutil',
     ],
 )
 
 
 if __name__ == '__main__':
     setup(**metadata)
+
