@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from ..helpers import TestRoutes
+from ..helpers import transaction_lifetime, TestRoutes
 
 
 class TestBankingRoutes(TestRoutes):
@@ -29,8 +29,8 @@ class TestBankingRoutes(TestRoutes):
         # Form should be prepopulated with the bank info
         assert 'value="Jail"' in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_account_post(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_account_post(self, authorization):
         self.post_route(
             "/add_account",
             data={
@@ -46,8 +46,8 @@ class TestBankingRoutes(TestRoutes):
         assert self.html.count('class="account-block"') == 4
         assert "8888" in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_new_bank_account_post(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_new_bank_account_post(self, authorization):
         self.post_route(
             "/add_account",
             data={
@@ -64,8 +64,8 @@ class TestBankingRoutes(TestRoutes):
         assert self.html.count('class="account-block"') == 4
         assert "8888" in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_delete_account(self, transaction_authorization):
+    @transaction_lifetime
+    def test_delete_account(self, authorization):
         self.get_route("/delete_account/3", follow_redirects=True)
         assert "Bank Accounts" in self.html
         # 2 banks for the user, with 2 total accounts
@@ -149,8 +149,8 @@ class TestBankingRoutes(TestRoutes):
         assert 'value="Jail"' in self.html
         assert 'value="5556"' in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_transaction_post(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_transaction_post(self, authorization):
         self.post_route(
             "/add_transaction",
             data={
@@ -171,9 +171,9 @@ class TestBankingRoutes(TestRoutes):
         for id_ in (2, 3, 4, 8):
             assert f"transaction-{id_}" in self.html
 
-    @TestRoutes.transaction_client_lifetime
+    @transaction_lifetime
     def test_add_transaction_multiple_subtransactions_post(
-        self, transaction_authorization
+        self, authorization
     ):
         self.post_route(
             "/add_transaction",
@@ -209,8 +209,8 @@ class TestBankingRoutes(TestRoutes):
         assert 'value="2020-05-06"' in self.html
         assert 'value="What else is there to do in Jail?"' in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_update_transaction_post(self, transaction_authorization):
+    @transaction_lifetime
+    def test_update_transaction_post(self, authorization):
         self.post_route(
             "/update_transaction/7",
             data={
@@ -248,8 +248,8 @@ class TestBankingRoutes(TestRoutes):
         assert "transfer_accounts_info-0-type_name" in self.html
         assert "transfer_accounts_info-0-last_four_digits" in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_delete_transaction(self, transaction_authorization):
+    @transaction_lifetime
+    def test_delete_transaction(self, authorization):
         self.get_route("/delete_transaction/4", follow_redirects=True)
         assert "Account Details" in self.html
         # 2 transactions in the table for the user

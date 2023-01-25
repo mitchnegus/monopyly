@@ -13,6 +13,7 @@ from monopyly.banking.transactions import BankTransactionHandler
 from monopyly.credit.cards import CreditCardHandler
 from monopyly.credit.statements import CreditStatementHandler
 from monopyly.credit.transactions import CreditTransactionHandler
+from ..helpers import transaction_lifetime
 
 
 @patch('monopyly.credit.actions.CreditStatementHandler.get_statements')
@@ -122,6 +123,7 @@ def test_transfer_credit_card_statement(client_context, transfer):
     assert prior_card.active == expected_prior_card_active
 
 
+@transaction_lifetime
 def test_make_payment(client_context):
     transaction_date = date(2020, 7, 1)
     make_payment(4, 3, transaction_date, 100.00)

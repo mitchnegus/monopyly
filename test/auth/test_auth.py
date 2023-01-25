@@ -4,13 +4,15 @@ from flask import g, session
 from sqlalchemy import select
 
 from monopyly.database import db
+from ..helpers import transaction_lifetime
 
 
-def test_registration(transaction_client, user_table):
+@transaction_lifetime
+def test_registration(client, user_table):
     # Check that the 'register' route is successfully reached
-    assert transaction_client.get('/auth/register').status_code == 200
+    assert client.get('/auth/register').status_code == 200
     # Perform a test registration
-    response = transaction_client.post(
+    response = client.post(
         '/auth/register',
         data={'username': 'a', 'password': 'a'}
     )
@@ -21,15 +23,16 @@ def test_registration(transaction_client, user_table):
         assert db_session.execute(query).fetchone() is not None
 
 
+@transaction_lifetime
 @pytest.mark.parametrize(
     ('username', 'password', 'message'),
     [('', '', b'Username is required.'),
      ('a', '', b'Password is required.'),
      ('test', 'test', b'User test is already registered.')]
 )
-def test_register_validate_input(transaction_client, username, password,
-                                 message, user_table):
-    response = transaction_client.post(
+def test_register_validate_input(client, username, password, message,
+                                 user_table):
+    response = client.post(
         '/auth/register',
         data={'username': username, 'password': password}
     )

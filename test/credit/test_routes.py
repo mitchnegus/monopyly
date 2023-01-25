@@ -6,7 +6,7 @@ import pytest
 from flask import url_for
 from werkzeug.exceptions import NotFound
 
-from ..helpers import TestRoutes
+from ..helpers import transaction_lifetime, TestRoutes
 
 
 class TestCreditRoutes(TestRoutes):
@@ -24,8 +24,8 @@ class TestCreditRoutes(TestRoutes):
         assert "New Card" in self.html
         assert '<form id="card"' in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_card_post(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_card_post(self, authorization):
         self.post_route(
             "/add_card",
             data={
@@ -42,8 +42,8 @@ class TestCreditRoutes(TestRoutes):
         assert "(ending in 3336)" in self.html
         assert "_transfer_card_statement" in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_new_account_card_post(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_new_account_card_post(self, authorization):
         self.post_route(
             "/add_card",
             data={
@@ -92,8 +92,8 @@ class TestCreditRoutes(TestRoutes):
         # 2 credit cards for the account
         assert self.html.count("credit-card-block") == 2
 
-    @TestRoutes.transaction_client_lifetime
-    def test_update_card_status(self, transaction_authorization):
+    @transaction_lifetime
+    def test_update_card_status(self, authorization):
         self.post_route(
             "/_update_card_status",
             json={
@@ -104,8 +104,8 @@ class TestCreditRoutes(TestRoutes):
         # The formerly active card should now be displayed as inactive
         assert "INACTIVE" in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_delete_card(self, transaction_authorization):
+    @transaction_lifetime
+    def test_delete_card(self, authorization):
         self.get_route("/delete_card/3", follow_redirects=True)
         assert "Credit Account Details" in self.html
         # 4 rows with information
@@ -115,19 +115,18 @@ class TestCreditRoutes(TestRoutes):
         # Ensure that the card (ending in "3335") was deleted
         assert "3335" not in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_update_account_statement_issue_day(self,
-                                                transaction_authorization):
+    @transaction_lifetime
+    def test_update_account_statement_issue_day(self, authorization):
         self.post_route("/_update_account_statement_issue_day/3", json="19")
         assert self.response.data == b"19"
 
-    @TestRoutes.transaction_client_lifetime
-    def test_update_account_statement_due_day(self, transaction_authorization):
+    @transaction_lifetime
+    def test_update_account_statement_due_day(self, authorization):
         self.post_route("/_update_account_statement_due_day/3", json="11")
         assert self.response.data == b"11"
 
-    @TestRoutes.transaction_client_lifetime
-    def test_delete_account(self, transaction_authorization):
+    @transaction_lifetime
+    def test_delete_account(self, authorization):
         self.get_route("/delete_account/2", follow_redirects=True)
         assert "Credit Cards" in self.html
         # 1 credit card for the user; 1 for the 'Add card' button
@@ -164,13 +163,13 @@ class TestCreditRoutes(TestRoutes):
         for id_ in (5, 6, 7):
             assert f"transaction-{id_}" in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_update_statement_due_date(self, transaction_authorization):
+    @transaction_lifetime
+    def test_update_statement_due_date(self, authorization):
         self.post_route("/_update_statement_due_date/5", json="07/06/2020")
         assert self.response.data == b"2020-07-06"
 
-    @TestRoutes.transaction_client_lifetime
-    def test_pay_credit_card(self, transaction_authorization):
+    @transaction_lifetime
+    def test_pay_credit_card(self, authorization):
         self.post_route(
             "/_pay_credit_card/4/7",
             json={
@@ -275,8 +274,8 @@ class TestCreditRoutes(TestRoutes):
         assert 'value="3335"' in self.html
         assert 'value="2020-06-10"' in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_transaction_post(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_transaction_post(self, authorization):
         self.post_route(
             "/add_transaction",
             data={
@@ -297,9 +296,9 @@ class TestCreditRoutes(TestRoutes):
         assert "$250.00" in self.html
         assert "New Token" in self.html
 
-    @TestRoutes.transaction_client_lifetime
+    @transaction_lifetime
     def test_add_transaction_multiple_subtransactions_post(
-        self, transaction_authorization
+        self, authorization
     ):
         self.post_route(
             "/add_transaction",
@@ -336,8 +335,8 @@ class TestCreditRoutes(TestRoutes):
         assert 'value="Water Works"' in self.html
         assert 'value="2020-06-10"' in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_update_transaction_post(self, transaction_authorization):
+    @transaction_lifetime
+    def test_update_transaction_post(self, authorization):
         self.post_route(
             "/update_transaction/10",
             data={
@@ -368,8 +367,8 @@ class TestCreditRoutes(TestRoutes):
         assert "subtransactions-2-note" in self.html
         assert "subtransactions-2-tags" in self.html
 
-    @TestRoutes.transaction_client_lifetime
-    def test_delete_transaction(self, transaction_authorization):
+    @transaction_lifetime
+    def test_delete_transaction(self, authorization):
         self.get_route("/delete_transaction/8", follow_redirects=True)
         assert "Credit Transactions" in self.html
         # 9 transactions in the table for the user
@@ -384,8 +383,8 @@ class TestCreditRoutes(TestRoutes):
         # 5 tags for the user
         assert self.html.count('class="tag"') == 5
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_tag(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_tag(self, authorization):
         self.post_route(
             "/_add_tag", json={"tag_name": "Games", "parent": None},
         )
@@ -394,8 +393,8 @@ class TestCreditRoutes(TestRoutes):
         assert len(tags) == 1
         assert tags[0].text == "Games"
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_tag_with_parent(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_tag_with_parent(self, authorization):
         self.post_route(
             "/_add_tag", json={"tag_name": "Gas", "parent": "Transportation"},
         )
@@ -404,15 +403,15 @@ class TestCreditRoutes(TestRoutes):
         assert len(tags) == 1
         assert tags[0].text == "Gas"
 
-    @TestRoutes.transaction_client_lifetime
-    def test_add_conflicting_tag(self, transaction_authorization):
+    @transaction_lifetime
+    def test_add_conflicting_tag(self, authorization):
         with pytest.raises(ValueError):
             self.post_route(
                 "/_add_tag", json={"tag_name": "Railroad", "parent": None},
             )
 
-    @TestRoutes.transaction_client_lifetime
-    def test_delete_tag(self, transaction_authorization):
+    @transaction_lifetime
+    def test_delete_tag(self, authorization):
         self.post_route("/_delete_tag", json={"tag_name": "Railroad"})
         # Returns an empty string
         assert self.response.data == b""

@@ -99,20 +99,46 @@ class AuthActions:
         return self._client.get('/auth/logout')
 
 
+class AppManager:
+
+    persistent_app = None
+    ephemeral_app = None
+
+    @classmethod
+    def get_app(cls):
+        if cls.ephemeral_app:
+            return cls.ephemeral_app
+        db.load_state(cls.persistent_app._db)
+        return cls.persistent_app
+
+    @classmethod
+    def generate_app(cls, test_db_path):
+        return provide_test_app(test_db_path)
+
+
 # Build a test database, use it in an app, and then create a test client
 
-@pytest.fixture(scope="session")
-def _app():
+@pytest.fixture(scope="session", autouse=True)
+def _app_context():
     with testing_database_context() as test_db:
-        app = provide_test_app(test_db.path)
-        yield app
+        app = AppManager.generate_app(test_db.path)
+        AppManager.persistent_app = app
+        yield
+        AppManager.persistent_app = None
 
 
 @pytest.fixture
-def app(_app):
-    # The global database object needs to be refreshed
-    db.load_state(_app._db)
-    yield _app
+def _transaction_app_context():
+    with testing_database_context() as test_db:
+        app = AppManager.generate_app(test_db.path)
+        AppManager.ephemeral_app = app
+        yield
+        AppManager.ephemeral_app = None
+
+
+@pytest.fixture
+def app():
+    yield AppManager.get_app()
 
 
 @pytest.fixture
@@ -142,34 +168,6 @@ def client_context(client, authorization):
         # Context variables (e.g. `g`) may be accessed only after response
         client.get('/')
         yield
-
-
-# Repeat the construction process, but now without session scoping to reset
-# the database after a successful transaction
-
-@pytest.fixture
-def transaction_app():
-    with testing_database_context() as test_db:
-        # Generate an app object that persists for only one transaction
-        transaction_app = provide_test_app(test_db.path)
-        yield transaction_app
-
-
-@pytest.fixture
-def transaction_client(transaction_app):
-    # Generate a client that persists for only one transaction
-    yield transaction_app.test_client()
-
-
-@pytest.fixture
-def transaction_auth(transaction_client):
-    return AuthActions(transaction_client)
-
-
-@pytest.fixture
-def transaction_authorization(transaction_auth):
-    transaction_auth.login(username="mr.monopyly", password="MONOPYLY")
-    yield
 
 
 # Streamline access to the database user table
