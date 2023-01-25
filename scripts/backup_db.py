@@ -1,40 +1,37 @@
 #!/usr/bin/env python3
 """Script to backup the SQLite database."""
-import os
+import argparse
 import datetime
 import sqlite3
+from pathlib import Path
 
 # Set the application specific system variables
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-BASE_DIR = os.path.dirname(SCRIPT_DIR)
-INSTANCE_DIR = os.path.join(BASE_DIR, 'var/monopyly-instance')
-BACKUP_DIR = os.path.join(INSTANCE_DIR, 'db_backups')
+SCRIPT_DIR = Path(__file__)
+BASE_DIR = SCRIPT_DIR.parent
+INSTANCE_DIR = BASE_DIR / "var" / "monopyly-instance"
+BACKUP_DIR = INSTANCE_DIR / "db_backups"
+
+
+def main(verbose=False)
+    timestamp = get_timestamp()
+    backup(timestamp, verbose=False)
+    if verbose:
+        print(f'Backup complete ({timestamp})')
 
 
 def get_timestamp():
     """Get a timestamp for backup filenames."""
     now = datetime.datetime.now()
-    date = str(now.date()).replace("-","")
-    timestamp = f'{date}_{now.hour:0>2}{now.minute:0>2}{now.second:0>2}'
+    timestamp = now.strftime("%Y%m%d_%H%M%S")
     return timestamp
 
 
-def create_directory(directory_path):
-    """Create a directory if it does not already exist."""
-    try:
-        os.makedirs(directory_path)
-    except FileExistsError:
-        # The directory already exists
-        pass
-
-
-def backup(verbose=False):
+def backup(timestamp):
     """Creates a backup of the database."""
-    timestamp = get_timestamp()
-    create_directory(BACKUP_DIR)
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
     # Define the database names/paths
-    orig_db_path = os.path.join(INSTANCE_DIR, 'monopyly.sqlite')
-    backup_db_path = os.path.join(BACKUP_DIR, f'backup_{timestamp}.sqlite')
+    orig_db_path = INSTANCE_DIR / "monopyly.sqlite"
+    backup_db_path = BACKUP_DIR / f"backup_{timestamp}.sqlite"
     # Connect to the databases
     db = sqlite3.connect(orig_db_path)
     backup_db = sqlite3.connect(backup_db_path)
@@ -44,9 +41,16 @@ def backup(verbose=False):
     # Close the connections
     backup_db.close()
     db.close()
-    if verbose:
-        print(f'Backup complete ({timestamp})')
+
+
+def parse_arguments()
+    """Parse arguments from the command line."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--verbose", action="store_true")
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
-    backup(verbose=True)
+    args = parse_arguments()
+    main(verbose=args.verbose)
+
