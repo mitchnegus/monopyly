@@ -39,7 +39,7 @@ def transaction_lifetime(test_function):
         The wrapped test.
     """
 
-    @pytest.mark.usefixtures("_transaction_app_context")
+    @pytest.mark.usefixtures("transaction_app_context")
     @functools.wraps(test_function)
     def wrapped_test_function(*args, **kwargs):
         test_function(*args, **kwargs)
