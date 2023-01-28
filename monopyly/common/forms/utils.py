@@ -83,10 +83,11 @@ class Autocompleter:
         # Execute the query and sort appropriately
         field_value_by_sort_field = {}
         for row in current_app.db.session.execute(sort_query):
-            value = row[field]
+            value = getattr(row, field)
             # Register values associated with the important sort field value
             if not field_value_by_sort_field.get(value):
-                row_has_precedence = (row[sort_field] == precedence_value)
+                sort_value = getattr(row, sort_field)
+                row_has_precedence = (sort_value == precedence_value)
                 field_value_by_sort_field[value] = row_has_precedence
         suggestions.sort(key=field_value_by_sort_field.get, reverse=True)
 

@@ -9,5 +9,5 @@ pytest 	           # test dependency
 pytest-cov         # test dependency
 python-dateutil
 setuptools
-sqlalchemy>=1.4.46
+sqlalchemy>=2.0.0
 werkzeug

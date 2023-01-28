@@ -55,7 +55,7 @@ metadata = dict(
         "flask>=2.2.2",
         "flask-wtf",
         "python-dateutil",
-        "sqlalchemy>=1.4.46",
+        "sqlalchemy>=2.0.0",
     ],
 )
 

@@ -32,7 +32,7 @@ env: $(ENV)/.touchfile
 	@echo "The environment ($(ENV)) is up to date."
 
 
-# Create/update the virtual environment (based on `requirements.txt` etc.)
+# Create/update the virtual environment (based on `requirements.txt`, etc.)
 # Uses touchfile as proxy for installed environment
 $(ENV)/.touchfile : $(REQS) setup.py
 	@echo "Installing/updating the environment ($(ENV))."
