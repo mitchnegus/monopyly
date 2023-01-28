@@ -31,7 +31,7 @@ def create_app(test_config=None):
         app.config.from_pyfile('config.py', silent=True)
     else:
         # Load the test config if that is passed instead
-        app.config.from_mapping(test_config)
+        app.config.from_object(test_config)
 
 
     # Allow the databases to be initialized from the command line

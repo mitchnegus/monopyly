@@ -14,6 +14,7 @@ from sqlalchemy.sql.expression import func
 from bs4 import BeautifulSoup
 
 from monopyly import create_app
+from monopyly.config import TestingConfig
 from monopyly.database import init_db
 
 
@@ -69,11 +70,10 @@ class AppManager:
     @classmethod
     def _generate_app(cls, test_database_path):
         # Create a testing app
-        app = create_app({
-            'TESTING': True,
-            'DATABASE': test_database_path,
-            'WTF_CSRF_ENABLED': False,
-        })
+        test_config = TestingConfig()
+        test_config.DATABASE = test_database_path
+        test_config.WTF_CSRF_ENABLED = False
+        app = create_app(test_config)
         return app
 
     @classmethod
