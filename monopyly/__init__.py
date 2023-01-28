@@ -2,6 +2,7 @@
 Run a development server for the Monopyly app.
 """
 from pathlib import Path
+from warnings import warn
 
 from flask import Flask
 
@@ -29,6 +30,7 @@ def create_app(test_config=None):
             config = DevelopmentConfig(db_path=db_path)
         else:
             config = ProductionConfig(db_path=db_path)
+            warn("INSECURE: Production mode has not yet been fully configured")
     app.config.from_object(config)
 
     # Allow the databases to be initialized from the command line
