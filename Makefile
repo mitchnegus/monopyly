@@ -5,13 +5,13 @@ include config.mk
 ## develop 	: Install the package in development mode
 .PHONY: develop
 develop:
-	$(PYTHON) setup.py develop
+	$(PIP) install -e .
 
 
 ## install	: Install the package
 .PHONY: install
 install:
-	$(PYTHON) setup.py install
+	$(PIP) install .
 
 
 ## package	: Bundle the package for distribution
@@ -38,7 +38,7 @@ $(ENV)/.touchfile : $(REQS) setup.py
 	@echo "Installing/updating the environment ($(ENV))."
 	@if [ ! -d "$(ENV)" ]; then $(PYTHON) -m venv $(ENV); fi
 	@. $(ENV_ACTIVATE); \
-	pip install -r $(REQS) -e .
+	$(PIP) install -r $(REQS) -e .
 	@touch $(ENV)/.touchfile
 
 
