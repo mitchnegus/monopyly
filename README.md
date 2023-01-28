@@ -19,7 +19,7 @@ To install the app, simply run
 pip install monopyly
 ```
 
-The package requires a recent version of Python (3.7+).
+The package requires a recent version of Python (3.9+).
 
 
 ## Getting started
