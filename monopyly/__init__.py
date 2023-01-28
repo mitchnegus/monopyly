@@ -5,7 +5,7 @@ from pathlib import Path
 
 from flask import Flask
 
-from monopyly.config import DevelopmentConfig
+from monopyly.config import DevelopmentConfig, ProductionConfig
 from monopyly.database import db, SQLAlchemy, init_db_command, close_db, DB_NAME
 
 
@@ -16,17 +16,19 @@ def create_app(test_config=None):
         instance_relative_config=True,
     )
 
-    # Ensure the instance path exists
-    instance_path = Path(app.instance_path)
-    instance_path.mkdir(parents=True, exist_ok=True)
-
-    if test_config is None:
-        # Load the development config, if it exists, when not testing
-        db_path = instance_path / DB_NAME
-        config = DevelopmentConfig(db_path=db_path)
-    else:
+    if test_config:
         # Load the test config if that is passed instead
         config = test_config
+    else:
+        # Ensure the instance path exists
+        instance_path = Path(app.instance_path)
+        instance_path.mkdir(parents=True, exist_ok=True)
+        # Load the development/production config when not testing
+        db_path = instance_path / DB_NAME
+        if app.debug:
+            config = DevelopmentConfig(db_path=db_path)
+        else:
+            config = ProductionConfig(db_path=db_path)
     app.config.from_object(config)
 
 
