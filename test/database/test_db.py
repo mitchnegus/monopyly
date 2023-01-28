@@ -1,14 +1,13 @@
 """Tests for the database."""
-from monopyly.database import db
 
 
 def test_get_close_db(app):
     # Access the database
     with app.app_context():
-        session = db.session
-        assert session is db.session
+        session = app.db.session
+        assert session is app.db.session
     # Check that the session ended
-    assert session is not db.session
+    assert session is not app.db.session
 
 
 def test_init_db_command(runner, monkeypatch):

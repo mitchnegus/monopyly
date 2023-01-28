@@ -4,7 +4,6 @@ from unittest.mock import Mock, patch, call
 
 import pytest
 
-from monopyly.database import db
 from monopyly.credit.actions import (
     get_card_statement_grouping, get_potential_preceding_card,
     transfer_credit_card_statement, make_payment
@@ -75,7 +74,7 @@ def test_get_potential_preceding_card_no_statements(client_context):
     preceding_card = get_potential_preceding_card(card)
     assert preceding_card is None
 
-def test_get_potential_preceding_card_no_balance(client_context):
+def test_get_potential_preceding_card_no_balance(app, client_context):
     # Deactivate the original active card with statements
     CreditCardHandler.update_entry(4, active=0)
     # Add a card (without statements)
@@ -97,7 +96,7 @@ def test_get_potential_preceding_card_no_balance(client_context):
             {"subtotal": -636.33, "note": "Zeroing the balance", "tags": []},
         ]
     )
-    db.session.refresh(statement)
+    app.db.session.refresh(statement)
     # Mock the card to be tested for a preceding card
     card = Mock(id=6, active=1, account_id=3)
     preceding_card = get_potential_preceding_card(card)

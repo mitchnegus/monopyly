@@ -5,7 +5,6 @@ from werkzeug.exceptions import abort
 import sqlalchemy.sql.functions as sql_func
 
 from ..common.forms.utils import execute_on_form_validation
-from ..database import db
 from ..database.handler import DatabaseViewHandler
 from ..database.models import (
     Bank, BankAccountType, BankAccountTypeView, BankAccount, BankAccountView
@@ -59,7 +58,7 @@ class BankAccountTypeHandler(DatabaseViewHandler):
         query = query.join(BankAccount).join(Bank).distinct()
         # Get only types for the specified bank
         query = query.where(Bank.id == bank_id)
-        account_types = db.session.execute(query).scalars()
+        account_types = cls._db.session.execute(query).scalars()
         return account_types
 
     @classmethod
@@ -184,7 +183,7 @@ class BankAccountHandler(DatabaseViewHandler):
         """Get the balance of all accounts at one bank."""
         query = cls.model.select_for_user(sql_func.sum(cls.model.balance))
         query = query.where(Bank.id == bank_id)
-        balance = db.session.execute(query).scalar()
+        balance = cls._db.session.execute(query).scalar()
         if balance is None:
             abort_msg = ("No balance was found for the given combination of "
                          "user and account.")

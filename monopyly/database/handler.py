@@ -3,12 +3,11 @@ A database handler for facilitating interactions with the SQLite database.
 """
 from abc import ABC, abstractmethod
 
-from flask import g
+from flask import current_app, g
 from werkzeug.exceptions import abort
 from sqlalchemy import inspect
 from sqlalchemy.exc import NoResultFound
 
-from . import db
 from .utils import validate_sort_order
 
 
@@ -32,6 +31,11 @@ class DatabaseHandler(ABC):
     table : str
         The name of the database table that this handler manages.
     """
+
+    @classmethod
+    @property
+    def _db(cls):
+        return current_app.db
 
     @classmethod
     @property
@@ -90,7 +94,7 @@ class DatabaseHandler(ABC):
         # Query entries for the authorized user
         query = cls.model.select_for_user()
         query = cls._customize_entries_query(query, filters, sort_order)
-        entries = db.session.execute(query).scalars()
+        entries = cls._db.session.execute(query).scalars()
         return entries
 
     @classmethod
@@ -125,7 +129,7 @@ class DatabaseHandler(ABC):
         # Query entries from the authorized user
         query = cls.model.select_for_user()
         query = cls._customize_entries_query(query, filters, sort_order)
-        results = db.session.execute(query)
+        results = cls._db.session.execute(query)
         if require_unique:
             entry = results.scalar_one_or_none()
         else:
@@ -195,7 +199,7 @@ class DatabaseHandler(ABC):
         criteria = [cls.model.id == entry_id]
         query = cls.model.select_for_user().where(*criteria)
         try:
-            entry = db.session.execute(query).scalar_one()
+            entry = cls._db.session.execute(query).scalar_one()
         except NoResultFound:
             abort_msg = (f"The entry with ID {entry_id} does not exist for "
                           "the current user.")
@@ -218,8 +222,8 @@ class DatabaseHandler(ABC):
             The saved entry.
         """
         entry = cls.model(**field_values)
-        db.session.add(entry)
-        db.session.flush()
+        cls._db.session.add(entry)
+        cls._db.session.flush()
         # Confirm that this was an authorized entry by the user
         entry = cls.get_entry(entry.id)
         return entry
@@ -246,14 +250,14 @@ class DatabaseHandler(ABC):
             The saved entry.
         """
         cls._confirm_manipulation_authorization(entry_id)
-        entry = db.session.get(cls.model, entry_id)
+        entry = cls._db.session.get(cls.model, entry_id)
         entry_fields = [column.name for column in inspect(cls.model).columns]
         for field, value in field_values.items():
             if field not in entry_fields:
                 raise ValueError("A value cannot be updated in the "
                                 f"nonexistent field {field}.")
             setattr(entry, field, value)
-        db.session.flush()
+        cls._db.session.flush()
         # Confirm that this was an authorized entry by the user
         entry = cls.get_entry(entry.id)
         return entry
@@ -269,9 +273,9 @@ class DatabaseHandler(ABC):
             The ID of the entry to be deleted.
         """
         cls._confirm_manipulation_authorization(entry_id)
-        entry = db.session.get(cls.model, entry_id)
-        db.session.delete(entry)
-        db.session.flush()
+        entry = cls._db.session.get(cls.model, entry_id)
+        cls._db.session.delete(entry)
+        cls._db.session.flush()
 
     @classmethod
     def _confirm_manipulation_authorization(cls, entry_id):

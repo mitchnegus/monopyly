@@ -1,7 +1,8 @@
 """
 Tools for building a common transaction interface.
 """
-from ..database import db
+from flask import current_app
+
 from ..database.models import (
     BankAccountTypeView, BankTransactionView, CreditTransactionView
 )
@@ -50,7 +51,7 @@ def _get_linked_bank_transaction(transaction_id, internal_transaction_id):
         BankTransactionView.internal_transaction_id == internal_transaction_id,
     ]
     query = query.where(*criteria)
-    transaction = db.session.execute(query).scalar_one_or_none()
+    transaction = current_app.db.session.execute(query).scalar_one_or_none()
     return transaction
 
 
@@ -62,6 +63,6 @@ def _get_linked_credit_transaction(transaction_id, internal_transaction_id):
         CreditTransactionView.internal_transaction_id == internal_transaction_id,
     ]
     query = query.where(*criteria)
-    transaction = db.session.execute(query).scalar_one_or_none()
+    transaction = current_app.db.session.execute(query).scalar_one_or_none()
     return transaction
 

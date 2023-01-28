@@ -2,7 +2,6 @@
 Tools for interacting with the credit transactions in the database.
 """
 from ..common.forms.utils import execute_on_form_validation
-from ..database import db
 from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models  import (
     Bank, CreditAccount, CreditCard, CreditStatementView, CreditTransaction,
@@ -114,7 +113,7 @@ class CreditTransactionHandler(DatabaseViewHandler):
         transaction = super().add_entry(**field_values)
         cls._add_subtransactions(transaction, subtransactions_data)
         # Refresh the transaction with the subtransaction information
-        db.session.refresh(transaction)
+        cls._db.session.refresh(transaction)
         return transaction
 
     @classmethod
@@ -126,14 +125,14 @@ class CreditTransactionHandler(DatabaseViewHandler):
         if subtransactions_data:
             # Replace all subtransactions when updating any subtransaction
             for subtransaction in transaction.subtransactions:
-                db.session.delete(subtransaction)
+                cls._db.session.delete(subtransaction)
             cls._add_subtransactions(transaction, subtransactions_data)
         # Refresh the transaction with the subtransaction information
-        db.session.refresh(transaction)
+        cls._db.session.refresh(transaction)
         return transaction
 
-    @staticmethod
-    def _add_subtransactions(transaction, subtransactions_data):
+    @classmethod
+    def _add_subtransactions(cls, transaction, subtransactions_data):
         """Add subtransactions to the database for the data given."""
         for subtransaction_data in subtransactions_data:
             tag_names = subtransaction_data.pop("tags")
@@ -144,9 +143,9 @@ class CreditTransactionHandler(DatabaseViewHandler):
                 **subtransaction_data,
                 tags=tags,
             )
-            db.session.add(subtransaction)
+            cls._db.session.add(subtransaction)
         # Flush to the database after all subtransactions have been added
-        db.session.flush()
+        cls._db.session.flush()
 
 
 class CreditTagHandler(DatabaseHandler):
@@ -262,7 +261,7 @@ class CreditTagHandler(DatabaseHandler):
         # Filter the query to get only subtags of the given tag
         parent_id = tag.id if tag else None
         query = query.where(cls.model.parent_id == parent_id)
-        subtags = db.session.execute(query).scalars()
+        subtags = cls._db.session.execute(query).scalars()
         return subtags
 
     @classmethod
@@ -360,7 +359,7 @@ class CreditTagHandler(DatabaseHandler):
         """
         criteria = [cls.model.tag_name == tag_name]
         query = cls.model.select_for_user().where(*criteria)
-        tag = db.session.execute(query).scalar_one_or_none()
+        tag = cls._db.session.execute(query).scalar_one_or_none()
         return tag
 
 

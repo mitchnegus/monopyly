@@ -1,11 +1,13 @@
 """
 Routes for site authentication.
 """
-from flask import flash, redirect, render_template, request, session, url_for
+from flask import (
+    current_app, flash, redirect, render_template, request, session, url_for
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy import select, insert
 
-from ..database import db, db_transaction
+from ..database import db_transaction
 from ..database.models import User
 from .blueprint import bp
 from .actions import get_username_and_password
@@ -25,7 +27,7 @@ def register():
         else:
             # Get user information from the database
             user_query = select(User).where(User.username == username)
-            user = db.session.scalar(user_query)
+            user = current_app.db.session.scalar(user_query)
             if user:
                 error = f'User {username} is already registered.'
             else:
@@ -36,7 +38,7 @@ def register():
                 username=username,
                 password=generate_password_hash(password),
             )
-            db.session.add(new_user)
+            current_app.db.session.add(new_user)
             return redirect(url_for('auth.login'))
         else:
             flash(error)
@@ -51,7 +53,7 @@ def login():
         username, password = get_username_and_password(request.form)
         # Get user information from the database
         user_query = select(User).where(User.username == username)
-        user = db.session.scalar(user_query)
+        user = current_app.db.session.scalar(user_query)
         # Check for errors in the accessed information
         if user is None:
             error = 'That user is not yet registered.'

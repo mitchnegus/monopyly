@@ -3,12 +3,11 @@ import pytest
 from flask import g, session
 from sqlalchemy import select
 
-from monopyly.database import db
 from ..helpers import transaction_lifetime
 
 
 @transaction_lifetime
-def test_registration(client, user_table):
+def test_registration(app, client, user_table):
     # Check that the 'register' route is successfully reached
     assert client.get('/auth/register').status_code == 200
     # Perform a test registration
@@ -19,7 +18,7 @@ def test_registration(client, user_table):
     assert '/auth/login' == response.headers['Location']
     # Check that the registration was successful
     query = select(user_table).where(user_table.c.username == 'a')
-    with db.session as db_session:
+    with app.db.session as db_session:
         assert db_session.execute(query).fetchone() is not None
 
 

@@ -3,10 +3,9 @@ General utility objects for handling forms.
 """
 from functools import wraps
 
-from flask import flash
+from flask import current_app, flash
 from wtforms.validators import ValidationError
 
-from ...database import db
 from ..utils import sort_by_frequency
 from ._forms import form_err_msg
 
@@ -68,7 +67,7 @@ class Autocompleter:
         """Get autocomplete suggestions for a field."""
         # Get information from the database to use for autocompletion
         query = model.select_for_user(getattr(model, field))
-        values = db.session.execute(query).scalars()
+        values = current_app.db.session.execute(query).scalars()
         suggestions = sort_by_frequency([value for value in values])
         return suggestions
 
@@ -83,7 +82,7 @@ class Autocompleter:
         )
         # Execute the query and sort appropriately
         field_value_by_sort_field = {}
-        for row in db.session.execute(sort_query):
+        for row in current_app.db.session.execute(sort_query):
             value = row[field]
             # Register values associated with the important sort field value
             if not field_value_by_sort_field.get(value):

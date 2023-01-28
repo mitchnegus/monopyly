@@ -5,7 +5,7 @@ from pathlib import Path
 
 from flask import Flask
 
-from monopyly.database import db, init_db_command, close_db, DB_PATH
+from monopyly.database import db, SQLAlchemy, init_db_command, close_db, DB_PATH
 from monopyly.definitions import INSTANCE_PATH
 
 
@@ -43,9 +43,15 @@ def init_app(app):
     # Register the database intialization with the app
     app.cli.add_command(init_db_command)
     # Prepare database access with SQLAlchemy
-    db.setup_engine()
-    if not app.config["TESTING"] and Path(app.config["DATABASE"]).exists():
-        db.access_tables()
+    #   - Use the `app.db` attribute like the `app.extensions` dict
+    #     (but not actually that dict because this is not an extension)
+    if app.testing:
+        app.db = SQLAlchemy(db_path=app.config["DATABASE"])
+    else:
+        app.db = db
+    # If the database is new, it will not yet have been properly populated
+    if not app.testing and Path(app.config["DATABASE"]).exists():
+        app.db.access_tables()
 
 
 def register_blueprints(app):

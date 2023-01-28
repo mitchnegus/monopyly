@@ -3,7 +3,6 @@ Tools for interacting with the bank transactions in the database.
 """
 from ..core.internal_transactions import add_internal_transaction
 from ..common.forms.utils import execute_on_form_validation
-from ..database import db
 from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models import (
     BankAccountView, BankTransaction, BankTransactionView, BankSubtransaction,
@@ -110,7 +109,7 @@ class BankTransactionHandler(DatabaseViewHandler):
         transaction = super().add_entry(**field_values)
         cls._add_subtransactions(transaction, subtransactions_data)
         # Refresh the transaction with the subtransaction information
-        db.session.refresh(transaction)
+        cls._db.session.refresh(transaction)
         return transaction
 
     @classmethod
@@ -122,23 +121,23 @@ class BankTransactionHandler(DatabaseViewHandler):
         if subtransactions_data:
             # Replace all subtransactions when updating any subtransaction
             for subtransaction in transaction.subtransactions:
-                db.session.delete(subtransaction)
+                cls._db.session.delete(subtransaction)
             cls._add_subtransactions(transaction, subtransactions_data)
         # Refresh the transaction with the subtransaction information
-        db.session.refresh(transaction)
+        cls._db.session.refresh(transaction)
         return transaction
 
-    @staticmethod
-    def _add_subtransactions(transaction, subtransactions_data):
+    @classmethod
+    def _add_subtransactions(cls, transaction, subtransactions_data):
         """Add subtransactions to the database for the data given."""
         for subtransaction_data in subtransactions_data:
             subtransaction = BankSubtransaction(
                 transaction_id =transaction.id,
                 **subtransaction_data,
             )
-            db.session.add(subtransaction)
+            cls._db.session.add(subtransaction)
         # Flush to the database after all subtransactions have been added
-        db.session.flush()
+        cls._db.session.flush()
 
 
 @execute_on_form_validation

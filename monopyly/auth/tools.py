@@ -3,10 +3,9 @@ Tools for dealing with the authorization blueprint.
 """
 import functools
 
-from flask import g, redirect, session, url_for
+from flask import current_app, g, redirect, session, url_for
 from sqlalchemy import select
 
-from ..database import db
 from ..database.models import User
 from .blueprint import bp
 
@@ -19,7 +18,7 @@ def load_logged_in_user():
         g.user = None
     else:
         query = select(User).where(User.id == user_id)
-        with db.session as db_session:
+        with current_app.db.session as db_session:
             g.user = db_session.scalar(query)
 
 

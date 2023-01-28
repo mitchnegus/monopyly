@@ -24,35 +24,6 @@ DB_PATH = Path(INSTANCE_PATH, DB_NAME)
 
 
 class SQLAlchemy:
-    """
-    Store SQLAlchemy database objects.
-
-    This is a wrapper for the `_SQLAlchemy` object. The wrapped object
-    stores the database information and is the primary vehicle for
-    interacting with the SQLAlchemy API. This object facilitates testing,
-    to enable the state of that wrapped database object to be preserved
-    over the course of many tests. (This is a major efficiency
-    enhancement, as the database does not need to be recreated and/or
-    repopulated for each test.
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.create(*args, **kwargs)
-
-    def __getattr__(self, item):
-        return getattr(self._db, item)
-
-    def create(self, *args, **kwargs):
-        self._db = _SQLAlchemy(*args, **kwargs)
-
-    def save_state(self):
-        return self._db
-
-    def load_state(self, db):
-        self._db = db
-
-
-class _SQLAlchemy:
     """Store SQLAlchemy database objects."""
     _base = Model
 
@@ -61,6 +32,7 @@ class _SQLAlchemy:
         self.engine = None
         self.metadata = None
         self.scoped_session = None
+        self.setup_engine()
 
     @property
     def tables(self):
@@ -77,8 +49,11 @@ class _SQLAlchemy:
         db_url = f"{DIALECT}+{DBAPI}:///{self._path}"
         self.engine = create_engine(db_url, echo=echo_engine)
         # Use a session factory to generate sessions
-        session_kwargs = {"bind": self.engine, "autoflush": False, "future": True}
-        session_factory = sessionmaker(**session_kwargs)
+        session_factory = sessionmaker(
+            bind=self.engine,
+            autoflush=False,
+            future=True,
+        )
         self.scoped_session = scoped_session(session_factory)
         self._base.query = self.scoped_session.query_property()
         # Add metadata
@@ -96,7 +71,7 @@ def db_transaction(func):
     """A decorator denoting the wrapped function as a database transaction."""
     @wraps(func)
     def wrapper(*args, **kwargs):
-        with db.session.begin():
+        with current_app.db.session.begin():
             return func(*args, **kwargs)
     return wrapper
 
@@ -116,7 +91,7 @@ def init_db_command():
     click.echo(f"Initialized the database ('{current_app.config['DATABASE']}')")
 
 
-def init_db():
+def init_db(db):
     """Execute the SQL schema to clear existing data and create new tables."""
     # Establish a raw connection in order to execute the complete files
     raw_conn = db.engine.raw_connection()
@@ -134,6 +109,6 @@ def init_db():
 
 def close_db(exception=None):
     """Close the database if it is open."""
-    if db.scoped_session is not None:
-        db.scoped_session.remove()
+    if current_app.db.scoped_session is not None:
+        current_app.db.scoped_session.remove()
 

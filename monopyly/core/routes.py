@@ -3,7 +3,6 @@ Routes for core functionality.
 """
 from flask import g, render_template
 
-from ..database import db
 from ..auth.tools import login_required
 from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
