@@ -29,6 +29,8 @@ upload :
 ## env		: Prepare a virtual environment to run the package
 .PHONY: env
 env: $(ENV)/.touchfile
+	@. $(ENV_ACTIVATE); \
+	pip install -e .
 	@echo "The environment ($(ENV)) is up to date."
 
 
