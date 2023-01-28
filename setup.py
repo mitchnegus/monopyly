@@ -50,11 +50,12 @@ metadata = dict(
         "scripts/monopyly",
         "scripts/backup_db.py",
     ],
-    python_requires='>=3.9',
+    python_requires=">=3.9",
     install_requires=[
-        'flask',
-        'flask-wtf',
-        'python-dateutil',
+        "flask>=2.2.2",
+        "flask-wtf",
+        "python-dateutil",
+        "sqlalchemy>=1.4.46",
     ],
 )
 

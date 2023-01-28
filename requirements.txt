@@ -1,6 +1,6 @@
 beautifulsoup4     # test dependency
 coverage           # test dependency
-flask >= 2.2.2
+flask>=2.2.2
 flask-wtf
 ipython            # dev dependency?
 numpy
@@ -9,5 +9,5 @@ pytest 	           # test dependency
 pytest-cov         # test dependency
 python-dateutil
 setuptools
-sqlalchemy
+sqlalchemy>=1.4.46
 werkzeug
