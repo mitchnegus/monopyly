@@ -19,7 +19,8 @@ os.environ['FLASK_APP'] = 'monopyly'
 
 
 def main(mode, host=None, port=None):
-    os.system('flask init-db')
+    # Initialize the database (force debug mode here, not during production)
+    os.system('flask --debug init-db')
     run_app(mode, host, port)
     # Run the default web browser
     time.sleep(1)
