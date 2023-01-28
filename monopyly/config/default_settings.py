@@ -1,15 +1,14 @@
 """Default configuration settings."""
 from pathlib import Path
 
-from ..database import DB_NAME
-
 
 class Config:
     """A base configuration object with some default settings."""
     TESTING = False
 
-    def __init__(self):
-        self._database = None
+    def __init__(self, db_path=None):
+        if db_path:
+            self.DATABASE = db_path
 
     @property
     def DATABASE(self):

@@ -70,9 +70,7 @@ class AppManager:
     @classmethod
     def _generate_app(cls, test_database_path):
         # Create a testing app
-        test_config = TestingConfig()
-        test_config.DATABASE = test_database_path
-        test_config.WTF_CSRF_ENABLED = False
+        test_config = TestingConfig(db_path=test_database_path)
         app = create_app(test_config)
         return app
 

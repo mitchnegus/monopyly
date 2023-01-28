@@ -11,6 +11,8 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """A configuration object with settings for testing."""
     TESTING = True
+    SECRET_KEY = "testing key"
+    WTF_CSRF_ENABLED = False
 
 
 class ProductionConfig(Config):
