@@ -22,7 +22,8 @@ package:
 
 ## upload		: Upload the package to PyPI
 .PHONY: upload
-upload :
+upload : env
+	@. $(ENV_ACTIVATE); \
 	$(PYTHON) -m twine upload --skip-existing dist/*
 
 

@@ -10,4 +10,5 @@ pytest-cov         # test dependency
 python-dateutil
 setuptools
 sqlalchemy>=2.0.0
+twine
 werkzeug
