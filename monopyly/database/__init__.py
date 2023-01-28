@@ -82,9 +82,13 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 @click.command('init-db')
 @with_appcontext
 def init_db_command():
-    """Clear the existing data and create new tables."""
-    init_db()
-    click.echo(f"Initialized the database ('{current_app.config['DATABASE']}')")
+    """Initialize the database from the command line (if it does not exist)."""
+    db_path = current_app.config["DATABASE"]
+    if not db_path.is_file():
+        init_db(current_app.db)
+        click.echo(f"Initialized the database ('{db_path}')")
+    else:
+        click.echo(f"Database exists, using '{db_path}'")
 
 
 def init_db(db):

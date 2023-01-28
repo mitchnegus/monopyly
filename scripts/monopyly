@@ -11,20 +11,16 @@ import webbrowser
 from pathlib import Path
 from threading import Event
 
+from flask import current_app
 
-# Set the Flask system variables
+
+# Set the Flask environment variable
 os.environ['FLASK_APP'] = 'monopyly'
-os.environ['FLASK_ENV'] = 'development'
-
-# Set the application specific system variables
-SCRIPT_DIR = Path(__file__).parent
-BASE_DIR = SCRIPT_DIR.parent
-INSTANCE_DIR = BASE_DIR / "var" / "monopyly-instance"
 
 
-def main(host=None, port=None):
-    initialize_database("monopyly.sqlite")
-    run_app(host, port)
+def main(mode, host=None, port=None):
+    os.system('flask init-db')
+    run_app(mode, host, port)
     # Run the default web browser
     time.sleep(1)
     port = "5000" if port is None else port
@@ -42,19 +38,19 @@ def parse_arguments():
         "--port",
         help="The port where the app will be accessible."
     )
+    parser.add_argument(
+        "mode",
+        help="The runtime mode for the app; defaults to `development`.",
+        choices=["development", "production"],
+    )
     return parser.parse_args()
 
 
-def initialize_database(database_name):
-    """Initialize the database for the given name."""
-    database_path = INSTANCE_DIR / database_name
-    if not database_path.is_file():
-        os.system('flask init-db')
-
-
-def run_app(host, port):
+def run_app(mode, host=None, port=None):
     """Run the Monopyly application."""
     command = ["flask", "run"]
+    if mode == "development":
+        command.insert(1, "--debug")
     if host:
         command.extend(["--host", host])
     if port:
@@ -80,5 +76,5 @@ _exit = Event()
 
 if __name__ == "__main__":
     args = parse_arguments()
-    main(host=args.host, port=args.port)
+    main(args.mode, host=args.host, port=args.port)
 

@@ -31,7 +31,6 @@ def create_app(test_config=None):
             config = ProductionConfig(db_path=db_path)
     app.config.from_object(config)
 
-
     # Allow the databases to be initialized from the command line
     init_app(app)
     register_blueprints(app)
