@@ -1,6 +1,6 @@
 beautifulsoup4     # test dependency
 coverage           # test dependency
-flask
+flask >= 2.2.2
 flask-wtf
 ipython            # dev dependency?
 numpy
