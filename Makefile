@@ -29,18 +29,16 @@ upload :
 ## env		: Prepare a virtual environment to run the package
 .PHONY: env
 env: $(ENV)/.touchfile
-	@. $(ENV_ACTIVATE); \
-	pip install -e .
 	@echo "The environment ($(ENV)) is up to date."
 
 
 # Create/update the virtual environment (based on `requirements.txt` etc.)
 # Uses touchfile as proxy for installed environment
-$(ENV)/.touchfile : $(REQS)
+$(ENV)/.touchfile : $(REQS) setup.py
 	@echo "Installing/updating the environment ($(ENV))."
 	@if [ ! -d "$(ENV)" ]; then $(PYTHON) -m venv $(ENV); fi
 	@. $(ENV_ACTIVATE); \
-	pip install -r $(REQS)
+	pip install -r $(REQS) -e .
 	@touch $(ENV)/.touchfile
 
 
