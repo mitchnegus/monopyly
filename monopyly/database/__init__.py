@@ -12,7 +12,6 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.schema import Table
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from ..definitions import INSTANCE_PATH
 from .models import Model
 from .schema import DATABASE_SCHEMA
 
@@ -20,7 +19,6 @@ from .schema import DATABASE_SCHEMA
 DIALECT = 'sqlite'
 DBAPI = 'pysqlite'
 DB_NAME = 'monopyly.sqlite'
-DB_PATH = Path(INSTANCE_PATH, DB_NAME)
 
 
 class SQLAlchemy:
@@ -28,11 +26,9 @@ class SQLAlchemy:
     _base = Model
 
     def __init__(self, db_path=None):
-        self._path = db_path if db_path else DB_PATH
         self.engine = None
         self.metadata = None
         self.scoped_session = None
-        self.setup_engine()
 
     @property
     def tables(self):
@@ -43,10 +39,10 @@ class SQLAlchemy:
         # Returns the current `Session` object
         return self.scoped_session()
 
-    def setup_engine(self, echo_engine=False):
+    def setup_engine(self, db_path, echo_engine=False):
         """Setup the database engine, a session factory, and metadata."""
         # Create the engine using the custom database URL
-        db_url = f"{DIALECT}+{DBAPI}:///{self._path}"
+        db_url = f"{DIALECT}+{DBAPI}:///{db_path}"
         self.engine = create_engine(db_url, echo=echo_engine)
         # Use a session factory to generate sessions
         session_factory = sessionmaker(

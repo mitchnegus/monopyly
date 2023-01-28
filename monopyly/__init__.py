@@ -5,23 +5,26 @@ from pathlib import Path
 
 from flask import Flask
 
-from monopyly.database import db, SQLAlchemy, init_db_command, close_db, DB_PATH
-from monopyly.definitions import INSTANCE_PATH
+from monopyly.database import db, SQLAlchemy, init_db_command, close_db, DB_NAME
 
 
 def create_app(test_config=None):
-    # Ensure that the instance path exists
-    INSTANCE_PATH.mkdir(parents=True, exist_ok=True)
     # Create and configure the app
     app = Flask(
         __name__,
-        instance_path=INSTANCE_PATH.resolve(),
         instance_relative_config=True,
     )
+
+    instance_path = Path(app.instance_path)
+    db_path = instance_path / DB_NAME
+
     app.config.from_mapping(
         SECRET_KEY='development key',
-        DATABASE=DB_PATH,
+        DATABASE=db_path,
     )
+
+    # Ensure the instance path exists
+    instance_path.mkdir(parents=True, exist_ok=True)
 
     if test_config is None:
         # Load the instance config, if it exists, when not testing
@@ -29,6 +32,7 @@ def create_app(test_config=None):
     else:
         # Load the test config if that is passed instead
         app.config.from_mapping(test_config)
+
 
     # Allow the databases to be initialized from the command line
     init_app(app)
@@ -46,9 +50,10 @@ def init_app(app):
     #   - Use the `app.db` attribute like the `app.extensions` dict
     #     (but not actually that dict because this is not an extension)
     if app.testing:
-        app.db = SQLAlchemy(db_path=app.config["DATABASE"])
+        app.db = SQLAlchemy()
     else:
         app.db = db
+    app.db.setup_engine(db_path=app.config["DATABASE"])
     # If the database is new, it will not yet have been properly populated
     if not app.testing and Path(app.config["DATABASE"]).exists():
         app.db.access_tables()
