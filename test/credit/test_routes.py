@@ -1,12 +1,12 @@
 """Tests for routes in the credit blueprint."""
 import json
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from flask import url_for
 from werkzeug.exceptions import NotFound
 
-from ..helpers import transaction_lifetime, TestRoutes
+from ..helpers import TestRoutes, transaction_lifetime
 
 
 class TestCreditRoutes(TestRoutes):

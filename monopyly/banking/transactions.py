@@ -1,11 +1,11 @@
 """
 Tools for interacting with the bank transactions in the database.
 """
-from ..core.internal_transactions import add_internal_transaction
 from ..common.forms.utils import execute_on_form_validation
+from ..core.internal_transactions import add_internal_transaction
 from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models import (
-    BankAccountView, BankTransaction, BankTransactionView, BankSubtransaction,
+    BankAccountView, BankSubtransaction, BankTransaction, BankTransactionView
 )
 
 

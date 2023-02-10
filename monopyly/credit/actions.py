@@ -1,6 +1,6 @@
 """Module describing logical credit actions (to be used in routes)."""
-from ..common.forms.utils import execute_on_form_validation
 from ..banking.transactions import record_new_transfer
+from ..common.forms.utils import execute_on_form_validation
 from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
 from .transactions import CreditTransactionHandler

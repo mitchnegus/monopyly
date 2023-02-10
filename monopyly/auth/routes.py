@@ -4,13 +4,13 @@ Routes for site authentication.
 from flask import (
     current_app, flash, redirect, render_template, request, session, url_for
 )
+from sqlalchemy import insert, select
 from werkzeug.security import check_password_hash, generate_password_hash
-from sqlalchemy import select, insert
 
 from ..database import db_transaction
 from ..database.models import User
-from .blueprint import bp
 from .actions import get_username_and_password
+from .blueprint import bp
 
 
 @bp.route('/register', methods=('GET', 'POST'))

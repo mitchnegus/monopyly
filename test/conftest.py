@@ -2,7 +2,6 @@ import pytest
 
 from .helpers import AppManager
 
-
 # Use an app/client for authorization
 
 class AuthActions:

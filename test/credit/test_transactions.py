@@ -1,17 +1,18 @@
 """Tests for the credit module managing transactions/subtransactions."""
 from datetime import date
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
-from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import NotFound
 
-from monopyly.database.models import (
-    CreditTransaction, CreditTransactionView, CreditSubtransaction, CreditTag
-)
 from monopyly.credit.transactions import (
-    CreditTransactionHandler, CreditTagHandler, save_transaction
+    CreditTagHandler, CreditTransactionHandler, save_transaction
 )
+from monopyly.database.models import (
+    CreditSubtransaction, CreditTag, CreditTransaction, CreditTransactionView
+)
+
 from ..helpers import TestHandler
 
 

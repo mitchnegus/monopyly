@@ -43,6 +43,12 @@ $(ENV)/.touchfile : $(REQS) setup.py
 	@touch $(ENV)/.touchfile
 
 
+## format		: Format the package source code
+.PHONY: format
+format:
+	@isort monopyly/ test/ setup.py
+
+
 ## test		: Run tests
 .PHONY: test
 test: env

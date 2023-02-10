@@ -2,11 +2,9 @@ from datetime import date
 
 from flask import g
 from sqlalchemy import (
-    Table, Column, Integer, Float, String, Date, ForeignKey, select
+    Column, Date, Float, ForeignKey, Integer, String, Table, select
 )
-from sqlalchemy.orm import (
-    declarative_base, relationship, with_loader_criteria
-)
+from sqlalchemy.orm import declarative_base, relationship, with_loader_criteria
 
 
 class ModelBase:

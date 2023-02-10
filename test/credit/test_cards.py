@@ -2,11 +2,12 @@
 from unittest.mock import patch
 
 import pytest
-from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import NotFound
 
-from monopyly.database.models import CreditCard, CreditStatement
 from monopyly.credit.cards import CreditCardHandler, save_card
+from monopyly.database.models import CreditCard, CreditStatement
+
 from ..helpers import TestHandler
 
 

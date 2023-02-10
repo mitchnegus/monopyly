@@ -1,10 +1,11 @@
 """Tests for the credit module managing credit card accounts."""
 import pytest
-from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import NotFound
 
-from monopyly.database.models import CreditAccount, CreditCard
 from monopyly.credit.accounts import CreditAccountHandler
+from monopyly.database.models import CreditAccount, CreditCard
+
 from ..helpers import TestHandler
 
 

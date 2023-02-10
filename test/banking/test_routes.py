@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from ..helpers import transaction_lifetime, TestRoutes
+from ..helpers import TestRoutes, transaction_lifetime
 
 
 class TestBankingRoutes(TestRoutes):

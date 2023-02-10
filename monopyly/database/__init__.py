@@ -1,20 +1,19 @@
 """
 Expose commonly used database functionality to the rest of the package.
 """
-from pathlib import Path
 from functools import wraps
+from pathlib import Path
 
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
-from sqlalchemy import create_engine, event, MetaData
+from sqlalchemy import MetaData, create_engine, event
 from sqlalchemy.engine import Engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import Table
-from sqlalchemy.orm import sessionmaker, scoped_session
 
 from .models import Model
 from .schema import DATABASE_SCHEMA
-
 
 DIALECT = 'sqlite'
 DBAPI = 'pysqlite'

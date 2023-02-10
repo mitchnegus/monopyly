@@ -1,13 +1,13 @@
 """
 Tools for interacting with bank accounts in the database.
 """
-from werkzeug.exceptions import abort
 import sqlalchemy.sql.functions as sql_func
+from werkzeug.exceptions import abort
 
 from ..common.forms.utils import execute_on_form_validation
 from ..database.handler import DatabaseViewHandler
 from ..database.models import (
-    Bank, BankAccountType, BankAccountTypeView, BankAccount, BankAccountView
+    Bank, BankAccount, BankAccountType, BankAccountTypeView, BankAccountView
 )
 
 

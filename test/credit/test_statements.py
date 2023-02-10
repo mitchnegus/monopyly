@@ -1,15 +1,16 @@
 """Tests for the credit module managing credit card statements."""
 from datetime import date
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
-from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import StatementError
+from werkzeug.exceptions import NotFound
 
+from monopyly.credit.statements import CreditStatementHandler
 from monopyly.database.models import (
     CreditStatement, CreditStatementView, CreditTransaction
 )
-from monopyly.credit.statements import CreditStatementHandler
+
 from ..helpers import TestHandler
 
 

@@ -1,5 +1,5 @@
 """Tests for the actions performed by the banking blueprint."""
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 from monopyly.banking.actions import get_bank_account_type_grouping
 

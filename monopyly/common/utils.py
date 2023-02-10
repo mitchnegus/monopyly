@@ -1,8 +1,8 @@
 """
 General utility objects.
 """
-from collections import Counter
 import datetime
+from collections import Counter
 
 from dateutil.relativedelta import relativedelta
 

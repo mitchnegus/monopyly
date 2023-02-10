@@ -1,6 +1,6 @@
 """Tests for form utilities."""
-from unittest.mock import Mock, patch
 from contextlib import nullcontext as does_not_raise
+from unittest.mock import Mock, patch
 
 import pytest
 from flask_wtf import FlaskForm

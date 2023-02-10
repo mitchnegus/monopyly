@@ -4,9 +4,9 @@ A database handler for facilitating interactions with the SQLite database.
 from abc import ABC, abstractmethod
 
 from flask import current_app, g
-from werkzeug.exceptions import abort
 from sqlalchemy import inspect
 from sqlalchemy.exc import NoResultFound
+from werkzeug.exceptions import abort
 
 from .utils import validate_sort_order
 

@@ -4,32 +4,32 @@ Routes for credit card financials.
 from itertools import islice
 
 from flask import (
-    g, redirect, render_template, flash, request, url_for, jsonify
+    flash, g, jsonify, redirect, render_template, request, url_for
 )
 from sqlalchemy.exc import MultipleResultsFound
 from werkzeug.exceptions import abort
 from wtforms.validators import ValidationError
 
-from ..database import db_transaction
 from ..auth.tools import login_required
-from ..common.utils import parse_date, dedelimit_float, sort_by_frequency
+from ..banking.accounts import BankAccountHandler
+from ..banking.banks import BankHandler
+from ..banking.transactions import BankTransactionHandler
 from ..common.forms import form_err_msg
 from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import get_linked_transaction
-from ..banking.banks import BankHandler
-from ..banking.accounts import BankAccountHandler
-from ..banking.transactions import BankTransactionHandler
-from .blueprint import bp
-from .forms import *
+from ..common.utils import dedelimit_float, parse_date, sort_by_frequency
+from ..database import db_transaction
 from .accounts import CreditAccountHandler
-from .cards import CreditCardHandler, save_card
-from .statements import CreditStatementHandler
-from .transactions import (
-    CreditTransactionHandler, CreditTagHandler, save_transaction
-)
 from .actions import (
     get_card_statement_grouping, get_potential_preceding_card, make_payment,
     transfer_credit_card_statement
+)
+from .blueprint import bp
+from .cards import CreditCardHandler, save_card
+from .forms import *
+from .statements import CreditStatementHandler
+from .transactions import (
+    CreditTagHandler, CreditTransactionHandler, save_transaction
 )
 
 

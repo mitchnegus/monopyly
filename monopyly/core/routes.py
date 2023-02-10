@@ -4,8 +4,8 @@ Routes for core functionality.
 from flask import g, render_template
 
 from ..auth.tools import login_required
-from ..banking.banks import BankHandler
 from ..banking.accounts import BankAccountHandler
+from ..banking.banks import BankHandler
 from ..credit.cards import CreditCardHandler
 from ..credit.statements import CreditStatementHandler
 from .blueprint import bp

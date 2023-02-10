@@ -1,10 +1,11 @@
 """Tests for the banking module managing banks."""
 import pytest
-from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import NotFound
 
-from monopyly.database.models import Bank, BankAccount
 from monopyly.banking.banks import BankHandler
+from monopyly.database.models import Bank, BankAccount
+
 from ..helpers import TestHandler
 
 

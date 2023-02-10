@@ -1,1 +1,1 @@
-from .settings import ProductionConfig, DevelopmentConfig, TestingConfig
+from .settings import DevelopmentConfig, ProductionConfig, TestingConfig

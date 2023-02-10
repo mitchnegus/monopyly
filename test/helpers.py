@@ -1,22 +1,21 @@
 """Helper objects to improve modularity of tests."""
-import os
 import functools
+import os
 import tempfile
 import unittest
-from pathlib import Path
 from collections import namedtuple
 from contextlib import contextmanager
+from pathlib import Path
 
 import pytest
-from werkzeug.exceptions import NotFound
+from bs4 import BeautifulSoup
 from sqlalchemy import inspect, select
 from sqlalchemy.sql.expression import func
-from bs4 import BeautifulSoup
+from werkzeug.exceptions import NotFound
 
 from monopyly import create_app
 from monopyly.config import TestingConfig
 from monopyly.database import init_db
-
 
 TEST_DIR = Path(__file__).parent
 

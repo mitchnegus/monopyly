@@ -1,7 +1,3 @@
 from ._forms import (
-    form_err_msg,
-    EntryForm,
-    EntrySubform,
-    AcquisitionSubform,
-    TransactionForm,
+    AcquisitionSubform, EntryForm, EntrySubform, TransactionForm, form_err_msg
 )

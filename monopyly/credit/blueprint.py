@@ -3,7 +3,6 @@ Flask blueprint for credit card financials.
 """
 from flask import Blueprint
 
-
 # Define the blueprint
 bp = Blueprint('credit', __name__, url_prefix='/credit')
 

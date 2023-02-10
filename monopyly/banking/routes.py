@@ -3,18 +3,18 @@ Routes for banking financials.
 """
 from itertools import islice
 
-from flask import redirect, render_template, request, url_for, jsonify
+from flask import jsonify, redirect, render_template, request, url_for
 
-from ..database import db_transaction
 from ..auth.tools import login_required
 from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import get_linked_transaction
+from ..database import db_transaction
+from .accounts import BankAccountHandler, BankAccountTypeHandler, save_account
+from .actions import get_bank_account_type_grouping
+from .banks import BankHandler
 from .blueprint import bp
 from .forms import *
-from .banks import BankHandler
-from .accounts import BankAccountTypeHandler, BankAccountHandler, save_account
 from .transactions import BankTransactionHandler, save_transaction
-from .actions import get_bank_account_type_grouping
 
 
 @bp.route('/accounts')

@@ -3,7 +3,6 @@ Flask blueprint for site authentication.
 """
 from flask import Blueprint
 
-
 # Define the blueprint
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 

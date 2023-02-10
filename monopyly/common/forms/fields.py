@@ -4,7 +4,7 @@ General form constructions.
 from abc import ABC, abstractmethod
 
 from flask_wtf import FlaskForm
-from wtforms.fields import SelectField, FormField, FieldList
+from wtforms.fields import FieldList, FormField, SelectField
 
 from ...banking.banks import BankHandler
 from .validators import SelectionNotBlank

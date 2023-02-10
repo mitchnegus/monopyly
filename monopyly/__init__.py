@@ -7,7 +7,9 @@ from warnings import warn
 from flask import Flask
 
 from monopyly.config import DevelopmentConfig, ProductionConfig
-from monopyly.database import db, SQLAlchemy, init_db_command, close_db, DB_NAME
+from monopyly.database import (
+    DB_NAME, SQLAlchemy, close_db, db, init_db_command
+)
 
 
 def create_app(test_config=None):

@@ -1,19 +1,20 @@
 """Tests for the banking module forms."""
-from unittest.mock import Mock, patch
 from datetime import date
+from unittest.mock import Mock, patch
 
 import pytest
 from flask_wtf import FlaskForm
 from werkzeug.exceptions import NotFound
 
-from monopyly.database.models import (
-    CreditAccount, CreditCard, CreditStatementView, CreditTransactionView,
-    CreditSubtransaction
-)
 from monopyly.credit.forms import (
-    CreditAccountSelectField, CreditTransactionForm, CreditCardForm,
-    CardStatementTransferForm
+    CardStatementTransferForm, CreditAccountSelectField, CreditCardForm,
+    CreditTransactionForm
 )
+from monopyly.database.models import (
+    CreditAccount, CreditCard, CreditStatementView, CreditSubtransaction,
+    CreditTransactionView
+)
+
 from ..helpers import helper
 
 

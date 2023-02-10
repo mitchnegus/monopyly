@@ -2,16 +2,17 @@
 from unittest.mock import patch
 
 import pytest
-from werkzeug.exceptions import NotFound
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import NotFound
 
+from monopyly.banking.accounts import (
+    BankAccountHandler, BankAccountTypeHandler, save_account
+)
 from monopyly.database.models import (
-    Bank, BankAccountType, BankAccountTypeView, BankAccount, BankAccountView,
+    Bank, BankAccount, BankAccountType, BankAccountTypeView, BankAccountView,
     BankTransaction
 )
-from monopyly.banking.accounts import (
-    BankAccountTypeHandler, BankAccountHandler, save_account
-)
+
 from ..helpers import TestHandler
 
 
