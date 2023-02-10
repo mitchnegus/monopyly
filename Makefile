@@ -2,29 +2,16 @@
 include config.mk
 
 
-## develop 	: Install the package in development mode
-.PHONY: develop
-develop:
-	$(PIP) install -e .
-
-
 ## install	: Install the package
 .PHONY: install
 install:
 	$(PIP) install .
 
 
-## package	: Bundle the package for distribution
-.PHONY: package
-package:
-	$(PYTHON) setup.py sdist bdist_wheel
-
-
-## upload		: Upload the package to PyPI
-.PHONY: upload
-upload : env
-	@. $(ENV_ACTIVATE); \
-	$(PYTHON) -m twine upload --skip-existing dist/*
+## develop 	: Install the package in development mode
+.PHONY: develop
+develop:
+	$(PIP) install -e .
 
 
 ## env		: Prepare a virtual environment to run the package
@@ -43,17 +30,30 @@ $(ENV)/.touchfile : $(REQS) setup.py
 	@touch $(ENV)/.touchfile
 
 
+## test		: Run tests
+.PHONY: test
+test: env
+	@. $(ENV_ACTIVATE); \
+	pytest $(COVERAGE_OPTIONS) --cov-report html
+
+
 ## format		: Format the package source code
 .PHONY: format
 format:
 	@isort monopyly/ test/ setup.py
 
 
-## test		: Run tests
-.PHONY: test
-test: env
+## package	: Bundle the package for distribution
+.PHONY: package
+package:
+	$(PYTHON) setup.py sdist bdist_wheel
+
+
+## upload		: Upload the package to PyPI
+.PHONY: upload
+upload : env
 	@. $(ENV_ACTIVATE); \
-	pytest $(COVERAGE_OPTIONS) --cov-report html
+	$(PYTHON) -m twine upload --skip-existing dist/*
 
 
 ## clean		: Clean all automatically generated files
