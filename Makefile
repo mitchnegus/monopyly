@@ -56,6 +56,14 @@ test: env
 	pytest $(COVERAGE_OPTIONS) --cov-report html
 
 
+## clean		: Clean all automatically generated files
+.PHONY : clean
+clean :
+	@rm -rf instance/dev-monopyly.sqlite
+	@rm -rf build/ dist/ *egg-info/
+	@rm -rf $(ENV)
+
+
 .PHONY: help
 help: Makefile
 	@sed -n 's/^##//p' $<

@@ -27,10 +27,11 @@ def create_app(test_config=None):
         instance_path = Path(app.instance_path)
         instance_path.mkdir(parents=True, exist_ok=True)
         # Load the development/production config when not testing
-        db_path = instance_path / DB_NAME
         if app.debug:
+            db_path = instance_path / f"dev-{DB_NAME}"
             config = DevelopmentConfig(db_path=db_path)
         else:
+            db_path = instance_path / DB_NAME
             config = ProductionConfig(db_path=db_path)
             warn("INSECURE: Production mode has not yet been fully configured")
     app.config.from_object(config)
