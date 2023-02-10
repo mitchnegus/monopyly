@@ -15,7 +15,7 @@ def test_init_db_command_db_exists(runner, monkeypatch):
     class Recorder:
         called = False
 
-    def mock_init_db():
+    def mock_init_db(db, auxiliary_preload_path=None):
         Recorder.called = True
 
     monkeypatch.setattr('monopyly.database.init_db', mock_init_db)
@@ -30,7 +30,7 @@ def test_init_db_command(mock_method, runner, monkeypatch):
     class Recorder:
         called = False
 
-    def mock_init_db(db):
+    def mock_init_db(db, auxiliary_preload_path):
         Recorder.called = True
 
     monkeypatch.setattr('monopyly.database.init_db', mock_init_db)

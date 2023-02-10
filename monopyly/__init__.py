@@ -29,7 +29,10 @@ def create_app(test_config=None):
         # Load the development/production config when not testing
         if app.debug:
             db_path = instance_path / f"dev-{DB_NAME}"
-            config = DevelopmentConfig(db_path=db_path)
+            preload_data_path = _get_preload_data_path(instance_path)
+            config = DevelopmentConfig(
+                db_path=db_path, preload_data_path=preload_data_path
+            )
         else:
             db_path = instance_path / DB_NAME
             config = ProductionConfig(db_path=db_path)
@@ -40,6 +43,11 @@ def create_app(test_config=None):
     init_app(app)
     register_blueprints(app)
     return app
+
+
+def _get_preload_data_path(instance_path):
+    dev_data_path = instance_path / "preload_dev_data.sql"
+    return dev_data_path if dev_data_path.exists() else None
 
 
 def init_app(app):

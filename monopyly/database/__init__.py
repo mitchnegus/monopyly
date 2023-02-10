@@ -84,21 +84,27 @@ def init_db_command():
     """Initialize the database from the command line (if it does not exist)."""
     db_path = current_app.config["DATABASE"]
     if not db_path.is_file():
-        init_db(current_app.db)
+        preload_path = current_app.config.get("PRELOAD_DATA_PATH")
+        init_db(current_app.db, preload_path)
         click.echo(f"Initialized the database ('{db_path}')")
+        if preload_path:
+            click.echo(f"Prepopulated the database using '{preload_path}'")
     else:
         click.echo(f"Database exists, using '{db_path}'")
 
 
-def init_db(db):
+def init_db(db, auxiliary_preload_path=None):
     """Execute the SQL schema to clear existing data and create new tables."""
     # Establish a raw connection in order to execute the complete files
     raw_conn = db.engine.raw_connection()
     # Load the tables, table views, and preloaded data
     sql_dir = Path(__file__).parent
-    sql_filenames = ("schema.sql", "views.sql", "preloads.sql")
-    for filename in sql_filenames:
-        sql_filepath = sql_dir / filename
+    sql_filepaths = [
+        sql_dir / path for path in ("schema.sql", "views.sql", "preloads.sql")
+    ]
+    if auxiliary_preload_path:
+        sql_filepaths.append(auxiliary_preload_path)
+    for sql_filepath in sql_filepaths:
         with current_app.open_resource(sql_filepath) as sql_file:
             raw_conn.executescript(sql_file.read().decode('utf8'))
     raw_conn.close()

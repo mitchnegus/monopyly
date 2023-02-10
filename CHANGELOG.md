@@ -6,7 +6,7 @@
 - Initial release
 
 
-## 1.0.1
+### 1.0.1
 
 - Added dependencies to `setup.py` for self-contained installation
 - Added this changelog
@@ -14,12 +14,12 @@
 - Fixed a few minor bugs with the display interface
 
 
-## 1.0.2
+### 1.0.2
 
 - Added image support to PyPI description
 
 
-## 1.0.3
+### 1.0.3
 
 - Implemented (rudimentary) interface for adding and removing transaction tags
 - Added button to add more statements to a transaction (from submission complete page)
@@ -27,7 +27,7 @@
 - Fixed bug where tags where not saved on new transactions
 
 
-## 1.0.4
+### 1.0.4
 
 - Improved tagging interface with a 'Manage Tags' page
 - Introduced statement level statistics
@@ -36,7 +36,7 @@
 - Renamed `show_*` route functions to `load_*` to clarify that they are for loading the associated pages (as opposed to just displaying content)
 
 
-## 1.0.5
+### 1.0.5
 
 - Transactions may be split into an arbitrary number of subtransactions, each with a separate subtotal and note
 - Backend properly handles duplicate/ancestor tags; all tags are saved in the database, but only the lowest-level child tag must be entered
@@ -63,3 +63,7 @@
 - Fixed error on handling subtransactions in credit forms
 - Fixed error updating transaction display from widget bar
 
+
+### 1.2.1 (in-progress)
+
+- Improve development functionality; better/safer cleaning with a separate database and preloaded data

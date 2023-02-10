@@ -7,6 +7,10 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SECRET_KEY = "development key"
 
+    def __init__(self, db_path=None, preload_data_path=None):
+        super().__init__(db_path=db_path)
+        self.PRELOAD_DATA_PATH = preload_data_path
+
 
 class TestingConfig(Config):
     """A configuration object with settings for testing."""
