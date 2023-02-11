@@ -12,11 +12,15 @@
       <form action="{{ url_for('credit.transfer_statement', account_id=card.account_id, card_id=card.id, prior_card_id=prior_card.id) }}" method="post">
 
         <div class="form-field">
+
+          {{ transfer_statement_form.hidden_tag() }}
+
           {% for option in transfer_statement_form.transfer %}
             <div class="form-option">
               {{ option }}{{ option.label }}
             </div>
           {% endfor %}
+
         </div>
 
         {{ transfer_statement_form.submit }}
