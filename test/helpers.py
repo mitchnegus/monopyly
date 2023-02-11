@@ -69,7 +69,11 @@ class AppManager:
     @classmethod
     def _generate_app(cls, test_database_path):
         # Create a testing app
-        test_config = TestingConfig(db_path=test_database_path)
+        preload_data_path = TEST_DIR / "data.sql"
+        test_config = TestingConfig(
+            db_path=test_database_path,
+            preload_data_path=preload_data_path,
+        )
         app = create_app(test_config)
         return app
 
@@ -122,26 +126,8 @@ class AppManager:
     def _setup_test_database(cls, app):
         """Initialize the test database and populate it with test data."""
         with app.app_context():
-            init_db(app.db)
-            cls._populate_test_database(app.db)
-
-    @staticmethod
-    def _populate_test_database(db):
-        """
-        Use a raw connection to the SQLite DBAPI to load entire files
-
-        Establish a raw connection to the database and use it to populate
-        the database tables with the preloaded test data.
-        """
-        # Load the SQLite instructions adding the preloaded testing data
-        with Path(TEST_DIR, "data.sql").open("rb") as test_data_sql_file:
-            test_data_sql = test_data_sql_file.read().decode('utf-8')
-        # Connect to the database, and add the preloaded test data
-        raw_conn = db.engine.raw_connection()
-        raw_conn.executescript(test_data_sql)
-        raw_conn.close()
-        # Once loaded, access the tables with the database engine
-        db.access_tables()
+            init_db(app.db, app.config["PRELOAD_DATA_PATH"])
+            app.db.access_tables()
 
 
 def transaction_lifetime(test_function):
