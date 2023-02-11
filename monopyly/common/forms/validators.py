@@ -32,8 +32,9 @@ class SelectionNotBlank:
 
     Parameters
     ----------
-    blank : int
-        The integer representing a blank selection.
+    blank :
+        The value representing a blank selection. The default is the
+        integer `-1`.
     message : str
         Error message to raise in case of a validation error.
     """

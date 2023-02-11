@@ -43,7 +43,7 @@ class TestValidators:
         assert validator.message == 'test message'
 
     @pytest.mark.parametrize(
-        'value', [0, 1, 2, 3, 1000]
+        'value', [0, 1, 2, 3, 1000, "-1"]
     )
     def test_selection_not_blank(self, mock_form, mock_field, value):
         validator = SelectionNotBlank()

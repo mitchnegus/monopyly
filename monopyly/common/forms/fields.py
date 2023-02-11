@@ -16,7 +16,9 @@ class CustomChoiceSelectField(SelectField, ABC):
     def __init__(self, label=None, validators=None, coerce=int, **kwargs):
         if not validators:
             validators = [SelectionNotBlank()]
-        super().__init__(label=label, validators=validators, **kwargs)
+        super().__init__(
+            label=label, validators=validators, coerce=int, **kwargs
+        )
         self.prepare_field_choices()
 
     @property
