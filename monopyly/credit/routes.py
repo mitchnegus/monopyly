@@ -330,10 +330,10 @@ def add_transaction(card_id, statement_id):
     else:
         if statement_id:
             statement = CreditStatementHandler.get_entry(statement_id)
-            form.prepopulate(statement)
+            form = form.prepopulate(statement)
         elif card_id:
             card = CreditCardHandler.get_entry(card_id)
-            form.prepopulate(card)
+            form = form.prepopulate(card)
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_new.html', form=form)
@@ -354,7 +354,7 @@ def update_transaction(transaction_id):
                                update=True)
     else:
         transaction = CreditTransactionHandler.get_entry(transaction_id)
-        form.prepopulate(transaction)
+        form = form.prepopulate(transaction)
     # Display the form for accepting user input
     return render_template('credit/transaction_form/'
                            'transaction_form_page_update.html',

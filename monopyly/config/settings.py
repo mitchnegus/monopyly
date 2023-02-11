@@ -18,6 +18,10 @@ class TestingConfig(Config):
     SECRET_KEY = "testing key"
     WTF_CSRF_ENABLED = False
 
+    def __init__(self, db_path=None, preload_data_path=None):
+        super().__init__(db_path=db_path)
+        self.PRELOAD_DATA_PATH = preload_data_path
+
 
 class ProductionConfig(Config):
     """A configuration object with settings for production."""

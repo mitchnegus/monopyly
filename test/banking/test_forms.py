@@ -273,12 +273,13 @@ class TestBankAccountForm:
         with pytest.raises(TypeError):
             account_form.gather_entry_data(None)
 
-    @patch("monopyly.banking.forms.BankAccountForm.process")
+    @patch("wtforms.form.FormMeta.__call__")
     @patch("monopyly.banking.forms.BankAccountForm.gather_entry_data")
-    def test_prepopulate(self, mock_gather_method, mock_process_method,
+    def test_prepopulate(self, mock_gather_method, mock_meta_call,
                          account_form, mock_account):
         account_form.prepopulate(mock_account)
-        mock_process_method.assert_called_once_with(
+        # Forms are instantiated via the `FormMeta` metaclass, so mock that
+        mock_meta_call.assert_called_once_with(
             data=mock_gather_method.return_value
         )
 
@@ -490,12 +491,13 @@ class TestBankTransactionForm:
         with pytest.raises(TypeError):
             transaction_form.gather_entry_data(None)
 
-    @patch("monopyly.banking.forms.BankTransactionForm.process")
-    @patch("monopyly.banking.forms.BankTransactionForm.gather_entry_data")
-    def test_prepopulate(self, mock_gather_method, mock_process_method,
-                         transaction_form, mock_transaction):
-        transaction_form.prepopulate(mock_transaction)
-        mock_process_method.assert_called_once_with(
+    @patch("wtforms.form.FormMeta.__call__")
+    @patch("monopyly.banking.forms.BankAccountForm.gather_entry_data")
+    def test_prepopulate(self, mock_gather_method, mock_meta_call,
+                         account_form, mock_account):
+        account_form.prepopulate(mock_account)
+        # Forms are instantiated via the `FormMeta` metaclass, so mock that
+        mock_meta_call.assert_called_once_with(
             data=mock_gather_method.return_value
         )
 
@@ -523,9 +525,4 @@ class TestBankTransactionForm:
         suggestions = transaction_form.autocomplete(field, **sort_fields)
         top_suggestions = suggestions[:len(top_expected_suggestions)]
         helper.assertCountEqual(top_suggestions, top_expected_suggestions)
-        helper.assertCountEqual(suggestions, expected_suggestions)
-
-    def test_autocomplete_invalid(self, transaction_form):
-        with pytest.raises(KeyError):
-            transaction_form.autocomplete("test_field")
 

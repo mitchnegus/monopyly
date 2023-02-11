@@ -42,7 +42,7 @@ def add_account(bank_id):
     else:
         if bank_id:
             bank = BankHandler.get_entry(bank_id)
-            form.prepopulate(bank)
+            form = form.prepopulate(bank)
     return render_template('banking/account_form/account_form_page_new.html',
                            form=form)
 
@@ -125,10 +125,10 @@ def add_transaction(bank_id, account_id):
     else:
         if account_id:
             account = BankAccountHandler.get_entry(account_id)
-            form.prepopulate(account)
+            form = form.prepopulate(account)
         elif bank_id:
             bank = BankHandler.get_entry(bank_id)
-            form.prepopulate(bank)
+            form = form.prepopulate(bank)
     # Display the form for accepting user input
     return render_template('banking/transaction_form/'
                            'transaction_form_page_new.html', form=form,
@@ -148,7 +148,7 @@ def update_transaction(transaction_id):
                                 account_id=transaction.account_id))
     else:
         transaction = BankTransactionHandler.get_entry(transaction_id)
-        form.prepopulate(transaction)
+        form = form.prepopulate(transaction)
     # Display the form for accepting user input
     update = 'transfer' if transaction.internal_transaction_id else True
     return render_template('banking/transaction_form/'
@@ -161,7 +161,7 @@ def update_transaction(transaction_id):
 @login_required
 def add_subtransaction_fields():
     post_args = request.get_json()
-    subtransaction_count = post_args['subtransaction_count']
+    subtransaction_count = int(post_args['subtransaction_count'])
     # Add a new subtransaction to the form
     new_subform = extend_field_list_for_ajax(
         BankTransactionForm,

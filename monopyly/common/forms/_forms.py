@@ -33,30 +33,47 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
 
     def prepopulate(self, entry):
         """
-        Prepopulate the form with the given database entry information.
+        Generate a duplicate prepopulated form.
+
+        Note
+        ----
+        WTForms requires that a form be instantiated in order to be
+        able to properly introspect fields. Because of this, this method
+        will only return a duplicate form matching the type of the
+        form instance used to call it. Using the form's process method
+        will not properly handle enumeration of field lists, so it
+        can not be used as a replacement for populating an existing
+        form.
 
         Parameters
         ----------
         entry : database.models.Model
             A database entry from which to pull information for
             prepopulating the form.
+
+        Returns
+        -------
+        form : EntryForm
+            A duplicate form, prepopulated with the collected database
+            information.
         """
         data = self.gather_entry_data(entry)
-        self.process(data=data)
+        return self.__class__(data=data)
 
     @abstractmethod
     def gather_entry_data(self, entry):
         raise NotImplementedError("Define how form data is gathered from an "
                                   "entry in a form-specific subclass.")
 
-    def _raise_gather_fail_error(self, permissible_entries, entry):
+    @classmethod
+    def _raise_gather_fail_error(cls, permissible_entries, entry):
         permissible_entries_string = ", ".join([
             f"`{_.__name__}`" for _ in permissible_entries
         ])
         raise TypeError(
-            f"Data for a `{self.__class__.__name__}` can only be gathered "
-            f"from permissible entry classes: {permissible_entries_string}; "
-            f"the entry provided was a `{entry.__class__.__name__}` object."
+            f"Data for a `{cls.__name__}` can only be gathered from "
+            f"permissible entry classes: {permissible_entries_string}; the "
+            f"entry provided was a `{entry.__class__.__name__}` object."
         )
 
 
@@ -164,12 +181,10 @@ class TransactionForm(EntryForm):
         """Gather subtransaction-specific data."""
         subtransactions_data = []
         for i, subtransaction in enumerate(subtransactions):
-            # Add a subtransaction subform if necessary
-            if i+1 > len(self.subtransactions):
-                self.subtransactions.append_entry()
             # Use the subtransaction subform to gather data from the entry info
+            #  - There will always be at least 1 subtransaction to use
             subtransactions_data.append(
-                self.subtransactions[i].gather_entry_data(subtransaction)
+                self.subtransactions[0].gather_entry_data(subtransaction)
             )
         return subtransactions_data
 

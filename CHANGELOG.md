@@ -67,3 +67,4 @@
 ### 1.2.1 (in-progress)
 
 - Improve development functionality; better/safer cleaning with a separate database and preloaded data
+- Fixed bug where multiple subtransactions failed to update properly

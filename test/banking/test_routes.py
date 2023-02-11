@@ -237,9 +237,10 @@ class TestBankingRoutes(TestRoutes):
             "/_add_subtransaction_fields",
             json={"subtransaction_count": 1}
         )
-        assert 'id="subtransactions-2"' in self.html
-        assert "subtransactions-2-subtotal" in self.html
-        assert "subtransactions-2-note" in self.html
+        # Created a second transaction with index 1
+        assert 'id="subtransactions-1"' in self.html
+        assert "subtransactions-1-subtotal" in self.html
+        assert "subtransactions-1-note" in self.html
 
     def test_add_transfer_field(self, authorization):
         self.post_route("/_add_transfer_field")

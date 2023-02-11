@@ -362,10 +362,11 @@ class TestCreditRoutes(TestRoutes):
             "/_add_subtransaction_fields",
             json={"subtransaction_count": 1}
         )
-        assert 'id="subtransactions-2"' in self.html
-        assert "subtransactions-2-subtotal" in self.html
-        assert "subtransactions-2-note" in self.html
-        assert "subtransactions-2-tags" in self.html
+        # Created a second transaction with index 1
+        assert 'id="subtransactions-1"' in self.html
+        assert "subtransactions-1-subtotal" in self.html
+        assert "subtransactions-1-note" in self.html
+        assert "subtransactions-1-tags" in self.html
 
     @transaction_lifetime
     def test_delete_transaction(self, authorization):

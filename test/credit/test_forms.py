@@ -193,12 +193,13 @@ class TestCreditCardForm:
         with pytest.raises(TypeError):
             card_form.gather_entry_data(None)
 
-    @patch("monopyly.credit.forms.CreditCardForm.process")
+    @patch("wtforms.form.FormMeta.__call__")
     @patch("monopyly.credit.forms.CreditCardForm.gather_entry_data")
-    def test_prepopulate(self, mock_gather_method, mock_process_method,
+    def test_prepopulate(self, mock_gather_method, mock_meta_call,
                          card_form, mock_card):
         card_form.prepopulate(mock_card)
-        mock_process_method.assert_called_once_with(
+        # Forms are instantiated via the `FormMeta` metaclass, so mock that
+        mock_meta_call.assert_called_once_with(
             data=mock_gather_method.return_value
         )
 
@@ -486,12 +487,13 @@ class TestCreditTransactionForm:
         with pytest.raises(TypeError):
             transaction_form.gather_entry_data(None)
 
-    @patch("monopyly.credit.forms.CreditTransactionForm.process")
+    @patch("wtforms.form.FormMeta.__call__")
     @patch("monopyly.credit.forms.CreditTransactionForm.gather_entry_data")
-    def test_prepopulate(self, mock_gather_method, mock_process_method,
+    def test_prepopulate(self, mock_gather_method, mock_meta_call,
                          transaction_form, mock_transaction):
         transaction_form.prepopulate(mock_transaction)
-        mock_process_method.assert_called_once_with(
+        # Forms are instantiated via the `FormMeta` metaclass, so mock that
+        mock_meta_call.assert_called_once_with(
             data=mock_gather_method.return_value
         )
 
