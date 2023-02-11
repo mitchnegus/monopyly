@@ -34,7 +34,9 @@ $(ENV)/.touchfile : $(REQS) setup.py
 .PHONY: test
 test: env
 	@. $(ENV_ACTIVATE); \
-	pytest $(COVERAGE_OPTIONS) --cov-report html
+	pytest $(COVERAGE_OPTIONS) \
+		--cov-report term \
+		--cov-report html
 
 
 ## format		: Format the package source code
