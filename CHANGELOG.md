@@ -69,3 +69,4 @@
 - Improve development functionality; better/safer cleaning with a separate database and preloaded data
 - Fixed bug where multiple subtransactions failed to update properly
 - Fixed error where validation was not raised for blank inputs to a `CustomChoiceSelectField`
+- Fixed errors in field validation for nested subforms with unset values

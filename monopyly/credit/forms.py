@@ -56,6 +56,14 @@ class CreditCardForm(EntryForm):
         statement_issue_day = IntegerField('Statement Issue Day', [Optional()])
         statement_due_day = IntegerField('Statement Due Day', [Optional()])
 
+        def validate(self, *args, **kwargs):
+            """Validate the subform."""
+            # Unset subform `CustomChoiceSelectField` values will be invalid
+            if self.bank_info.bank_id.data == -1:
+                account = self.get_account()
+                self.bank_info.bank_id.data = account.bank.id
+            return super().validate(*args, **kwargs)
+
         def get_account(self):
             return self._produce_entry_from_field("account_id")
 

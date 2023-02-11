@@ -21,6 +21,11 @@ class CustomChoiceSelectField(SelectField, ABC):
         )
         self.prepare_field_choices()
 
+    def process_data(self, value):
+        """Process incoming data, and set the field default value."""
+        value = -1 if value is None else value
+        super().process_data(value)
+
     @property
     @abstractmethod
     def _db_handler(self):
