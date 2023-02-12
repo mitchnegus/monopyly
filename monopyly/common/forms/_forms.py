@@ -9,7 +9,7 @@ from wtforms.fields import (
 )
 from wtforms.validators import DataRequired
 
-from ..utils import parse_date
+from .fields import DateField
 from .validators import SelectionNotBlank
 
 # Define a custom form error messaage
@@ -144,11 +144,7 @@ class TransactionForm(EntryForm):
                                       "gathered from an entry in a subclass.")
 
     # Fields pertaining to the transaction
-    transaction_date = StringField(
-        "Transaction Date",
-        validators=[DataRequired()],
-        filters=[parse_date]
-    )
+    transaction_date = DateField("Transaction Date", [DataRequired()])
     # Subtransactions should be defined as a `FieldList` in a subclass
     subtransactions = None
     submit = SubmitField("Save Transaction")

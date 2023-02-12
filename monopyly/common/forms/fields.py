@@ -4,13 +4,26 @@ General form constructions.
 from abc import ABC, abstractmethod
 
 from flask_wtf import FlaskForm
-from wtforms.fields import FieldList, FormField, SelectField
+from wtforms import fields as wtforms_fields
 
 from ...banking.banks import BankHandler
+from ..utils import parse_date
 from .validators import SelectionNotBlank
 
 
-class CustomChoiceSelectField(SelectField, ABC):
+class DateField(wtforms_fields.DateField):
+    """A date field with better parsing abilities than the WTForms default."""
+
+    def __init__(self, *args, filters=(), **kwargs):
+        # The date field should normally handle date conversion, but this
+        # filter remains as a backup for browsers not supporting locales
+        if parse_date not in filters:
+            filters = list(filters)
+            filters.append(parse_date)
+        super().__init__(*args, filters=filters, **kwargs)
+
+
+class CustomChoiceSelectField(wtforms_fields.SelectField, ABC):
     """A select field that can auto-prepare choices."""
 
     def __init__(self, label=None, validators=None, coerce=int, **kwargs):

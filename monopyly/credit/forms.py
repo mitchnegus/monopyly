@@ -13,10 +13,9 @@ from ..banking.forms import BankSelectField, BankSubform
 from ..common.forms import (
     AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 )
-from ..common.forms.fields import CustomChoiceSelectField
+from ..common.forms.fields import CustomChoiceSelectField, DateField
 from ..common.forms.utils import Autocompleter
 from ..common.forms.validators import NumeralsOnly, SelectionNotBlank
-from ..common.utils import parse_date
 from ..database.models import (
     Bank, CreditAccount, CreditCard, CreditStatementView, CreditSubtransaction,
     CreditTransactionView
@@ -169,7 +168,7 @@ class CreditTransactionForm(TransactionForm):
         # Fields to identify the card/bank information for the statement
         card_info = FormField(CardSubform)
         # Fields pertaining to the statement
-        issue_date = StringField('Statement Date', filters=[parse_date])
+        issue_date = DateField('Statement Date')
 
         def get_statement(self, transaction_date):
             """Get the credit card statement described by the form data."""
