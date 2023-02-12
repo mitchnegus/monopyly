@@ -49,19 +49,22 @@ def parse_date(given_date):
 
 class _DateParser:
     """Class used to parse dates within the `parse_date` function."""
-    alt_delimiters = ('.', '/')
-    date_formats = ('%Y-%m-%d', '%m-%d-%Y', '%m-%d-%y')
+
+    alt_delimiters = (".", "/")
+    date_formats = ("%Y-%m-%d", "%m-%d-%Y", "%m-%d-%y")
 
     def __init__(self, given_date):
         self.given_date = given_date
-        self.err_msg = (f"The given date ('{given_date}') was not in an "
-                         "acceptable format. Try entering the date in the "
-                         "format 'YYYY-MM-DD'.")
+        self.err_msg = (
+            f"The given date ('{given_date}') was not in an "
+            "acceptable format. Try entering the date in the "
+            "format 'YYYY-MM-DD'."
+        )
 
     def parse(self):
         """Parse the date (string) into a Python `datetime.date` object."""
         components = self._get_date_components(self.given_date)
-        parseable_string = '-'.join(components)
+        parseable_string = "-".join(components)
         return self._attempt_datetime_parsing(parseable_string)
 
     def _get_date_components(self, given_date):
@@ -77,12 +80,12 @@ class _DateParser:
     def _standardize_delimiters(self, date_string):
         """Set the delimiter in all dates to '-' for simplified parsing."""
         for delimiter in self.alt_delimiters:
-            date_string = date_string.replace(delimiter, '-')
+            date_string = date_string.replace(delimiter, "-")
         return date_string
 
     def _split_delimited_date(self, delimited_date_string):
         """Split a delimited date into components (padding if necessary)."""
-        split_date = delimited_date_string.split('-')
+        split_date = delimited_date_string.split("-")
         if len(split_date) == 3:
             return self._pad_components(split_date)
         else:
@@ -91,7 +94,7 @@ class _DateParser:
 
     def _pad_components(self, split_date):
         """Pad each component with leading zeros if less than two digits."""
-        return [f'{_:0>2}' if len(_) <2 else _ for _ in split_date]
+        return [f"{_:0>2}" if len(_) < 2 else _ for _ in split_date]
 
     def _attempt_datetime_parsing(self, parseable_string):
         """Attempt to parse the string into a date using the valid formats."""
@@ -118,10 +121,10 @@ def get_next_occurrence_of_day(day, given_date):
     return next_date
 
 
-def dedelimit_float(value, delimiter=','):
+def dedelimit_float(value, delimiter=","):
     """Remove delimiters from strings before conversion to floats."""
     try:
-        return float(value.replace(delimiter, ''))
+        return float(value.replace(delimiter, ""))
     except AttributeError:
         return float(value)
 
@@ -131,4 +134,3 @@ def sort_by_frequency(items):
     item_counts = Counter(items)
     unique_items = set(items)
     return sorted(unique_items, key=item_counts.get, reverse=True)
-

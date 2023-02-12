@@ -76,15 +76,11 @@ def get_potential_preceding_card(card):
 def transfer_credit_card_statement(form, card_id, prior_card_id):
     """Transfer a credit statement between cards based on form input."""
     # If response is affirmative, transfer the statement to the new card
-    if form.transfer.data == 'yes':
+    if form.transfer.data == "yes":
         # Get the prior card's most recent statement; assign it to the new card
-        statements = CreditStatementHandler.get_statements(
-            card_ids=(prior_card_id,)
-        )
+        statements = CreditStatementHandler.get_statements(card_ids=(prior_card_id,))
         latest_statement = statements.first()
-        CreditStatementHandler.update_entry(
-            latest_statement.id, card_id=card_id
-        )
+        CreditStatementHandler.update_entry(latest_statement.id, card_id=card_id)
         # Deactivate the old card
         prior_card = CreditCardHandler.get_entry(prior_card_id)
         CreditCardHandler.update_entry(prior_card_id, active=0)
@@ -121,25 +117,27 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
         # Populate a mapping for the transfer
         payment_note = f"Credit card payment ({payee}-{card.last_four_digits})"
         bank_mapping = {
-            'account_id': payment_account_id,
-            'transaction_date': payment_date,
-            'subtransactions': [
-                {'subtotal': -payment_amount, 'note': payment_note},
-            ]
+            "account_id": payment_account_id,
+            "transaction_date": payment_date,
+            "subtransactions": [
+                {"subtotal": -payment_amount, "note": payment_note},
+            ],
         }
         transfer = record_new_transfer(bank_mapping)
         internal_transaction_id = transfer.internal_transaction_id
     else:
         internal_transaction_id = None
     credit_mapping = {
-        'internal_transaction_id': internal_transaction_id,
-        'statement_id': payment_statement.id,
-        'transaction_date': payment_date,
-        'vendor': payee,
-        'subtransactions': [{
-            'subtotal': -payment_amount,
-            'note': 'Card payment',
-            'tags': ['Payments'],
-        }],
+        "internal_transaction_id": internal_transaction_id,
+        "statement_id": payment_statement.id,
+        "transaction_date": payment_date,
+        "vendor": payee,
+        "subtransactions": [
+            {
+                "subtotal": -payment_amount,
+                "note": "Card payment",
+                "tags": ["Payments"],
+            }
+        ],
     }
     CreditTransactionHandler.add_entry(**credit_mapping)

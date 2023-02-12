@@ -22,7 +22,6 @@ from monopyly.database.models import (
 
 
 class TestModel:
-
     def assert_accurate_model_field_assignment(self, model_type, mapping):
         model = model_type(**mapping)
         for field in mapping:
@@ -30,7 +29,6 @@ class TestModel:
 
 
 class TestUser(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -41,12 +39,21 @@ class TestUser(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "username": "test_user", "password": "something-secure"},
-          "User(id=100, username='test_user', password='something-secure')"],
-         [{"id": 100, "username": "test_user",
-           "password": "something-else-more-secure"},
-          "User(id=100, username='test_user', "
-          "password='something-else-more-secur...')"]]
+        [
+            [
+                {"id": 100, "username": "test_user", "password": "something-secure"},
+                "User(id=100, username='test_user', password='something-secure')",
+            ],
+            [
+                {
+                    "id": 100,
+                    "username": "test_user",
+                    "password": "something-else-more-secure",
+                },
+                "User(id=100, username='test_user', "
+                "password='something-else-more-secur...')",
+            ],
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         user = User(**mapping)
@@ -54,7 +61,6 @@ class TestUser(TestModel):
 
 
 class TestBank(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -65,12 +71,20 @@ class TestBank(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "user_id": 10, "bank_name": "New Bank"},
-          "Bank(id=100, user_id=10, bank_name='New Bank')"],
-         [{"id": 100, "user_id": 10,
-           "bank_name": "New Bank with a very long name"},
-          "Bank(id=100, user_id=10, "
-          "bank_name='New Bank with a very long...')"]]
+        [
+            [
+                {"id": 100, "user_id": 10, "bank_name": "New Bank"},
+                "Bank(id=100, user_id=10, bank_name='New Bank')",
+            ],
+            [
+                {
+                    "id": 100,
+                    "user_id": 10,
+                    "bank_name": "New Bank with a very long name",
+                },
+                "Bank(id=100, user_id=10, " "bank_name='New Bank with a very long...')",
+            ],
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         user = Bank(**mapping)
@@ -78,7 +92,6 @@ class TestBank(TestModel):
 
 
 class TestBankAccountType(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -90,16 +103,29 @@ class TestBankAccountType(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "user_id": 10, "type_name": "New Bank Account Type",
-           "type_abbreviation": "New BAT"},
-          "BankAccountType(id=100, user_id=10, "
-          "type_name='New Bank Account Type', type_abbreviation='New BAT')"],
-         [{"id": 100, "user_id": 10,
-           "type_name": "New Bank Account Type with a very long name",
-           "type_abbreviation": "New BAT"},
-          "BankAccountType(id=100, user_id=10, "
-          "type_name='New Bank Account Type wit...', "
-          "type_abbreviation='New BAT')"]]
+        [
+            [
+                {
+                    "id": 100,
+                    "user_id": 10,
+                    "type_name": "New Bank Account Type",
+                    "type_abbreviation": "New BAT",
+                },
+                "BankAccountType(id=100, user_id=10, "
+                "type_name='New Bank Account Type', type_abbreviation='New BAT')",
+            ],
+            [
+                {
+                    "id": 100,
+                    "user_id": 10,
+                    "type_name": "New Bank Account Type with a very long name",
+                    "type_abbreviation": "New BAT",
+                },
+                "BankAccountType(id=100, user_id=10, "
+                "type_name='New Bank Account Type wit...', "
+                "type_abbreviation='New BAT')",
+            ],
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         account_type = BankAccountType(**mapping)
@@ -107,7 +133,6 @@ class TestBankAccountType(TestModel):
 
 
 class TestBankAcount(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -120,10 +145,19 @@ class TestBankAcount(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "bank_id": 200, "account_type_id": 10,
-           "last_four_digits": "####", "active": 1},
-          "BankAccount(id=100, bank_id=200, account_type_id=10, "
-          "last_four_digits='####', active=1)"]]
+        [
+            [
+                {
+                    "id": 100,
+                    "bank_id": 200,
+                    "account_type_id": 10,
+                    "last_four_digits": "####",
+                    "active": 1,
+                },
+                "BankAccount(id=100, bank_id=200, account_type_id=10, "
+                "last_four_digits='####', active=1)",
+            ]
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         account = BankAccount(**mapping)
@@ -131,7 +165,6 @@ class TestBankAcount(TestModel):
 
 
 class TestBankTransaction(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -144,10 +177,18 @@ class TestBankTransaction(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "internal_transaction_id": None, "account_id": 200,
-           "transaction_date": date(2022, 11, 15)},
-          "BankTransaction(id=100, internal_transaction_id=None, "
-          "account_id=200, transaction_date='2022-11-15')"]]
+        [
+            [
+                {
+                    "id": 100,
+                    "internal_transaction_id": None,
+                    "account_id": 200,
+                    "transaction_date": date(2022, 11, 15),
+                },
+                "BankTransaction(id=100, internal_transaction_id=None, "
+                "account_id=200, transaction_date='2022-11-15')",
+            ]
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         transaction = BankTransaction(**mapping)
@@ -155,7 +196,6 @@ class TestBankTransaction(TestModel):
 
 
 class TestBankSubtransaction(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -163,20 +203,32 @@ class TestBankSubtransaction(TestModel):
             "subtotal": 300.00,
             "note": "New subtransaction",
         }
-        self.assert_accurate_model_field_assignment(
-            BankSubtransaction, mapping
-        )
+        self.assert_accurate_model_field_assignment(BankSubtransaction, mapping)
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "transaction_id": 200, "subtotal": 300.00,
-           "note": "New subtransaction"},
-          "BankSubtransaction(id=100, transaction_id=200, subtotal=300.0, "
-          "note='New subtransaction')"],
-         [{"id": 100, "transaction_id": 200, "subtotal": 300.00,
-           "note": "New subtransaction with a very long note"},
-          "BankSubtransaction(id=100, transaction_id=200, subtotal=300.0, "
-          "note='New subtransaction with a...')"]]
+        [
+            [
+                {
+                    "id": 100,
+                    "transaction_id": 200,
+                    "subtotal": 300.00,
+                    "note": "New subtransaction",
+                },
+                "BankSubtransaction(id=100, transaction_id=200, subtotal=300.0, "
+                "note='New subtransaction')",
+            ],
+            [
+                {
+                    "id": 100,
+                    "transaction_id": 200,
+                    "subtotal": 300.00,
+                    "note": "New subtransaction with a very long note",
+                },
+                "BankSubtransaction(id=100, transaction_id=200, subtotal=300.0, "
+                "note='New subtransaction with a...')",
+            ],
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         subtransaction = BankSubtransaction(**mapping)
@@ -184,7 +236,6 @@ class TestBankSubtransaction(TestModel):
 
 
 class TestCreditAccount(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -196,10 +247,18 @@ class TestCreditAccount(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "bank_id": 200, "statement_issue_day": 28,
-           "statement_due_day": 1},
-          "CreditAccount(id=100, bank_id=200, statement_issue_day=28, "
-          "statement_due_day=1)"]]
+        [
+            [
+                {
+                    "id": 100,
+                    "bank_id": 200,
+                    "statement_issue_day": 28,
+                    "statement_due_day": 1,
+                },
+                "CreditAccount(id=100, bank_id=200, statement_issue_day=28, "
+                "statement_due_day=1)",
+            ]
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         account = CreditAccount(**mapping)
@@ -207,7 +266,6 @@ class TestCreditAccount(TestModel):
 
 
 class TestCreditCard(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -219,10 +277,13 @@ class TestCreditCard(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "account_id": 200, "last_four_digits": "####",
-           "active": 1},
-          "CreditCard(id=100, account_id=200, last_four_digits='####', "
-          "active=1)"]]
+        [
+            [
+                {"id": 100, "account_id": 200, "last_four_digits": "####", "active": 1},
+                "CreditCard(id=100, account_id=200, last_four_digits='####', "
+                "active=1)",
+            ]
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         card = CreditCard(**mapping)
@@ -230,7 +291,6 @@ class TestCreditCard(TestModel):
 
 
 class TestCreditStatement(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -242,10 +302,18 @@ class TestCreditStatement(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "card_id": 200, "issue_date": date(2022, 11, 24),
-           "due_date": date(2022, 12, 13)},
-          "CreditStatement(id=100, card_id=200, issue_date='2022-11-24', "
-          "due_date='2022-12-13')"]]
+        [
+            [
+                {
+                    "id": 100,
+                    "card_id": 200,
+                    "issue_date": date(2022, 11, 24),
+                    "due_date": date(2022, 12, 13),
+                },
+                "CreditStatement(id=100, card_id=200, issue_date='2022-11-24', "
+                "due_date='2022-12-13')",
+            ]
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         statement = CreditStatement(**mapping)
@@ -253,25 +321,33 @@ class TestCreditStatement(TestModel):
 
 
 class TestCreditTransaction(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
             "internal_transaction_id": None,
             "statement_id": 200,
             "transaction_date": date(2022, 11, 23),
-            "vendor": "New vendor"
+            "vendor": "New vendor",
         }
         self.assert_accurate_model_field_assignment(CreditTransaction, mapping)
         assert CreditTransaction.subtype == "credit"
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "internal_transaction_id": None, "statement_id": 200,
-           "transaction_date": date(2022, 11, 23), "vendor": "New vendor"},
-          "CreditTransaction(id=100, internal_transaction_id=None, "
-          "statement_id=200, transaction_date='2022-11-23', "
-          "vendor='New vendor')"]]
+        [
+            [
+                {
+                    "id": 100,
+                    "internal_transaction_id": None,
+                    "statement_id": 200,
+                    "transaction_date": date(2022, 11, 23),
+                    "vendor": "New vendor",
+                },
+                "CreditTransaction(id=100, internal_transaction_id=None, "
+                "statement_id=200, transaction_date='2022-11-23', "
+                "vendor='New vendor')",
+            ]
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         transaction = CreditTransaction(**mapping)
@@ -279,7 +355,6 @@ class TestCreditTransaction(TestModel):
 
 
 class TestCreditSubtransaction(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -287,20 +362,32 @@ class TestCreditSubtransaction(TestModel):
             "subtotal": 300.00,
             "note": "New subtransaction",
         }
-        self.assert_accurate_model_field_assignment(
-            CreditSubtransaction, mapping
-        )
+        self.assert_accurate_model_field_assignment(CreditSubtransaction, mapping)
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "transaction_id": 200, "subtotal": 300.00,
-           "note": "New subtransaction"},
-          "CreditSubtransaction(id=100, transaction_id=200, subtotal=300.0, "
-          "note='New subtransaction')"],
-         [{"id": 100, "transaction_id": 200, "subtotal": 300.00,
-           "note": "New subtransaction with a very long note"},
-          "CreditSubtransaction(id=100, transaction_id=200, subtotal=300.0, "
-          "note='New subtransaction with a...')"]]
+        [
+            [
+                {
+                    "id": 100,
+                    "transaction_id": 200,
+                    "subtotal": 300.00,
+                    "note": "New subtransaction",
+                },
+                "CreditSubtransaction(id=100, transaction_id=200, subtotal=300.0, "
+                "note='New subtransaction')",
+            ],
+            [
+                {
+                    "id": 100,
+                    "transaction_id": 200,
+                    "subtotal": 300.00,
+                    "note": "New subtransaction with a very long note",
+                },
+                "CreditSubtransaction(id=100, transaction_id=200, subtotal=300.0, "
+                "note='New subtransaction with a...')",
+            ],
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         subtransaction = CreditSubtransaction(**mapping)
@@ -308,7 +395,6 @@ class TestCreditSubtransaction(TestModel):
 
 
 class TestCreditTag(TestModel):
-
     def test_model_initialization(self):
         mapping = {
             "id": 100,
@@ -320,8 +406,12 @@ class TestCreditTag(TestModel):
 
     @pytest.mark.parametrize(
         "mapping, expected_repr_string",
-        [[{"id": 100, "user_id": 10, "parent_id": None, "tag_name": "New tag"},
-          "CreditTag(id=100, user_id=10, parent_id=None, tag_name='New tag')"]]
+        [
+            [
+                {"id": 100, "user_id": 10, "parent_id": None, "tag_name": "New tag"},
+                "CreditTag(id=100, user_id=10, parent_id=None, tag_name='New tag')",
+            ]
+        ],
     )
     def test_model_representation(self, mapping, expected_repr_string):
         tag = CreditTag(**mapping)
@@ -329,12 +419,12 @@ class TestCreditTag(TestModel):
 
 
 class TestAlternateModels:
-
     def test_no_representation(self):
         # Define a generic class to test default string representations
         class GenericModel(Model):
             # Pass a valid table name
             __tablename__ = "users"
+
         # Test that the model's string representation is generic
         generic_model = GenericModel()
         assert str(generic_model)[0] == "<"
@@ -345,6 +435,7 @@ class TestAlternateModels:
         class AuthorizedModel(AuthorizedAccessMixin, Model):
             # Pass a valid table name
             __tablename__ = "users"
+
         # Test that the model cannot make a selection based on the user
         authorized_model = AuthorizedModel()
         with pytest.raises(AttributeError):

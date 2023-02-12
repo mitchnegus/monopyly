@@ -59,7 +59,7 @@ class DatabaseHandler(ABC):
         # Build a filter based on the values (if given)
         if value is None:
             return None
-        return (field == value)
+        return field == value
 
     @staticmethod
     def _filter_values(field, values):
@@ -201,8 +201,9 @@ class DatabaseHandler(ABC):
         try:
             entry = cls._db.session.execute(query).scalar_one()
         except NoResultFound:
-            abort_msg = (f"The entry with ID {entry_id} does not exist for "
-                          "the current user.")
+            abort_msg = (
+                f"The entry with ID {entry_id} does not exist for the current user."
+            )
             abort(404, abort_msg)
         return entry
 
@@ -254,8 +255,9 @@ class DatabaseHandler(ABC):
         entry_fields = [column.name for column in inspect(cls.model).columns]
         for field, value in field_values.items():
             if field not in entry_fields:
-                raise ValueError("A value cannot be updated in the "
-                                f"nonexistent field {field}.")
+                raise ValueError(
+                    f"A value cannot be updated in the nonexistent field {field}."
+                )
             setattr(entry, field, value)
         cls._db.session.flush()
         # Confirm that this was an authorized entry by the user
@@ -291,6 +293,7 @@ class DatabaseViewHandler(DatabaseHandler):
     handler, but with minor customizations to allow the handler to
     operate on database views, rather than native tables.
     """
+
     _view_context = False
 
     @classmethod
@@ -324,6 +327,7 @@ class DatabaseViewHandler(DatabaseHandler):
 
     def view_query(func):
         """Require that a function use a model view rather than the model."""
+
         def wrapper(cls, *args, **kwargs):
             orig_view_context = cls._view_context
             cls._view_context = True
@@ -332,6 +336,7 @@ class DatabaseViewHandler(DatabaseHandler):
             finally:
                 cls._view_context = orig_view_context
             return return_value
+
         return wrapper
 
     @classmethod
@@ -350,4 +355,3 @@ class DatabaseViewHandler(DatabaseHandler):
     @view_query
     def get_entry(cls, entry_id):
         return super().get_entry(entry_id)
-

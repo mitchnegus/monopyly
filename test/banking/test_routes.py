@@ -7,7 +7,6 @@ from ..helpers import TestRoutes, transaction_lifetime
 
 
 class TestBankingRoutes(TestRoutes):
-
     blueprint_prefix = "banking"
 
     def test_load_accounts(self, authorization):
@@ -76,7 +75,7 @@ class TestBankingRoutes(TestRoutes):
         self.get_route("/account_summaries/2")
         assert "Bank Account Summaries" in self.html
         # 2 accounts (1 checking, 1 savings)
-        total_balance = (42.00 + 43.00 + 300 + 58.90 - 109.21 - 300)
+        total_balance = 42.00 + 43.00 + 300 + 58.90 - 109.21 - 300
         assert f'<h2 class="bank">Jail (${total_balance:.2f})</h2' in self.html
         assert self.html.count("account-type-block") == 2
         assert self.html.count('<span class="digits">5556</span>') == 2
@@ -101,9 +100,7 @@ class TestBankingRoutes(TestRoutes):
         assert "$-109.21" in self.html
 
     def test_show_linked_bank_transaction(self, authorization):
-        self.post_route(
-            "/_show_linked_transaction", json={"transaction_id": 6}
-        )
+        self.post_route("/_show_linked_transaction", json={"transaction_id": 6})
         # Show the overlay
         assert "overlay" in self.html
         assert "linked-transaction-display" in self.html
@@ -115,9 +112,7 @@ class TestBankingRoutes(TestRoutes):
         assert "Savings" in self.html
 
     def test_show_linked_credit_transaction(self, authorization):
-        self.post_route(
-            "/_show_linked_transaction", json={"transaction_id": 5}
-        )
+        self.post_route("/_show_linked_transaction", json={"transaction_id": 5})
         # Show the overlay
         assert "overlay" in self.html
         assert "linked-transaction-display" in self.html
@@ -172,9 +167,7 @@ class TestBankingRoutes(TestRoutes):
             assert f"transaction-{id_}" in self.html
 
     @transaction_lifetime
-    def test_add_transaction_multiple_subtransactions_post(
-        self, authorization
-    ):
+    def test_add_transaction_multiple_subtransactions_post(self, authorization):
         self.post_route(
             "/add_transaction",
             data={
@@ -233,10 +226,7 @@ class TestBankingRoutes(TestRoutes):
         assert "Do not pass GO, do not collect $200" in self.html
 
     def test_add_subtransaction_fields(self, authorization):
-        self.post_route(
-            "/_add_subtransaction_fields",
-            json={"subtransaction_count": 1}
-        )
+        self.post_route("/_add_subtransaction_fields", json={"subtransaction_count": 1})
         # Created a second transaction with index 1
         assert 'id="subtransactions-1"' in self.html
         assert "subtransactions-1-subtotal" in self.html
@@ -261,15 +251,10 @@ class TestBankingRoutes(TestRoutes):
 
     @pytest.mark.parametrize(
         "field, suggestions",
-        [["bank_name", ["TheBank", "Jail"]],
-         ["last_four_digits", ["5556", "5557"]]]
+        [["bank_name", ("TheBank", "Jail")], ["last_four_digits", ("5556", "5557")]],
     )
-    def test_suggest_transaction_autocomplete(self, authorization, field,
-                                              suggestions):
-        self.post_route(
-            "/_suggest_transaction_autocomplete", json={"field": field}
-        )
+    def test_suggest_transaction_autocomplete(self, authorization, field, suggestions):
+        self.post_route("/_suggest_transaction_autocomplete", json={"field": field})
         # Returned suggestions are not required to be in any particular order
         # (for this test)
         assert sorted(json.loads(self.response.data)) == sorted(suggestions)
-

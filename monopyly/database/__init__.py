@@ -15,13 +15,14 @@ from sqlalchemy.schema import Table
 from .models import Model
 from .schema import DATABASE_SCHEMA
 
-DIALECT = 'sqlite'
-DBAPI = 'pysqlite'
-DB_NAME = 'monopyly.sqlite'
+DIALECT = "sqlite"
+DBAPI = "pysqlite"
+DB_NAME = "monopyly.sqlite"
 
 
 class SQLAlchemy:
     """Store SQLAlchemy database objects."""
+
     _base = Model
 
     def __init__(self, db_path=None):
@@ -64,10 +65,12 @@ db = SQLAlchemy()
 
 def db_transaction(func):
     """A decorator denoting the wrapped function as a database transaction."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         with current_app.db.session.begin():
             return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -78,7 +81,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 
-@click.command('init-db')
+@click.command("init-db")
 @with_appcontext
 def init_db_command():
     """Initialize the database from the command line (if it does not exist)."""
@@ -106,7 +109,7 @@ def init_db(db, auxiliary_preload_path=None):
         sql_filepaths.append(auxiliary_preload_path)
     for sql_filepath in sql_filepaths:
         with current_app.open_resource(sql_filepath) as sql_file:
-            raw_conn.executescript(sql_file.read().decode('utf8'))
+            raw_conn.executescript(sql_file.read().decode("utf8"))
     raw_conn.close()
     # Register tables with the SQLAlchemy metadata
     db.metadata.create_all(bind=db.engine)
@@ -116,4 +119,3 @@ def close_db(exception=None):
     """Close the database if it is open."""
     if current_app.db.scoped_session is not None:
         current_app.db.scoped_session.remove()
-

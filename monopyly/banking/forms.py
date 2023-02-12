@@ -22,6 +22,7 @@ from .banks import BankHandler
 
 class BankSelectField(CustomChoiceSelectField):
     """Bank field that uses the database to prepare field choices."""
+
     _db_handler = BankHandler
 
     def __init__(self, **kwargs):
@@ -35,6 +36,7 @@ class BankSelectField(CustomChoiceSelectField):
 
 class BankAccountTypeSelectField(CustomChoiceSelectField):
     """Account type field that uses the database to prepare field choices."""
+
     _db_handler = BankAccountTypeHandler
 
     def __init__(self, **kwargs):
@@ -51,10 +53,11 @@ class BankAccountTypeSelectField(CustomChoiceSelectField):
 
 class BankSubform(AcquisitionSubform):
     """Form to input/edit bank identification."""
+
     _db_handler = BankHandler
     # Fields pertaining to the bank
     bank_id = BankSelectField()
-    bank_name = StringField('Bank Name', [Optional()])
+    bank_name = StringField("Bank Name", [Optional()])
 
     def get_bank(self):
         """Get the bank described by the form data."""
@@ -66,8 +69,8 @@ class BankSubform(AcquisitionSubform):
             raise ValueError("A bank name must be provided.")
         # Mapping must match format for `banks` database table
         bank_data = {
-            'user_id': self._db_handler.user_id,
-            'bank_name': self.bank_name.data,
+            "user_id": self._db_handler.user_id,
+            "bank_name": self.bank_name.data,
         }
         return bank_data
 
@@ -75,8 +78,8 @@ class BankSubform(AcquisitionSubform):
         """Gather data for the form from the given database entry."""
         if isinstance(entry, Bank):
             data = {
-                'bank_id': entry.id,
-                'bank_name': entry.bank_name,
+                "bank_id": entry.id,
+                "bank_name": entry.bank_name,
             }
         else:
             self._raise_gather_fail_error((Bank,), entry)
@@ -88,10 +91,11 @@ class BankAccountForm(EntryForm):
 
     class AccountTypeSubform(AcquisitionSubform):
         """Form to input/edit bank account types."""
+
         _db_handler = BankAccountTypeHandler
         # Fields pertaining to the account type
         account_type_id = BankAccountTypeSelectField()
-        type_name = StringField('Account Type Name')
+        type_name = StringField("Account Type Name")
 
         def get_account_type(self):
             """Get the bank account type described by the form data."""
@@ -100,9 +104,9 @@ class BankAccountForm(EntryForm):
         def _prepare_mapping(self):
             # Mapping must match format for `bank_account_types` database table
             account_type_data = {
-                'user_id': self._db_handler.user_id,
-                'type_name': self.type_name.data,
-                'type_abbreviation': None,
+                "user_id": self._db_handler.user_id,
+                "type_name": self.type_name.data,
+                "type_abbreviation": None,
             }
             return account_type_data
 
@@ -111,10 +115,10 @@ class BankAccountForm(EntryForm):
     account_type_info = FormField(AccountTypeSubform)
     # Fields pertaining to the account
     last_four_digits = LastFourDigitsField(
-        'Last Four Digits', validators=[DataRequired()]
+        "Last Four Digits", validators=[DataRequired()]
     )
-    active = BooleanField('Active', default='checked')
-    submit = SubmitField('Save Account')
+    active = BooleanField("Active", default="checked")
+    submit = SubmitField("Save Account")
 
     @property
     def account_data(self):
@@ -122,10 +126,10 @@ class BankAccountForm(EntryForm):
         bank = self.bank_info.get_bank()
         account_type = self.account_type_info.get_account_type()
         account_data = {
-            'bank_id': bank.id,
-            'account_type_id': account_type.id,
-            'last_four_digits': self['last_four_digits'].data,
-            'active': self['active'].data,
+            "bank_id": bank.id,
+            "account_type_id": account_type.id,
+            "last_four_digits": self["last_four_digits"].data,
+            "active": self["active"].data,
         }
         return account_data
 
@@ -136,7 +140,7 @@ class BankAccountForm(EntryForm):
             bank_info = entry
         else:
             self._raise_gather_fail_error((Bank,), entry)
-        data['bank_info'] = self.bank_info.gather_entry_data(bank_info)
+        data["bank_info"] = self.bank_info.gather_entry_data(bank_info)
         return data
 
 
@@ -145,13 +149,14 @@ class BankTransactionForm(TransactionForm):
 
     class AccountSubform(EntrySubform):
         """Form to input/edit bank account identification."""
+
         _db_handler = BankAccountHandler
         # Fields pertaining to the account
-        bank_name = StringField('Bank')
+        bank_name = StringField("Bank")
         last_four_digits = LastFourDigitsField(
-            'Last Four Digits', validators=[DataRequired()]
+            "Last Four Digits", validators=[DataRequired()]
         )
-        type_name = StringField('AccountType', validators=[DataRequired()])
+        type_name = StringField("AccountType", validators=[DataRequired()])
 
         def get_account(self):
             """Get the bank account described by the form data."""
@@ -165,12 +170,12 @@ class BankTransactionForm(TransactionForm):
             """Gather data for the form from the given database entry."""
             if isinstance(entry, BankAccountView):
                 data = {
-                    'bank_name': entry.bank.bank_name,
-                    'last_four_digits': entry.last_four_digits,
-                    'type_name': entry.account_type.type_name,
+                    "bank_name": entry.bank.bank_name,
+                    "last_four_digits": entry.last_four_digits,
+                    "type_name": entry.account_type.type_name,
                 }
             elif isinstance(entry, Bank):
-                data = {'bank_name': entry.bank_name}
+                data = {"bank_name": entry.bank_name}
             else:
                 self._raise_gather_fail_error((BankAccountView, Bank), entry)
             return data
@@ -182,8 +187,8 @@ class BankTransactionForm(TransactionForm):
             """Gather data for the form from the given database entry."""
             if isinstance(entry, BankSubtransaction):
                 data = {
-                    'subtotal': entry.subtotal,
-                    'note': entry.note,
+                    "subtotal": entry.subtotal,
+                    "note": entry.note,
                 }
             else:
                 self._raise_gather_fail_error((BankSubtransaction,), entry)
@@ -203,12 +208,14 @@ class BankTransactionForm(TransactionForm):
         max_entries=1,
     )
     # Define an autocompleter for the form
-    _autocompleter = Autocompleter({
-        'bank_name': Bank,
-        'type_name': BankAccountTypeView,
-        'last_four_digits': BankAccountView,
-        'note': BankSubtransaction,
-    })
+    _autocompleter = Autocompleter(
+        {
+            "bank_name": Bank,
+            "type_name": BankAccountTypeView,
+            "last_four_digits": BankAccountView,
+            "note": BankSubtransaction,
+        }
+    )
 
     @property
     def transfer_account_info(self):
@@ -247,7 +254,7 @@ class BankTransactionForm(TransactionForm):
         transfer_data = self._prepare_transaction_data(account)
         # Negate transfer subtotals as the opposite of the original transaction
         for subtransaction_data in transfer_data["subtransactions"]:
-            subtransaction_data['subtotal'] = -subtransaction_data['subtotal']
+            subtransaction_data["subtotal"] = -subtransaction_data["subtotal"]
         return transfer_data
 
     def get_transaction_account(self):
@@ -273,12 +280,7 @@ class BankTransactionForm(TransactionForm):
             data = {}
             account_info = entry
         else:
-            self._raise_gather_fail_error(
-                (BankTransactionView, BankAccountView), entry
-            )
+            self._raise_gather_fail_error((BankTransactionView, BankAccountView), entry)
         # Prepare data for the account/subtransaction subforms
-        data['account_info'] = self.account_info.gather_entry_data(
-            account_info
-        )
+        data["account_info"] = self.account_info.gather_entry_data(account_info)
         return data
-

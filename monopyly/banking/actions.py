@@ -13,4 +13,3 @@ def get_bank_account_type_grouping(bank):
             account_type_ids=(account_type.id,),
         )
     return type_accounts
-

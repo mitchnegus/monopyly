@@ -14,6 +14,5 @@ def validate_sort_order(sort_order):
         sorting the returned values from the database query. The order
         must be either 'ASC' or 'DESC'.
     """
-    if sort_order not in ('ASC', 'DESC'):
-        raise ValueError('Provide a valid sort order.')
-
+    if sort_order not in ("ASC", "DESC"):
+        raise ValueError("Provide a valid sort order.")

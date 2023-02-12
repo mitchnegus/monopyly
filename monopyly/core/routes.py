@@ -11,7 +11,7 @@ from ..credit.statements import CreditStatementHandler
 from .blueprint import bp
 
 
-@bp.route('/')
+@bp.route("/")
 def index():
     if g.user:
         # Get the user's banks and credit cards from the database
@@ -32,22 +32,22 @@ def index():
                 card.last_statement_id = None
     else:
         bank_accounts, active_cards = None, None
-    return render_template('index.html',
-                           bank_accounts=bank_accounts,
-                           cards=active_cards)
+    return render_template(
+        "index.html", bank_accounts=bank_accounts, cards=active_cards
+    )
 
 
-@bp.route('/about')
+@bp.route("/about")
 def about():
-    return render_template('about.html')
+    return render_template("about.html")
 
 
-@bp.route('/credits')
+@bp.route("/credits")
 def credits():
-    return render_template('credits.html')
+    return render_template("credits.html")
 
 
-@bp.route('/settings')
+@bp.route("/settings")
 @login_required
 def settings():
-    return render_template('settings.html')
+    return render_template("settings.html")

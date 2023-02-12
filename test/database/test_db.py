@@ -18,9 +18,9 @@ def test_init_db_command_db_exists(runner, monkeypatch):
     def mock_init_db(db, auxiliary_preload_path=None):
         Recorder.called = True
 
-    monkeypatch.setattr('monopyly.database.init_db', mock_init_db)
-    result = runner.invoke(args=['init-db'])
-    assert 'Database exists' in result.output
+    monkeypatch.setattr("monopyly.database.init_db", mock_init_db)
+    result = runner.invoke(args=["init-db"])
+    assert "Database exists" in result.output
     assert not Recorder.called
 
 
@@ -33,10 +33,9 @@ def test_init_db_command(mock_method, runner, monkeypatch):
     def mock_init_db(db, auxiliary_preload_path):
         Recorder.called = True
 
-    monkeypatch.setattr('monopyly.database.init_db', mock_init_db)
+    monkeypatch.setattr("monopyly.database.init_db", mock_init_db)
     mock_method.return_value = False
     # Ensure that the database is initialized properly
-    result = runner.invoke(args=['init-db'])
-    assert 'Initialized' in result.output
+    result = runner.invoke(args=["init-db"])
+    assert "Initialized" in result.output
     assert Recorder.called
-

@@ -15,6 +15,7 @@ def mock_field_form(client_context):
     def _mock_field_form(test_field_class, *args, **kwargs):
         class TestForm(FlaskForm):
             field = test_field_class("Test", *args, **kwargs)
+
         return TestForm
 
     return _mock_field_form
@@ -32,10 +33,7 @@ class TestFields:
 
     @pytest.mark.parametrize(
         "test_value, expected_value",
-        [[100, 100.00],
-         [100.003, 100.00],
-         [100.999, 101.00],
-         [None, None]]
+        [[100, 100.00], [100.003, 100.00], [100.999, 101.00], [None, None]],
     )
     def test_currency_field(self, mock_field_form, test_value, expected_value):
         form_class = mock_field_form(CurrencyField)
@@ -46,9 +44,11 @@ class TestFields:
 
     @pytest.mark.parametrize(
         "test_value, expected_value",
-        [["test string", "test string"],
-         ["  test string   ", "test string"],
-         [None, ""]]
+        [
+            ["test string", "test string"],
+            ["  test string   ", "test string"],
+            [None, ""],
+        ],
     )
     def test_string_field(self, mock_field_form, test_value, expected_value):
         form_class = mock_field_form(StringField)
@@ -56,13 +56,11 @@ class TestFields:
         assert form.field.data == expected_value
 
     @pytest.mark.parametrize(
-        "test_value, validated",
-        [["1234", True],
-         ["12345", False],
-         ["a1234", False]]
+        "test_value, validated", [["1234", True], ["12345", False], ["a1234", False]]
     )
-    def test_last_four_digits_field_validation(self, mock_field_form,
-                                               test_value, validated):
+    def test_last_four_digits_field_validation(
+        self, mock_field_form, test_value, validated
+    ):
         form_class = mock_field_form(LastFourDigitsField)
         form = form_class(data={"field": test_value})
         v = form.validate()

@@ -17,7 +17,6 @@ def card_handler(client_context):
 
 
 class TestCreditCardHandler(TestHandler):
-
     # References only include entries accessible to the authorized login
     #   - ordered by active status (active first)
     db_reference = [
@@ -33,22 +32,28 @@ class TestCreditCardHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "bank_ids, account_ids, last_four_digits, active, reference_entries",
-        [[None, None, None, None, db_reference],
-         [(2,), None, None, None, [db_reference[0], db_reference[2]]],
-         [None, (2,), None, None, [db_reference[0], db_reference[2]]],
-         [None, None, ("3335",), None, db_reference[:1]],
-         [None, None, None, 1, db_reference[:2]]]
+        [
+            [None, None, None, None, db_reference],
+            [(2,), None, None, None, (db_reference[0], db_reference[2])],
+            [None, (2,), None, None, (db_reference[0], db_reference[2])],
+            [None, None, ("3335",), None, db_reference[:1]],
+            [None, None, None, 1, db_reference[:2]],
+        ],
     )
-    def test_get_cards(self, card_handler, bank_ids, account_ids,
-                       last_four_digits, active, reference_entries):
-        cards = card_handler.get_cards(bank_ids, account_ids, last_four_digits,
-                                       active)
+    def test_get_cards(
+        self,
+        card_handler,
+        bank_ids,
+        account_ids,
+        last_four_digits,
+        active,
+        reference_entries,
+    ):
+        cards = card_handler.get_cards(bank_ids, account_ids, last_four_digits, active)
         self.assertEntriesMatch(cards, reference_entries)
 
     @pytest.mark.parametrize(
-        "card_id, reference_entry",
-        [[2, db_reference[2]],
-         [3, db_reference[0]]]
+        "card_id, reference_entry", [[2, db_reference[2]], [3, db_reference[0]]]
     )
     def test_get_entry(self, card_handler, card_id, reference_entry):
         card = card_handler.get_entry(card_id)
@@ -56,8 +61,10 @@ class TestCreditCardHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "card_id, exception",
-        [[1, NotFound],  # Not the logged in user
-         [5, NotFound]]  # Not in the database
+        [
+            [1, NotFound],  # the card user is not the logged in user
+            [5, NotFound],  # the card is not in the database
+        ],
     )
     def test_get_entry_invalid(self, card_handler, card_id, exception):
         with pytest.raises(exception):
@@ -65,29 +72,31 @@ class TestCreditCardHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "bank_name, last_four_digits, reference_entry",
-        [["Jail", "3334", db_reference[2]],
-         [None, "3335", db_reference[0]],
-         ["TheBank", "3336", db_reference[1]]]
+        [
+            ["Jail", "3334", db_reference[2]],
+            [None, "3335", db_reference[0]],
+            ["TheBank", "3336", db_reference[1]],
+        ],
     )
-    def test_find_card(self, card_handler, bank_name, last_four_digits,
-                       reference_entry):
+    def test_find_card(
+        self, card_handler, bank_name, last_four_digits, reference_entry
+    ):
         card = card_handler.find_card(bank_name, last_four_digits)
         self.assertEntryMatches(card, reference_entry)
 
     @pytest.mark.parametrize(
-        "bank_name, last_four_digits",
-        [["Jail", "6666"],
-         [None, None]]
+        "bank_name, last_four_digits", [["Jail", "6666"], [None, None]]
     )
-    def test_find_card_none_exist(self, card_handler, bank_name,
-                                  last_four_digits):
+    def test_find_card_none_exist(self, card_handler, bank_name, last_four_digits):
         card = card_handler.find_card(bank_name, last_four_digits)
         assert card is None
 
     @pytest.mark.parametrize(
         "mapping",
-        [{"account_id": 2, "last_four_digits": "4444", "active": 1},
-         {"account_id": 3, "last_four_digits": "4444", "active": 0}]
+        [
+            {"account_id": 2, "last_four_digits": "4444", "active": 1},
+            {"account_id": 3, "last_four_digits": "4444", "active": 0},
+        ],
     )
     def test_add_entry(self, card_handler, mapping):
         card = card_handler.add_entry(**mapping)
@@ -100,8 +109,10 @@ class TestCreditCardHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "mapping, exception",
-        [[{"account_id": 2, "invalid_field": "Test", "active": 1}, TypeError],
-         [{"account_id": 3, "last_four_digits": "4444"}, IntegrityError]]
+        [
+            [{"account_id": 2, "invalid_field": "Test", "active": 1}, TypeError],
+            [{"account_id": 3, "last_four_digits": "4444"}, IntegrityError],
+        ],
     )
     def test_add_entry_invalid(self, card_handler, mapping, exception):
         with pytest.raises(exception):
@@ -120,8 +131,10 @@ class TestCreditCardHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "mapping",
-        [{"account_id": 2, "last_four_digits": "4444", "active": 1},
-         {"account_id": 2, "last_four_digits": "4444"}]
+        [
+            {"account_id": 2, "last_four_digits": "4444", "active": 1},
+            {"account_id": 2, "last_four_digits": "4444"},
+        ],
     )
     def test_update_entry(self, card_handler, mapping):
         card = card_handler.update_entry(2, **mapping)
@@ -134,15 +147,16 @@ class TestCreditCardHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "card_id, mapping, exception",
-        [[1, {"account_id": 2, "last_four_digits": "4444"},
-          NotFound],                                        # wrong user
-         [2, {"account_id": 2, "invalid_field": "Test"},
-          ValueError],                                      # invalid field
-         [5, {"account_id": 2, "last_four_digits": "4444"},
-          NotFound]]                                        # nonexistent ID
+        [
+            # Wrong card user
+            [1, {"account_id": 2, "last_four_digits": "4444"}, NotFound],
+            # Invalid field
+            [2, {"account_id": 2, "invalid_field": "Test"}, ValueError],
+            # Nonexistent ID
+            [5, {"account_id": 2, "last_four_digits": "4444"}, NotFound],
+        ],
     )
-    def test_update_entry_invalid(self, card_handler, card_id, mapping,
-                                  exception):
+    def test_update_entry_invalid(self, card_handler, card_id, mapping, exception):
         with pytest.raises(exception):
             card_handler.update_entry(card_id, **mapping)
 
@@ -156,8 +170,10 @@ class TestCreditCardHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "entry_id, exception",
-        [[1, NotFound],   # should not be able to delete other user entries
-         [5, NotFound]]   # should not be able to delete nonexistent entries
+        [
+            [1, NotFound],  # should not be able to delete other user entries
+            [5, NotFound],  # should not be able to delete nonexistent entries
+        ],
     )
     def test_delete_entry_invalid(self, card_handler, entry_id, exception):
         with pytest.raises(exception):
@@ -165,7 +181,6 @@ class TestCreditCardHandler(TestHandler):
 
 
 class TestSaveFormFunctions:
-
     @patch("monopyly.credit.cards.CreditCardHandler")
     @patch("monopyly.credit.forms.CreditCardForm")
     def test_save_new_card(self, mock_form, mock_handler):
@@ -188,4 +203,3 @@ class TestSaveFormFunctions:
         card = save_card(mock_form, card_id)
         mock_method.assert_called_once_with(card_id, **mock_form.card_data)
         assert card == mock_method.return_value
-

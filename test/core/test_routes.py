@@ -5,7 +5,6 @@ from ..helpers import TestRoutes
 
 
 class TestCoreRoutes(TestRoutes):
-
     def test_index(self, auth):
         # Test that index shows minimal information without login
         self.get_route("/")
@@ -47,4 +46,3 @@ class TestCoreRoutes(TestRoutes):
     def test_settings(self, authorization):
         self.get_route("/settings")
         assert "Settings coming soon..." in self.html
-

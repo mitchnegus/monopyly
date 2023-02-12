@@ -38,6 +38,7 @@ from .statements import CreditStatementHandler
 
 class CreditAccountSelectField(CustomChoiceSelectField):
     """Account field that uses the database to prepare field choices."""
+
     _db_handler = CreditAccountHandler
 
     def __init__(self, **kwargs):
@@ -58,13 +59,14 @@ class CreditCardForm(EntryForm):
 
     class AccountSubform(AcquisitionSubform):
         """Form to input/edit account identification."""
+
         _db_handler = CreditAccountHandler
         # Fields to identify the bank information for the account
         bank_info = FormField(BankSubform)
         # Fields pertaining to the account
         account_id = CreditAccountSelectField()
-        statement_issue_day = IntegerField('Statement Issue Day', [Optional()])
-        statement_due_day = IntegerField('Statement Due Day', [Optional()])
+        statement_issue_day = IntegerField("Statement Issue Day", [Optional()])
+        statement_due_day = IntegerField("Statement Due Day", [Optional()])
 
         def validate(self, *args, **kwargs):
             """Validate the subform."""
@@ -82,9 +84,9 @@ class CreditCardForm(EntryForm):
             bank = self.bank_info.get_bank()
             # Mapping must match format for `credit_accounts` database table
             account_data = {
-                'bank_id': bank.id,
-                'statement_issue_day': self.statement_issue_day.data,
-                'statement_due_day': self.statement_due_day.data,
+                "bank_id": bank.id,
+                "statement_issue_day": self.statement_issue_day.data,
+                "statement_due_day": self.statement_due_day.data,
             }
             return account_data
 
@@ -92,9 +94,9 @@ class CreditCardForm(EntryForm):
             """Gather data for the form from the given database entry."""
             if isinstance(entry, CreditAccount):
                 data = {
-                    'account_id': entry.id,
-                    'statement_issue_day': entry.statement_issue_day,
-                    'statement_due_day': entry.statement_due_day,
+                    "account_id": entry.id,
+                    "statement_issue_day": entry.statement_issue_day,
+                    "statement_due_day": entry.statement_due_day,
                 }
             else:
                 self._raise_gather_fail_error((CreditAccount,), entry)
@@ -104,19 +106,20 @@ class CreditCardForm(EntryForm):
     account_info = FormField(AccountSubform)
     # Fields pertaining to the card
     last_four_digits = LastFourDigitsField(
-        'Last Four Digits', validators=[DataRequired()],
+        "Last Four Digits",
+        validators=[DataRequired()],
     )
-    active = BooleanField('Active', default='checked')
-    submit = SubmitField('Save Card')
+    active = BooleanField("Active", default="checked")
+    submit = SubmitField("Save Card")
 
     @property
     def card_data(self):
         """Produce a dictionary corresponding to a database card."""
         account = self.account_info.get_account()
         card_data = {
-            'account_id': account.id,
-            'last_four_digits': self.last_four_digits.data,
-            'active': self.active.data
+            "account_id": account.id,
+            "last_four_digits": self.last_four_digits.data,
+            "active": self.active.data,
         }
         return card_data
 
@@ -124,18 +127,19 @@ class CreditCardForm(EntryForm):
         """Gather data for the form from the given database entry."""
         if isinstance(entry, CreditCard):
             data = {
-                'last_four_digits': entry.last_four_digits,
-                'active': entry.active,
+                "last_four_digits": entry.last_four_digits,
+                "active": entry.active,
             }
             account_info = entry.account
         else:
             self._raise_gather_fail_error((CreditCard,), entry)
-        data['account_info'] = self.account_info.gather_entry_data(account_info)
+        data["account_info"] = self.account_info.gather_entry_data(account_info)
         return data
 
 
 class CardStatementTransferForm(EntryForm):
     """Form indicating if an unpaid statement should be transferred to a new card."""
+
     transfer = RadioField("transfer", choices=[("yes", "Yes"), ("no", "No")])
     submit = SubmitField("Continue")
 
@@ -145,15 +149,18 @@ class CreditTransactionForm(TransactionForm):
 
     class StatementSubform(EntrySubform):
         """Form to input/edit credit statement identification."""
+
         _db_handler = CreditStatementHandler
 
         class CardSubform(EntrySubform):
             """Form to input/edit credit account identification."""
+
             _db_handler = CreditCardHandler
             # Fields pertaining to the card
-            bank_name = StringField('Bank')
+            bank_name = StringField("Bank")
             last_four_digits = LastFourDigitsField(
-                'Last Four Digits', validators=[DataRequired()],
+                "Last Four Digits",
+                validators=[DataRequired()],
             )
 
             def get_card(self):
@@ -167,8 +174,8 @@ class CreditTransactionForm(TransactionForm):
                 """Gather data for the form from the given database entry."""
                 if isinstance(entry, CreditCard):
                     data = {
-                        'bank_name': entry.account.bank.bank_name,
-                        'last_four_digits': entry.last_four_digits,
+                        "bank_name": entry.account.bank.bank_name,
+                        "last_four_digits": entry.last_four_digits,
                     }
                 else:
                     self._raise_gather_fail_error((CreditCard,), entry)
@@ -177,7 +184,7 @@ class CreditTransactionForm(TransactionForm):
         # Fields to identify the card/bank information for the statement
         card_info = FormField(CardSubform)
         # Fields pertaining to the statement
-        issue_date = DateField('Statement Date')
+        issue_date = DateField("Statement Date")
 
         def get_statement(self, transaction_date):
             """Get the credit card statement described by the form data."""
@@ -217,14 +224,10 @@ class CreditTransactionForm(TransactionForm):
             """
             issue_date = self.issue_date.data
             if issue_date:
-                statement = self._db_handler.find_statement(
-                    card.id, issue_date
-                )
+                statement = self._db_handler.find_statement(card.id, issue_date)
                 # Create the statement if it does not already exist
                 if not statement:
-                    statement = self._db_handler.add_statement(
-                        card, issue_date
-                    )
+                    statement = self._db_handler.add_statement(card, issue_date)
             else:
                 # No issue date was given, so the statement must be inferred
                 statement = self._db_handler.infer_statement(
@@ -235,32 +238,29 @@ class CreditTransactionForm(TransactionForm):
         def gather_entry_data(self, entry):
             """Gather data for the form from the given database entry."""
             if isinstance(entry, CreditStatementView):
-                data = {
-                    'issue_date': entry.issue_date
-                }
+                data = {"issue_date": entry.issue_date}
                 card_info = entry.card
             elif isinstance(entry, CreditCard):
                 data = {}
                 card_info = entry
             else:
-                self._raise_gather_fail_error(
-                    (CreditStatementView, CreditCard), entry
-                )
+                self._raise_gather_fail_error((CreditStatementView, CreditCard), entry)
             # Prepare data for the card subforms
-            data['card_info'] = self.card_info.gather_entry_data(card_info)
+            data["card_info"] = self.card_info.gather_entry_data(card_info)
             return data
 
     class SubtransactionSubform(TransactionForm.SubtransactionSubform):
         """Form to input/edit credit card subtransactions."""
+
         # Fields pertaining to the credit subtransaction
-        tags = StringField('Tags')
+        tags = StringField("Tags")
 
         @property
         def subtransaction_data(self):
             """
             Produce a dictionary corresponding to a database subtransaction.
             """
-            raw_tag_data = self.tags.data.split(',')
+            raw_tag_data = self.tags.data.split(",")
             data = super().subtransaction_data
             data["tags"] = [tag.strip() for tag in raw_tag_data if tag]
             return data
@@ -270,9 +270,9 @@ class CreditTransactionForm(TransactionForm):
             if isinstance(entry, CreditSubtransaction):
                 tag_names = [tag.tag_name for tag in entry.tags]
                 data = {
-                    'subtotal': entry.subtotal,
-                    'note': entry.note,
-                    'tags': ', '.join(tag_names),
+                    "subtotal": entry.subtotal,
+                    "note": entry.note,
+                    "tags": ", ".join(tag_names),
                 }
             else:
                 self._raise_gather_fail_error((CreditSubtransaction,), entry)
@@ -281,19 +281,21 @@ class CreditTransactionForm(TransactionForm):
     # Fields to identify the statement information for the transaction
     statement_info = FormField(StatementSubform)
     # Fields pertaining to the credit transaction
-    vendor = StringField('Vendor', [DataRequired()])
+    vendor = StringField("Vendor", [DataRequired()])
     # Subtransaction fields (must be at least 1 subtransaction)
     subtransactions = FieldList(
         FormField(SubtransactionSubform),
         min_entries=1,
     )
     # Define an autocompleter for the form
-    _autocompleter = Autocompleter({
-        'bank_name': Bank,
-        'last_four_digits': CreditCard,
-        'vendor': CreditTransactionView,
-        'note': CreditSubtransaction,
-    })
+    _autocompleter = Autocompleter(
+        {
+            "bank_name": Bank,
+            "last_four_digits": CreditCard,
+            "vendor": CreditTransactionView,
+            "note": CreditSubtransaction,
+        }
+    )
 
     @property
     def transaction_data(self):
@@ -328,13 +330,9 @@ class CreditTransactionForm(TransactionForm):
             data = {}
             statement_info = entry
         else:
-            self._raise_gather_fail_error(
-                (CreditCard, CreditStatementView), entry
-            )
+            self._raise_gather_fail_error((CreditCard, CreditStatementView), entry)
         # Prepare data for the statement/subtransaction subforms
-        data['statement_info'] = self.statement_info.gather_entry_data(
-            statement_info
-        )
+        data["statement_info"] = self.statement_info.gather_entry_data(statement_info)
         return data
 
     def _gather_transaction_data(self, transaction):
@@ -342,4 +340,3 @@ class CreditTransactionForm(TransactionForm):
         data = super()._gather_transaction_data(transaction)
         data["vendor"] = transaction.vendor
         return data
-

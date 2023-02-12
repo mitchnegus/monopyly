@@ -24,4 +24,3 @@ def test_test_config():
     app = create_app(_TestingConfig)
     assert app.testing
     assert app.config["SECRET_KEY"] == "testing key"
-

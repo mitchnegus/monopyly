@@ -4,6 +4,7 @@ from pathlib import Path
 
 class Config:
     """A base configuration object with some default settings."""
+
     TESTING = False
 
     def __init__(self, db_path=None):
@@ -18,4 +19,3 @@ class Config:
     def DATABASE(self, value):
         # Ensure that the database path is set as a `pathlib.Path` object
         self._database = Path(value)
-

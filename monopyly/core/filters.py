@@ -4,15 +4,15 @@ Filters defined for the application.
 from .blueprint import bp
 
 
-@bp.app_template_filter('currency')
+@bp.app_template_filter("currency")
 def make_currency(amount):
     """Return the amount to two decimal places (always shown)."""
     # Correct values of -0.00 to 0
     amount = amount if round(amount, 2) != 0 else 0
-    return f'{amount:,.2f}'
+    return f"{amount:,.2f}"
 
 
-@bp.app_template_filter('ordinal')
+@bp.app_template_filter("ordinal")
 def make_ordinal(integer):
     """
     Return the ordinal representation of an integer.
@@ -44,8 +44,7 @@ def make_ordinal(integer):
     This function is an adaptation of the one proposed by Stack Overflow user
     Florian Brucker (https://stackoverflow.com/a/50992575/8754471).
     """
-    suffix = ['th', 'st', 'nd', 'rd', 'th'][min(integer%10, 4)]
-    if 11 <= (integer%100) <= 13:
-        suffix = 'th'
-    return f'{integer}{suffix}'
-
+    suffix = ["th", "st", "nd", "rd", "th"][min(integer % 10, 4)]
+    if 11 <= (integer % 100) <= 13:
+        suffix = "th"
+    return f"{integer}{suffix}"

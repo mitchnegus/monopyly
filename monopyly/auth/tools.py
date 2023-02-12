@@ -13,7 +13,7 @@ from .blueprint import bp
 @bp.before_app_request
 def load_logged_in_user():
     # Match the user's information with the session
-    user_id = session.get('user_id')
+    user_id = session.get("user_id")
     if user_id is None:
         g.user = None
     else:
@@ -26,6 +26,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:
-            return redirect(url_for('auth.login'))
+            return redirect(url_for("auth.login"))
         return view(**kwargs)
+
     return wrapped_view

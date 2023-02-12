@@ -60,14 +60,16 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
 
     @abstractmethod
     def gather_entry_data(self, entry):
-        raise NotImplementedError("Define how form data is gathered from an "
-                                  "entry in a form-specific subclass.")
+        raise NotImplementedError(
+            "Define how form data is gathered from an "
+            "entry in a form-specific subclass."
+        )
 
     @classmethod
     def _raise_gather_fail_error(cls, permissible_entries, entry):
-        permissible_entries_string = ", ".join([
-            f"`{_.__name__}`" for _ in permissible_entries
-        ])
+        permissible_entries_string = ", ".join(
+            [f"`{_.__name__}`" for _ in permissible_entries]
+        )
         raise TypeError(
             f"Data for a `{cls.__name__}` can only be gathered from "
             f"permissible entry classes: {permissible_entries_string}; the "
@@ -77,6 +79,7 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
 
 class EntrySubform(EntryForm):
     """Subform disabling CSRF (CSRF is REQUIRED in encapsulating form)."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(meta={"csrf": False}, *args, **kwargs)
 
@@ -133,8 +136,10 @@ class TransactionForm(EntryForm):
 
         @abstractmethod
         def gather_entry_data(self, entry):
-            raise NotImplementedError("Define how subtransaction data is "
-                                      "gathered from an entry in a subclass.")
+            raise NotImplementedError(
+                "Define how subtransaction data is "
+                "gathered from an entry in a subclass."
+            )
 
     # Fields pertaining to the transaction
     transaction_date = DateField("Transaction Date", [DataRequired()])
@@ -145,7 +150,7 @@ class TransactionForm(EntryForm):
     _autocompleter = None
 
     def _prepare_transaction_data(self):
-        subtransactions_data =  [
+        subtransactions_data = [
             subform.subtransaction_data for subform in self["subtransactions"]
         ]
         data = {
@@ -181,4 +186,3 @@ class TransactionForm(EntryForm):
     def autocomplete(cls, field, **priority_sort_fields):
         """Provide autocompletion suggestions for form fields."""
         return cls._autocompleter.autocomplete(field, **priority_sort_fields)
-

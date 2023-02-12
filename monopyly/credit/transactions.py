@@ -35,13 +35,15 @@ class CreditTransactionHandler(DatabaseViewHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     _model = CreditTransaction
     _model_view = CreditTransactionView
 
     @classmethod
     @DatabaseViewHandler.view_query
-    def get_transactions(cls, statement_ids=None, card_ids=None, active=None,
-                    sort_order='DESC'):
+    def get_transactions(
+        cls, statement_ids=None, card_ids=None, active=None, sort_order="DESC"
+    ):
         """
         Get credit card transactions from the database.
 
@@ -116,7 +118,7 @@ class CreditTransactionHandler(DatabaseViewHandler):
             The saved transaction.
         """
         # Extend the default method to account for subtransactions
-        subtransactions_data = field_values.pop('subtransactions')
+        subtransactions_data = field_values.pop("subtransactions")
         transaction = super().add_entry(**field_values)
         cls._add_subtransactions(transaction, subtransactions_data)
         # Refresh the transaction with the subtransaction information
@@ -127,7 +129,7 @@ class CreditTransactionHandler(DatabaseViewHandler):
     def update_entry(cls, entry_id, **field_values):
         """Update a transaction in the database."""
         # Extend the default method to account for subtransactions
-        subtransactions_data = field_values.pop('subtransactions', None)
+        subtransactions_data = field_values.pop("subtransactions", None)
         transaction = super().update_entry(entry_id, **field_values)
         if subtransactions_data:
             # Replace all subtransactions when updating any subtransaction
@@ -176,11 +178,17 @@ class CreditTagHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     model = CreditTag
 
     @classmethod
-    def get_tags(cls, tag_names=None, transaction_ids=None,
-                 subtransaction_ids=None, ancestors=None):
+    def get_tags(
+        cls,
+        tag_names=None,
+        transaction_ids=None,
+        subtransaction_ids=None,
+        ancestors=None,
+    ):
         """
         Get credit card transaction tags from the database.
 
@@ -236,13 +244,15 @@ class CreditTagHandler(DatabaseHandler):
     @classmethod
     def _filter_entries(cls, query, filters):
         # Add a join to enable filtering by transaction ID or subtransaction ID
-        query = query.join(tag_link_table) \
-                     .join(CreditSubtransaction) \
-                     .join(CreditTransactionView) \
-                     .join(CreditStatementView) \
-                     .join(CreditCard) \
-                     .join(CreditAccount) \
-                     .join(Bank)
+        query = (
+            query.join(tag_link_table)
+            .join(CreditSubtransaction)
+            .join(CreditTransactionView)
+            .join(CreditStatementView)
+            .join(CreditCard)
+            .join(CreditAccount)
+            .join(Bank)
+        )
         # Only get distinct tag entries
         query = query.distinct()
         return super()._filter_entries(query, filters)
@@ -408,4 +418,3 @@ def save_transaction(form, transaction_id=None):
         # Insert the new transaction into the database
         transaction = CreditTransactionHandler.add_entry(**transaction_data)
     return transaction
-

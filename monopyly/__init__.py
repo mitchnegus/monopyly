@@ -77,16 +77,14 @@ def register_blueprints(app):
     that require database models before those models have been set up
     via `init_app`.
     """
-    # Register the core functionality blueprint
-    from monopyly.core.blueprint import bp as core_bp
-    app.register_blueprint(core_bp)
-    # Register the authentication blueprint
+    # Import blueprints
     from monopyly.auth.blueprint import bp as auth_bp
-    app.register_blueprint(auth_bp)
-    # Register the banking financials blueprint
     from monopyly.banking.blueprint import bp as banking_bp
-    app.register_blueprint(banking_bp)
-    # Register the credit card financials blueprint
+    from monopyly.core.blueprint import bp as core_bp
     from monopyly.credit.blueprint import bp as credit_bp
-    app.register_blueprint(credit_bp)
 
+    # Register blueprints
+    app.register_blueprint(core_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(banking_bp)
+    app.register_blueprint(credit_bp)

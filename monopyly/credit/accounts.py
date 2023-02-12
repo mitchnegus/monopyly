@@ -24,6 +24,7 @@ class CreditAccountHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     model = CreditAccount
 
     @classmethod
@@ -66,4 +67,3 @@ class CreditAccountHandler(DatabaseHandler):
             The ID of the account to be deleted.
         """
         super().delete_entry(entry_id)
-

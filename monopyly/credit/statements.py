@@ -30,13 +30,15 @@ class CreditStatementHandler(DatabaseViewHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     _model = CreditStatement
     _model_view = CreditStatementView
 
     @classmethod
     @DatabaseViewHandler.view_query
-    def get_statements(cls, card_ids=None, bank_ids=None, active=None,
-                       sort_order="DESC"):
+    def get_statements(
+        cls, card_ids=None, bank_ids=None, active=None, sort_order="DESC"
+    ):
         """
         Get credit card statements from the database.
 
@@ -102,7 +104,7 @@ class CreditStatementHandler(DatabaseViewHandler):
         """
         criteria = [
             cls._filter_value(CreditCard.id, card_id),
-            cls._filter_value(cls.model.issue_date, issue_date)
+            cls._filter_value(cls.model.issue_date, issue_date),
         ]
         statement = super().find_entry(
             *criteria, sort_order="DESC", require_unique=False
@@ -163,9 +165,9 @@ class CreditStatementHandler(DatabaseViewHandler):
             due_day = card.account.statement_due_day
             due_date = get_next_occurrence_of_day(due_day, issue_date)
         statement_data = {
-            'card_id': card.id,
-            'issue_date': issue_date,
-            'due_date': due_date,
+            "card_id": card.id,
+            "issue_date": issue_date,
+            "due_date": due_date,
         }
         statement = cls.add_entry(**statement_data)
         return statement
@@ -185,4 +187,3 @@ class CreditStatementHandler(DatabaseViewHandler):
             The ID of the statement to be deleted.
         """
         super().delete_entry(entry_id)
-

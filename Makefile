@@ -4,19 +4,19 @@ include config.mk
 
 ## install	: Install the package
 .PHONY: install
-install:
+install :
 	$(PIP) install .
 
 
 ## develop 	: Install the package in development mode
 .PHONY: develop
-develop:
+develop :
 	$(PIP) install -e .
 
 
 ## env		: Prepare a virtual environment to run the package
 .PHONY: env
-env: $(ENV)/.touchfile
+env : $(ENV)/.touchfile
 	@echo "The environment ($(ENV)) is up to date."
 
 
@@ -32,7 +32,7 @@ $(ENV)/.touchfile : $(REQS) setup.py
 
 ## test		: Run tests
 .PHONY: test
-test: env
+test : env
 	@. $(ENV_ACTIVATE); \
 	pytest $(COVERAGE_OPTIONS) \
 		--cov-report term \
@@ -41,19 +41,21 @@ test: env
 
 ## format		: Format the package source code
 .PHONY: format
-format:
+format : $(PYTHON_FORMAT_FILES)
 	@isort $(PYTHON_FORMAT_FILES)
+	@black $(PYTHON_FORMAT_FILES)
 
 
 ## format-diff	: See the differences that will be produced by formatting
 .PHONY: format-diff
-format-diff:
+format-diff : $(PYTHON_FORMAT_FILES)
 	@isort --diff --color $(PYTHON_FORMAT_FILES)
+	@black --diff --color $(PYTHON_FORMAT_FILES)
 
 
 ## package	: Bundle the package for distribution
 .PHONY: package
-package:
+package :
 	$(PYTHON) setup.py sdist bdist_wheel
 
 
@@ -73,5 +75,5 @@ clean :
 
 
 .PHONY: help
-help: Makefile
+help : Makefile
 	@sed -n 's/^##//p' $<

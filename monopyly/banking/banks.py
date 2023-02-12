@@ -24,6 +24,7 @@ class BankHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     model = Bank
 
     @classmethod
@@ -63,4 +64,3 @@ class BankHandler(DatabaseHandler):
             The ID of the bank to be deleted.
         """
         super().delete_entry(entry_id)
-

@@ -33,14 +33,12 @@ def get_linked_transaction(transaction):
         return None
     # First, check if there is a matching bank transaction
     linked_transaction = _get_linked_bank_transaction(
-        transaction.id,
-        internal_transaction_id
+        transaction.id, internal_transaction_id
     )
     if not linked_transaction:
         # Otherwise, check if there is a matching credit transaction
         linked_transaction = _get_linked_credit_transaction(
-            transaction.id,
-            internal_transaction_id
+            transaction.id, internal_transaction_id
         )
     return linked_transaction
 
@@ -67,4 +65,3 @@ def _get_linked_credit_transaction(transaction_id, internal_transaction_id):
     query = query.where(*criteria)
     transaction = current_app.db.session.execute(query).scalar_one_or_none()
     return transaction
-

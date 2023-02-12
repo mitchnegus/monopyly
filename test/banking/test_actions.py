@@ -4,8 +4,8 @@ from unittest.mock import Mock, call, patch
 from monopyly.banking.actions import get_bank_account_type_grouping
 
 
-@patch('monopyly.banking.actions.BankAccountHandler.get_accounts')
-@patch('monopyly.banking.actions.BankAccountTypeHandler.get_types_for_bank')
+@patch("monopyly.banking.actions.BankAccountHandler.get_accounts")
+@patch("monopyly.banking.actions.BankAccountTypeHandler.get_types_for_bank")
 def test_get_bank_account_type_grouping(mock_types_method, mock_accounts_method):
     # Mock the inputs and external return values
     mock_bank = Mock()
@@ -22,4 +22,3 @@ def test_get_bank_account_type_grouping(mock_types_method, mock_accounts_method)
     for key, mock_account_type in zip(type_accounts, mock_account_types):
         assert key == mock_account_type
         assert type_accounts[mock_account_type] == mock_accounts_method.return_value
-

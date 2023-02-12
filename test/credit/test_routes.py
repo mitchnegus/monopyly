@@ -10,7 +10,6 @@ from ..helpers import TestRoutes, transaction_lifetime
 
 
 class TestCreditRoutes(TestRoutes):
-
     blueprint_prefix = "credit"
 
     def test_load_cards(self, authorization):
@@ -66,22 +65,23 @@ class TestCreditRoutes(TestRoutes):
 
     @patch("monopyly.credit.routes.CardStatementTransferForm")
     @patch("monopyly.credit.routes.transfer_credit_card_statement")
-    def test_transfer_statement(self, mock_function, mock_form_class,
-                                authorization, client_context):
+    def test_transfer_statement(
+        self, mock_function, mock_form_class, authorization, client_context
+    ):
         mock_form = mock_form_class.return_value
         mock_account_id = 100
         mock_card_id = 201
         mock_prior_card_id = 200
         self.post_route(
             "/_transfer_card_statement"
-           f"/{mock_account_id}/{mock_card_id}/{mock_prior_card_id}",
+            f"/{mock_account_id}/{mock_card_id}/{mock_prior_card_id}",
             follow_redirects=True,
         )
         mock_function.assert_called_once_with(
             mock_form, mock_card_id, mock_prior_card_id
         )
         assert self.response.request.path == url_for(
-            'credit.load_account', account_id=mock_account_id
+            "credit.load_account", account_id=mock_account_id
         )
 
     def test_load_account(self, authorization):
@@ -206,9 +206,7 @@ class TestCreditRoutes(TestRoutes):
         assert "$35.00" in self.html
 
     def test_show_linked_bank_transaction(self, authorization):
-        self.post_route(
-            "/_show_linked_transaction", json={"transaction_id": 7}
-        )
+        self.post_route("/_show_linked_transaction", json={"transaction_id": 7})
         # Show the overlay
         assert "overlay" in self.html
         assert "linked-transaction-display" in self.html
@@ -222,9 +220,7 @@ class TestCreditRoutes(TestRoutes):
     def test_update_transactions_display_card(self, authorization):
         self.post_route(
             "/_update_transactions_display",
-            json={
-                "filter_ids": ["Jail-3335"],
-                "sort_order": "asc"},
+            json={"filter_ids": ["Jail-3335"], "sort_order": "asc"},
         )
         # 1 card shown with the filter applied
         assert all(_ not in self.html for _ in ["3333", "3334", "3336"])
@@ -238,9 +234,7 @@ class TestCreditRoutes(TestRoutes):
     def test_update_transactions_display_order(self, authorization):
         self.post_route(
             "/_update_transactions_display",
-            json={
-                "filter_ids": ["Jail-3335", "TheBank-3336"],
-                "sort_order": "desc"},
+            json={"filter_ids": ["Jail-3335", "TheBank-3336"], "sort_order": "desc"},
         )
         # 2 cards shown with the filter applied
         assert all(_ not in self.html for _ in ["3333", "3334"])
@@ -297,9 +291,7 @@ class TestCreditRoutes(TestRoutes):
         assert "New Token" in self.html
 
     @transaction_lifetime
-    def test_add_transaction_multiple_subtransactions_post(
-        self, authorization
-    ):
+    def test_add_transaction_multiple_subtransactions_post(self, authorization):
         self.post_route(
             "/add_transaction",
             data={
@@ -358,10 +350,7 @@ class TestCreditRoutes(TestRoutes):
         assert "Bigger refund" in self.html
 
     def test_add_subtransaction_fields(self, authorization):
-        self.post_route(
-            "/_add_subtransaction_fields",
-            json={"subtransaction_count": 1}
-        )
+        self.post_route("/_add_subtransaction_fields", json={"subtransaction_count": 1})
         # Created a second transaction with index 1
         assert 'id="subtransactions-1"' in self.html
         assert "subtransactions-1-subtotal" in self.html
@@ -387,7 +376,8 @@ class TestCreditRoutes(TestRoutes):
     @transaction_lifetime
     def test_add_tag(self, authorization):
         self.post_route(
-            "/_add_tag", json={"tag_name": "Games", "parent": None},
+            "/_add_tag",
+            json={"tag_name": "Games", "parent": None},
         )
         # Returns the subtag tree with the new tag added
         tags = self.soup.find_all("div", "tag")
@@ -397,7 +387,8 @@ class TestCreditRoutes(TestRoutes):
     @transaction_lifetime
     def test_add_tag_with_parent(self, authorization):
         self.post_route(
-            "/_add_tag", json={"tag_name": "Gas", "parent": "Transportation"},
+            "/_add_tag",
+            json={"tag_name": "Gas", "parent": "Transportation"},
         )
         # Returns the subtag tree with the new tag added
         tags = self.soup.find_all("div", "tag")
@@ -408,7 +399,8 @@ class TestCreditRoutes(TestRoutes):
     def test_add_conflicting_tag(self, authorization):
         with pytest.raises(ValueError):
             self.post_route(
-                "/_add_tag", json={"tag_name": "Railroad", "parent": None},
+                "/_add_tag",
+                json={"tag_name": "Railroad", "parent": None},
             )
 
     @transaction_lifetime
@@ -419,19 +411,29 @@ class TestCreditRoutes(TestRoutes):
 
     @pytest.mark.parametrize(
         "field, suggestions",
-        [["bank_name", ["TheBank", "Jail"]],
-         ["last_four_digits", ["3334", "3335", "3336"]],
-         ["vendor",
-          ["Top Left Corner", "Boardwalk", "Park Place", "Electric Company",
-           "Marvin Gardens", "JP Morgan Chance", "Water Works",
-           "Pennsylvania Avenue", "Income Tax Board", "Reading Railroad",
-           "Community Chest"]]]
+        [
+            ["bank_name", ["TheBank", "Jail"]],
+            ["last_four_digits", ["3334", "3335", "3336"]],
+            [
+                "vendor",
+                [
+                    "Top Left Corner",
+                    "Boardwalk",
+                    "Park Place",
+                    "Electric Company",
+                    "Marvin Gardens",
+                    "JP Morgan Chance",
+                    "Water Works",
+                    "Pennsylvania Avenue",
+                    "Income Tax Board",
+                    "Reading Railroad",
+                    "Community Chest",
+                ],
+            ],
+        ],
     )
-    def test_suggest_transaction_autocomplete(self, authorization, field,
-                                              suggestions):
-        self.post_route(
-            "/_suggest_transaction_autocomplete", json={"field": field}
-        )
+    def test_suggest_transaction_autocomplete(self, authorization, field, suggestions):
+        self.post_route("/_suggest_transaction_autocomplete", json={"field": field})
         # Returned suggestions are not required to be in any particular order
         # (for this test)
         assert sorted(json.loads(self.response.data)) == sorted(suggestions)
@@ -439,7 +441,7 @@ class TestCreditRoutes(TestRoutes):
     def test_suggest_transaction_note_autocomplete(self, authorization):
         self.post_route(
             "/_suggest_transaction_autocomplete",
-            json={"field": "note", "vendor": "Boardwalk"}
+            json={"field": "note", "vendor": "Boardwalk"},
         )
         # Returned suggestions should prioritize notes related to the vendor
         top_suggestions = ["Merry-go-round", "Back for more..."]
@@ -456,8 +458,8 @@ class TestCreditRoutes(TestRoutes):
             "Conducting business",
         ]
         response_suggestions = json.loads(self.response.data)
-        response_top_suggestions = response_suggestions[:len(top_suggestions)]
-        response_other_suggestions = response_suggestions[len(top_suggestions):]
+        response_top_suggestions = response_suggestions[: len(top_suggestions)]
+        response_other_suggestions = response_suggestions[len(top_suggestions) :]
         assert sorted(response_top_suggestions) == sorted(top_suggestions)
         assert sorted(response_other_suggestions) == sorted(other_suggestions)
 
@@ -471,9 +473,7 @@ class TestCreditRoutes(TestRoutes):
         assert json.loads(self.response.data) == inferred_card_map
 
     def test_infer_card_from_digits(self, authorization):
-        self.post_route(
-            "/_infer_card", json={"bank_name": "TheBank", "digits": "3336"}
-        )
+        self.post_route("/_infer_card", json={"bank_name": "TheBank", "digits": "3336"})
         inferred_card_map = {"bank_name": "TheBank", "digits": "3336"}
         assert json.loads(self.response.data) == inferred_card_map
 
@@ -508,4 +508,3 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         assert self.response.data == b"2020-06-10"
-

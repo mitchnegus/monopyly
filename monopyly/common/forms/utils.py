@@ -58,8 +58,9 @@ class Autocompleter:
         model = self._field_map[field]
         suggestions = self._get_autocomplete_suggestions(model, field)
         for sort_field, precedence_value in priority_sort_fields.items():
-            self._sort_suggestions_by_field(suggestions, model, field,
-                                            sort_field, precedence_value)
+            self._sort_suggestions_by_field(
+                suggestions, model, field, sort_field, precedence_value
+            )
         return suggestions
 
     @staticmethod
@@ -71,14 +72,15 @@ class Autocompleter:
         suggestions = sort_by_frequency([value for value in values])
         return suggestions
 
-    def _sort_suggestions_by_field(self, suggestions, model, field, sort_field,
-                                   precedence_value):
+    def _sort_suggestions_by_field(
+        self, suggestions, model, field, sort_field, precedence_value
+    ):
         sort_model = self._field_map[sort_field]
         # Build the select query to use for sorting
         sort_query = model.select_for_user(
-            getattr(model, field),            # select the primary field
+            getattr(model, field),  # select the primary field
             getattr(sort_model, sort_field),  # select the sorting field
-            guaranteed_joins=(sort_model,)    # ensure a joined sorting field
+            guaranteed_joins=(sort_model,),  # ensure a joined sorting field
         )
         # Execute the query and sort appropriately
         field_value_by_sort_field = {}
@@ -87,7 +89,7 @@ class Autocompleter:
             # Register values associated with the important sort field value
             if not field_value_by_sort_field.get(value):
                 sort_value = getattr(row, sort_field)
-                row_has_precedence = (sort_value == precedence_value)
+                row_has_precedence = sort_value == precedence_value
                 field_value_by_sort_field[value] = row_has_precedence
         suggestions.sort(key=field_value_by_sort_field.get, reverse=True)
 
@@ -121,7 +123,7 @@ def extend_field_list_for_ajax(form_class, field_list_name, field_list_count):
     form = form_class()
     field_list = getattr(form, field_list_name)
     # The field list will have the minimum required entries pregenerated
-    for _ in range(field_list.min_entries, field_list_count+1):
+    for _ in range(field_list.min_entries, field_list_count + 1):
         field_list.append_entry()
     new_field = field_list[-1]
     return new_field
@@ -129,6 +131,7 @@ def extend_field_list_for_ajax(form_class, field_list_name, field_list_count):
 
 def execute_on_form_validation(func):
     """A decorator that executes the function only if the form validates."""
+
     @wraps(func)
     def wrapper(form, *args, **kwargs):
         if form.validate():
@@ -138,5 +141,5 @@ def execute_on_form_validation(func):
             flash(form_err_msg)
             print(form.errors)
             raise ValidationError("The form did not validate properly.")
-    return wrapper
 
+    return wrapper

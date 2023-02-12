@@ -48,4 +48,3 @@ class SelectionNotBlank:
     def __call__(self, form, field):
         if field.data == self.blank:
             raise ValidationError(self.message)
-

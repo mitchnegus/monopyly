@@ -34,6 +34,7 @@ class BankAccountTypeHandler(DatabaseViewHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     _model = BankAccountType
     _model_view = BankAccountTypeView
 
@@ -123,8 +124,10 @@ class BankAccountTypeHandler(DatabaseViewHandler):
         account_type = super()._confirm_manipulation_authorization(entry_id)
         # Limit manipulation to only the user (excluding common entries)
         if account_type.user_id != cls.user_id:
-            abort_msg = ("The current user is not authorized to manipulate "
-                         "this account type entry.")
+            abort_msg = (
+                "The current user is not authorized to manipulate "
+                "this account type entry."
+            )
             abort(404, abort_msg)
 
 
@@ -147,6 +150,7 @@ class BankAccountHandler(DatabaseViewHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     _model = BankAccount
     _model_view = BankAccountView
 
@@ -189,15 +193,17 @@ class BankAccountHandler(DatabaseViewHandler):
         query = query.where(Bank.id == bank_id)
         balance = cls._db.session.execute(query).scalar()
         if balance is None:
-            abort_msg = ("No balance was found for the given combination of "
-                         "user and account.")
+            abort_msg = (
+                "No balance was found for the given combination of user and account."
+            )
             abort(404, abort_msg)
         return balance
 
     @classmethod
     @DatabaseViewHandler.view_query
-    def find_account(cls, bank_name=None, account_type_name=None,
-                     last_four_digits=None):
+    def find_account(
+        cls, bank_name=None, account_type_name=None, last_four_digits=None
+    ):
         """
         Find a bank account using uniquely identifying characteristics.
 
@@ -230,8 +236,7 @@ class BankAccountHandler(DatabaseViewHandler):
         """
         criteria = [
             cls._filter_value(Bank.bank_name, bank_name),
-            cls._filter_value(BankAccountTypeView.type_name,
-                              account_type_name),
+            cls._filter_value(BankAccountTypeView.type_name, account_type_name),
             cls._filter_value(cls.model.last_four_digits, last_four_digits),
         ]
         account = super().find_entry(*criteria)
@@ -281,10 +286,10 @@ def save_account(form, account_id=None):
     """
     account_data = form.account_data
     if account_id:
-        raise NotImplementedError("The ability to update the account is not "
-                                  "yet supported.")
+        raise NotImplementedError(
+            "The ability to update the account is not yet supported."
+        )
     else:
         # Insert the new account into the database
         account = BankAccountHandler.add_entry(**account_data)
     return account
-

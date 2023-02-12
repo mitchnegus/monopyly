@@ -4,19 +4,18 @@ from .helpers import AppManager
 
 # Use an app/client for authorization
 
-class AuthActions:
 
+class AuthActions:
     def __init__(self, client):
         self._client = client
 
-    def login(self, username='test', password='test'):
+    def login(self, username="test", password="test"):
         return self._client.post(
-            '/auth/login',
-            data={'username': username, 'password': password}
+            "/auth/login", data={"username": username, "password": password}
         )
 
     def logout(self):
-        return self._client.get('/auth/logout')
+        return self._client.get("/auth/logout")
 
 
 def pytest_generate_tests(metafunc):
@@ -38,6 +37,7 @@ def pytest_generate_tests(metafunc):
 
 
 # Build a test database, use it in an app, and then create a test client
+
 
 @pytest.fixture(scope="session", autouse=True)
 def app_context():
@@ -81,13 +81,13 @@ def authorization(auth):
 def client_context(client, authorization):
     with client:
         # Context variables (e.g., `g`) may be accessed only after response
-        client.get('/')
+        client.get("/")
         yield
 
 
 # Streamline access to the database user table
 
+
 @pytest.fixture
 def user_table(app):
-    return app.db.tables['users']
-
+    return app.db.tables["users"]

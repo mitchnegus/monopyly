@@ -31,13 +31,13 @@ class BankTransactionHandler(DatabaseViewHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     _model = BankTransaction
     _model_view = BankTransactionView
 
     @classmethod
     @DatabaseViewHandler.view_query
-    def get_transactions(cls, account_ids=None, active=None,
-                         sort_order="DESC"):
+    def get_transactions(cls, account_ids=None, active=None, sort_order="DESC"):
         """
         Get bank transactions from the database.
 
@@ -108,7 +108,7 @@ class BankTransactionHandler(DatabaseViewHandler):
             The saved transaction.
         """
         # Extend the default method to account for subtransactions
-        subtransactions_data = field_values.pop('subtransactions')
+        subtransactions_data = field_values.pop("subtransactions")
         transaction = super().add_entry(**field_values)
         cls._add_subtransactions(transaction, subtransactions_data)
         # Refresh the transaction with the subtransaction information
@@ -119,7 +119,7 @@ class BankTransactionHandler(DatabaseViewHandler):
     def update_entry(cls, entry_id, **field_values):
         """Update a transaction in the database."""
         # Extend the default method to account for subtransactions
-        subtransactions_data = field_values.pop('subtransactions', None)
+        subtransactions_data = field_values.pop("subtransactions", None)
         transaction = super().update_entry(entry_id, **field_values)
         if subtransactions_data:
             # Replace all subtransactions when updating any subtransaction
@@ -135,7 +135,7 @@ class BankTransactionHandler(DatabaseViewHandler):
         """Add subtransactions to the database for the data given."""
         for subtransaction_data in subtransactions_data:
             subtransaction = BankSubtransaction(
-                transaction_id =transaction.id,
+                transaction_id=transaction.id,
                 **subtransaction_data,
             )
             cls._db.session.add(subtransaction)
@@ -197,4 +197,3 @@ def record_new_transfer(transfer_data):
     # Add the transfer transaction to the database
     transfer = BankTransactionHandler.add_entry(**transfer_data)
     return transfer
-

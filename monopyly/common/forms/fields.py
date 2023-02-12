@@ -27,6 +27,7 @@ class DateField(wtforms_fields.DateField):
 
 class CurrencyField(wtforms_fields.DecimalField):
     """A decimal field with currency-specific customizations."""
+
     widget = NumberInput(step=0.01)
 
     def __init__(self, *args, filters=(), **kwargs):
@@ -59,9 +60,7 @@ class CustomChoiceSelectField(wtforms_fields.SelectField, ABC):
     def __init__(self, label=None, validators=None, coerce=int, **kwargs):
         if not validators:
             validators = [SelectionNotBlank()]
-        super().__init__(
-            label=label, validators=validators, coerce=int, **kwargs
-        )
+        super().__init__(label=label, validators=validators, coerce=int, **kwargs)
         self.prepare_field_choices()
 
     def process_data(self, value):
@@ -86,8 +85,7 @@ class CustomChoiceSelectField(wtforms_fields.SelectField, ABC):
         # Collect all available user entries
         entries = self._db_handler.get_entries()
         # Set default choice values
-        self.choices = [(-1, "-"),
-                         (0, f"New {self.label.text.lower()}")]
+        self.choices = [(-1, "-"), (0, f"New {self.label.text.lower()}")]
         # Set the user choices (for consistency, arbitrarily sort by entry ID)
         for entry in sorted(entries, key=lambda entry: entry.id):
             display_name = self._format_choice(entry)
@@ -101,6 +99,4 @@ class CustomChoiceSelectField(wtforms_fields.SelectField, ABC):
         Accepts an entry returned by the database handler, and extract a
         name to be displayed as a choice in the list of choices.
         """
-        raise NotImplementedError("Define the formatting for a choice in a "
-                                  "subclass.")
-
+        raise NotImplementedError("Define the formatting for a choice in a subclass.")

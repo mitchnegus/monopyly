@@ -25,11 +25,13 @@ class CreditCardHandler(DatabaseHandler):
     user_id : int
         The ID of the user who is the subject of database access.
     """
+
     model = CreditCard
 
     @classmethod
-    def get_cards(cls, bank_ids=None, account_ids=None, last_four_digits=None,
-                  active=None):
+    def get_cards(
+        cls, bank_ids=None, account_ids=None, last_four_digits=None, active=None
+    ):
         """
         Get credit cards from the database.
 
@@ -158,4 +160,3 @@ def save_card(form, card_id=None):
         # Insert the new transaction into the database
         card = CreditCardHandler.add_entry(**card_data)
     return card
-

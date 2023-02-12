@@ -15,4 +15,3 @@ def test_add_internal_transaction(app, client_context):
     assert count == 3
     entry_id = add_internal_transaction()
     assert entry_id == count + 1
-

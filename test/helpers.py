@@ -101,7 +101,7 @@ class AppManager:
         with cls._database_test_context() as test_db:
             app = cls._generate_app(test_db.path)
             cls._setup_test_database(app)
-            setattr(cls, app_name,  app)
+            setattr(cls, app_name, app)
             yield
             setattr(cls, app_name, None)
 
@@ -117,7 +117,7 @@ class AppManager:
         lifetime is completed.
         """
         db_fd, db_path = tempfile.mkstemp()
-        yield namedtuple('TemporaryFile', ['fd', 'path'])(db_fd, db_path)
+        yield namedtuple("TemporaryFile", ["fd", "path"])(db_fd, db_path)
         # After function execution, close the file and remove it
         os.close(db_fd)
         os.unlink(db_path)
@@ -164,7 +164,6 @@ def transaction_lifetime(test_function):
 
 
 class TestHandler:
-
     @pytest.fixture(autouse=True)
     def _get_app(self, app):
         # Use the client fixture in route tests
@@ -199,13 +198,12 @@ class TestHandler:
         count = self._app.db.session.execute(query).scalar()
         assert count == number
 
-    def assert_invalid_user_entry_add_fails(self, handler, mapping,
-                                            invalid_user_id, invalid_matches):
+    def assert_invalid_user_entry_add_fails(
+        self, handler, mapping, invalid_user_id, invalid_matches
+    ):
         # Count the number of the entry type owned by the invalid user
         self.assertNumberOfMatches(
-            invalid_matches,
-            handler.model.id,
-            handler.model.id == invalid_user_id
+            invalid_matches, handler.model.id, handler.model.id == invalid_user_id
         )
         # Ensure that the mapping cannot be added for the invalid user
         with pytest.raises(NotFound):
@@ -213,21 +211,16 @@ class TestHandler:
         # Rollback and ensure the entry was not added for the invalid user
         self._app.db.session.close()
         self.assertNumberOfMatches(
-            invalid_matches,
-            handler.model.id,
-            handler.model.id == invalid_user_id
+            invalid_matches, handler.model.id, handler.model.id == invalid_user_id
         )
 
     def assert_entry_deletion_succeeds(self, handler, entry_id):
         handler.delete_entry(entry_id)
         # Check that the entry was deleted
-        self.assertNumberOfMatches(
-            0, handler.model.id, handler.model.id == entry_id
-        )
+        self.assertNumberOfMatches(0, handler.model.id, handler.model.id == entry_id)
 
 
 class TestRoutes:
-
     blueprint_prefix = None
 
     @property
@@ -244,11 +237,12 @@ class TestRoutes:
         @functools.wraps(method)
         def wrapper(self, route, *args, **kwargs):
             if self.blueprint_prefix is not None:
-                route =  f"/{self.blueprint_prefix}{route}"
+                route = f"/{self.blueprint_prefix}{route}"
             method(self, route, *args, **kwargs)
             # Save the response as HTML
             self.html = self.response.data.decode("utf-8")
             self.soup = BeautifulSoup(self.html, "html.parser")
+
         return wrapper
 
     @route_loader
@@ -260,4 +254,3 @@ class TestRoutes:
     def post_route(self, route, *args, **kwargs):
         """Load the HTML returned by accessing the route (via 'POST')."""
         self.response = self.client.post(route, *args, **kwargs)
-
