@@ -67,6 +67,8 @@
 ### 1.2.1 (in-progress)
 
 - Improve development functionality; better/safer cleaning with a separate database and preloaded data
+- Add custom form fields for consistent app-wide form implementations
 - Fixed bug where multiple subtransactions failed to update properly
 - Fixed error where validation was not raised for blank inputs to a `CustomChoiceSelectField`
 - Fixed errors in field validation for nested subforms with unset values
+

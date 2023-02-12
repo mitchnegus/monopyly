@@ -4,14 +4,13 @@ Generate banking forms for the user to complete.
 from wtforms.fields import (
     BooleanField, FieldList, FormField, StringField, SubmitField
 )
-from wtforms.validators import DataRequired, Length, Optional
+from wtforms.validators import DataRequired, Optional
 
 from ..common.forms import (
     AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 )
-from ..common.forms.fields import CustomChoiceSelectField
+from ..common.forms.fields import CustomChoiceSelectField, LastFourDigitsField
 from ..common.forms.utils import Autocompleter
-from ..common.forms.validators import NumeralsOnly
 from ..common.utils import parse_date
 from ..database.models import (
     Bank, BankAccountTypeView, BankAccountView, BankSubtransaction,
@@ -111,9 +110,8 @@ class BankAccountForm(EntryForm):
     bank_info = FormField(BankSubform)
     account_type_info = FormField(AccountTypeSubform)
     # Fields pertaining to the account
-    last_four_digits = StringField(
-        'Last Four Digits',
-        validators=[DataRequired(), Length(4), NumeralsOnly()]
+    last_four_digits = LastFourDigitsField(
+        'Last Four Digits', validators=[DataRequired()]
     )
     active = BooleanField('Active', default='checked')
     submit = SubmitField('Save Account')
@@ -150,9 +148,8 @@ class BankTransactionForm(TransactionForm):
         _db_handler = BankAccountHandler
         # Fields pertaining to the account
         bank_name = StringField('Bank')
-        last_four_digits = StringField(
-            'Last Four Digits',
-            validators=[DataRequired(), Length(4), NumeralsOnly()]
+        last_four_digits = LastFourDigitsField(
+            'Last Four Digits', validators=[DataRequired()]
         )
         type_name = StringField('AccountType', validators=[DataRequired()])
 

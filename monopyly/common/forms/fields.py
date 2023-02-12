@@ -5,10 +5,12 @@ from abc import ABC, abstractmethod
 
 from flask_wtf import FlaskForm
 from wtforms import fields as wtforms_fields
+from wtforms.validators import Length
+from wtforms.widgets import NumberInput
 
 from ...banking.banks import BankHandler
 from ..utils import parse_date
-from .validators import SelectionNotBlank
+from .validators import NumeralsOnly, SelectionNotBlank
 
 
 class DateField(wtforms_fields.DateField):
@@ -25,11 +27,30 @@ class DateField(wtforms_fields.DateField):
 
 class CurrencyField(wtforms_fields.DecimalField):
     """A decimal field with currency-specific customizations."""
+    widget = NumberInput(step=0.01)
 
     def __init__(self, *args, filters=(), **kwargs):
         filters = list(filters)
         filters.append(lambda x: float(round(x, 2)) if x else None)
         super().__init__(*args, filters=filters, places=2, **kwargs)
+
+
+class StringField(wtforms_fields.StringField):
+    """A custom string field."""
+
+    def __init__(self, *args, filters=(), **kwargs):
+        filters = list(filters)
+        filters.append(lambda x: x.strip() if x else "")
+        super().__init__(*args, filters=filters, **kwargs)
+
+
+class LastFourDigitsField(StringField):
+    """A custom field for collecting the last four digits of cards/accounts."""
+
+    def __init__(self, *args, validators=(), **kwargs):
+        validators = list(validators)
+        validators.extend([Length(4, 4), NumeralsOnly()])
+        super().__init__(*args, validators=validators, **kwargs)
 
 
 class CustomChoiceSelectField(wtforms_fields.SelectField, ABC):

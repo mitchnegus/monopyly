@@ -6,16 +6,17 @@ from wtforms.fields import (
     BooleanField, FieldList, FormField, IntegerField, RadioField, StringField,
     SubmitField
 )
-from wtforms.validators import DataRequired, Length, Optional
+from wtforms.validators import DataRequired, Optional
 
 from ..banking.banks import BankHandler
 from ..banking.forms import BankSelectField, BankSubform
 from ..common.forms import (
     AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 )
-from ..common.forms.fields import CustomChoiceSelectField, DateField
+from ..common.forms.fields import (
+    CustomChoiceSelectField, DateField, LastFourDigitsField, StringField
+)
 from ..common.forms.utils import Autocompleter
-from ..common.forms.validators import NumeralsOnly, SelectionNotBlank
 from ..database.models import (
     Bank, CreditAccount, CreditCard, CreditStatementView, CreditSubtransaction,
     CreditTransactionView
@@ -92,9 +93,8 @@ class CreditCardForm(EntryForm):
     # Fields to identify the account information for the card
     account_info = FormField(AccountSubform)
     # Fields pertaining to the card
-    last_four_digits = StringField(
-        'Last Four Digits',
-        validators=[DataRequired(), Length(4), NumeralsOnly()]
+    last_four_digits = LastFourDigitsField(
+        'Last Four Digits', validators=[DataRequired()],
     )
     active = BooleanField('Active', default='checked')
     submit = SubmitField('Save Card')
@@ -142,9 +142,8 @@ class CreditTransactionForm(TransactionForm):
             _db_handler = CreditCardHandler
             # Fields pertaining to the card
             bank_name = StringField('Bank')
-            last_four_digits = StringField(
-                'Last Four Digits',
-                validators=[DataRequired(), Length(4), NumeralsOnly()],
+            last_four_digits = LastFourDigitsField(
+                'Last Four Digits', validators=[DataRequired()],
             )
 
             def get_card(self):
