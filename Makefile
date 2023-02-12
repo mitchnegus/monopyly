@@ -45,6 +45,12 @@ format:
 	@isort monopyly/ test/ setup.py
 
 
+## format-diff	: See the differences that will be produced by formatting
+.PHONY: format-diff
+format-diff:
+	@isort --diff monopyly/ test/ setup.py
+
+
 ## package	: Bundle the package for distribution
 .PHONY: package
 package:
