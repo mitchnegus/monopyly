@@ -23,6 +23,15 @@ class DateField(wtforms_fields.DateField):
         super().__init__(*args, filters=filters, **kwargs)
 
 
+class CurrencyField(wtforms_fields.DecimalField):
+    """A decimal field with currency-specific customizations."""
+
+    def __init__(self, *args, filters=(), **kwargs):
+        filters = list(filters)
+        filters.append(lambda x: float(round(x, 2)) if x else None)
+        super().__init__(*args, filters=filters, places=2, **kwargs)
+
+
 class CustomChoiceSelectField(wtforms_fields.SelectField, ABC):
     """A select field that can auto-prepare choices."""
 

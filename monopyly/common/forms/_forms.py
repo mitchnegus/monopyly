@@ -5,11 +5,11 @@ from abc import ABC, abstractmethod
 
 from flask_wtf import FlaskForm
 from wtforms.fields import (
-    DecimalField, FieldList, FormField, SelectField, StringField, SubmitField
+    FieldList, FormField, SelectField, StringField, SubmitField
 )
 from wtforms.validators import DataRequired
 
-from .fields import DateField
+from .fields import CurrencyField, DateField
 from .validators import SelectionNotBlank
 
 # Define a custom form error messaage
@@ -122,12 +122,7 @@ class TransactionForm(EntryForm):
 
     class SubtransactionSubform(EntrySubform):
         # Fields pertaining to the subtransaction
-        subtotal = DecimalField(
-            "Amount",
-            validators=[DataRequired()],
-            filters=[lambda x: float(round(x, 2)) if x else None],
-            places=2,
-        )
+        subtotal = CurrencyField("Amount", [DataRequired()])
         note = StringField("Note", [DataRequired()])
 
         @property
