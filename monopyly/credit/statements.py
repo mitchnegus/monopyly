@@ -4,7 +4,10 @@ Tools for interacting with the credit statements in the database.
 from ..common.utils import get_next_occurrence_of_day
 from ..database.handler import DatabaseViewHandler
 from ..database.models import (
-    CreditAccount, CreditCard, CreditStatement, CreditStatementView
+    CreditAccount,
+    CreditCard,
+    CreditStatement,
+    CreditStatementView,
 )
 
 

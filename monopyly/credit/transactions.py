@@ -4,8 +4,15 @@ Tools for interacting with the credit transactions in the database.
 from ..common.forms.utils import execute_on_form_validation
 from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models import (
-    Bank, CreditAccount, CreditCard, CreditStatementView, CreditSubtransaction,
-    CreditTag, CreditTransaction, CreditTransactionView, tag_link_table
+    Bank,
+    CreditAccount,
+    CreditCard,
+    CreditStatementView,
+    CreditSubtransaction,
+    CreditTag,
+    CreditTransaction,
+    CreditTransactionView,
+    tag_link_table,
 )
 
 

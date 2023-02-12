@@ -7,10 +7,14 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.banking.transactions import (
-    BankTransactionHandler, record_new_transfer, save_transaction
+    BankTransactionHandler,
+    record_new_transfer,
+    save_transaction,
 )
 from monopyly.database.models import (
-    BankSubtransaction, BankTransaction, BankTransactionView
+    BankSubtransaction,
+    BankTransaction,
+    BankTransactionView,
 )
 
 from ..helpers import TestHandler

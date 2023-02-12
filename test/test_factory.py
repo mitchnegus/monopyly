@@ -2,6 +2,7 @@
 from unittest.mock import patch
 
 from monopyly import create_app
+
 # Rename config to avoid Pytest attempting to collect `TestingConfig`
 from monopyly.config import DevelopmentConfig, ProductionConfig
 from monopyly.config import TestingConfig as _TestingConfig

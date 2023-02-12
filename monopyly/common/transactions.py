@@ -4,7 +4,9 @@ Tools for building a common transaction interface.
 from flask import current_app
 
 from ..database.models import (
-    BankAccountTypeView, BankTransactionView, CreditTransactionView
+    BankAccountTypeView,
+    BankTransactionView,
+    CreditTransactionView,
 )
 
 

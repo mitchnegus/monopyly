@@ -8,7 +8,9 @@ from werkzeug.exceptions import NotFound
 
 from monopyly.credit.statements import CreditStatementHandler
 from monopyly.database.models import (
-    CreditStatement, CreditStatementView, CreditTransaction
+    CreditStatement,
+    CreditStatementView,
+    CreditTransaction,
 )
 
 from ..helpers import TestHandler

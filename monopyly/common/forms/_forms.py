@@ -4,9 +4,7 @@ General form constructions.
 from abc import ABC, abstractmethod
 
 from flask_wtf import FlaskForm
-from wtforms.fields import (
-    FieldList, FormField, SelectField, StringField, SubmitField
-)
+from wtforms.fields import FieldList, FormField, SelectField, StringField, SubmitField
 from wtforms.validators import DataRequired
 
 from .fields import CurrencyField, DateField

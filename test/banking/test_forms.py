@@ -9,12 +9,18 @@ from wtforms.fields import FormField
 from monopyly.banking.accounts import BankAccountTypeHandler
 from monopyly.banking.banks import BankHandler
 from monopyly.banking.forms import (
-    BankAccountForm, BankAccountTypeSelectField, BankSelectField, BankSubform,
-    BankTransactionForm
+    BankAccountForm,
+    BankAccountTypeSelectField,
+    BankSelectField,
+    BankSubform,
+    BankTransactionForm,
 )
 from monopyly.database.models import (
-    Bank, BankAccountTypeView, BankAccountView, BankSubtransaction,
-    BankTransactionView
+    Bank,
+    BankAccountTypeView,
+    BankAccountView,
+    BankSubtransaction,
+    BankTransactionView,
 )
 
 from ..helpers import helper

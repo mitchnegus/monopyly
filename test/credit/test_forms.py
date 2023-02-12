@@ -7,12 +7,17 @@ from flask_wtf import FlaskForm
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.forms import (
-    CardStatementTransferForm, CreditAccountSelectField, CreditCardForm,
-    CreditTransactionForm
+    CardStatementTransferForm,
+    CreditAccountSelectField,
+    CreditCardForm,
+    CreditTransactionForm,
 )
 from monopyly.database.models import (
-    CreditAccount, CreditCard, CreditStatementView, CreditSubtransaction,
-    CreditTransactionView
+    CreditAccount,
+    CreditCard,
+    CreditStatementView,
+    CreditSubtransaction,
+    CreditTransactionView,
 )
 
 from ..helpers import helper

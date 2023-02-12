@@ -1,20 +1,20 @@
 """
 Generate banking forms for the user to complete.
 """
-from wtforms.fields import (
-    BooleanField, FieldList, FormField, StringField, SubmitField
-)
+from wtforms.fields import BooleanField, FieldList, FormField, StringField, SubmitField
 from wtforms.validators import DataRequired, Optional
 
-from ..common.forms import (
-    AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
-)
+from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 from ..common.forms.fields import CustomChoiceSelectField, LastFourDigitsField
 from ..common.forms.utils import Autocompleter
 from ..common.utils import parse_date
 from ..database.models import (
-    Bank, BankAccountTypeView, BankAccountView, BankSubtransaction,
-    BankTransaction, BankTransactionView
+    Bank,
+    BankAccountTypeView,
+    BankAccountView,
+    BankSubtransaction,
+    BankTransaction,
+    BankTransactionView,
 )
 from .accounts import BankAccountHandler, BankAccountTypeHandler
 from .banks import BankHandler

@@ -6,8 +6,10 @@ import pytest
 
 from monopyly.banking.transactions import BankTransactionHandler
 from monopyly.credit.actions import (
-    get_card_statement_grouping, get_potential_preceding_card, make_payment,
-    transfer_credit_card_statement
+    get_card_statement_grouping,
+    get_potential_preceding_card,
+    make_payment,
+    transfer_credit_card_statement,
 )
 from monopyly.credit.cards import CreditCardHandler
 from monopyly.credit.statements import CreditStatementHandler

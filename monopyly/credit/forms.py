@@ -3,23 +3,33 @@ Generate credit card forms for the user to complete.
 """
 from werkzeug.exceptions import abort
 from wtforms.fields import (
-    BooleanField, FieldList, FormField, IntegerField, RadioField, StringField,
-    SubmitField
+    BooleanField,
+    FieldList,
+    FormField,
+    IntegerField,
+    RadioField,
+    StringField,
+    SubmitField,
 )
 from wtforms.validators import DataRequired, Optional
 
 from ..banking.banks import BankHandler
 from ..banking.forms import BankSelectField, BankSubform
-from ..common.forms import (
-    AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
-)
+from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 from ..common.forms.fields import (
-    CustomChoiceSelectField, DateField, LastFourDigitsField, StringField
+    CustomChoiceSelectField,
+    DateField,
+    LastFourDigitsField,
+    StringField,
 )
 from ..common.forms.utils import Autocompleter
 from ..database.models import (
-    Bank, CreditAccount, CreditCard, CreditStatementView, CreditSubtransaction,
-    CreditTransactionView
+    Bank,
+    CreditAccount,
+    CreditCard,
+    CreditStatementView,
+    CreditSubtransaction,
+    CreditTransactionView,
 )
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler

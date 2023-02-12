@@ -7,7 +7,11 @@ from werkzeug.exceptions import abort
 from ..common.forms.utils import execute_on_form_validation
 from ..database.handler import DatabaseViewHandler
 from ..database.models import (
-    Bank, BankAccount, BankAccountType, BankAccountTypeView, BankAccountView
+    Bank,
+    BankAccount,
+    BankAccountType,
+    BankAccountTypeView,
+    BankAccountView,
 )
 
 

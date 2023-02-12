@@ -42,13 +42,13 @@ test: env
 ## format		: Format the package source code
 .PHONY: format
 format:
-	@isort monopyly/ test/ setup.py
+	@isort $(PYTHON_FORMAT_FILES)
 
 
 ## format-diff	: See the differences that will be produced by formatting
 .PHONY: format-diff
 format-diff:
-	@isort --diff monopyly/ test/ setup.py
+	@isort --diff --color $(PYTHON_FORMAT_FILES)
 
 
 ## package	: Bundle the package for distribution

@@ -5,7 +5,10 @@ from ..common.forms.utils import execute_on_form_validation
 from ..core.internal_transactions import add_internal_transaction
 from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models import (
-    BankAccountView, BankSubtransaction, BankTransaction, BankTransactionView
+    BankAccountView,
+    BankSubtransaction,
+    BankTransaction,
+    BankTransactionView,
 )
 
 

@@ -15,3 +15,5 @@ COVERAGE_OPT_LOCATION = --cov=.
 COVERAGE_OPT_CONFIG = --cov-config=.coveragerc
 COVERAGE_OPTIONS = $(COVERAGE_OPT_LOCATION) $(COVERAGE_OPT_CONFIG)
 
+# Format files
+PYTHON_FORMAT_FILES = monopyly/ test/ setup.py

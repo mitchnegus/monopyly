@@ -6,11 +6,17 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.banking.accounts import (
-    BankAccountHandler, BankAccountTypeHandler, save_account
+    BankAccountHandler,
+    BankAccountTypeHandler,
+    save_account,
 )
 from monopyly.database.models import (
-    Bank, BankAccount, BankAccountType, BankAccountTypeView, BankAccountView,
-    BankTransaction
+    Bank,
+    BankAccount,
+    BankAccountType,
+    BankAccountTypeView,
+    BankAccountView,
+    BankTransaction,
 )
 
 from ..helpers import TestHandler

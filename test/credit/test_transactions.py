@@ -7,10 +7,15 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.transactions import (
-    CreditTagHandler, CreditTransactionHandler, save_transaction
+    CreditTagHandler,
+    CreditTransactionHandler,
+    save_transaction,
 )
 from monopyly.database.models import (
-    CreditSubtransaction, CreditTag, CreditTransaction, CreditTransactionView
+    CreditSubtransaction,
+    CreditTag,
+    CreditTransaction,
+    CreditTransactionView,
 )
 
 from ..helpers import TestHandler

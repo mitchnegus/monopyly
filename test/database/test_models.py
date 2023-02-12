@@ -4,10 +4,20 @@ from datetime import date
 import pytest
 
 from monopyly.database.models import (
-    AuthorizedAccessMixin, Bank, BankAccount, BankAccountType,
-    BankSubtransaction, BankTransaction, CreditAccount, CreditCard,
-    CreditStatement, CreditSubtransaction, CreditTag, CreditTransaction, Model,
-    User
+    AuthorizedAccessMixin,
+    Bank,
+    BankAccount,
+    BankAccountType,
+    BankSubtransaction,
+    BankTransaction,
+    CreditAccount,
+    CreditCard,
+    CreditStatement,
+    CreditSubtransaction,
+    CreditTag,
+    CreditTransaction,
+    Model,
+    User,
 )
 
 

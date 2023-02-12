@@ -2,7 +2,13 @@
 Routes for site authentication.
 """
 from flask import (
-    current_app, flash, redirect, render_template, request, session, url_for
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
 )
 from sqlalchemy import insert, select
 from werkzeug.security import check_password_hash, generate_password_hash

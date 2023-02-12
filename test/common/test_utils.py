@@ -4,7 +4,10 @@ from datetime import date
 import pytest
 
 from monopyly.common.utils import (
-    dedelimit_float, get_next_occurrence_of_day, parse_date, sort_by_frequency
+    dedelimit_float,
+    get_next_occurrence_of_day,
+    parse_date,
+    sort_by_frequency,
 )
 
 
