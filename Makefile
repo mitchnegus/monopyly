@@ -56,6 +56,7 @@ format-diff : $(PYTHON_FORMAT_FILES)
 ## package	: Bundle the package for distribution
 .PHONY: package
 package :
+	@. $(ENV_ACTIVATE); \
 	$(PYTHON) setup.py sdist bdist_wheel
 
 
