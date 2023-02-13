@@ -1,5 +1,7 @@
 # Monopyly
 
+#### _The Money Game_
+
 This is a package designed to help manage personal finances.
 The current functionality is fairly limited, with only the ability to track bank account and credit card history.
 Eventually the app will provide a full set of features including purchase history, investment profiles, and budgeting.
