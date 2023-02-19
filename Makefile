@@ -41,16 +41,18 @@ test : env
 
 ## format		: Format the package source code
 .PHONY: format
-format : $(PYTHON_FORMAT_FILES)
-	@isort $(PYTHON_FORMAT_FILES)
-	@black $(PYTHON_FORMAT_FILES)
+format : env $(PYTHON_FORMAT_FILES)
+	@. $(ENV_ACTIVATE); \
+	isort $(PYTHON_FORMAT_FILES); \
+	black $(PYTHON_FORMAT_FILES)
 
 
 ## format-diff	: See the differences that will be produced by formatting
 .PHONY: format-diff
-format-diff : $(PYTHON_FORMAT_FILES)
-	@isort --diff --color $(PYTHON_FORMAT_FILES)
-	@black --diff --color $(PYTHON_FORMAT_FILES)
+format-diff : env $(PYTHON_FORMAT_FILES)
+	@. $(ENV_ACTIVATE); \
+	isort --diff --color $(PYTHON_FORMAT_FILES); \
+	black --diff --color $(PYTHON_FORMAT_FILES)
 
 
 ## package	: Bundle the package for distribution
