@@ -77,5 +77,6 @@
 
 ### 1.2.2
 
+- Added version information to app footer
 - Fixed bug where bank name failed to show on 'Credit Account Details' page
 - Improved JavaScript management for acquisition forms

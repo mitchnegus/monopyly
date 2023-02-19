@@ -2,7 +2,14 @@
 /*     Style sheet for the Monopyly app      */
 /*-------------------------------------------*/
 
+html {
+  height: 100%;
+}
+
 body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -55,7 +62,7 @@ select {
 /*
  * Create dark grey header with a white logo
  */
-#masthead {
+header#masthead {
   position: fixed;
   top: 0;
   z-index: 99;
@@ -114,6 +121,24 @@ select {
 
 #nav-menu li a:hover {
   color: #cdcdcd;
+}
+
+
+/*
+ * Create a footer with site information
+ */
+footer#site-info {
+  margin-top: auto;
+}
+
+#site-info p {
+  color: #cccccc;
+  font-size: 9pt;
+  text-align: center;
+}
+
+#site-info span {
+  padding: 0 5px;
 }
 
 
