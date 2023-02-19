@@ -73,3 +73,8 @@
 - Fixed error where validation was not raised for blank inputs to a `CustomChoiceSelectField`
 - Fixed errors in field validation for nested subforms with unset values
 
+
+
+### 1.2.2
+
+- Fixed bug where bank name failed to show on 'Credit Account Details' page
