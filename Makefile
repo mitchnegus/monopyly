@@ -59,7 +59,7 @@ format-diff : env $(PYTHON_FORMAT_FILES)
 .PHONY: package
 package :
 	@. $(ENV_ACTIVATE); \
-	$(PYTHON) setup.py sdist bdist_wheel
+	$(PYTHON) -m build
 
 
 ## upload		: Upload the package to PyPI
@@ -73,7 +73,7 @@ upload : env
 .PHONY : clean
 clean :
 	@rm -rf instance/dev-monopyly.sqlite
-	@rm -rf build/ dist/ *egg-info/
+	@rm -rf dist/ *egg-info/
 	@rm -rf $(ENV)
 
 
