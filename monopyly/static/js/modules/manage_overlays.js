@@ -8,38 +8,62 @@
  */
 
 
+/**
+ * A class for managing overlays.
+ */
 class OverlayManager {
-  // A class for handling overlays
+
+  /**
+   * Create the manager.
+   *
+   * @param {JQuery} $container - The container to include the overlay.
+   */
   constructor($container) {
     this.$container = $container;
     this.$overlay;
   }
 
+  /**
+   * Add the overlay
+   *
+   * @param {string} The AJAX request response containing the overlay.
+   */
   addOverlay(response) {
-    // Add an overlay, described by the AJAX request response
     this.$container.prepend(response)
     // The overlay container is given the 'overlay' class
     this.$overlay = $('.overlay');
     this.#bindClose();
   }
 
+  /**
+   * Bind exit methods to elements in the  overlay.
+   */
   #bindClose() {
     this.#bindCloseFromXButtonClick();
     this.#bindCloseFromEscapeKey();
   }
 
+  /**
+   * Bind an exit capability to the 'X' button in the overlay.
+   */
   #bindCloseFromXButtonClick() {
-    // Close the overlay when the 'X' button is clicked
     const $closeButton = this.$overlay.find('.close.button')
     $closeButton.on('click', this.#closeOverlay.bind(this));
   }
 
+  /**
+   * Bind an exit capability to the escape key in the overlay.
+   */
   #bindCloseFromEscapeKey() {
-    // Close the overlay when the escape key is pressed
     const manager = this;
     $(window).on('keydown', this.#closeOnEscapePress.bind(this))
   }
 
+  /**
+   * Trigger the window to close when the escape key is pressed.
+   *
+   * @param {Event} event - The event potentially triggering an exit.
+   */
   #closeOnEscapePress(event) {
     if (event.which == 27) {
       event.preventDefault();
@@ -47,6 +71,9 @@ class OverlayManager {
     }
   }
 
+  /**
+   * Close the window.
+   */
   #closeOverlay() {
     this.$overlay.remove();
   }
