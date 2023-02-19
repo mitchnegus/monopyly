@@ -78,3 +78,4 @@
 ### 1.2.2
 
 - Fixed bug where bank name failed to show on 'Credit Account Details' page
+- Improved JavaScript management for acquisition forms
