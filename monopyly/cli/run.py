@@ -19,15 +19,13 @@ os.environ["FLASK_APP"] = "monopyly"
 
 def main():
     args = parse_arguments()
-    host, port = args.host, args.port
-    # Initialize the database (force debug mode here, not during production)
-    os.system("flask --debug init-db")
-    run_app(args.mode, host, port)
-    # Run the default web browser
-    time.sleep(1)
-    port = "5000" if port is None else port
-    webbrowser.open(f"http://127.0.0.1:{port}/")
-    wait_for_exit()
+    app_runner = Runner(args.mode, host=args.host, port=args.port)
+    # Initialize the database and run the app
+    app_runner.initialize_database()
+    app_runner.run()
+    app_runner.open_browser(delay=1)
+    # Wait for the exit command to stop
+    app_runner.wait_for_exit()
 
 
 def parse_arguments():
@@ -42,33 +40,56 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def run_app(mode, host=None, port=None):
-    """Run the Monopyly application."""
-    command = ["flask", "run"]
-    if mode == "development":
-        command.insert(1, "--debug")
-    if host:
-        command.extend(["--host", host])
-    if port:
-        command.extend(["--port", port])
-    server = subprocess.Popen(command)
+class Runner:
+    """A tool to build and execute Flask commands."""
 
+    _exit = Event()
 
-def wait_for_exit():
-    """Wait for the exit command (e.g., keyboard interrupt) to be issued."""
-    for sig in ("TERM", "HUP", "INT"):
-        signal.signal(getattr(signal, "SIG" + sig), _quit)
-    while not _exit.is_set():
-        _exit.wait(1)
+    def __init__(self, mode, host=None, port=None):
+        self.mode = mode
+        self.host = host
+        self.port = port
 
+    @property
+    def command(self):
+        _command = ["flask"]
+        if self.mode == "development":
+            _command.append("--debug")
+        return _command
 
-def _quit(signo, _frame):
-    """Send the signal to quit the app."""
-    print("\nClosing the Monopyly app...")
-    _exit.set()
+    def initialize_database(self):
+        """Run the database initializer."""
+        instruction = self.command + ["init-db"]
+        subprocess.run(instruction)
 
+    def run(self):
+        """Run the Monopyly application."""
+        instruction = self.command + ["run"]
+        if self.host:
+            instruction += ["--host", self.host]
+        if self.port:
+            instruction += ["--port", self.port]
+        server = subprocess.Popen(instruction)
 
-_exit = Event()
+    def open_browser(self, delay=0):
+        """Open the default web browser."""
+        time.sleep(delay)
+        webbrowser.open(f"http://127.0.0.1:{self.port}/")
+
+    @classmethod
+    def wait_for_exit(cls):
+        """Wait for the exit command (e.g., keyboard interrupt) to be issued."""
+        for sig in ("TERM", "HUP", "INT"):
+            signal.signal(getattr(signal, "SIG" + sig), cls._quit)
+        while not cls._exit.is_set():
+            cls._exit.wait(1)
+
+    @classmethod
+    def _quit(cls, signo, _frame):
+        """Send the signal to quit the app."""
+        print("\nClosing the Monopyly app...")
+        cls._exit.set()
+
 
 if __name__ == "__main__":
     main()
