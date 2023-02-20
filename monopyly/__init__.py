@@ -1,8 +1,8 @@
 """
 Run a development server for the Monopyly app.
 """
+import warnings
 from pathlib import Path
-from warnings import warn
 
 from flask import Flask
 
@@ -34,7 +34,9 @@ def create_app(test_config=None):
         else:
             db_path = instance_path / DB_NAME
             config = ProductionConfig(db_path=db_path)
-            warn("INSECURE: Production mode has not yet been fully configured")
+            # Give a while the secret key remains insecure
+            warnings.formatwarning = lambda msg, *args, **kwargs: f"\n{msg}\n"
+            warnings.warn("INSECURE: Production mode has not yet been fully configured")
     app.config.from_object(config)
 
     # Allow the databases to be initialized from the command line
