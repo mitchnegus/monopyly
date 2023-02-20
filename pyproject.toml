@@ -16,6 +16,10 @@ dependencies = [
     'python-dateutil',
     'sqlalchemy>=2.0.0',
 ]
+keywords = [
+  'Finance',
+  'Personal Finance',
+]
 classifiers = [
   'Development Status :: 3 - Alpha',
   'Environment :: Web Environment',
