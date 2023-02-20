@@ -66,7 +66,7 @@ package : env
 .PHONY: upload
 upload : env
 	@. $(ENV_ACTIVATE); \
-	$(PYTHON) -m twine upload --skip-existing dist/*
+	hatch publish
 
 
 ## clean		: Clean all automatically generated files

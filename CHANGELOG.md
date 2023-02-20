@@ -74,9 +74,10 @@
 - Fixed errors in field validation for nested subforms with unset values
 
 
-
 ### 1.2.2
 
+- Use `pyproject.toml` via Hatch
 - Added version information to app footer
 - Fixed bug where bank name failed to show on 'Credit Account Details' page
 - Improved JavaScript management for acquisition forms
+
