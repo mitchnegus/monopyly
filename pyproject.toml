@@ -69,3 +69,10 @@ replacement = 'src="https://raw.githubusercontent.com/mitchnegus/monopyly/main/\
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
 pattern = '\[(.+?)\]\(((?!https?://)\S+?)\)'
 replacement = '[\1](https://github.com/mitchnegus/monopyly/blob/main/\g<2>)'
+
+[tool.black]
+force-exclude = 'monopyly/_version.py'
+
+[tool.isort]
+profile = 'black'
+src_paths = ['monopyly', 'test']
