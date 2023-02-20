@@ -40,10 +40,10 @@ monopyly = 'monopyly.cli.run:main'
 backup_db = 'monopyly.cli.backup_db:main'
 
 [project.urls]
-download = 'https://pypi.org/project/monopyly'
-homepage = 'https://github.com/mitchnegus/monopyly'
-repository = 'https://github.com/mitchnegus/monopyly'
-changelog = 'https://github.com/mitchnegus/monopyly/blob/main/CHANGELOG.md'
+Download = 'https://pypi.org/project/monopyly'
+Homepage = 'https://github.com/mitchnegus/monopyly'
+Repository = 'https://github.com/mitchnegus/monopyly'
+Changelog = 'https://github.com/mitchnegus/monopyly/blob/main/CHANGELOG.md'
 
 [tool.hatch.version]
 source = 'vcs'
