@@ -14,9 +14,13 @@ def test_development_config():
     assert app.config["SECRET_KEY"] == "development key"
 
 
-def test_production_config():
+@patch("monopyly.database.SQLAlchemy.access_tables")
+@patch("monopyly.Path.exists")
+def test_production_config(mock_exists_method, mock_access_method):
+    mock_exists_method.return_value = True
     app = create_app()
     assert app.config["SECRET_KEY"] not in ["development key", "testing key"]
+    mock_access_method.assert_called_once()
 
 
 def test_test_config():
