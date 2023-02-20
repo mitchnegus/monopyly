@@ -72,6 +72,9 @@ target/
 # Virtual environment
 monopyly-env/
 
+# Hatch-generated version file
+monopyly/_version.py
+
 # Image creation files
 monopyly/static/img/**/*.pptx
 monopyly/static/img/**/*.key

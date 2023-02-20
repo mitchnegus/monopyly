@@ -1,27 +1,28 @@
 #!/usr/bin/env python
 """
-A script to launch the Monopyly application.
+A script (entry point) to launch the Monopyly application.
 """
-import os
 import argparse
-import time
+import os
 import signal
 import subprocess
+import time
 import webbrowser
 from pathlib import Path
 from threading import Event
 
 from flask import current_app
 
-
 # Set the Flask environment variable
-os.environ['FLASK_APP'] = 'monopyly'
+os.environ["FLASK_APP"] = "monopyly"
 
 
-def main(mode, host=None, port=None):
+def main():
+    args = parse_arguments()
+    host, port = args.host, args.port
     # Initialize the database (force debug mode here, not during production)
-    os.system('flask --debug init-db')
-    run_app(mode, host, port)
+    os.system("flask --debug init-db")
+    run_app(args.mode, host, port)
     # Run the default web browser
     time.sleep(1)
     port = "5000" if port is None else port
@@ -31,14 +32,8 @@ def main(mode, host=None, port=None):
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--host",
-        help="The host address where the app will be run."
-    )
-    parser.add_argument(
-        "--port",
-        help="The port where the app will be accessible."
-    )
+    parser.add_argument("--host", help="The host address where the app will be run.")
+    parser.add_argument("--port", help="The port where the app will be accessible.")
     parser.add_argument(
         "mode",
         help="The runtime mode for the app; defaults to `development`.",
@@ -62,20 +57,18 @@ def run_app(mode, host=None, port=None):
 def wait_for_exit():
     """Wait for the exit command (e.g., keyboard interrupt) to be issued."""
     for sig in ("TERM", "HUP", "INT"):
-        signal.signal(getattr(signal, "SIG"+sig), _quit)
+        signal.signal(getattr(signal, "SIG" + sig), _quit)
     while not _exit.is_set():
         _exit.wait(1)
 
 
 def _quit(signo, _frame):
     """Send the signal to quit the app."""
-    print('\nClosing the Monopyly app...')
+    print("\nClosing the Monopyly app...")
     _exit.set()
 
 
 _exit = Event()
 
 if __name__ == "__main__":
-    args = parse_arguments()
-    main(args.mode, host=args.host, port=args.port)
-
+    main()

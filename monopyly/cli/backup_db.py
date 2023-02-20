@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to backup the SQLite database."""
+"""A script (entry point) to backup the SQLite database."""
 import argparse
 import datetime
 import sqlite3
@@ -7,16 +7,17 @@ from pathlib import Path
 
 # Set the application specific system variables
 SCRIPT_DIR = Path(__file__)
-BASE_DIR = SCRIPT_DIR.parent
+BASE_DIR = SCRIPT_DIR.parents[1]
 INSTANCE_DIR = BASE_DIR / "var" / "monopyly-instance"
 BACKUP_DIR = INSTANCE_DIR / "db_backups"
 
 
-def main(verbose=False)
+def main():
+    args = parse_arguments()
     timestamp = get_timestamp()
-    backup(timestamp, verbose=False)
+    backup(timestamp, verbose=args.verbose)
     if verbose:
-        print(f'Backup complete ({timestamp})')
+        print(f"Backup complete ({timestamp})")
 
 
 def get_timestamp():
@@ -43,14 +44,12 @@ def backup(timestamp):
     db.close()
 
 
-def parse_arguments()
+def parse_arguments():
     """Parse arguments from the command line."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verbose", action="store_true")
     return parser.parse_args()
 
 
-if __name__ == '__main__':
-    args = parse_arguments()
-    main(verbose=args.verbose)
-
+if __name__ == "__main__":
+    main()

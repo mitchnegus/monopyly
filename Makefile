@@ -22,7 +22,7 @@ env : $(ENV)/.touchfile
 
 # Create/update the virtual environment (based on `requirements.txt`, etc.)
 # Uses touchfile as proxy for installed environment
-$(ENV)/.touchfile : $(REQS) setup.py
+$(ENV)/.touchfile : $(REQS) pyproject.toml
 	@echo "Installing/updating the environment ($(ENV))."
 	@if [ ! -d "$(ENV)" ]; then $(PYTHON) -m venv $(ENV); fi
 	@. $(ENV_ACTIVATE); \
@@ -57,9 +57,9 @@ format-diff : env $(PYTHON_FORMAT_FILES)
 
 ## package	: Bundle the package for distribution
 .PHONY: package
-package :
+package : env
 	@. $(ENV_ACTIVATE); \
-	$(PYTHON) -m build
+	hatch build
 
 
 ## upload		: Upload the package to PyPI
@@ -72,6 +72,7 @@ upload : env
 ## clean		: Clean all automatically generated files
 .PHONY : clean
 clean :
+	@rm -rf monopyly/_version.py
 	@rm -rf instance/dev-monopyly.sqlite
 	@rm -rf dist/ *egg-info/
 	@rm -rf $(ENV)

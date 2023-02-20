@@ -1,0 +1,59 @@
+[build-system]
+requires = ['hatchling', 'hatch-vcs', 'hatch-fancy-pypi-readme']
+build-backend = 'hatchling.build'
+
+[project]
+name = 'monopyly'
+authors = [
+    { name = 'Mitch Negus', email = 'mitchnegus57@gmail.com' },
+]
+description = 'A homemade personal finance manager.'
+license = { text = 'GNU GPLv3' }
+requires-python = '>=3.9,<3.11'
+dependencies = [
+    'flask>=2.2.2',
+    'flask-wtf',
+    'python-dateutil',
+    'sqlalchemy>=2.0.0',
+]
+classifiers = [
+  'Development Status :: 3 - Alpha',
+  'Environment :: Web Environment',
+  'Framework :: Flask',
+  'Intended Audience :: End Users/Desktop',
+  'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+  'Natural Language :: English',
+  'Operating System :: OS Independent',
+  'Programming Language :: Python',
+  'Topic :: Office/Business :: Financial',
+  'Topic :: Office/Business :: Financial :: Accounting',
+  'Topic :: Office/Business :: Financial :: Spreadsheet',
+]
+dynamic = ['readme', 'version']
+
+[project.scripts]
+monopyly = 'monopyly.cli.run:main'
+backup_db = 'monopyly.cli.backup_db:main'
+
+[project.urls]
+download = 'https://pypi.org/project/monopyly'
+homepage = 'https://github.com/mitchnegus/monopyly'
+repository = 'https://github.com/mitchnegus/monopyly'
+changelog = 'https://github.com/mitchnegus/monopyly/blob/main/CHANGELOG.md'
+
+[tool.hatch.version]
+source = 'vcs'
+
+[tool.hatch.build.targets.sdist]
+include = [
+    '/monopyly',
+]
+
+[tool.hatch.build.hooks.vcs]
+version-file = 'monopyly/_version.py'
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = 'text/markdown'
+fragments = [
+  { path = 'README.md' },
+]
