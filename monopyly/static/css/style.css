@@ -385,6 +385,17 @@ form .subtotal-field {
   min-width: 100px;
 }
 
+form .subtotal-field input.currency {
+  padding-left: 20px;
+}
+
+form .currency-symbol {
+  position: absolute;
+  display: block;
+  transform: translate(90%, 42%);
+  pointer-events: none;
+}
+
 form .note-field {
   flex: 3;
 }

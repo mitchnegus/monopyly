@@ -4,7 +4,8 @@
 
     <div class="form-field subtotal-field">
       {{ subform.subtotal.label }}
-      {{ subform.subtotal }}
+      <span class="currency-symbol">$</span>
+      {{ subform.subtotal(class_="currency") }}
     </div>
 
     <div class="form-field note-field autocomplete">
