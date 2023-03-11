@@ -198,7 +198,7 @@ class BankTransactionForm(TransactionForm):
     account_info = FormField(AccountSubform)
     # Subtransaction fields (must be at least 1 subtransaction)
     subtransactions = FieldList(
-        FormField(SubtransactionSubform),
+        FormField(SubtransactionSubform, render_kw={"class": "subtransaction-form"}),
         min_entries=1,
     )
     # Fields to identify a second bank involved in a funds transfer

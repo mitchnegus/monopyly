@@ -1,4 +1,6 @@
-<div id="{{ subform.id }}" class="subtransaction-form">
+{% extends 'common/transaction_form/subform.html' %}
+
+{% block subform %}
 
   <div class="form-line">
 
@@ -15,5 +17,4 @@
 
   </div>
 
-</div>
-
+{% endblock %}
