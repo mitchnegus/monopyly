@@ -374,6 +374,35 @@ form button.dark-background .icon {
   opacity: 0.5;
 }
 
+form .subform {
+  position: relative;
+}
+
+form .subform .close-button-panel {
+  position: absolute;
+  top: 0%;
+  left: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  width: 100px;
+  box-sizing: border-box;
+  padding: 0 0 6px 10px;
+  opacity: 0;
+}
+
+form .subform:hover .close-button-panel {
+  opacity: 100%;
+  transition: opacity 0.5s 0.5s;
+}
+
+form .subform .close.button {
+  height: 25px;
+  width: 25px;
+}
+
+
 /*
  * Style transaction forms
  */
@@ -396,6 +425,11 @@ form .currency-symbol {
 
 form .note-field {
   flex: 3;
+}
+
+form .subtransaction-form {
+  margin-top: 20px;
+  border-top: 1px solid #eaeaea;
 }
 
 
@@ -2372,11 +2406,6 @@ form#credit-transaction .transaction-date-field {
 
 form#credit-transaction .merchant-field {
   flex: 2;
-}
-
-form#credit-transaction .subtransaction-form {
-  margin-top: 20px;
-  border-top: 1px solid #eaeaea;
 }
 
 

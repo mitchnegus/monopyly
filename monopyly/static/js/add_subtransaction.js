@@ -24,7 +24,7 @@ class SubtransactionSubformManager extends SubformManager {
   constructor() {
     // Identify the button to add subtransaction entry forms
     const $button = $('#new-subtransaction.button');
-    super(ADD_SUBTRANSACTION_FORM_ENDPOINT, $button, null);
+    super(ADD_SUBTRANSACTION_FORM_ENDPOINT, $button);
   }
 
   /**

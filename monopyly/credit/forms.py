@@ -284,7 +284,7 @@ class CreditTransactionForm(TransactionForm):
     merchant = StringField("Merchant", [DataRequired()])
     # Subtransaction fields (must be at least 1 subtransaction)
     subtransactions = FieldList(
-        FormField(SubtransactionSubform),
+        FormField(SubtransactionSubform, render_kw={"class": "subtransaction-form"}),
         min_entries=1,
     )
     # Define an autocompleter for the form

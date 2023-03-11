@@ -22,7 +22,7 @@ class BankTransferSubformManager extends SubformManager {
   constructor() {
     // Identify the button to add subfields for recording transfers
     const $button = $('#new-transfer.button');
-    super(ADD_TRANSFER_FORM_ENDPOINT, $button, null);
+    super(ADD_TRANSFER_FORM_ENDPOINT, $button, true);
   }
 
   /**
@@ -30,7 +30,6 @@ class BankTransferSubformManager extends SubformManager {
    */
   addSubform(response) {
     $('.add-info.buttons').after(response);
-    this.$addFormButton.hide();
   }
 
 }

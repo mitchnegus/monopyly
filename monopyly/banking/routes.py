@@ -181,7 +181,9 @@ def add_subtransaction_fields():
         subtransaction_count,
     )
     return render_template(
-        "banking/transaction_form/subtransaction_form.html", subform=new_subform
+        "banking/transaction_form/subtransaction_form.html",
+        subform=new_subform,
+        field_list_optional_member=True,
     )
 
 
@@ -198,6 +200,7 @@ def add_transfer_field():
         "banking/transaction_form/transfer_form.html",
         subform=new_subform,
         id_prefix="transfer",
+        field_list_optional_member=True,
     )
 
 

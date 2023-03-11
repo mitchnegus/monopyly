@@ -85,6 +85,7 @@
 ### 1.2.3 (in progress)
 
 - Add currency symbol to the amount field(s)
+- Allow subform fields to be removed from forms
 - Change 'Vendor' field name to 'Merchant' for better generalizability
 - Remove wildcard imports from the package source code
 - Update form styles to be more browser compatible

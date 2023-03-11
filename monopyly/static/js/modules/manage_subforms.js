@@ -20,12 +20,12 @@ class SubformManager {
    * @param {string} addFormEndpoint - The endpoint to reach when accessing the
    *     new subform info to be displayed.
    * @param {JQuery} $addFormButton - The button that adds a subform.
-   * @param {JQuery} $removeFormButton - The button that removes a subform.
+   * @param {boolean} toggleButton - ...
    */
-  constructor(addFormEndpoint, $addFormButton, $removeFormButton) {
+  constructor(addFormEndpoint, $addFormButton, toggleButton=false) {
     this.addFormEndpoint = addFormEndpoint;
     this.$addFormButton = $addFormButton;
-    this.$removeFormButton = $removeFormButton;
+    this.toggleButton = toggleButton;
     // Bind actions to the buttons when clicked
     this.$addFormButton.on("click", this.#executeAjaxRequest.bind(this));
   }
@@ -49,8 +49,27 @@ class SubformManager {
    */
   #executeAjaxRequest() {
     const rawData = this.determineAjaxData();
-    const callback = this.addSubform.bind(this);
+    const callback = this.#handleAjaxResponse.bind(this);
     executeAjaxRequest(this.addFormEndpoint, rawData, callback);
+  }
+
+  /**
+   * Provide an AJAX callback that adds a subform and binds the remove button.
+   */
+  #handleAjaxResponse(response) {
+    this.addSubform(response);
+    if (this.toggleButton) {
+      this.$addFormButton.hide();
+    }
+
+    const $removeButtons = $(".subform .close.button");
+    const manager = this;
+    $removeButtons.on("click", function() {
+      this.closest(".subform").remove();
+      if (manager.toggleButton) {
+        manager.$addFormButton.show();
+      }
+    });
   }
 
 }

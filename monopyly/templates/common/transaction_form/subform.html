@@ -1,6 +1,15 @@
-<div id="{{ subform.id }}" class="{{ subform.render_kw['class'] }}">
+<div id="{{ subform.id }}" class="subform {{ subform.render_kw['class'] }}">
 
-{% block subform %}
-{% endblock %}
+  {% block subform_header %}
+  {% endblock %}
+
+  {% block subform %}
+  {% endblock %}
+
+  {% if field_list_optional_member %}
+    <div class="close-button-panel">
+      <img class="close button" src="{{ url_for('static', filename='img/icons/x-thick.png') }}">
+    </div>
+  {% endif %}
 
 </div>
