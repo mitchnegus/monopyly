@@ -86,5 +86,6 @@
 
 - Add currency symbol to the amount field(s)
 - Change 'Vendor' field name to 'Merchant' for better generalizability
+- Remove wildcard imports from the package source code
 - Update form styles to be more browser compatible
 - Impose boolean constraint on boolean/integer database fields

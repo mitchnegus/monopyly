@@ -26,7 +26,7 @@ from .actions import (
 )
 from .blueprint import bp
 from .cards import CreditCardHandler, save_card
-from .forms import *
+from .forms import CardStatementTransferForm, CreditCardForm, CreditTransactionForm
 from .statements import CreditStatementHandler
 from .transactions import CreditTagHandler, CreditTransactionHandler, save_transaction
 

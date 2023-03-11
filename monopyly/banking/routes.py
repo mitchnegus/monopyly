@@ -13,7 +13,7 @@ from .accounts import BankAccountHandler, BankAccountTypeHandler, save_account
 from .actions import get_bank_account_type_grouping
 from .banks import BankHandler
 from .blueprint import bp
-from .forms import *
+from .forms import BankAccountForm, BankTransactionForm
 from .transactions import BankTransactionHandler, save_transaction
 
 
