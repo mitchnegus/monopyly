@@ -835,7 +835,8 @@ form .autocomplete-box .item.active {
 }
 
 .credit-card.inactive .card-face.front {
-  filter: contrast(0.25) brightness(1.5);
+  color: #cccccc;
+  filter: brightness(0.9);
 }
 
 .credit-card.inactive .card-face .notice {
