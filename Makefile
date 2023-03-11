@@ -74,7 +74,9 @@ upload : env
 clean :
 	@rm -rf monopyly/_version.py
 	@rm -rf instance/dev-monopyly.sqlite
+	@rm -rf htmlcov/
 	@rm -rf dist/ *egg-info/
+	@rm -rf .pytest_cache/
 	@rm -rf $(ENV)
 
 
