@@ -95,7 +95,7 @@ def test_get_potential_preceding_card_no_balance(app, client_context):
         internal_transaction_id=None,
         statement_id=statement.id,
         transaction_date=date(2020, 7, 9),
-        vendor="Balance Beam Fitness",
+        merchant="Balance Beam Fitness",
         subtransactions=[
             {"subtotal": -636.33, "note": "Zeroing the balance", "tags": []},
         ],
@@ -140,7 +140,7 @@ def test_make_payment(client_context):
     assert payment_credit_transaction.internal_transaction_id == 4
     assert payment_credit_transaction.statement_id == 8
     assert payment_credit_transaction.transaction_date == transaction_date
-    assert payment_credit_transaction.vendor == "TheBank"
+    assert payment_credit_transaction.merchant == "TheBank"
     assert len(payment_credit_transaction.subtransactions) == 1
     assert payment_credit_transaction.subtransactions[0].subtotal == -100
     assert payment_credit_transaction.subtransactions[0].note == "Card payment"
@@ -152,7 +152,7 @@ def test_make_payment_no_bank_account(client_context):
     assert payment_credit_transaction.internal_transaction_id is None
     assert payment_credit_transaction.statement_id == 8
     assert payment_credit_transaction.transaction_date == date(2020, 7, 1)
-    assert payment_credit_transaction.vendor == "TheBank"
+    assert payment_credit_transaction.merchant == "TheBank"
     assert len(payment_credit_transaction.subtransactions) == 1
     assert payment_credit_transaction.subtransactions[0].subtotal == -100
     assert payment_credit_transaction.subtransactions[0].note == "Card payment"

@@ -227,7 +227,7 @@ def filled_transaction_form(transaction_form):
     transaction_form.statement_info.card_info.last_four_digits.data = "3335"
     # Mock the transaction data
     transaction_form.transaction_date.data = date(2020, 5, 4)
-    transaction_form.vendor.data = "O.B. (Wan) Railroad"
+    transaction_form.merchant.data = "O.B. (Wan) Railroad"
     # Mock the subtransaction subform data
     transaction_form.subtransactions[0].subtotal.data = 42.00
     transaction_form.subtransactions[0].note.data = "Wrong SciFi movie?"
@@ -240,7 +240,7 @@ class TestCreditTransactionForm:
         form_fields = (
             "statement_info",
             "transaction_date",
-            "vendor",
+            "merchant",
             "subtransactions",
             "submit",
         )
@@ -270,7 +270,7 @@ class TestCreditTransactionForm:
             "internal_transaction_id": None,
             "statement_id": mock_method.return_value.id,
             "transaction_date": filled_transaction_form.transaction_date.data,
-            "vendor": filled_transaction_form.vendor.data,
+            "merchant": filled_transaction_form.merchant.data,
             "subtransactions": [
                 {
                     "note": filled_form_subtransaction.note.data,
@@ -455,7 +455,7 @@ class TestCreditTransactionForm:
         data = transaction_form.gather_entry_data(mock_transaction)
         expected_data = {
             "transaction_date": mock_transaction.transaction_date,
-            "vendor": mock_transaction.vendor,
+            "merchant": mock_transaction.merchant,
             "subtransactions": 3 * [mock_subtransaction_method.return_value],
             "statement_info": mock_statement_method.return_value,
         }
@@ -498,7 +498,7 @@ class TestCreditTransactionForm:
         "field, sort_fields, top_expected_suggestions, expected_suggestions",
         [
             [
-                "vendor",
+                "merchant",
                 {},
                 # sorted by (only) frequency
                 ("Boardwalk",),
@@ -518,8 +518,8 @@ class TestCreditTransactionForm:
             ],
             [
                 "note",
-                {"vendor": "Park Place"},
-                # sorted by vendor key, then note frequency
+                {"merchant": "Park Place"},
+                # sorted by merchant key, then note frequency
                 ("One for the park", "One for the place"),
                 (
                     "Parking (thought it was free)",

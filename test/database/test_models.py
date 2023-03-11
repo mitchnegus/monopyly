@@ -327,7 +327,7 @@ class TestCreditTransaction(TestModel):
             "internal_transaction_id": None,
             "statement_id": 200,
             "transaction_date": date(2022, 11, 23),
-            "vendor": "New vendor",
+            "merchant": "New merchant",
         }
         self.assert_accurate_model_field_assignment(CreditTransaction, mapping)
         assert CreditTransaction.subtype == "credit"
@@ -341,11 +341,11 @@ class TestCreditTransaction(TestModel):
                     "internal_transaction_id": None,
                     "statement_id": 200,
                     "transaction_date": date(2022, 11, 23),
-                    "vendor": "New vendor",
+                    "merchant": "New merchant",
                 },
                 "CreditTransaction(id=100, internal_transaction_id=None, "
                 "statement_id=200, transaction_date='2022-11-23', "
-                "vendor='New vendor')",
+                "merchant='New merchant')",
             ]
         ],
     )

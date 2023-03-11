@@ -115,7 +115,7 @@ CREATE TABLE credit_transactions (
   statement_id INTEGER NOT NULL REFERENCES credit_statements (id)
     ON DELETE CASCADE,
   transaction_date DATE NOT NULL,
-  vendor TEXT NOT NULL
+  merchant TEXT NOT NULL
 );
 
 

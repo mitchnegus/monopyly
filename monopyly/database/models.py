@@ -260,7 +260,7 @@ class BankTransaction(AuthorizedAccessMixin, Model):
         nullable=False,
     )
     transaction_date = Column(Date, nullable=False)
-    # ((Should have optional vendor field?))
+    # ((Should have optional merchant field?))
     #  Relationships
     view = relationship(
         "BankTransactionView",
@@ -299,7 +299,7 @@ class BankTransactionView(AuthorizedAccessMixin, Model):
     total = Column(Float)
     notes = Column(String)
     balance = Column(Float)
-    # ((Should have optional vendor field?))
+    # ((Should have optional merchant field?))
     # Relationships
     transaction = relationship(
         "BankTransaction",
@@ -424,7 +424,7 @@ class CreditTransaction(AuthorizedAccessMixin, Model):
         "internal_transaction_id",
         "statement_id",
         "transaction_date",
-        "vendor",
+        "merchant",
     )
     _user_id_join_chain = (CreditStatementView, CreditCard, CreditAccount, Bank)
     # Denote the transaction subtype
@@ -441,7 +441,7 @@ class CreditTransaction(AuthorizedAccessMixin, Model):
         nullable=False,
     )
     transaction_date = Column(Date, nullable=False)
-    vendor = Column(String, nullable=False)
+    merchant = Column(String, nullable=False)
     # Relationships
     view = relationship(
         "CreditTransactionView",
@@ -458,7 +458,7 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
         "internal_transaction_id",
         "statement_id",
         "transaction_date",
-        "vendor",
+        "merchant",
         "total",
         "notes",
     )
@@ -481,7 +481,7 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
         nullable=False,
     )
     transaction_date = Column(Date, nullable=False)
-    vendor = Column(String, nullable=False)
+    merchant = Column(String, nullable=False)
     total = Column(Float, nullable=False)
     notes = Column(String, nullable=False)
     # Relationships

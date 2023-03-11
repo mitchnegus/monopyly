@@ -85,5 +85,6 @@
 ### 1.2.3 (in progress)
 
 - Add currency symbol to the amount field(s)
+- Change 'Vendor' field name to 'Merchant' for better generalizability
 - Update form styles to be more browser compatible
 - Impose boolean constraint on boolean/integer database fields

@@ -131,7 +131,7 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
         "internal_transaction_id": internal_transaction_id,
         "statement_id": payment_statement.id,
         "transaction_date": payment_date,
-        "vendor": payee,
+        "merchant": payee,
         "subtransactions": [
             {
                 "subtotal": -payment_amount,

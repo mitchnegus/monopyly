@@ -78,8 +78,8 @@ VALUES (1, '2020-05-15', '2020-06-05'),
        (4, '2020-06-06', '2020-06-27');
 
 INSERT INTO credit_transactions
-       (internal_transaction_id, statement_id, transaction_date, vendor)
-VALUES (NULL, 1, '2020-04-20', 'Test vendor'),
+       (internal_transaction_id, statement_id, transaction_date, merchant)
+VALUES (NULL, 1, '2020-04-20', 'Test merchant'),
        (NULL, 2, '2020-04-13', 'Top Left Corner'),
        (NULL, 3, '2020-03-20', 'Boardwalk'),
        (NULL, 3, '2020-04-05', 'Park Place'),

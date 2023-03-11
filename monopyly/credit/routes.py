@@ -451,8 +451,8 @@ def suggest_transaction_autocomplete():
     if field != "note":
         suggestions = CreditTransactionForm.autocomplete(field)
     else:
-        vendor = post_args["vendor"]
-        suggestions = CreditTransactionForm.autocomplete("note", vendor=vendor)
+        merchant = post_args["merchant"]
+        suggestions = CreditTransactionForm.autocomplete("note", merchant=merchant)
     return jsonify(suggestions)
 
 

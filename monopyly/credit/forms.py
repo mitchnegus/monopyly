@@ -281,7 +281,7 @@ class CreditTransactionForm(TransactionForm):
     # Fields to identify the statement information for the transaction
     statement_info = FormField(StatementSubform)
     # Fields pertaining to the credit transaction
-    vendor = StringField("Vendor", [DataRequired()])
+    merchant = StringField("Merchant", [DataRequired()])
     # Subtransaction fields (must be at least 1 subtransaction)
     subtransactions = FieldList(
         FormField(SubtransactionSubform),
@@ -292,7 +292,7 @@ class CreditTransactionForm(TransactionForm):
         {
             "bank_name": Bank,
             "last_four_digits": CreditCard,
-            "vendor": CreditTransactionView,
+            "merchant": CreditTransactionView,
             "note": CreditSubtransaction,
         }
     )
@@ -318,7 +318,7 @@ class CreditTransactionForm(TransactionForm):
     def _prepare_transaction_data(self, statement):
         data = super()._prepare_transaction_data()
         data["statement_id"] = statement.id
-        data["vendor"] = self.vendor.data
+        data["merchant"] = self.merchant.data
         return data
 
     def gather_entry_data(self, entry):
@@ -338,5 +338,5 @@ class CreditTransactionForm(TransactionForm):
     def _gather_transaction_data(self, transaction):
         """Gather credit transaction-specific data."""
         data = super()._gather_transaction_data(transaction)
-        data["vendor"] = transaction.vendor
+        data["merchant"] = transaction.merchant
         return data

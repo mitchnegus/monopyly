@@ -277,7 +277,7 @@ class TestCreditRoutes(TestRoutes):
                 "statement_info-card_info-bank_name": "TheBank",
                 "statement_info-card_info-last_four_digits": "3336",
                 "statement_info-issue_date": "2022-06-11",
-                "vendor": "body shop",
+                "merchant": "body shop",
                 "subtransactions-1-subtotal": "250.00",
                 "subtransactions-1-note": "New Token",
                 "subtransactions-1-tags": "",
@@ -299,7 +299,7 @@ class TestCreditRoutes(TestRoutes):
                 "statement_info-card_info-bank_name": "TheBank",
                 "statement_info-card_info-last_four_digits": "3336",
                 "statement_info-issue_date": "2022-06-11",
-                "vendor": "Body shop",
+                "merchant": "Body shop",
                 "subtransactions-1-subtotal": "250.00",
                 "subtransactions-1-note": "New token",
                 "subtransactions-1-tags": "",
@@ -336,7 +336,7 @@ class TestCreditRoutes(TestRoutes):
                 "statement_info-card_info-last_four_digits": "3336",
                 "statement_info-card_info-bank_name": "TheBank",
                 "statement_info-issue_date": "2022-06-11",
-                "vendor": "Body shop",
+                "merchant": "Body shop",
                 "subtransactions-1-subtotal": "-2345.00",
                 "subtransactions-1-note": "Bigger refund",
                 "subtransactions-1-tags": "",
@@ -415,7 +415,7 @@ class TestCreditRoutes(TestRoutes):
             ["bank_name", ["TheBank", "Jail"]],
             ["last_four_digits", ["3334", "3335", "3336"]],
             [
-                "vendor",
+                "merchant",
                 [
                     "Top Left Corner",
                     "Boardwalk",
@@ -441,9 +441,9 @@ class TestCreditRoutes(TestRoutes):
     def test_suggest_transaction_note_autocomplete(self, authorization):
         self.post_route(
             "/_suggest_transaction_autocomplete",
-            json={"field": "note", "vendor": "Boardwalk"},
+            json={"field": "note", "merchant": "Boardwalk"},
         )
-        # Returned suggestions should prioritize notes related to the vendor
+        # Returned suggestions should prioritize notes related to the merchant
         top_suggestions = ["Merry-go-round", "Back for more..."]
         other_suggestions = [
             "Parking (thought it was free)",

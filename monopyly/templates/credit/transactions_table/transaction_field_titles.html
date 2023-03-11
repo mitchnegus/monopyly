@@ -7,7 +7,7 @@
       <img class="sort-button asc{{ ' selected' if sort_order == 'ASC' else '' }}" src="{{ url_for('static', filename='img/icons/sort-asc.png') }}" />
       <img class="sort-button desc{{ ' selected' if sort_order == 'DESC' else '' }}" src="{{ url_for('static', filename='img/icons/sort-desc.png') }}" />
     </div>
-    <div class="vendor column">Vendor</div>
+    <div class="merchant column">Merchant</div>
     {% if transactions and full_view %}
       <div class="notes column">Notes</div>
     {% endif %}

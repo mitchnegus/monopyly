@@ -22,9 +22,9 @@ import { AutocompleteBox } from './modules/autocomplete_input.js';
     $('form').on('focus', '.autocomplete input', function() {
       const inputElement = this;
       autocompleteBox = new AutocompleteBox(inputElement);
-      // Identify the vendor input box (used when suggesting notes)
-      const $vendor = $('form input#vendor');
-      autocompleteAjaxRequest(autocompleteBox, inputElement, $vendor);
+      // Identify the merchant input box (used when suggesting notes)
+      const $merchant = $('form input#merchant');
+      autocompleteAjaxRequest(autocompleteBox, inputElement, $merchant);
     });
 
     $('form').on('blur', '.autocomplete input', function() {
@@ -32,12 +32,12 @@ import { AutocompleteBox } from './modules/autocomplete_input.js';
     });
   }
 
-  function autocompleteAjaxRequest(autocompleteBox, inputElement, $vendor = null) {
+  function autocompleteAjaxRequest(autocompleteBox, inputElement, $merchant = null) {
     const inputID = inputElement.id.split('-');
     const field = inputID[inputID.length-1];
     const rawData = {
       'field': field,
-      'vendor': $vendor.val()
+      'merchant': $merchant.val()
     };
     // Use the AJAX request to finish setting up the autocomplete box
     autocompleteBox.ajaxRequest(AUTOCOMPLETE_ENDPOINT, rawData);
