@@ -49,8 +49,6 @@ input:focus-visible {
 input[type="text"],
 select {
   box-sizing: border-box;
-  border: 1px solid #cccccc;
-  border-radius: 3px;
   color: inherit;
 }
 
@@ -345,7 +343,6 @@ form input.button {
   align-items: center;
   margin-top: 20px;
   padding: 10px;
-  border:1px solid #d8d8d8;
   background-color: #fbfbfb;
   background-image: linear-gradient(#fbfbfb, #efefef);
   color: #333333;
@@ -392,7 +389,8 @@ form .subtotal-field input.currency {
 form .currency-symbol {
   position: absolute;
   display: block;
-  transform: translate(90%, 42%);
+  transform: translate(90%, 40%);
+  color: #666666;
   pointer-events: none;
 }
 
