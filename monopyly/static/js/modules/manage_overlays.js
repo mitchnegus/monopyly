@@ -24,7 +24,7 @@ class OverlayManager {
   }
 
   /**
-   * Add the overlay
+   * Add the overlay.
    *
    * @param {string} The AJAX request response containing the overlay.
    */

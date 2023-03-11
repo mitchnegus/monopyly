@@ -8,24 +8,36 @@
  * form. The page is updated with the new field information.
  */
 
-import { executeAjaxRequest } from './modules/ajax.js';
+import { SubformManager } from './modules/manage_subforms.js';
 
+
+/**
+ * A class for managing bank transfer subforms.
+ */
+class BankTransferSubformManager extends SubformManager {
+
+  /**
+   * Create the manager.
+   */
+  constructor() {
+    // Identify the button to add subfields for recording transfers
+    const $button = $('#new-transfer.button');
+    super(ADD_TRANSFER_FORM_ENDPOINT, $button, null);
+  }
+
+  /**
+   * Add the subform.
+   */
+  addSubform(response) {
+    $('.add-info.buttons').after(response);
+    this.$addFormButton.hide();
+  }
+
+}
 
 (function() {
 
-  const endpoint = ADD_TRANSFER_FORM_ENDPOINT;
-  // Identify the button to add subfields for recording transfers
-  const $button = $('#new-transfer.button');
-
-  $button.on('click', function() {
-    // Execute the AJAX request to retrieve the transfer form
-    function addTransferForm(response) {
-      $('.add-info.buttons').after(response);
-      $('#new-transfer').hide();
-    }
-    // Add the new transfer form to the bank transaction form
-    executeAjaxRequest(endpoint, 0, addTransferForm);
-  });
+  const subformManager = new BankTransferSubformManager();
 
 })();
 

@@ -10,25 +10,43 @@
  * is updated with the new field information.
  */
 
-import { executeAjaxRequest } from './modules/ajax.js';
+import { SubformManager } from './modules/manage_subforms.js';
 
+
+/**
+ * A class for managing subtransaction subforms.
+ */
+class SubtransactionSubformManager extends SubformManager {
+
+  /**
+   * Create the manager.
+   */
+  constructor() {
+    // Identify the button to add subtransaction entry forms
+    const $button = $('#new-subtransaction.button');
+    super(ADD_SUBTRANSACTION_FORM_ENDPOINT, $button, null);
+  }
+
+  /**
+   * Add the subform at the end of the set of existing subtransaction forms.
+   */
+  addSubform(response) {
+    $('#subtransactions').append(response);
+  }
+
+  /**
+   * Create a raw data object containing the count of existing subtransactions.
+   */
+  determineAjaxData() {
+    const subtransactionCount = $('.subtransaction-form').length;
+    const rawData = {'subtransaction_count': subtransactionCount};
+    return rawData;
+  }
+
+}
 
 (function() {
 
-  const endpoint = ADD_SUBTRANSACTION_FORM_ENDPOINT;
-  // Identify the button to add subtransaction entry forms
-  const $button = $('#new-subtransaction.button');
-
-  $button.on('click', function() {
-    const subtransactionCount = $('.subtransaction-form').length
-    // Execute the AJAX request to retrieve a new subtransaction form
-    const rawData = {'subtransaction_count': subtransactionCount};
-    function addSubtransactionForm(response) {
-      // Add the new form at the end of the set of subtransaction forms
-      $('#subtransactions').append(response);
-    }
-    executeAjaxRequest(endpoint, rawData, addSubtransactionForm);
-  });
+  const subformManager = new SubtransactionSubformManager();
 
 })();
-
