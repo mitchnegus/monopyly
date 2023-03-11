@@ -120,13 +120,12 @@ class AutocompleteBox {
     this.#bindMouseAction();
   }
 
-  select(suggestion) {
+  select(suggestion, advance=true) {
     // Select a suggestion from the list
     if (suggestion !== null) {
       this.fill(suggestion);
     }
     this.close();
-    this.advanceFocus();
   }
 
   fill(suggestion) {
@@ -134,7 +133,7 @@ class AutocompleteBox {
     this.inputElement.value = suggestion.textContent;
   }
 
-  advanceFocus(inputElement) {
+  advanceFocus() {
     // Shift the focus to the next input element
     const nextInputIndex = this.$inputElements.index(this.inputElement)+1;
     this.$inputElements.eq(nextInputIndex).focus();
@@ -193,6 +192,7 @@ class AutocompleteBox {
     let box = this;
     this.$boxSuggestions.on('click', function() {
       box.select(this);
+      box.advanceFocus();
     });
   }
 
@@ -201,12 +201,13 @@ class AutocompleteBox {
     let box = this;
     box.currentFocus = -1;
     $(this.inputElement).on('keydown', function(event) {
-      switch (event.which) {
-        case 13:    // ENTER
+      switch (event.key) {
+        case "Enter":
           event.preventDefault();
           box.#selectActiveSuggestion();
+          box.advanceFocus();
           break;
-        case 9:     // TAB
+        case "Tab":
           event.preventDefault();
           if (event.shiftKey) {
             box.#moveCursorUp();
@@ -214,13 +215,16 @@ class AutocompleteBox {
             box.#moveCursorDown();
           }
           break;
-        case 38:    // UP
+        case "ArrowUp":
           event.preventDefault();
           box.#moveCursorUp();
           break;
-        case 40:    // DOWN
+        case "ArrowDown":
           event.preventDefault();
           box.#moveCursorDown();
+          break;
+        case "ArrowRight":
+          box.#selectActiveSuggestion();
           break;
       }
     });
