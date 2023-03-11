@@ -49,7 +49,8 @@ CREATE TABLE bank_accounts (
   account_type_id INTEGER NOT NULL REFERENCES bank_account_types (id)
     ON DELETE CASCADE,
   last_four_digits TEXT NOT NULL,
-  active INTEGER NOT NULL,
+  active INTEGER NOT NULL
+    CHECK(active IN (0, 1)),
   UNIQUE(bank_id, account_type_id, last_four_digits)
 );
 
@@ -93,6 +94,7 @@ CREATE TABLE credit_cards (
     ON DELETE CASCADE,
   last_four_digits TEXT NOT NULL,
   active INTEGER NOT NULL
+    CHECK(active IN (0, 1))
 );
 
 
