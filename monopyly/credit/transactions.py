@@ -20,20 +20,15 @@ class CreditTransactionHandler(DatabaseViewHandler):
     """
     A database handler for accessing credit transactions.
 
-    Parameters
-    ----------
-    user_id : int
-        The ID of the user who is the subject of database access. If not
-        given, the handler defaults to using the logged-in user.
-
     Attributes
     ----------
-    table : str
-        The name of the database table that this handler manages.
-    db : sqlite3.Connection
-        A connection to the database for interfacing.
     user_id : int
         The ID of the user who is the subject of database access.
+    model : type
+        The type of database model that the handler is primarily
+        designed to manage.
+    table : str
+        The name of the database table that this handler manages.
     """
 
     _model = CreditTransaction
@@ -161,22 +156,15 @@ class CreditTagHandler(DatabaseHandler):
     """
     A database handler for managing credit transaction tags.
 
-    Parameters
-    ----------
-    user_id : int
-        The ID of the user who is the subject of database access. If not
-        given, the handler defaults to using the logged-in user.
-
     Attributes
     ----------
-    table : str
-        The name of the database table that this handler manages.
-    db : sqlite3.Connection
-        A connection to the database for interfacing.
-    cursor : sqlite.Cursor
-        A cursor for executing database interactions.
     user_id : int
         The ID of the user who is the subject of database access.
+    model : type
+        The type of database model that the handler is primarily
+        designed to manage.
+    table : str
+        The name of the database table that this handler manages.
     """
 
     model = CreditTag

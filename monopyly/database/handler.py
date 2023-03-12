@@ -81,8 +81,9 @@ class DatabaseHandler(ABC):
         *filters :
             Criteria to use when applying filters to the query.
             (A filter with a value of `None` will be ignored.)
-        sort_order : ...
-            ...
+        sort_order : str
+            The order to use when sorting values returned by the
+            database query.
 
         Returns
         -------
