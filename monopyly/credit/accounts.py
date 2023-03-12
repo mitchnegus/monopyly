@@ -5,7 +5,7 @@ from ..database.handler import DatabaseHandler
 from ..database.models import CreditAccount
 
 
-class CreditAccountHandler(DatabaseHandler):
+class CreditAccountHandler(DatabaseHandler, model=CreditAccount):
     """
     A database handler for managing credit accounts.
 
@@ -19,8 +19,6 @@ class CreditAccountHandler(DatabaseHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    model = CreditAccount
 
     @classmethod
     def get_accounts(cls, bank_ids=None):

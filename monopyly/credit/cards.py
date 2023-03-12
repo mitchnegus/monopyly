@@ -6,7 +6,7 @@ from ..database.handler import DatabaseHandler
 from ..database.models import Bank, CreditAccount, CreditCard
 
 
-class CreditCardHandler(DatabaseHandler):
+class CreditCardHandler(DatabaseHandler, model=CreditCard):
     """
     A database handler for managing credit cards.
 
@@ -20,8 +20,6 @@ class CreditCardHandler(DatabaseHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    model = CreditCard
 
     @classmethod
     def get_cards(

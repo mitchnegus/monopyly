@@ -90,3 +90,4 @@
 - Remove wildcard imports from the package source code
 - Update form styles to be more browser compatible
 - Impose boolean constraint on boolean/integer database fields
+- Use metaclasses for database handler to avoid stacking classmethod and property (deprecated in Python 3.11)

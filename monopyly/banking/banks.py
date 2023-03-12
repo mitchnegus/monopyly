@@ -5,7 +5,7 @@ from ..database.handler import DatabaseHandler
 from ..database.models import Bank
 
 
-class BankHandler(DatabaseHandler):
+class BankHandler(DatabaseHandler, model=Bank):
     """
     A database handler for managing bank information.
 
@@ -19,8 +19,6 @@ class BankHandler(DatabaseHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    model = Bank
 
     @classmethod
     def get_banks(cls, bank_names=None):

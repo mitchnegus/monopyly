@@ -11,7 +11,9 @@ from ..database.models import (
 )
 
 
-class CreditStatementHandler(DatabaseViewHandler):
+class CreditStatementHandler(
+    DatabaseViewHandler, model=CreditStatement, model_view=CreditStatementView
+):
     """
     A database handler for managing credit card statements.
 
@@ -25,9 +27,6 @@ class CreditStatementHandler(DatabaseViewHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    _model = CreditStatement
-    _model_view = CreditStatementView
 
     @classmethod
     @DatabaseViewHandler.view_query

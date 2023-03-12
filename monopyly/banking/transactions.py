@@ -12,7 +12,9 @@ from ..database.models import (
 )
 
 
-class BankTransactionHandler(DatabaseViewHandler):
+class BankTransactionHandler(
+    DatabaseViewHandler, model=BankTransaction, model_view=BankTransactionView
+):
     """
     A database handler for accessing bank transactions.
 
@@ -26,9 +28,6 @@ class BankTransactionHandler(DatabaseViewHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    _model = BankTransaction
-    _model_view = BankTransactionView
 
     @classmethod
     @DatabaseViewHandler.view_query

@@ -16,7 +16,9 @@ from ..database.models import (
 )
 
 
-class CreditTransactionHandler(DatabaseViewHandler):
+class CreditTransactionHandler(
+    DatabaseViewHandler, model=CreditTransaction, model_view=CreditTransactionView
+):
     """
     A database handler for accessing credit transactions.
 
@@ -30,9 +32,6 @@ class CreditTransactionHandler(DatabaseViewHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    _model = CreditTransaction
-    _model_view = CreditTransactionView
 
     @classmethod
     @DatabaseViewHandler.view_query
@@ -152,7 +151,7 @@ class CreditTransactionHandler(DatabaseViewHandler):
         cls._db.session.flush()
 
 
-class CreditTagHandler(DatabaseHandler):
+class CreditTagHandler(DatabaseHandler, model=CreditTag):
     """
     A database handler for managing credit transaction tags.
 
@@ -166,8 +165,6 @@ class CreditTagHandler(DatabaseHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    model = CreditTag
 
     @classmethod
     def get_tags(

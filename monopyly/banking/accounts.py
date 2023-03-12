@@ -15,7 +15,9 @@ from ..database.models import (
 )
 
 
-class BankAccountTypeHandler(DatabaseViewHandler):
+class BankAccountTypeHandler(
+    DatabaseViewHandler, model=BankAccountType, model_view=BankAccountTypeView
+):
     """
     A database handler for managing bank account types.
 
@@ -29,9 +31,6 @@ class BankAccountTypeHandler(DatabaseViewHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    _model = BankAccountType
-    _model_view = BankAccountTypeView
 
     @classmethod
     @DatabaseViewHandler.view_query
@@ -126,7 +125,9 @@ class BankAccountTypeHandler(DatabaseViewHandler):
             abort(404, abort_msg)
 
 
-class BankAccountHandler(DatabaseViewHandler):
+class BankAccountHandler(
+    DatabaseViewHandler, model=BankAccount, model_view=BankAccountView
+):
     """
     A database handler for managing bank accounts.
 
@@ -140,9 +141,6 @@ class BankAccountHandler(DatabaseViewHandler):
     table : str
         The name of the database table that this handler manages.
     """
-
-    _model = BankAccount
-    _model_view = BankAccountView
 
     @classmethod
     @DatabaseViewHandler.view_query

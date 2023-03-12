@@ -1,7 +1,7 @@
 """
 A database handler for facilitating interactions with the SQLite database.
 """
-from abc import ABC, abstractmethod
+from abc import ABCMeta
 
 from flask import current_app, g
 from sqlalchemy import inspect
@@ -11,48 +11,103 @@ from werkzeug.exceptions import abort
 from .utils import validate_sort_order
 
 
-class DatabaseHandler(ABC):
+class DatabaseHandlerMeta(ABCMeta):
     """
-    A generic handler for database access.
+    A metaclass defining a universal API for database handlers.
 
-    Database handlers simplify commonly used database interactions.
-    Complicated queries can be reformulated as class methods, taking
-    variable arguments. The handler also performs user authentication
-    upon creation so that user authentication is not required for each
-    query.
-
-    Attributes
-    ----------
-    user_id : int
-        The ID of the user who is the subject of database access.
-    model : type
-        The type of database model that the handler is primarily
-        designed to manage.
-    table : str
-        The name of the database table that this handler manages.
+    All database handlers provide access to the database focusing
+    primarily on access to a specific SQLAlchemy ORM model. Although
+    the model and many of the associated methods vary depending on the
+    handler and the model's role, the overall pattern remains relatively
+    consistent across handlers. Because of that, this metaclass
+    prescribes those common behaviors. When a model-specific handler is
+    defined, a model must be provided as a keyword argument to the
+    metaclass. This model is set on that model-specific class, and is
+    accessed using the corresponding property defined by this metaclass.
     """
 
-    @classmethod
+    def __new__(mcls, name, bases, namespace, **kwargs):
+        namespace.setdefault("model", kwargs.get("model"))
+        return super().__new__(mcls, name, bases, namespace)
+
     @property
     def _db(cls):
         return current_app.db
 
-    @classmethod
     @property
     def user_id(cls):
         return g.user.id
 
-    @classmethod
     @property
-    @abstractmethod
     def model(cls):
-        # The handler must have a defined model
-        raise NotImplementedError("Define a model in a subclass.")
+        return cls._get_required_attribute_data_descriptor("model")
 
-    @classmethod
     @property
     def table(cls):
         return cls.model.__tablename__
+
+    def _get_required_attribute_data_descriptor(cls, name):
+        # This property/attribute is a data descriptor, so standard overrides are
+        # not perimitted; instead, the metaclass property must reference the true
+        # class's dictionary of values to get the overridden attribute
+        value = cls.__dict__.get(name)
+        if value:
+            return value
+        # The handler subclass must have given the attribute a value to be valid
+        raise NotImplementedError(f"Define a value for '{name}' in this subclass.")
+
+
+class DatabaseViewHandlerMeta(DatabaseHandlerMeta):
+    """
+    A metaclass defining a universal API for database view handlers.
+
+    Similar to the `DatabaseHandlerMeta`, this metasubclass defines a
+    consistent set of behaviors for database handlers that focus on a
+    model based on a database view (rather than a native database
+    component). Since the ORM model views managed by a handler each have
+    a corresponding model (based on a native database component), that
+    component and the view are specified when defining a model-specific
+    handler.
+    """
+
+    def __new__(mcls, name, bases, namespace, **kwargs):
+        namespace.setdefault("_model", kwargs.get("model"))
+        namespace.setdefault("_model_view", kwargs.get("model_view"))
+        return super().__new__(mcls, name, bases, namespace)
+
+    @property
+    def _model(cls):
+        return cls._get_required_attribute_data_descriptor("_model")
+
+    @property
+    def _model_view(cls):
+        return cls._get_required_attribute_data_descriptor("_model_view")
+
+    @property
+    def model(cls):
+        return cls._model_view if cls._view_context else cls._model
+
+    @property
+    def table(cls):
+        return cls._model.__tablename__
+
+    @property
+    def table_view(cls):
+        return cls._model_view.__tablename__
+
+
+class DatabaseHandlerMixin:
+    """
+    A mixin providing the functionality of a database handler.
+
+    Note
+    ----
+    Tools relying on the database handler functionality (e.g., both the
+    `DatabaseHandler` and the `DatabaseViewHandler`) may have different
+    metaclasses. This mixin allows the functionality of a database
+    handler to be shared by any objects that implement the database
+    handler interface.
+    """
 
     @staticmethod
     def _filter_value(field, value):
@@ -286,45 +341,19 @@ class DatabaseHandler(ABC):
         return cls.get_entry(entry_id)
 
 
-class DatabaseViewHandler(DatabaseHandler):
+class DatabaseViewHandlerMixin(DatabaseHandlerMixin):
     """
-    A generic handler for database view access.
+    A mixin providing the functionality of a database view handler.
 
-    The view handler imitates the behavior of the standard database
-    handler, but with minor customizations to allow the handler to
-    operate on database views, rather than native tables.
+    Note
+    ----
+    Tools relying on the database view handler functionality may have
+    different metaclasses. This mixin allows the functionality of a
+    database view handler to be shared by any objects that implement the
+    database view handler interface.
     """
 
     _view_context = False
-
-    @classmethod
-    @property
-    @abstractmethod
-    def _model(cls):
-        # The handler must have a defined model as the primary base of the view
-        None
-
-    @classmethod
-    @property
-    @abstractmethod
-    def _model_view(cls):
-        # The handler must have a defined model view
-        raise NotImplementedError("Define a model in a subclass.")
-
-    @classmethod
-    @property
-    def model(cls):
-        return cls._model_view if cls._view_context else cls._model
-
-    @classmethod
-    @property
-    def table(cls):
-        return cls._model.__tablename__
-
-    @classmethod
-    @property
-    def table_view(cls):
-        return cls._model_view.__tablename__
 
     def view_query(func):
         """Require that a function use a model view rather than the model."""
@@ -356,3 +385,49 @@ class DatabaseViewHandler(DatabaseHandler):
     @view_query
     def get_entry(cls, entry_id):
         return super().get_entry(entry_id)
+
+
+class DatabaseHandler(DatabaseHandlerMixin, metaclass=DatabaseHandlerMeta):
+    """
+    A generic handler for database access.
+
+    Database handlers simplify commonly used database interactions.
+    Complicated queries can be reformulated as class methods, taking
+    variable arguments. The handler also performs user authentication
+    upon creation so that user authentication is not required for each
+    query.
+
+    Attributes
+    ----------
+    user_id : int
+        The ID of the user who is the subject of database access.
+    model : type
+        The type of database model that the handler is primarily
+        designed to manage.
+    table : str
+        The name of the database table that this handler manages.
+    """
+
+    # All functionality is provided by the mixin
+
+
+class DatabaseViewHandler(DatabaseViewHandlerMixin, metaclass=DatabaseViewHandlerMeta):
+    """
+    A generic handler for database view access.
+
+    The view handler imitates the behavior of the standard database
+    handler, but with minor customizations to allow the handler to
+    operate on database views, rather than native tables.
+
+    Attributes
+    ----------
+    user_id : int
+        The ID of the user who is the subject of database access.
+    model : type
+        The type of database model that the handler is primarily
+        designed to manage.
+    table : str
+        The name of the database table that this handler manages.
+    """
+
+    # All functionality is provided by the mixin
