@@ -2,6 +2,7 @@
 Tools for interacting with the bank transactions in the database.
 """
 from ..common.forms.utils import execute_on_form_validation
+from ..common.transactions import TransactionHandler
 from ..core.internal_transactions import add_internal_transaction
 from ..database.handler import DatabaseViewHandler
 from ..database.models import (
@@ -13,7 +14,7 @@ from ..database.models import (
 
 
 class BankTransactionHandler(
-    DatabaseViewHandler, model=BankTransaction, model_view=BankTransactionView
+    TransactionHandler, model=BankTransaction, model_view=BankTransactionView
 ):
     """
     A database handler for accessing bank transactions.
@@ -69,72 +70,10 @@ class BankTransactionHandler(
         transactions = super().get_entries(*criteria, sort_order=sort_order)
         return transactions
 
-    @classmethod
-    def _customize_entries_query(cls, query, filters, sort_order):
-        query = super()._customize_entries_query(query, filters, sort_order)
-        # Group transactions and order by transaction date
-        query = query.group_by(cls.model.id)
-        query = cls._sort_query(
-            query,
-            (cls.model.transaction_date, sort_order),
-        )
-        return query
-
-    @classmethod
-    def add_entry(cls, **field_values):
-        """
-        Add a transaction to the database.
-
-        Uses values acquired from a `BankTransactionForm` to add a new
-        transaction into the database. The values include information
-        for the transaction, along with information for all
-        subtransactions.
-
-        Parameters
-        ----------
-        **field_values :
-            Values for each field in the transaction (including
-            subtransaction values).
-
-        Returns
-        -------
-        transaction : database.models.BankTransaction
-            The saved transaction.
-        """
-        # Extend the default method to account for subtransactions
-        subtransactions_data = field_values.pop("subtransactions")
-        transaction = super().add_entry(**field_values)
-        cls._add_subtransactions(transaction, subtransactions_data)
-        # Refresh the transaction with the subtransaction information
-        cls._db.session.refresh(transaction)
-        return transaction
-
-    @classmethod
-    def update_entry(cls, entry_id, **field_values):
-        """Update a transaction in the database."""
-        # Extend the default method to account for subtransactions
-        subtransactions_data = field_values.pop("subtransactions", None)
-        transaction = super().update_entry(entry_id, **field_values)
-        if subtransactions_data:
-            # Replace all subtransactions when updating any subtransaction
-            for subtransaction in transaction.subtransactions:
-                cls._db.session.delete(subtransaction)
-            cls._add_subtransactions(transaction, subtransactions_data)
-        # Refresh the transaction with the subtransaction information
-        cls._db.session.refresh(transaction)
-        return transaction
-
-    @classmethod
-    def _add_subtransactions(cls, transaction, subtransactions_data):
-        """Add subtransactions to the database for the data given."""
-        for subtransaction_data in subtransactions_data:
-            subtransaction = BankSubtransaction(
-                transaction_id=transaction.id,
-                **subtransaction_data,
-            )
-            cls._db.session.add(subtransaction)
-        # Flush to the database after all subtransactions have been added
-        cls._db.session.flush()
+    @staticmethod
+    def _prepare_subtransaction(transaction, subtransaction_data):
+        """Prepare a subtransaction for the given transaction."""
+        return BankSubtransaction(transaction_id=transaction.id, **subtransaction_data)
 
 
 @execute_on_form_validation

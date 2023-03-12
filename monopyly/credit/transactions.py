@@ -2,6 +2,7 @@
 Tools for interacting with the credit transactions in the database.
 """
 from ..common.forms.utils import execute_on_form_validation
+from ..common.transactions import TransactionHandler
 from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models import (
     Bank,
@@ -17,7 +18,7 @@ from ..database.models import (
 
 
 class CreditTransactionHandler(
-    DatabaseViewHandler, model=CreditTransaction, model_view=CreditTransactionView
+    TransactionHandler, model=CreditTransaction, model_view=CreditTransactionView
 ):
     """
     A database handler for accessing credit transactions.
@@ -79,17 +80,6 @@ class CreditTransactionHandler(
         return transactions
 
     @classmethod
-    def _customize_entries_query(cls, query, filters, sort_order):
-        query = super()._customize_entries_query(query, filters, sort_order)
-        # Group transactions and order by transaction date
-        query = query.group_by(cls.model.id)
-        query = cls._sort_query(
-            query,
-            (cls.model.transaction_date, sort_order),
-        )
-        return query
-
-    @classmethod
     def add_entry(cls, **field_values):
         """
         Add a transaction to the database.
@@ -111,44 +101,18 @@ class CreditTransactionHandler(
         transaction : database.models.CreditTransaction
             The saved transaction.
         """
-        # Extend the default method to account for subtransactions
-        subtransactions_data = field_values.pop("subtransactions")
-        transaction = super().add_entry(**field_values)
-        cls._add_subtransactions(transaction, subtransactions_data)
-        # Refresh the transaction with the subtransaction information
-        cls._db.session.refresh(transaction)
-        return transaction
+        return super().add_entry(**field_values)
 
-    @classmethod
-    def update_entry(cls, entry_id, **field_values):
-        """Update a transaction in the database."""
-        # Extend the default method to account for subtransactions
-        subtransactions_data = field_values.pop("subtransactions", None)
-        transaction = super().update_entry(entry_id, **field_values)
-        if subtransactions_data:
-            # Replace all subtransactions when updating any subtransaction
-            for subtransaction in transaction.subtransactions:
-                cls._db.session.delete(subtransaction)
-            cls._add_subtransactions(transaction, subtransactions_data)
-        # Refresh the transaction with the subtransaction information
-        cls._db.session.refresh(transaction)
-        return transaction
-
-    @classmethod
-    def _add_subtransactions(cls, transaction, subtransactions_data):
-        """Add subtransactions to the database for the data given."""
-        for subtransaction_data in subtransactions_data:
-            tag_names = subtransaction_data.pop("tags")
-            # NOTE I don't believe that this adds new tags to the database
-            tags = CreditTagHandler.get_tags(tag_names, ancestors=True)
-            subtransaction = CreditSubtransaction(
-                transaction_id=transaction.id,
-                **subtransaction_data,
-                tags=tags,
-            )
-            cls._db.session.add(subtransaction)
-        # Flush to the database after all subtransactions have been added
-        cls._db.session.flush()
+    @staticmethod
+    def _prepare_subtransaction(transaction, subtransaction_data):
+        """Prepare a subtransaction for the given transaction."""
+        # NOTE I don't believe that this adds new tags to the database
+        tag_names = subtransaction_data.pop("tags")
+        return CreditSubtransaction(
+            transaction_id=transaction.id,
+            **subtransaction_data,
+            tags=CreditTagHandler.get_tags(tag_names, ancestors=True),
+        )
 
 
 class CreditTagHandler(DatabaseHandler, model=CreditTag):
