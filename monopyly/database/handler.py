@@ -197,8 +197,8 @@ class DatabaseHandlerMixin:
         """
         Customize a query to retrieve entries from the database.
 
-        Notes
-        -----
+        Note
+        ----
         As an implementation detail, the query returned by this method
         defined in the lowest level subclass should always be the final
         query executed by the current `Session` object in the
