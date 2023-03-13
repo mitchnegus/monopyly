@@ -82,7 +82,7 @@
 - Improved JavaScript management for acquisition forms
 
 
-### 1.2.3 (in progress)
+### 1.2.3
 
 - Add currency symbol to the amount field(s)
 - Allow subform fields to be removed from forms
