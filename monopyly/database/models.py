@@ -2,10 +2,15 @@ from datetime import date
 
 from flask import g
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Table, select
-from sqlalchemy.orm import declarative_base, relationship, with_loader_criteria
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    declared_attr,
+    relationship,
+    with_loader_criteria,
+)
 
 
-class ModelBase:
+class Model(DeclarativeBase):
     """A declarative base for all models."""
 
     _repr_attributes = ()
@@ -31,24 +36,21 @@ class ModelBase:
         return repr_str
 
 
-Model = declarative_base(cls=ModelBase)
-
-
 class AuthorizedAccessMixin:
     """A mixin class to facilitate making user-restricted queries."""
 
     _user_id_join_chain = ()
     _alt_authorized_ids = ()
 
+    @declared_attr.directive
     @classmethod
-    @property
     def user_id_model(cls):
         if cls._user_id_join_chain:
             return cls._user_id_join_chain[-1]
         return cls
 
+    @declared_attr.directive
     @classmethod
-    @property
     def _authorizing_criteria(cls):
         try:
             user_id_field = cls.user_id_model.user_id
@@ -61,8 +63,8 @@ class AuthorizedAccessMixin:
             raise AttributeError(msg)
         return user_id_field.in_(cls.authorized_ids)
 
+    @declared_attr.directive
     @classmethod
-    @property
     def authorized_ids(cls):
         # Add any extra IDs specified (e.g., user ID 0 for common entries)
         return (g.user.id, *cls._alt_authorized_ids)

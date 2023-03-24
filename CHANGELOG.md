@@ -91,3 +91,8 @@
 - Update form styles to be more browser compatible
 - Impose boolean constraint on boolean/integer database fields
 - Use metaclasses for database handler to avoid stacking classmethod and property (deprecated in Python 3.11)
+
+
+### 1.2.4 (in progress)
+
+- Leverage SQLAlchemy 2.0 `DeclarativeBase` class and `declared_attr` decorators
