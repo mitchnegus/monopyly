@@ -19,13 +19,19 @@
 
     <div class="description-header">
       <div class="brief">
+        {% if transaction.merchant %}
+            {% set merchant_reference = ": " + transaction.merchant %}
+        {% else %}
+            {% set merchant_reference = "" %}
+        {% endif %}
         {% if transaction.total > 0 %}
-          Deposit
+          Deposit{{ merchant_reference }}
         {% elif transaction.total < 0 %}
-          Withdrawal
+          Withdrawal{{ merchant_reference }}
         {% else %}
           Exchange
         {% endif %}
+
       </div>
       <div class="total">
         ${{ transaction.total|currency }}
