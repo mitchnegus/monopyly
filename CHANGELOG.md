@@ -96,3 +96,4 @@
 ### 1.2.4 (in progress)
 
 - Leverage SQLAlchemy 2.0 `DeclarativeBase` class and `declared_attr` decorators
+- Simplify `Model` base to avoid explicitly defining column attributes

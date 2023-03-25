@@ -13,12 +13,10 @@ from sqlalchemy.orm import (
 class Model(DeclarativeBase):
     """A declarative base for all models."""
 
-    _repr_attributes = ()
-
     def _format_repr_attr(self, name):
         value = getattr(self, name)
         value_str = f"{value}"
-        # Abbreviate the string if it's longer than a set length
+        # Abbreviate the string if it is longer than a set length
         abbrev_len = 25
         if len(value_str) > abbrev_len:
             value_str = f"{value_str[:abbrev_len]}..."
@@ -27,13 +25,10 @@ class Model(DeclarativeBase):
         return f"{name}={value_str}"
 
     def __repr__(self):
-        if self._repr_attributes:
-            pairs = [self._format_repr_attr(_) for _ in self._repr_attributes]
-            attributes_str = ", ".join(pairs)
-            repr_str = f"{self.__class__.__name__}({attributes_str})"
-        else:
-            repr_str = super().__repr__()
-        return repr_str
+        repr_attributes = self.__table__.columns.keys()
+        pairs = [self._format_repr_attr(_) for _ in repr_attributes]
+        attributes_str = ", ".join(pairs)
+        return f"{self.__class__.__name__}({attributes_str})"
 
 
 class AuthorizedAccessMixin:
@@ -71,6 +66,28 @@ class AuthorizedAccessMixin:
 
     @classmethod
     def select_for_user(cls, *args, guaranteed_joins=(), **kwargs):
+        """
+        Build a select query restricting results to only an authorized user.
+
+        Parameters
+        ----------
+        *args :
+            The arguments to pass to the `sqlalchemy.select` function.
+            If no arguments are given, the query selects the
+        guaranteed_joins : tuple
+            Database models (and by extension, their tables) that are
+            not included in this model's "user ID join chain" but which
+            should be added to this specific user-authorized join.
+        **kwargs :
+            The keyword arguments to pass to the `sqlalchemy.select`
+            function.
+
+        Returns
+        -------
+        query : sqlalchemy.sql.selectable.Select
+            A statement representing the select query to make against
+            the database.
+        """
         if args:
             query = select(*args, **kwargs)
         else:
@@ -95,7 +112,6 @@ class AuthorizedAccessMixin:
 
 class User(Model):
     __tablename__ = "users"
-    _repr_attributes = ("id", "username", "password")
     # Columns
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False)
@@ -115,7 +131,6 @@ class User(Model):
 
 class Bank(AuthorizedAccessMixin, Model):
     __tablename__ = "banks"
-    _repr_attributes = ("id", "user_id", "bank_name")
     # Columns
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -136,7 +151,6 @@ class Bank(AuthorizedAccessMixin, Model):
 
 class BankAccountType(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_account_types"
-    _repr_attributes = ("id", "user_id", "type_name", "type_abbreviation")
     _alt_authorized_ids = (0,)
     # Columns
     id = Column(Integer, primary_key=True)
@@ -154,7 +168,6 @@ class BankAccountType(AuthorizedAccessMixin, Model):
 
 class BankAccountTypeView(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_account_types_view"
-    _repr_attributes = ("id", "user_id", "type_name", "type_common_name")
     _alt_authorized_ids = (0,)
     # Columns
     id = Column(Integer, ForeignKey("bank_account_types.id"), primary_key=True)
@@ -177,13 +190,6 @@ class BankAccountTypeView(AuthorizedAccessMixin, Model):
 
 class BankAccount(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_accounts"
-    _repr_attributes = (
-        "id",
-        "bank_id",
-        "account_type_id",
-        "last_four_digits",
-        "active",
-    )
     _user_id_join_chain = (Bank,)
     # Columns
     id = Column(Integer, primary_key=True)
@@ -206,14 +212,6 @@ class BankAccount(AuthorizedAccessMixin, Model):
 
 class BankAccountView(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_accounts_view"
-    _repr_attributes = (
-        "id",
-        "bank_id",
-        "account_type_id",
-        "last_four_digits",
-        "active",
-        "balance",
-    )
     _user_id_join_chain = (Bank,)
     # Columns
     id = Column(Integer, ForeignKey("bank_accounts.id"), primary_key=True)
@@ -241,12 +239,6 @@ class BankAccountView(AuthorizedAccessMixin, Model):
 
 class BankTransaction(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_transactions"
-    _repr_attributes = (
-        "id",
-        "internal_transaction_id",
-        "account_id",
-        "transaction_date",
-    )
     _user_id_join_chain = (BankAccountView, Bank)
     # Denote the transaction subtype
     subtype = "bank"
@@ -274,15 +266,6 @@ class BankTransaction(AuthorizedAccessMixin, Model):
 
 class BankTransactionView(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_transactions_view"
-    _repr_attributes = (
-        "id",
-        "internal_transaction_id",
-        "account_id",
-        "transaction_date",
-        "total",
-        "notes",
-        "balance",
-    )
     _user_id_join_chain = (BankAccountView, Bank)
     # Denote the transaction subtype
     subtype = "bank"
@@ -319,7 +302,6 @@ class BankTransactionView(AuthorizedAccessMixin, Model):
 
 class BankSubtransaction(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_subtransactions"
-    _repr_attributes = ("id", "transaction_id", "subtotal", "note")
     _user_id_join_chain = (BankTransactionView, BankAccountView, Bank)
     # Columns
     id = Column(Integer, primary_key=True)
@@ -340,7 +322,6 @@ class BankSubtransaction(AuthorizedAccessMixin, Model):
 
 class CreditAccount(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_accounts"
-    _repr_attributes = ("id", "bank_id", "statement_issue_day", "statement_due_day")
     _user_id_join_chain = (Bank,)
     # Columns
     id = Column(Integer, primary_key=True)
@@ -359,7 +340,6 @@ class CreditAccount(AuthorizedAccessMixin, Model):
 
 class CreditCard(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_cards"
-    _repr_attributes = ("id", "account_id", "last_four_digits", "active")
     _user_id_join_chain = (CreditAccount, Bank)
     # Columns
     id = Column(Integer, primary_key=True)
@@ -381,7 +361,6 @@ class CreditCard(AuthorizedAccessMixin, Model):
 
 class CreditStatement(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_statements"
-    _repr_attributes = ("id", "card_id", "issue_date", "due_date")
     _user_id_join_chain = (CreditCard, CreditAccount, Bank)
     # Columns
     id = Column(Integer, primary_key=True)
@@ -399,7 +378,6 @@ class CreditStatement(AuthorizedAccessMixin, Model):
 
 class CreditStatementView(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_statements_view"
-    _repr_attributes = ("id", "card_id", "issue_date", "due_date")
     _user_id_join_chain = (CreditCard, CreditAccount, Bank)
     # Columns
     id = Column(Integer, ForeignKey("credit_statements.id"), primary_key=True)
@@ -421,13 +399,6 @@ class CreditStatementView(AuthorizedAccessMixin, Model):
 
 class CreditTransaction(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_transactions"
-    _repr_attributes = (
-        "id",
-        "internal_transaction_id",
-        "statement_id",
-        "transaction_date",
-        "merchant",
-    )
     _user_id_join_chain = (CreditStatementView, CreditCard, CreditAccount, Bank)
     # Denote the transaction subtype
     subtype = "credit"
@@ -455,15 +426,6 @@ class CreditTransaction(AuthorizedAccessMixin, Model):
 
 class CreditTransactionView(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_transactions_view"
-    _repr_attributes = (
-        "id",
-        "internal_transaction_id",
-        "statement_id",
-        "transaction_date",
-        "merchant",
-        "total",
-        "notes",
-    )
     _user_id_join_chain = (CreditStatementView, CreditCard, CreditAccount, Bank)
     # Denote the transaction subtype
     subtype = "credit"
@@ -522,7 +484,6 @@ tag_link_table = Table(
 
 class CreditSubtransaction(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_subtransactions"
-    _repr_attributes = ("id", "transaction_id", "subtotal", "note")
     _user_id_join_chain = (
         CreditTransactionView,
         CreditStatementView,
@@ -554,7 +515,6 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
 
 class CreditTag(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_tags"
-    _repr_attributes = ("id", "user_id", "parent_id", "tag_name")
     # Columns
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -570,7 +530,6 @@ class CreditTag(AuthorizedAccessMixin, Model):
 
 class InternalTransaction(Model):
     __tablename__ = "internal_transactions"
-    _repr_attributes = ("id",)
     # Columns
     id = Column(Integer, primary_key=True)
     # Relationships

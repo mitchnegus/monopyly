@@ -419,16 +419,6 @@ class TestCreditTag(TestModel):
 
 
 class TestAlternateModels:
-    def test_no_representation(self):
-        # Define a generic class to test default string representations
-        class GenericModel(Model):
-            # Pass a valid table name
-            __tablename__ = "users"
-
-        # Test that the model's string representation is generic
-        generic_model = GenericModel()
-        assert str(generic_model)[0] == "<"
-        assert str(generic_model)[-1] == ">"
 
     def test_invalid_authorized_model(self):
         # Define an "authorized access" class to test authorization
