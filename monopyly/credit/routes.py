@@ -450,11 +450,15 @@ def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args["field"]
-    if field != "note":
-        suggestions = CreditTransactionForm.autocomplete(field)
-    else:
+    if field == "note":
         merchant = post_args["merchant"]
         suggestions = CreditTransactionForm.autocomplete("note", merchant=merchant)
+    elif field == "tags":
+        suggestions = CreditTransactionForm.autocomplete(
+            "tags", db_field_name="tag_name"
+        )
+    else:
+        suggestions = CreditTransactionForm.autocomplete(field)
     return jsonify(suggestions)
 
 

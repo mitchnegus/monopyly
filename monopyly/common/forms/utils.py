@@ -29,7 +29,7 @@ class Autocompleter:
     def __init__(self, field_map):
         self._field_map = field_map
 
-    def autocomplete(self, field, **priority_sort_fields):
+    def autocomplete(self, field, db_field_name=None, **priority_sort_fields):
         """
         Provide autocomplete suggestions for the field.
 
@@ -43,6 +43,10 @@ class Autocompleter:
         field : str
             The name of the form field for which to provide
             autocompletion.
+        db_field_name : str, None
+            The name of the database field mapping to the form field;
+            the default is `None` where the form field name will be
+            used.
         priority_sort_field : dict
             A mapping of fields and a value of that field which will
             take precedence over a suggestion's frequency in the data
@@ -55,8 +59,9 @@ class Autocompleter:
             A list of autocompletion suggestions that are sorted by
             their frequency of appearance in the database.
         """
+        db_field_name = db_field_name if db_field_name else field
         model = self._field_map[field]
-        suggestions = self._get_autocomplete_suggestions(model, field)
+        suggestions = self._get_autocomplete_suggestions(model, db_field_name)
         for sort_field, precedence_value in priority_sort_fields.items():
             self._sort_suggestions_by_field(
                 suggestions, model, field, sort_field, precedence_value

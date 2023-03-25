@@ -430,6 +430,10 @@ class TestCreditRoutes(TestRoutes):
                     "Community Chest",
                 ],
             ],
+            [
+                "tags",
+                ["Transportation", "Utilities", "Electricity", "Parking", "Railroad"],
+            ],
         ],
     )
     def test_suggest_transaction_autocomplete(self, authorization, field, suggestions):
