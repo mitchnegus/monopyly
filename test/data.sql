@@ -31,14 +31,14 @@ VALUES (1, 1, '5555', 1),  -- 'Test Bank' savings account '5555' (active)
        (3, 3, '5557', 1);  -- 'TheBank' CD '5557' (active)
 
 INSERT INTO bank_transactions
-       (internal_transaction_id, account_id, transaction_date)
-VALUES (NULL, 1, '2020-05-04'),  -- 'Test Bank' savings transaction on 2020-05-04
-       (NULL, 2, '2020-05-04'),  -- 'Jail' savings transaction on 2020-05-04
-       (1, 2, '2020-05-05'),     -- 'Jail' savings transaction on 2020-05-05 (link)
-       (NULL, 2, '2020-05-06'),  -- 'Jail' savings transaction on 2020-05-06
-       (2, 3, '2020-05-04'),     -- 'Jail' checking payment on 2020-05-04
-       (1, 3, '2020-05-05'),     -- 'Jail' checking transaction on 2020-05-05 (link)
-       (NULL, 4, '2020-05-06');  -- 'TheBank' CD transaction on 2020-05-06
+       (internal_transaction_id, account_id, transaction_date, merchant)
+VALUES (NULL, 1, '2020-05-04', 'Test Merchant'),     -- 'Test Bank' savings transaction on 2020-05-04
+       (NULL, 2, '2020-05-04', NULL),                -- 'Jail' savings transaction on 2020-05-04
+       (1, 2, '2020-05-05', NULL),                   -- 'Jail' savings transaction on 2020-05-05 (link)
+       (NULL, 2, '2020-05-06', NULL),                -- 'Jail' savings transaction on 2020-05-06
+       (2, 3, '2020-05-04', 'JP Morgan Chance'),     -- 'Jail' checking payment on 2020-05-04
+       (1, 3, '2020-05-05', 'Canteen'),               -- 'Jail' checking transaction on 2020-05-05 (link)
+       (NULL, 4, '2020-05-06', NULL);                -- 'TheBank' CD transaction on 2020-05-06
 
 INSERT INTO bank_subtransactions
       (transaction_id, subtotal, note)
@@ -79,7 +79,7 @@ VALUES (1, '2020-05-15', '2020-06-05'),
 
 INSERT INTO credit_transactions
        (internal_transaction_id, statement_id, transaction_date, merchant)
-VALUES (NULL, 1, '2020-04-20', 'Test merchant'),
+VALUES (NULL, 1, '2020-04-20', 'Test Merchant'),
        (NULL, 2, '2020-04-13', 'Top Left Corner'),
        (NULL, 3, '2020-03-20', 'Boardwalk'),
        (NULL, 3, '2020-04-05', 'Park Place'),

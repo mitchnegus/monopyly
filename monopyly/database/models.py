@@ -254,6 +254,7 @@ class BankTransaction(AuthorizedAccessMixin, Model):
         nullable=False,
     )
     transaction_date = Column(Date, nullable=False)
+    merchant = Column(String)
     # ((Should have optional merchant field?))
     #  Relationships
     view = relationship(
@@ -281,6 +282,7 @@ class BankTransactionView(AuthorizedAccessMixin, Model):
         nullable=False,
     )
     transaction_date = Column(Date, nullable=False)
+    merchant = Column(String)
     total = Column(Float)
     notes = Column(String)
     balance = Column(Float)

@@ -184,9 +184,10 @@ class TestBankTransaction(TestModel):
                     "internal_transaction_id": None,
                     "account_id": 200,
                     "transaction_date": date(2022, 11, 15),
+                    "merchant": None,
                 },
                 "BankTransaction(id=100, internal_transaction_id=None, "
-                "account_id=200, transaction_date='2022-11-15')",
+                "account_id=200, transaction_date='2022-11-15', merchant=None)",
             ]
         ],
     )
@@ -419,7 +420,6 @@ class TestCreditTag(TestModel):
 
 
 class TestAlternateModels:
-
     def test_invalid_authorized_model(self):
         # Define an "authorized access" class to test authorization
         class AuthorizedModel(AuthorizedAccessMixin, Model):

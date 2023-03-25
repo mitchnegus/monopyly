@@ -61,7 +61,8 @@ CREATE TABLE bank_transactions (
   internal_transaction_id INTEGER DEFAULT NULL REFERENCES internal_transactions (id),
   account_id INTEGER NOT NULL REFERENCES bank_accounts (id)
     ON DELETE CASCADE,
-  transaction_date DATE NOT NULL
+  transaction_date DATE NOT NULL,
+  merchant TEXT
 );
 
 

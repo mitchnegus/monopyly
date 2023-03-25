@@ -40,6 +40,7 @@ DATABASE_SCHEMA = {
         "internal_transaction_id",
         "account_id",
         "transaction_date",
+        "merchant",
     ),
     "bank_transactions_view": (
         "internal_transaction_id",
