@@ -9,7 +9,7 @@
 import { executeAjaxRequest } from './ajax.js';
 
 
-function anchoredMatch(string1, string2) {
+function isAnchoredMatch(string1, string2) {
   if (string2.startsWith(string1)) {
     return true;
   } else {
@@ -18,7 +18,7 @@ function anchoredMatch(string1, string2) {
 }
 
 
-function containedMatch(string1, string2) {
+function isContainedMatch(string1, string2) {
   if (string2.includes(string1)) {
     return true;
   } else {
@@ -128,8 +128,10 @@ class AutocompleteBox {
     this.close();
   }
 
+  /**
+   * Populate the input element text using the chosen suggestion.
+   */
   fill(suggestion) {
-    // Populate the input element text using the chosen suggestion
     this.inputElement.value = suggestion.textContent;
   }
 
@@ -141,7 +143,7 @@ class AutocompleteBox {
 
   #needsRefresh(userInput) {
     // Check if the list of matches needs to be refreshed
-    this.#refreshMatches(userInput);
+    this.refreshMatches(userInput);
     const matchCount = this.matches.length;
     const matchIsUserInput = (matchCount == 1 && userInput == this.matches[0]);
     if (matchCount < 1 || matchIsUserInput || !userInput) {
@@ -151,11 +153,13 @@ class AutocompleteBox {
     }
   }
 
-  #refreshMatches(userInput) {
-    // Refresh autocomplete suggestions using the AJAX response
+  /**
+   * Refresh autocomplete suggestions using the AJAX response.
+   */
+  refreshMatches(userInput) {
     this.matches = [];
-    this.#testMatches(userInput, anchoredMatch);
-    this.#testMatches(userInput, containedMatch);
+    this.#testMatches(userInput, isAnchoredMatch);
+    this.#testMatches(userInput, isContainedMatch);
   }
 
   #testMatches(userInput, testFunction) {
