@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Story
+{% endblock %}
+
+{% block header %}
+  <h1>Pass go and collect $200</h1>
+{% endblock %}
+
+{% block content %}
+  <div id="about">
+    <p>It started with Microsoft Excel. </p>
+    <p>When I got my first bank account, my dad taught me how to keep track of all my finances in an Excel workbook.
+    It worked for a while, and as I acquired a handful of credit cards, investments, and other types of bank accounts, I kept adding sheets to that file.
+    Of course, since I was tracking all that data, I wanted to wring as much information out of it as I possibly could—and so I started working rudimentary analytics into the spreadsheet.
+    </p>
+
+    </p>
+    This all kept me satisfied until about halfway through college when I began learning Python.
+    Excel was getting cumbersome, and I wanted to be able to sort and tag types of transactions, link credit card payments with bank withdrawals, and create spending reports.
+    Seeing the potential ways I could use a standalone programming language to up my game, I realized that what I really needed was a database.
+    As I transitioned to graduate school, I also transitioned to tracking my finances in a MySQL database, accessed with Python through a set of Jupyter notebooks.
+    That approach gave me so much more power and flexibilty, but it still felt a little clunky.</p>
+
+    <p>My ideal situation?</p>
+
+    <p>I ultimately wanted a system that keep track of everything—credit card transactions, bank accounts, investments, retirement accounts, all that $—in one place.
+    Obviously there are mega-apps that already do all this, but I never wanted to go that route.
+    I'd always managed my finances independently, and had zero interest in ceding that control.
+    For one, I wanted to maintain some privacy regarding my financial data, because who knows how those apps are using that information.
+    Two, I didn't want <em>all</em> the bells and whistles (and advertisements) that those mega-apps would force upon me, but I also wanted something I could customize when I didn't like a feature... or when I wanted more.
+    And three, most importantly, it seemed like a fun challenge that would keep me deeply engaged in managing my own financial picture.
+
+    <p>That's how this app came about.
+    I started by trying to just create a GUI for my Python database interface, but that didn't offer the graphic flexibility of a web app.
+    Why fight to build a nice Tkinter GUI if I'd eventually get sick of that too?
+    (Tkinter is also a bit of a pain to code, and a bigger pain to test, and <em>that</em> certainly wouldn't do.)
+    Anyway, I'd always wanted to create an app, and I figured this was as good a chance as any to get started.
+    Win-win.</p>
+
+    <p>If you're reading this, I suppose it means you've stumbled across the program out of interest (or maybe you're just curious what the hell this nutjob is wasting his time on). If the former, cool! Feel free to look around or take it for a spin. I intend to always keep the basic concept open source, so play around as much as you'd like!</p>
+
+    <p class="signature">-Mitch</p>
+  </div>
+
+{% endblock %}

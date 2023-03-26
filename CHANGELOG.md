@@ -96,5 +96,6 @@
 ### 1.2.4 (in progress)
 
 - Add an enhanced autocompletion for assigning tags to credit transactions
+- Swap the README instructions for the 'About' page (and move the story to a separate page)
 - Leverage SQLAlchemy 2.0 `DeclarativeBase` class and `declared_attr` decorators
 - Simplify `Model` base to avoid explicitly defining column attributes

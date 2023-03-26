@@ -13,6 +13,7 @@ requires-python = '>=3.9,<3.11'
 dependencies = [
     'flask>=2.2.2',
     'flask-wtf',
+    'markdown>=3.4.3',
     'python-dateutil',
     'sqlalchemy>=2.0.0',
 ]

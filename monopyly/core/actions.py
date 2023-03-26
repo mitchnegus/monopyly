@@ -1,0 +1,23 @@
+"""Module describing logical core actions (to be used in routes)."""
+import markdown
+
+
+def format_readme_as_html_template(readme_text):
+    """Given the README text in Markdown, convert it to a renderable HTML template."""
+    # Convert Markdown to HTML
+    raw_html_readme = markdown.markdown(readme_text)
+    # Replace README relative links with app relevant links
+    html_readme = raw_html_readme.replace('src="monopyly/static', 'src="/static')
+    # Format the HTML as a valid Jinja template
+    html_readme_template = (
+        '{% extends "layout.html" %}'
+        "{% block content %}"
+        f"  {html_readme}"
+        '  <div class="resource-links">'
+        "    <h2>Links</h2>"
+        "    <p><a href=\"{{ url_for('core.story') }}\">Story</a></p>"
+        "    <p><a href=\"{{ url_for('core.credits') }}\">Credits</a></p>"
+        "  </div>"
+        "{% endblock %}"
+    )
+    return html_readme_template

@@ -34,12 +34,12 @@ monopyly
 
 This will open to an empty homepage with a welcome message.
 
-<img src="img/homepage.png" alt="user homepage" width="800px">
+<img src="monopyly/static/img/about/homepage.png" alt="user homepage" width="800px">
 
 To use the app, register a new profile and then log in using your newly created credentials.
 A successful login will return you to the homepage, now with several different feature panels.
 
-<img src="img/homepage-user.png" alt="user homepage" width="800px">
+<img src="monopyly/static/img/about/homepage-user.png" alt="user homepage" width="800px">
 
 Your username should now appear at the top right of the screen, and the 'Log In' button will be replaced with a 'Log Out' button.
 
@@ -54,18 +54,18 @@ While some account types are preloaded into the _Monopyly_ database (such as che
 
 After you have created a bank account, either using a bank that already exists in the _Monopyly_ system or with a new bank, the app will redirect you back to the 'Manage accounts' page.
 
-<img src="img/bank-accounts.png" alt="bank accounts" width="800px" />
+<img src="monopyly/static/img/about/bank-accounts.png" alt="bank accounts" width="800px" />
 
 Once at least one bank account has been added, you can head on back to the account homepage to view balances and add transactions.
 On the left side of the page, each bank will have a section in the 'Bank Accounts' box.
 By clicking the 'See account summaries' button, you will be transferred to a page showing all of the bank accounts at the given bank, as well as the account balances of each account.
 
-<img src="img/bank-account-summaries.png" alt="bank account summaries" width="800px" />
+<img src="monopyly/static/img/about/bank-account-summaries.png" alt="bank account summaries" width="800px" />
 
 Clicking on any of these accounts will pull up a detailed summary of that account—a page that is also accessible directly from the _Monopyly_ homepage.
 This detailed summary will show the current balance, but also a comprehensive set of (recent) transactions on that account.
 
-<img src="img/bank-account-details.png" alt="bank account details" width="800px" />
+<img src="monopyly/static/img/about/bank-account-details.png" alt="bank account details" width="800px" />
 
 Transactions can be created from either this page or the homepage, specifying the bank account and all transaction details (date, amount, notes, etc.).
 Transactions can also be recorded as transfers between banks, such that they are automatically input into the database for both accounts.
@@ -84,7 +84,7 @@ Additionally, each account must also be initialized with the date when the accou
 
 Following the addition of a new credit card, you will be redirected to a page displaying the account details, including all cards for that account.
 
-<img src="img/credit-account-details.png" alt="credit account details" width="800px" />
+<img src="monopyly/static/img/about/credit-account-details.png" alt="credit account details" width="800px" />
 
 Transactions can be added to each card using the 'Create a new transaction' links found on the 'Credit Cards' homepage panel.
 The link under the 'History' heading is a generic option that allows transactions to be created for any credit card in the system.
@@ -105,13 +105,13 @@ Click the 'Add subtransaction' button on the transaction form to add a subtransa
 
 Once the transaction information has been successfully entered and submitted, the transaction will appear on the full transaction history page.
 
-<img src="img/credit-transactions.png" alt="transaction history" width="800px" />
+<img src="monopyly/static/img/about/credit-transactions.png" alt="transaction history" width="800px" />
 
 Card balances are also visible by visiting the pages for individual statements.
 A full history of statements for each card is available off the homepage.
 Each statement's page gives the statement's balance, transactions, and due date.
 
-<img src="img/statement-details.png" alt="statement details" width="800px" />
+<img src="monopyly/static/img/about/statement-details.png" alt="statement details" width="800px" />
 
 Payments can be made directly from a statement's page and can be linked to a bank account in the _Monopyly_ system for simplified tracking.
 (Note that even linked transactions must be edited independently, as there are times when a user may wish to have separate values for linked transactions. For example, a credit card payment may be processed on a given date while it is only registered as a bank account transaction several days later.)

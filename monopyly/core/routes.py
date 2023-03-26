@@ -1,7 +1,7 @@
 """
 Routes for core functionality.
 """
-from flask import g, render_template
+from flask import g, render_template, render_template_string
 
 from ..auth.tools import login_required
 from ..banking.accounts import BankAccountHandler
@@ -9,6 +9,7 @@ from ..banking.banks import BankHandler
 from ..credit.cards import CreditCardHandler
 from ..credit.statements import CreditStatementHandler
 from .blueprint import bp
+from .actions import format_readme_as_html_template
 
 
 @bp.route("/")
@@ -39,7 +40,15 @@ def index():
 
 @bp.route("/about")
 def about():
-    return render_template("about.html")
+    with open("README.md", encoding="utf-8") as readme_file:
+        raw_readme_text = readme_file.read()
+    about_page_template = format_readme_as_html_template(raw_readme_text)
+    return render_template_string(about_page_template)
+
+
+@bp.route("/story")
+def story():
+    return render_template("story.html")
 
 
 @bp.route("/credits")

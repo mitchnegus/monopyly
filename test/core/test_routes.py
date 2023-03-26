@@ -29,6 +29,10 @@ class TestCoreRoutes(TestRoutes):
 
     def test_about(self):
         self.get_route("/about")
+        assert "<em>The Money Game</em>" in self.html
+
+    def test_story(self):
+        self.get_route("/story")
         assert "<h1>Pass go and collect $200</h1>" in self.html
 
     def test_credits(self):
