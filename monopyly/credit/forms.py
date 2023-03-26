@@ -29,8 +29,8 @@ from ..database.models import (
     CreditCard,
     CreditStatementView,
     CreditSubtransaction,
-    CreditTag,
     CreditTransactionView,
+    TransactionTag,
 )
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
@@ -295,7 +295,7 @@ class CreditTransactionForm(TransactionForm):
             "last_four_digits": CreditCard,
             "merchant": CreditTransactionView,
             "note": CreditSubtransaction,
-            "tags": CreditTag,
+            "tags": TransactionTag,
         }
     )
 

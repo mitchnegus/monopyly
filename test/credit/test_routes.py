@@ -370,8 +370,8 @@ class TestCreditRoutes(TestRoutes):
     def test_load_tags(self, authorization):
         self.get_route("/tags")
         assert "Transaction Tags" in self.html
-        # 5 tags for the user
-        assert self.html.count('class="tag"') == 5
+        # 6 tags for the user
+        assert self.html.count('class="tag"') == 6
 
     @transaction_lifetime
     def test_add_tag(self, authorization):
@@ -432,7 +432,14 @@ class TestCreditRoutes(TestRoutes):
             ],
             [
                 "tags",
-                ["Transportation", "Utilities", "Electricity", "Parking", "Railroad"],
+                [
+                    "Transportation",
+                    "Utilities",
+                    "Electricity",
+                    "Parking",
+                    "Railroad",
+                    "Credit payment",
+                ],
             ],
         ],
     )

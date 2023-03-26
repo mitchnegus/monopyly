@@ -2,7 +2,7 @@
 Tools for interacting with the credit transactions in the database.
 """
 from ..common.forms.utils import execute_on_form_validation
-from ..common.transactions import TransactionHandler
+from ..common.transactions import TransactionHandler, TransactionTagHandler
 from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models import (
     Bank,
@@ -10,10 +10,9 @@ from ..database.models import (
     CreditCard,
     CreditStatementView,
     CreditSubtransaction,
-    CreditTag,
     CreditTransaction,
     CreditTransactionView,
-    tag_link_table,
+    credit_tag_link_table,
 )
 
 
@@ -114,7 +113,7 @@ class CreditTransactionHandler(
         )
 
 
-class CreditTagHandler(DatabaseHandler, model=CreditTag):
+class CreditTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):
     """
     A database handler for managing credit transaction tags.
 
@@ -138,10 +137,10 @@ class CreditTagHandler(DatabaseHandler, model=CreditTag):
         ancestors=None,
     ):
         """
-        Get credit card transaction tags from the database.
+        Get transaction tags from the database.
 
-        Query the database to select credit transaction tag fields. Tags
-        can be filtered by tag name or transaction.
+        Query the database to select transaction tag fields. Tags can be
+        filtered by tag name or credit transaction.
 
         Parameters
         ----------
@@ -152,8 +151,9 @@ class CreditTagHandler(DatabaseHandler, model=CreditTag):
             A sequence of transaction IDs for which tags will be
             selected (if `None`, all transaction tags will be selected).
         subtransaction_ids : tuple of int, optional
-            A sequence of subtransaction IDs for which tags will be
-            selected (if `None`, all subtransaction tags will be selected).
+            A sequence of credit subtransaction IDs for which tags will
+            be selected (if `None`, all subtransaction tags will be
+            selected).
         ancestors : bool, optional
             A flag indicating whether the query should include tags
             that are the ancestor tags of other explictly selected tags
@@ -166,33 +166,21 @@ class CreditTagHandler(DatabaseHandler, model=CreditTag):
 
         Returns
         -------
-        tags : list of database.models.CreditTag
+        tags : list of database.models.TransactionTag
             Returns credit card transaction tags matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
         criteria.add_match_filter(cls.model, "tag_name", tag_names)
         criteria.add_match_filter(CreditTransactionView, "id", transaction_ids)
         criteria.add_match_filter(CreditSubtransaction, "id", subtransaction_ids)
-        tags = super().get_entries(criteria).all()
-        if ancestors is True:
-            # Add all ancestors for each tag in the list
-            for tag in tags:
-                for ancestor in cls.get_ancestors(tag):
-                    if ancestor not in tags:
-                        tags.append(ancestor)
-        elif ancestors is False:
-            # Remove ancestors of other tags in the list from the list
-            for tag in tags:
-                for ancestor in cls.get_ancestors(tag):
-                    if ancestor in tags:
-                        tags.remove(ancestor)
+        tags = super()._get_tags(criteria, ancestors=ancestors)
         return tags
 
     @classmethod
     def _filter_entries(cls, query, criteria):
         # Add a join to enable filtering by transaction ID or subtransaction ID
         query = (
-            query.join(tag_link_table)
+            query.join(credit_tag_link_table)
             .join(CreditSubtransaction)
             .join(CreditTransactionView)
             .join(CreditStatementView)
@@ -200,131 +188,7 @@ class CreditTagHandler(DatabaseHandler, model=CreditTag):
             .join(CreditAccount)
             .join(Bank)
         )
-        # Only get distinct tag entries
-        query = query.distinct()
         return super()._filter_entries(query, criteria)
-
-    @classmethod
-    def get_subtags(cls, tag):
-        """
-        Get subcategories (children) of a given credit transaction tag.
-
-        Parameters
-        ----------
-        tag : database.models.CreditTag
-            The parent tag for which to find subtags. (A value of `None`
-            indicates that top level tags should be found.)
-
-        Returns
-        -------
-        subtags : sqlalchemy.engine.ScalarResult
-            A list of credit card transaction tags that are
-            subcategories of the given parent tag.
-        """
-        query = cls.model.select_for_user()
-        # Filter the query to get only subtags of the given tag
-        parent_id = tag.id if tag else None
-        query = query.where(cls.model.parent_id == parent_id)
-        subtags = cls._db.session.execute(query).scalars()
-        return subtags
-
-    @classmethod
-    def get_supertag(cls, tag):
-        """
-        Get the supercategory (parent) of a credit transaction tag.
-
-        Parameters
-        ----------
-        tag_id : int
-            The child tag for which to find supertags.
-
-        Returns
-        -------
-        supertag : database.models.CreditTag
-            The credit card transaction tag that is the parent category
-            of the given tag. Returns `None` if no parent tag is found.
-        """
-        parent_id = tag.parent_id
-        supertag = cls.get_entry(parent_id) if parent_id else None
-        return supertag
-
-    @classmethod
-    def get_hierarchy(cls, root_tag=None):
-        """
-        Get the hierarchy of tags as a dictionary.
-
-        Recurses through the tags database to return a dictionary
-        representation of the tags. The dictionary has keys representing
-        each tag, and each key is paired to a similar dictionary of
-        subtags for that tag. The top level of the dictionary consists
-        only of tags without root tags.
-
-        Parameters
-        ----------
-        root_tag : database.models.CreditTag
-            The root tag to use as the starting point when recursing
-            through the tree. If the parent is `None`, the recursion
-            begins at the highest level of tags.
-
-        Returns
-        -------
-        hierarchy : dict
-            The dictionary representing the user's tags. Keys are
-            `CreditTag` objects.
-        """
-        hierarchy = {}
-        for tag in cls.get_subtags(root_tag):
-            hierarchy[tag] = cls.get_hierarchy(tag)
-        return hierarchy
-
-    @classmethod
-    def get_ancestors(cls, tag):
-        """
-        Get the ancestor tags of a given tag.
-
-        Traverses the hierarchy, starting from the given tag and returns
-        a list of all tags that are ancestors of the given tag.
-
-        Parameters
-        ----------
-        tag : database.models.CreditTag
-            The tag for which to find ancestors.
-
-        Returns
-        -------
-        ancestors : list of database.models.CreditTag
-            The ancestors of the given tag.
-        """
-        ancestors = []
-        ancestor = cls.get_supertag(tag)
-        while ancestor:
-            ancestors.append(ancestor)
-            ancestor = cls.get_supertag(ancestor)
-        return ancestors
-
-    @classmethod
-    def find_tag(cls, tag_name):
-        """
-        Find a tag using uniquely identifying characteristics.
-
-        Queries the database to find a transaction tag based on the
-        provided criteria (the tag's name).
-
-        Parameters
-        ----------
-        tag_name : str
-            The name of the tag to be found.
-
-        Returns
-        -------
-        tag : database.models.CreditTag
-            The tag entry matching the given criteria. If no matching
-            tag is found, returns `None`.
-        """
-        criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "tag_name", tag_name)
-        tag = super().find_entry(criteria=criteria)
-        return tag
 
 
 @execute_on_form_validation

@@ -13,9 +13,9 @@ from monopyly.credit.transactions import (
 )
 from monopyly.database.models import (
     CreditSubtransaction,
-    CreditTag,
     CreditTransaction,
     CreditTransactionView,
+    TransactionTag,
 )
 
 from ..helpers import TestHandler
@@ -52,9 +52,9 @@ def mock_subtransaction_mappings():
 @pytest.fixture
 def mock_tags():
     mock_tags = [
-        CreditTag(id=100, user_id=1, parent_id=None, tag_name="Mock tag 1"),
-        CreditTag(id=101, user_id=1, parent_id=100, tag_name="Mock tag 2"),
-        CreditTag(id=102, user_id=1, parent_id=None, tag_name="Mock tag 3"),
+        TransactionTag(id=100, user_id=1, parent_id=None, tag_name="Mock tag 1"),
+        TransactionTag(id=101, user_id=1, parent_id=100, tag_name="Mock tag 2"),
+        TransactionTag(id=102, user_id=1, parent_id=None, tag_name="Mock tag 3"),
     ]
     return mock_tags
 
@@ -424,11 +424,12 @@ def tag_handler(client_context):
 class TestCreditTagHandler(TestHandler):
     # References only include entries accessible to the authorized login
     db_reference = [
-        CreditTag(id=2, user_id=3, parent_id=None, tag_name="Transportation"),
-        CreditTag(id=3, user_id=3, parent_id=2, tag_name="Parking"),
-        CreditTag(id=4, user_id=3, parent_id=2, tag_name="Railroad"),
-        CreditTag(id=5, user_id=3, parent_id=None, tag_name="Utilities"),
-        CreditTag(id=6, user_id=3, parent_id=5, tag_name="Electricity"),
+        TransactionTag(id=2, user_id=3, parent_id=None, tag_name="Transportation"),
+        TransactionTag(id=3, user_id=3, parent_id=2, tag_name="Parking"),
+        TransactionTag(id=4, user_id=3, parent_id=2, tag_name="Railroad"),
+        TransactionTag(id=5, user_id=3, parent_id=None, tag_name="Utilities"),
+        TransactionTag(id=6, user_id=3, parent_id=5, tag_name="Electricity"),
+        TransactionTag(id=7, user_id=3, parent_id=None, tag_name="Credit payment"),
     ]
 
     db_reference_hierarchy = {
@@ -439,6 +440,7 @@ class TestCreditTagHandler(TestHandler):
         db_reference[3]: {
             db_reference[4]: {},
         },
+        db_reference[5]: {},
     }
 
     def _compare_hierarchies(self, hierarchy, reference_hierarchy):
@@ -450,8 +452,8 @@ class TestCreditTagHandler(TestHandler):
                     self._compare_hierarchies(subhierarchy, ref_subhierarchy)
 
     def test_initialization(self, tag_handler):
-        assert tag_handler.model == CreditTag
-        assert tag_handler.table == "credit_tags"
+        assert tag_handler.model == TransactionTag
+        assert tag_handler.table == "transaction_tags"
         assert tag_handler.user_id == 3
 
     @pytest.mark.parametrize(
@@ -460,7 +462,7 @@ class TestCreditTagHandler(TestHandler):
             [None, None, None, None, db_reference],  # defaults
             [("Railroad", "Utilities"), None, None, None, db_reference[2:4]],
             [None, (10, 11, 12), None, None, [db_reference[0], db_reference[2]]],
-            [None, None, (5, 6, 7), None, db_reference[3:]],
+            [None, None, (5, 6, 7), None, db_reference[3:5]],
             [("Parking",), None, None, True, db_reference[0:2]],
             [("Parking", "Transportation"), None, None, False, [db_reference[1]]],
         ],
@@ -488,7 +490,7 @@ class TestCreditTagHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "tag_id, exception",
-        [[1, NotFound], [7, NotFound]],  # Not the logged in user  # Not in the database
+        [[1, NotFound], [8, NotFound]],  # Not the logged in user  # Not in the database
     )
     def test_get_entry_invalid(self, tag_handler, tag_id, exception):
         with pytest.raises(exception):
@@ -496,7 +498,7 @@ class TestCreditTagHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "tag, expected_subtags",
-        [[db_reference[0], db_reference[1:3]], [db_reference[3], db_reference[4:]]],
+        [[db_reference[0], db_reference[1:3]], [db_reference[3], db_reference[4:5]]],
     )
     def test_get_subtags(self, tag_handler, tag, expected_subtags):
         subtags = tag_handler.get_subtags(tag)
@@ -565,7 +567,7 @@ class TestCreditTagHandler(TestHandler):
         assert tag.tag_name == mapping["tag_name"]
         # Check that the entry was added to the database
         self.assertNumberOfMatches(
-            1, CreditTag.id, CreditTag.tag_name == mapping["tag_name"]
+            1, TransactionTag.id, TransactionTag.tag_name == mapping["tag_name"]
         )
 
     @pytest.mark.parametrize(
@@ -606,7 +608,9 @@ class TestCreditTagHandler(TestHandler):
         # Check that the entry object was properly updated
         assert tag.tag_name == "Trains"
         # Check that the entry was updated in the database
-        self.assertNumberOfMatches(1, CreditTag.id, CreditTag.tag_name == "Trains")
+        self.assertNumberOfMatches(
+            1, TransactionTag.id, TransactionTag.tag_name == "Trains"
+        )
 
     @pytest.mark.parametrize(
         "tag_id, mapping, exception",
@@ -616,7 +620,7 @@ class TestCreditTagHandler(TestHandler):
             # Invalid field
             [5, {"user_id": 3, "invalid_field": "Test"}, ValueError],
             # Nonexistent ID
-            [7, {"user_id": 3, "tag_name": "Test"}, NotFound],
+            [8, {"user_id": 3, "tag_name": "Test"}, NotFound],
         ],
     )
     def test_update_entry_invalid(self, tag_handler, tag_id, mapping, exception):
@@ -629,15 +633,15 @@ class TestCreditTagHandler(TestHandler):
         # Check that the cascading entries were deleted
         self.assertNumberOfMatches(
             0,
-            CreditTag.id,
-            CreditTag.id.in_(subtag_ids),
+            TransactionTag.id,
+            TransactionTag.id.in_(subtag_ids),
         )
 
     @pytest.mark.parametrize(
         "entry_id, exception",
         [
             [1, NotFound],  # should not be able to delete other user entries
-            [7, NotFound],  # should not be able to delete nonexistent entries
+            [8, NotFound],  # should not be able to delete nonexistent entries
         ],
     )
     def test_delete_entry_invalid(self, tag_handler, entry_id, exception):

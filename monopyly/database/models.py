@@ -129,6 +129,68 @@ class User(Model):
     )
 
 
+class InternalTransaction(Model):
+    __tablename__ = "internal_transactions"
+    # Columns
+    id = Column(Integer, primary_key=True)
+    # Relationships
+    bank_transactions = relationship(
+        "BankTransactionView",
+        back_populates="internal_transaction",
+    )
+    credit_transactions = relationship(
+        "CreditTransactionView",
+        back_populates="internal_transaction",
+    )
+
+
+# Not sure why these tables are necessary, because they should already be reflected;
+# perhaps explore or wait until sqlalchemy 2.0
+
+bank_tag_link_table = Table(
+    "bank_tag_links",
+    Model.metadata,
+    Column(
+        "subtransaction_id",
+        ForeignKey("bank_subtransactions.id"),
+        primary_key=True,
+    ),
+    Column("tag_id", ForeignKey("transaction_tags.id"), primary_key=True),
+)
+
+
+credit_tag_link_table = Table(
+    "credit_tag_links",
+    Model.metadata,
+    Column(
+        "subtransaction_id",
+        ForeignKey("credit_subtransactions.id"),
+        primary_key=True,
+    ),
+    Column("tag_id", ForeignKey("transaction_tags.id"), primary_key=True),
+)
+
+
+class TransactionTag(AuthorizedAccessMixin, Model):
+    __tablename__ = "transaction_tags"
+    # Columns
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    parent_id = Column(Integer, ForeignKey("transaction_tags.id"))
+    tag_name = Column(String, nullable=False)
+    # Relationships
+    bank_subtransactions = relationship(
+        "BankSubtransaction",
+        secondary=bank_tag_link_table,
+        back_populates="tags",
+    )
+    credit_subtransactions = relationship(
+        "CreditSubtransaction",
+        secondary=credit_tag_link_table,
+        back_populates="tags",
+    )
+
+
 class Bank(AuthorizedAccessMixin, Model):
     __tablename__ = "banks"
     # Columns
@@ -320,6 +382,11 @@ class BankSubtransaction(AuthorizedAccessMixin, Model):
         viewonly=True,
         back_populates="subtransactions",
     )
+    tags = relationship(
+        "TransactionTag",
+        secondary=bank_tag_link_table,
+        back_populates="bank_subtransactions",
+    )
 
 
 class CreditAccount(AuthorizedAccessMixin, Model):
@@ -470,20 +537,6 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
     )
 
 
-tag_link_table = Table(
-    # Not sure why this table is necessary because it should already be
-    # reflected; perhaps explore or wait until sqlalchemy 2.0
-    "credit_tag_links",
-    Model.metadata,
-    Column(
-        "subtransaction_id",
-        ForeignKey("credit_subtransactions.id"),
-        primary_key=True,
-    ),
-    Column("tag_id", ForeignKey("credit_tags.id"), primary_key=True),
-)
-
-
 class CreditSubtransaction(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_subtransactions"
     _user_id_join_chain = (
@@ -509,37 +562,7 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
         back_populates="subtransactions",
     )
     tags = relationship(
-        "CreditTag",
-        secondary=tag_link_table,
-        back_populates="subtransactions",
-    )
-
-
-class CreditTag(AuthorizedAccessMixin, Model):
-    __tablename__ = "credit_tags"
-    # Columns
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    parent_id = Column(Integer, ForeignKey("credit_tags.id"))
-    tag_name = Column(String, nullable=False)
-    # Relationships
-    subtransactions = relationship(
-        "CreditSubtransaction",
-        secondary=tag_link_table,
-        back_populates="tags",
-    )
-
-
-class InternalTransaction(Model):
-    __tablename__ = "internal_transactions"
-    # Columns
-    id = Column(Integer, primary_key=True)
-    # Relationships
-    bank_transactions = relationship(
-        "BankTransactionView",
-        back_populates="internal_transaction",
-    )
-    credit_transactions = relationship(
-        "CreditTransactionView",
-        back_populates="internal_transaction",
+        "TransactionTag",
+        secondary=credit_tag_link_table,
+        back_populates="credit_subtransactions",
     )

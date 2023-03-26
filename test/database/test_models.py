@@ -14,9 +14,9 @@ from monopyly.database.models import (
     CreditCard,
     CreditStatement,
     CreditSubtransaction,
-    CreditTag,
     CreditTransaction,
     Model,
+    TransactionTag,
     User,
 )
 
@@ -58,6 +58,30 @@ class TestUser(TestModel):
     def test_model_representation(self, mapping, expected_repr_string):
         user = User(**mapping)
         assert repr(user) == expected_repr_string
+
+
+class TestTransactionTag(TestModel):
+    def test_model_initialization(self):
+        mapping = {
+            "id": 100,
+            "user_id": 10,
+            "parent_id": None,
+            "tag_name": "New tag",
+        }
+        self.assert_accurate_model_field_assignment(TransactionTag, mapping)
+
+    @pytest.mark.parametrize(
+        "mapping, expected_repr_string",
+        [
+            [
+                {"id": 100, "user_id": 10, "parent_id": None, "tag_name": "New tag"},
+                "TransactionTag(id=100, user_id=10, parent_id=None, tag_name='New tag')",
+            ]
+        ],
+    )
+    def test_model_representation(self, mapping, expected_repr_string):
+        tag = TransactionTag(**mapping)
+        assert repr(tag) == expected_repr_string
 
 
 class TestBank(TestModel):
@@ -393,30 +417,6 @@ class TestCreditSubtransaction(TestModel):
     def test_model_representation(self, mapping, expected_repr_string):
         subtransaction = CreditSubtransaction(**mapping)
         assert repr(subtransaction) == expected_repr_string
-
-
-class TestCreditTag(TestModel):
-    def test_model_initialization(self):
-        mapping = {
-            "id": 100,
-            "user_id": 10,
-            "parent_id": None,
-            "tag_name": "New tag",
-        }
-        self.assert_accurate_model_field_assignment(CreditTag, mapping)
-
-    @pytest.mark.parametrize(
-        "mapping, expected_repr_string",
-        [
-            [
-                {"id": 100, "user_id": 10, "parent_id": None, "tag_name": "New tag"},
-                "CreditTag(id=100, user_id=10, parent_id=None, tag_name='New tag')",
-            ]
-        ],
-    )
-    def test_model_representation(self, mapping, expected_repr_string):
-        tag = CreditTag(**mapping)
-        assert repr(tag) == expected_repr_string
 
 
 class TestAlternateModels:

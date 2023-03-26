@@ -1,16 +1,17 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS internal_transactions;
+DROP TABLE IF EXISTS transaction_tags;
 DROP TABLE IF EXISTS banks;
 DROP TABLE IF EXISTS bank_accounts;
 DROP TABLE IF EXISTS bank_account_types;
 DROP TABLE IF EXISTS bank_transactions;
 DROP TABLE IF EXISTS bank_subtransactions;
+DROP TABLE IF EXISTS bank_tag_links;
 DROP TABLE IF EXISTS credit_accounts;
 DROP TABLE IF EXISTS credit_cards;
 DROP TABLE IF EXISTS credit_statements;
 DROP TABLE IF EXISTS credit_transactions;
 DROP TABLE IF EXISTS credit_subtransactions;
-DROP TABLE IF EXISTS credit_tags;
 DROP TABLE IF EXISTS credit_tag_links;
 
 
@@ -19,6 +20,23 @@ CREATE TABLE users (
   id INTEGER PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL
+);
+
+
+/* Store a common link for paired transactions */
+CREATE TABLE internal_transactions (
+  id INTEGER PRIMARY KEY
+);
+
+
+/* Store transaction tags */
+CREATE TABLE transaction_tags (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users (id),
+  parent_id INTEGER REFERENCES transaction_tags (id)
+    ON DELETE CASCADE,
+  tag_name TEXT NOT NULL COLLATE NOCASE,
+  UNIQUE(user_id, tag_name)
 );
 
 
@@ -76,6 +94,16 @@ CREATE TABLE bank_subtransactions (
 );
 
 
+/* Associate bank transactions with tags in a link table */
+CREATE TABLE bank_tag_links (
+  subtransaction_id INTEGER NOT NULL REFERENCES bank_subtransactions (id)
+    ON DELETE CASCADE,
+  tag_id INTEGER NOT NULL REFERENCES transaction_tags (id)
+    ON DELETE CASCADE,
+  PRIMARY KEY (subtransaction_id, tag_id)
+);
+
+
 /* Store credit account information */
 CREATE TABLE credit_accounts (
   id INTEGER PRIMARY KEY,
@@ -130,29 +158,12 @@ CREATE TABLE credit_subtransactions (
 );
 
 
-/* Store credit card transaction tags */
-CREATE TABLE credit_tags (
-  id INTEGER PRIMARY KEY,
-  user_id INTEGER NOT NULL REFERENCES users (id),
-  parent_id INTEGER REFERENCES credit_tags (id)
-    ON DELETE CASCADE,
-  tag_name TEXT NOT NULL COLLATE NOCASE,
-  UNIQUE(user_id, tag_name)
-);
-
-
 /* Associate credit transactions with tags in a link table */
 CREATE TABLE credit_tag_links (
   subtransaction_id INTEGER NOT NULL REFERENCES credit_subtransactions (id)
     ON DELETE CASCADE,
-  tag_id INTEGER NOT NULL REFERENCES credit_tags (id)
+  tag_id INTEGER NOT NULL REFERENCES transaction_tags (id)
     ON DELETE CASCADE,
   PRIMARY KEY (subtransaction_id, tag_id)
-);
-
-
-/* Store a common link for paired transactions */
-CREATE TABLE internal_transactions (
-  id INTEGER PRIMARY KEY
 );
 

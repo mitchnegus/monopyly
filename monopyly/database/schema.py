@@ -9,6 +9,11 @@ DATABASE_SCHEMA = {
         "password",
     ),
     "internal_transactions": (),
+    "transaction_tags": (
+        "parent_id",
+        "user_id",
+        "tag_name",
+    ),
     "banks": (
         "user_id",
         "bank_name",
@@ -95,11 +100,6 @@ DATABASE_SCHEMA = {
         "transaction_id",
         "subtotal",
         "note",
-    ),
-    "credit_tags": (
-        "parent_id",
-        "user_id",
-        "tag_name",
     ),
     "credit_tag_links": (
         "subtransaction_id",
