@@ -17,5 +17,5 @@ class Config:
 
     @DATABASE.setter
     def DATABASE(self, value):
-        # Ensure that the database path is set as a `pathlib.Path` object
+        # Ensure that the database path is always set as a `pathlib.Path` object
         self._database = Path(value)

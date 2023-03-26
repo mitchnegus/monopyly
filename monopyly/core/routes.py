@@ -8,8 +8,8 @@ from ..banking.accounts import BankAccountHandler
 from ..banking.banks import BankHandler
 from ..credit.cards import CreditCardHandler
 from ..credit.statements import CreditStatementHandler
-from .blueprint import bp
 from .actions import format_readme_as_html_template
+from .blueprint import bp
 
 
 @bp.route("/")
