@@ -48,8 +48,8 @@ class DatabaseHandlerMeta(ABCMeta):
         return cls.model.__tablename__
 
     def _get_required_attribute_data_descriptor(cls, name):
-        # This property/attribute is a data descriptor, so standard overrides are
-        # not perimitted; instead, the metaclass property must reference the true
+        # The named property/attribute is a data descriptor, so standard overrides are
+        # not permitted; instead, the metaclass property must reference the true
         # class's dictionary of values to get the overridden attribute
         value = cls.__dict__.get(name)
         if value:

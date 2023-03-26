@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.banking.transactions import (
+    BankTagHandler,
     BankTransactionHandler,
     record_new_transfer,
     save_transaction,
@@ -15,8 +16,10 @@ from monopyly.database.models import (
     BankSubtransaction,
     BankTransaction,
     BankTransactionView,
+    TransactionTag,
 )
 
+from ..common.helpers import TestTagHandler
 from ..helpers import TestHandler
 
 
@@ -310,6 +313,40 @@ class TestBankTransactionHandler(TestHandler):
     def test_delete_entry_invalid(self, transaction_handler, entry_id, exception):
         with pytest.raises(exception):
             transaction_handler.delete_entry(entry_id)
+
+
+@pytest.fixture
+def tag_handler(client_context):
+    return BankTagHandler
+
+
+class TestBankTagHandler(TestTagHandler):
+    # Redefine references here to allow them to be used by parametrization
+    db_reference = TestTagHandler.db_reference
+    db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
+
+    @pytest.mark.parametrize(
+        "tag_names, transaction_ids, subtransaction_ids, ancestors, reference_entries",
+        [
+            [None, None, None, None, db_reference],  # defaults
+            [("Credit payment",), None, None, None, db_reference[5:6]],
+            [None, (4, 5, 6), None, None, db_reference[5:6]],
+            [None, None, (2, 3, 4), None, []],
+        ],
+    )
+    def test_get_tags(
+        self,
+        tag_handler,
+        tag_names,
+        transaction_ids,
+        subtransaction_ids,
+        ancestors,
+        reference_entries,
+    ):
+        tags = tag_handler.get_tags(
+            tag_names, transaction_ids, subtransaction_ids, ancestors
+        )
+        self.assertEntriesMatch(tags, reference_entries)
 
 
 class TestSaveFormFunctions:
