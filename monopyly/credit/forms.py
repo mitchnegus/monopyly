@@ -253,28 +253,10 @@ class CreditTransactionForm(TransactionForm):
     class SubtransactionSubform(TransactionForm.SubtransactionSubform):
         """Form to input/edit credit card subtransactions."""
 
-        # Fields pertaining to the credit subtransaction
-        tags = StringField("Tags")
-
-        @property
-        def subtransaction_data(self):
-            """
-            Produce a dictionary corresponding to a database subtransaction.
-            """
-            raw_tag_data = self.tags.data.split(",")
-            data = super().subtransaction_data
-            data["tags"] = [tag.strip() for tag in raw_tag_data if tag]
-            return data
-
         def gather_entry_data(self, entry):
             """Gather data for the form from the given database entry."""
             if isinstance(entry, CreditSubtransaction):
-                tag_names = [tag.tag_name for tag in entry.tags]
-                data = {
-                    "subtotal": entry.subtotal,
-                    "note": entry.note,
-                    "tags": ", ".join(tag_names),
-                }
+                data = super()._gather_subtransaction_data(entry)
             else:
                 self._raise_gather_fail_error((CreditSubtransaction,), entry)
             return data
@@ -335,10 +317,4 @@ class CreditTransactionForm(TransactionForm):
             self._raise_gather_fail_error((CreditCard, CreditStatementView), entry)
         # Prepare data for the statement/subtransaction subforms
         data["statement_info"] = self.statement_info.gather_entry_data(statement_info)
-        return data
-
-    def _gather_transaction_data(self, transaction):
-        """Gather credit transaction-specific data."""
-        data = super()._gather_transaction_data(transaction)
-        data["merchant"] = transaction.merchant
         return data

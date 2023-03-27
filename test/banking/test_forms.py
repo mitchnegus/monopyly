@@ -21,6 +21,7 @@ from monopyly.database.models import (
     BankAccountView,
     BankSubtransaction,
     BankTransactionView,
+    TransactionTag,
 )
 
 from ..helpers import helper
@@ -112,6 +113,9 @@ def mock_transaction(mock_account):
 def mock_subtransaction(mock_transaction):
     mock_subtransaction = Mock(spec=BankSubtransaction)
     mock_subtransaction.transaction = mock_transaction
+    mock_subtransaction.tags = [
+        Mock(spec=TransactionTag, tag_name=f"Tag{i+1}") for i in range(3)
+    ]
     return mock_subtransaction
 
 
@@ -303,6 +307,7 @@ def filled_transaction_form(transaction_form):
     # Mock the subtransaction subform data
     transaction_form.subtransactions[0].subtotal.data = 25.00
     transaction_form.subtransactions[0].note.data = "Christmas gift"
+    transaction_form.subtransactions[0].tags.data = "Gifts"
     return transaction_form
 
 
@@ -358,6 +363,7 @@ class TestBankTransactionForm:
                 {
                     "note": subtransaction.note.data,
                     "subtotal": subtransaction.subtotal.data,
+                    "tags": subtransaction.tags.data.split(","),
                 }
             ],
         }
@@ -376,6 +382,7 @@ class TestBankTransactionForm:
                 {
                     "note": subtransaction.note.data,
                     "subtotal": -subtransaction.subtotal.data,
+                    "tags": subtransaction.tags.data.split(","),
                 }
             ],
         }
@@ -426,6 +433,7 @@ class TestBankTransactionForm:
         expected_data = {
             "subtotal": mock_subtransaction.subtotal,
             "note": mock_subtransaction.note,
+            "tags": ", ".join([tag.tag_name for tag in mock_subtransaction.tags]),
         }
         assert data == expected_data
 
@@ -466,6 +474,7 @@ class TestBankTransactionForm:
         data = transaction_form.gather_entry_data(mock_transaction)
         expected_data = {
             "transaction_date": mock_transaction.transaction_date,
+            "merchant": mock_transaction.merchant,
             "subtransactions": 3 * [mock_subtransaction_method.return_value],
             "account_info": mock_account_method.return_value,
         }

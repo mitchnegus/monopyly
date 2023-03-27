@@ -125,12 +125,18 @@ class TransactionForm(EntryForm):
         # Fields pertaining to the subtransaction
         subtotal = CurrencyField("Amount", [DataRequired()])
         note = StringField("Note", [DataRequired()])
+        tags = StringField("Tags")
 
         @property
         def subtransaction_data(self):
+            """
+            Produce a dictionary corresponding to a database subtransaction.
+            """
+            raw_tag_data = self.tags.data.split(",")
             data = {
                 "subtotal": self.subtotal.data,
                 "note": self.note.data,
+                "tags": [tag.strip() for tag in raw_tag_data if tag],
             }
             return data
 
@@ -140,6 +146,16 @@ class TransactionForm(EntryForm):
                 "Define how subtransaction data is "
                 "gathered from an entry in a subclass."
             )
+
+        def _gather_subtransaction_data(self, subtransaction):
+            """Gather subtransaction-specific data."""
+            tag_names = [tag.tag_name for tag in subtransaction.tags]
+            data = {
+                "subtotal": subtransaction.subtotal,
+                "note": subtransaction.note,
+                "tags": ", ".join(tag_names),
+            }
+            return data
 
     # Fields pertaining to the transaction
     transaction_date = DateField("Transaction Date", [DataRequired()])
@@ -167,6 +183,7 @@ class TransactionForm(EntryForm):
         )
         data = {
             "transaction_date": transaction.transaction_date,
+            "merchant": transaction.merchant,
             "subtransactions": subtransactions_data,
         }
         return data

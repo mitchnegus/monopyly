@@ -74,7 +74,12 @@ class BankTransactionHandler(
     @staticmethod
     def _prepare_subtransaction(transaction, subtransaction_data):
         """Prepare a subtransaction for the given transaction."""
-        return BankSubtransaction(transaction_id=transaction.id, **subtransaction_data)
+        tag_names = subtransaction_data.pop("tags")
+        return BankSubtransaction(
+            transaction_id=transaction.id,
+            **subtransaction_data,
+            tags=BankTagHandler.get_tags(tag_names, ancestors=True),
+        )
 
 
 class BankTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):

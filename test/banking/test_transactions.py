@@ -30,10 +30,18 @@ def transaction_handler(client_context):
 
 def _mock_subtransaction_mappings():
     # Use a function to regenerate mappings (avoid persisting mutations)
-    mock_tags = [Mock(name=f"Mock tag {_+1}") for _ in range(3)]
+    mock_tags = [Mock(name=f"Mock tag {i+1}") for i in range(3)]
     mappings = [
-        {"subtotal": 1000.00, "note": "Mock subtransaction mapping 1"},
-        {"subtotal": 2000.00, "note": "Mock subtransaction mapping 2"},
+        {
+            "subtotal": 1000.00,
+            "note": "Mock subtransaction mapping 1",
+            "tags": mock_tags[:2],
+        },
+        {
+            "subtotal": 2000.00,
+            "note": "Mock subtransaction mapping 2",
+            "tags": mock_tags[:1],
+        },
     ]
     return mappings
 
@@ -41,6 +49,16 @@ def _mock_subtransaction_mappings():
 @pytest.fixture
 def mock_subtransaction_mappings():
     return _mock_subtransaction_mappings()
+
+
+@pytest.fixture
+def mock_tags():
+    mock_tags = [
+        TransactionTag(id=100, user_id=1, parent_id=None, tag_name="Mock tag 1"),
+        TransactionTag(id=101, user_id=1, parent_id=100, tag_name="Mock tag 2"),
+        TransactionTag(id=102, user_id=1, parent_id=None, tag_name="Mock tag 3"),
+    ]
+    return mock_tags
 
 
 class TestBankTransactionHandler(TestHandler):
@@ -179,7 +197,11 @@ class TestBankTransactionHandler(TestHandler):
             },
         ],
     )
-    def test_add_entry(self, transaction_handler, mapping):
+    @patch("monopyly.banking.transactions.BankTagHandler.get_tags")
+    def test_add_entry(self, mock_method, transaction_handler, mock_tags, mapping):
+        # Mock the tags found by the tag handler
+        mock_method.return_value = mock_tags[:2]
+        # Add the entry
         transaction = transaction_handler.add_entry(**mapping)
         # Check that the entry object was properly created
         assert transaction.transaction_date == date(2022, 5, 8)
@@ -258,7 +280,11 @@ class TestBankTransactionHandler(TestHandler):
             {"internal_transaction_id": None, "transaction_date": date(2022, 5, 8)},
         ],
     )
-    def test_update_entry(self, transaction_handler, mapping):
+    @patch("monopyly.banking.transactions.BankTagHandler.get_tags")
+    def test_update_entry(self, mock_method, transaction_handler, mock_tags, mapping):
+        # Mock the tags found by the tag handler
+        mock_method.return_value = mock_tags[:2]
+        # Add the entry
         transaction = transaction_handler.update_entry(5, **mapping)
         # Check that the entry object was properly updated
         assert transaction.transaction_date == date(2022, 5, 8)
@@ -329,7 +355,7 @@ class TestBankTagHandler(TestTagHandler):
         "tag_names, transaction_ids, subtransaction_ids, ancestors, reference_entries",
         [
             [None, None, None, None, db_reference],  # defaults
-            [("Credit payment",), None, None, None, db_reference[5:6]],
+            [("Credit payments",), None, None, None, db_reference[5:6]],
             [None, (4, 5, 6), None, None, db_reference[5:6]],
             [None, None, (2, 3, 4), None, []],
         ],

@@ -29,7 +29,7 @@ def transaction_handler(client_context):
 
 def _mock_subtransaction_mappings():
     # Use a function to regenerate mappings (avoid persisting mutations)
-    mock_tags = [Mock(name=f"Mock tag {_+1}") for _ in range(3)]
+    mock_tags = [Mock(name=f"Mock tag {i+1}") for i in range(3)]
     mappings = [
         {
             "subtotal": 100.00,

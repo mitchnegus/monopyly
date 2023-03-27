@@ -15,6 +15,7 @@ from ..database.models import (
     BankSubtransaction,
     BankTransaction,
     BankTransactionView,
+    TransactionTag,
 )
 from .accounts import BankAccountHandler, BankAccountTypeHandler
 from .banks import BankHandler
@@ -186,10 +187,7 @@ class BankTransactionForm(TransactionForm):
         def gather_entry_data(self, entry):
             """Gather data for the form from the given database entry."""
             if isinstance(entry, BankSubtransaction):
-                data = {
-                    "subtotal": entry.subtotal,
-                    "note": entry.note,
-                }
+                data = super()._gather_subtransaction_data(entry)
             else:
                 self._raise_gather_fail_error((BankSubtransaction,), entry)
             return data
@@ -214,6 +212,7 @@ class BankTransactionForm(TransactionForm):
             "type_name": BankAccountTypeView,
             "last_four_digits": BankAccountView,
             "note": BankSubtransaction,
+            "tags": TransactionTag,
         }
     )
 

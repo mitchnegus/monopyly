@@ -152,8 +152,9 @@ class TestBankingRoutes(TestRoutes):
                 "transaction_date": "2022-01-19",
                 "account_info-last_four_digits": "5556",
                 "account_info-type_name": "Savings",
-                "subtransactions-1-subtotal": "505.00",
+                "subtransactions-1-subtotal": "-505.00",
                 "subtransactions-1-note": "7 hour flight, 45 minute drive",
+                "subtransactions-1-tags": "Transportation",
             },
             follow_redirects=True,
         )
@@ -174,12 +175,15 @@ class TestBankingRoutes(TestRoutes):
                 "transaction_date": "2022-01-19",
                 "account_info-last_four_digits": "5556",
                 "account_info-type_name": "Savings",
-                "subtransactions-1-subtotal": "505.00",
+                "subtransactions-1-subtotal": "-505.00",
                 "subtransactions-1-note": "7 hour flight, 45 minute drive",
+                "subtransactions-1-tags": "Transportation",
                 "subtransactions-2-subtotal": "0.80",
                 "subtransactions-2-note": "Rave reviews",
+                "subtransactions-2-tags": "",
                 "subtransactions-3-subtotal": "70.70",
                 "subtransactions-3-note": "Easy money",
+                "subtransactions-3-tags": "",
             },
             follow_redirects=True,
         )
@@ -212,6 +216,7 @@ class TestBankingRoutes(TestRoutes):
                 "account_info-type_name": "Certificate of Deposit",
                 "subtransactions-1-subtotal": "0.01",
                 "subtransactions-1-note": "Do not pass GO, do not collect $200",
+                "subtransactions-1-tags": "",
             },
             follow_redirects=True,
         )
@@ -251,7 +256,22 @@ class TestBankingRoutes(TestRoutes):
 
     @pytest.mark.parametrize(
         "field, suggestions",
-        [["bank_name", ("TheBank", "Jail")], ["last_four_digits", ("5556", "5557")]],
+        [
+            ["bank_name", ("TheBank", "Jail")],
+            ["last_four_digits", ("5556", "5557")],
+            [
+                "tags",
+                [
+                    "Transportation",
+                    "Utilities",
+                    "Electricity",
+                    "Parking",
+                    "Railroad",
+                    "Credit payments",
+                    "Gifts",
+                ],
+            ],
+        ],
     )
     def test_suggest_transaction_autocomplete(self, authorization, field, suggestions):
         self.post_route("/_suggest_transaction_autocomplete", json={"field": field})

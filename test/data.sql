@@ -19,7 +19,8 @@ VALUES (1, NULL, 'Test tag'),
        (3, 2, 'Railroad'),
        (3, NULL, 'Utilities'),
        (3, 5, 'Electricity'),
-       (3, NULL, 'Credit payment');
+       (3, NULL, 'Credit payments'),
+       (3, NULL, 'Gifts');
 
 INSERT INTO banks
        (user_id, bank_name)

@@ -220,5 +220,8 @@ def suggest_transaction_autocomplete():
     # Get the autocomplete field from the AJAX request
     post_args = request.get_json()
     field = post_args["field"]
-    suggestions = BankTransactionForm.autocomplete(field)
+    if field == "tags":
+        suggestions = BankTransactionForm.autocomplete("tags", db_field_name="tag_name")
+    else:
+        suggestions = BankTransactionForm.autocomplete(field)
     return jsonify(suggestions)

@@ -120,7 +120,11 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
             "account_id": payment_account_id,
             "transaction_date": payment_date,
             "subtransactions": [
-                {"subtotal": -payment_amount, "note": payment_note},
+                {
+                    "subtotal": -payment_amount,
+                    "note": payment_note,
+                    "tags": ["Credit payments"],
+                }
             ],
         }
         transfer = record_new_transfer(bank_mapping)
@@ -136,7 +140,7 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
             {
                 "subtotal": -payment_amount,
                 "note": "Card payment",
-                "tags": ["Payments"],
+                "tags": ["Credit payments"],
             }
         ],
     }

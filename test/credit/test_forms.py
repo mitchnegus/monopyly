@@ -18,6 +18,7 @@ from monopyly.database.models import (
     CreditStatementView,
     CreditSubtransaction,
     CreditTransactionView,
+    TransactionTag,
 )
 
 from ..helpers import helper
@@ -82,11 +83,9 @@ def mock_transaction(mock_statement):
 def mock_subtransaction(mock_transaction):
     mock_subtransaction = Mock(spec=CreditSubtransaction)
     mock_subtransaction.transaction = mock_transaction
-    mock_subtransaction.tags = []
-    for tag_name in ("Tag1", "Tag2", "Tag3"):
-        mock_tag = Mock()
-        mock_tag.tag_name = tag_name
-        mock_subtransaction.tags.append(mock_tag)
+    mock_subtransaction.tags = [
+        Mock(spec=TransactionTag, tag_name=f"Tag{i+1}") for i in range(3)
+    ]
     return mock_subtransaction
 
 
@@ -417,7 +416,7 @@ class TestCreditTransactionForm:
         expected_data = {
             "subtotal": mock_subtransaction.subtotal,
             "note": mock_subtransaction.note,
-            "tags": ", ".join([_.tag_name for _ in mock_subtransaction.tags]),
+            "tags": ", ".join([tag.tag_name for tag in mock_subtransaction.tags]),
         }
         assert data == expected_data
 

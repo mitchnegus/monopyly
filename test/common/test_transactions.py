@@ -35,7 +35,7 @@ class TestTransactionTagHandler(TestTagHandler):
 
     @pytest.mark.parametrize(
         "tag_id, exception",
-        [[1, NotFound], [8, NotFound]],  # Not the logged in user  # Not in the database
+        [[1, NotFound], [9, NotFound]],  # Not the logged in user  # Not in the database
     )
     def test_get_entry_invalid(self, tag_handler, tag_id, exception):
         with pytest.raises(exception):
@@ -165,7 +165,7 @@ class TestTransactionTagHandler(TestTagHandler):
             # Invalid field
             [5, {"user_id": 3, "invalid_field": "Test"}, ValueError],
             # Nonexistent ID
-            [8, {"user_id": 3, "tag_name": "Test"}, NotFound],
+            [9, {"user_id": 3, "tag_name": "Test"}, NotFound],
         ],
     )
     def test_update_entry_invalid(self, tag_handler, tag_id, mapping, exception):
@@ -186,7 +186,7 @@ class TestTransactionTagHandler(TestTagHandler):
         "entry_id, exception",
         [
             [1, NotFound],  # should not be able to delete other user entries
-            [8, NotFound],  # should not be able to delete nonexistent entries
+            [9, NotFound],  # should not be able to delete nonexistent entries
         ],
     )
     def test_delete_entry_invalid(self, tag_handler, entry_id, exception):
