@@ -384,7 +384,7 @@ def add_subtransaction_fields():
         subtransaction_count,
     )
     return render_template(
-        "credit/transaction_form/subtransaction_form.html",
+        "common/transaction_form/subtransaction_subform.html",
         subform=new_subform,
         field_list_optional_member=True,
     )

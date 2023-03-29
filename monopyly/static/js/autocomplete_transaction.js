@@ -1,12 +1,11 @@
 /*
  * Provide autocomplete suggestions when filling out a transaction form.
  *
- * When entering a credit card transaction, provide autocomplete
- * suggestions to the  user. The suggestions are pulled from the
- * database for the field being input using an AJAX request. They are
- * ordered (on the server side) by their occurrence frequency and then
- * filtered here by the current input text after the input field is
- * changed.
+ * When entering a transaction, provide autocomplete suggestions to the user.
+ * The suggestions are pulled from the database for the field being input
+ * using an AJAX request. They are ordered (on the server side) by their
+ * occurrence frequency and then filtered here by the current input text after
+ * the input field is changed.
  */
 
 import { AutocompleteBox } from './modules/autocomplete_input.js';
