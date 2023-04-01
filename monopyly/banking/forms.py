@@ -247,6 +247,8 @@ class BankTransactionForm(TransactionForm):
             return None
         account = self.get_transfer_account()
         transfer_data = self._prepare_transaction_data(account)
+        # Use the bank initiating the transaction as the merchant
+        transfer_data["merchant"] = self.get_transaction_account().bank.bank_name
         # Negate transfer subtotals as the opposite of the original transaction
         for subtransaction_data in transfer_data["subtransactions"]:
             subtransaction_data["subtotal"] = -subtransaction_data["subtotal"]

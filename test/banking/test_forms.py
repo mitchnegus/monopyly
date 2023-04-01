@@ -381,7 +381,7 @@ class TestBankTransactionForm:
             "internal_transaction_id": None,
             "account_id": mock_method.return_value.id,
             "transaction_date": filled_transaction_form_with_transfer.transaction_date.data,
-            "merchant": filled_transaction_form_with_transfer.merchant.data,
+            "merchant": "Jail",
             "subtransactions": [
                 {
                     "note": subtransaction.note.data,
