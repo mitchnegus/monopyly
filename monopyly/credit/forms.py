@@ -253,13 +253,7 @@ class CreditTransactionForm(TransactionForm):
     class SubtransactionSubform(TransactionForm.SubtransactionSubform):
         """Form to input/edit credit card subtransactions."""
 
-        def gather_entry_data(self, entry):
-            """Gather data for the form from the given database entry."""
-            if isinstance(entry, CreditSubtransaction):
-                data = super()._gather_subtransaction_data(entry)
-            else:
-                self._raise_gather_fail_error((CreditSubtransaction,), entry)
-            return data
+        subtransaction_model = CreditSubtransaction
 
     # Fields to identify the statement information for the transaction
     statement_info = FormField(StatementSubform)
@@ -302,7 +296,6 @@ class CreditTransactionForm(TransactionForm):
     def _prepare_transaction_data(self, statement):
         data = super()._prepare_transaction_data()
         data["statement_id"] = statement.id
-        data["merchant"] = self.merchant.data
         return data
 
     def gather_entry_data(self, entry):

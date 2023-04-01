@@ -184,16 +184,12 @@ class BankTransactionForm(TransactionForm):
     class SubtransactionSubform(TransactionForm.SubtransactionSubform):
         """Form to input/edit bank subtransactions."""
 
-        def gather_entry_data(self, entry):
-            """Gather data for the form from the given database entry."""
-            if isinstance(entry, BankSubtransaction):
-                data = super()._gather_subtransaction_data(entry)
-            else:
-                self._raise_gather_fail_error((BankSubtransaction,), entry)
-            return data
+        subtransaction_model = BankSubtransaction
 
     # Fields to identify the bank account information for the transaction
     account_info = FormField(AccountSubform)
+    # Fields pertaining to the bank transaction
+    merchant = StringField("Merchant")
     # Subtransaction fields (must be at least 1 subtransaction)
     subtransactions = FieldList(
         FormField(SubtransactionSubform, render_kw={"class": "subtransaction-form"}),

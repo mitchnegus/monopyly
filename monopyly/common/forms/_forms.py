@@ -122,6 +122,7 @@ class TransactionForm(EntryForm):
     """An abstract form to input/edit generic transactions."""
 
     class SubtransactionSubform(EntrySubform):
+        subtransaction_model = None
         # Fields pertaining to the subtransaction
         subtotal = CurrencyField("Amount", [DataRequired()])
         note = StringField("Note", [DataRequired()])
@@ -142,10 +143,15 @@ class TransactionForm(EntryForm):
 
         @abstractmethod
         def gather_entry_data(self, entry):
-            raise NotImplementedError(
-                "Define how subtransaction data is "
-                "gathered from an entry in a subclass."
-            )
+            if self.subtransaction_model is None:
+                raise RuntimeError(
+                    "A subtransaction model must be defined for every subtransaction "
+                    "form."
+                )
+            elif isinstance(entry, self.subtransaction_model):
+                return self._gather_subtransaction_data(entry)
+            else:
+                self._raise_gather_fail_error((self.subtransaction_model,), entry)
 
         def _gather_subtransaction_data(self, subtransaction):
             """Gather subtransaction-specific data."""
@@ -172,6 +178,7 @@ class TransactionForm(EntryForm):
         data = {
             "internal_transaction_id": None,
             "transaction_date": self["transaction_date"].data,
+            "merchant": self["merchant"].data,
             "subtransactions": subtransactions_data,
         }
         return data

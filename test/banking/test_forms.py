@@ -304,6 +304,7 @@ def filled_transaction_form(transaction_form):
     transaction_form.account_info.type_name.data = "Savings"
     # Mock the transaction data
     transaction_form.transaction_date.data = date(2020, 12, 25)
+    transaction_form.merchant.data = None
     # Mock the subtransaction subform data
     transaction_form.subtransactions[0].subtotal.data = 25.00
     transaction_form.subtransactions[0].note.data = "Christmas gift"
@@ -334,6 +335,7 @@ class TestBankTransactionForm:
         form_fields = (
             "account_info",
             "transaction_date",
+            "merchant",
             "subtransactions",
             "transfer_accounts_info",
             "submit",
@@ -347,7 +349,7 @@ class TestBankTransactionForm:
             assert hasattr(transaction_form.account_info, field)
 
     def test_subtransaction_subform_initialization(self, transaction_form):
-        subform_fields = ("subtotal", "note")
+        subform_fields = ("subtotal", "note", "tags")
         for subtransaction_form in transaction_form.subtransactions:
             for field in subform_fields:
                 assert hasattr(subtransaction_form, field)
@@ -359,6 +361,7 @@ class TestBankTransactionForm:
             "internal_transaction_id": None,
             "account_id": mock_method.return_value.id,
             "transaction_date": filled_transaction_form.transaction_date.data,
+            "merchant": filled_transaction_form.merchant.data,
             "subtransactions": [
                 {
                     "note": subtransaction.note.data,
@@ -378,6 +381,7 @@ class TestBankTransactionForm:
             "internal_transaction_id": None,
             "account_id": mock_method.return_value.id,
             "transaction_date": filled_transaction_form_with_transfer.transaction_date.data,
+            "merchant": filled_transaction_form_with_transfer.merchant.data,
             "subtransactions": [
                 {
                     "note": subtransaction.note.data,
