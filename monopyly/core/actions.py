@@ -1,5 +1,11 @@
 """Module describing logical core actions (to be used in routes)."""
+from datetime import datetime
 import markdown
+
+
+def get_timestamp():
+    """Get a timestamp for backup filenames."""
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 def format_readme_as_html_template(readme_text):

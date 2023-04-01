@@ -1,6 +1,7 @@
 """
 Expose commonly used database functionality to the rest of the package.
 """
+import sqlite3
 from functools import wraps
 from pathlib import Path
 
@@ -12,6 +13,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import Table
 
+from ..core.actions import get_timestamp
 from .models import Model
 from .schema import DATABASE_SCHEMA
 
@@ -113,6 +115,33 @@ def init_db(db, auxiliary_preload_path=None):
     raw_conn.close()
     # Register tables with the SQLAlchemy metadata
     db.metadata.create_all(bind=db.engine)
+
+
+@click.command("back-up-db")
+@with_appcontext
+def back_up_db_command():
+    """Back up the database from the command line."""
+    timestamp = get_timestamp()
+    # Connect to the database
+    db = sqlite3.connect(current_app.config["DATABASE"])
+    # Create and connect to the backup database
+    backup_db_dir_path = Path(current_app.instance_path) / "db_backups"
+    backup_db_dir_path.mkdir(exist_ok=True, parents=True)
+    backup_db_path = backup_db_dir_path / f"backup_{timestamp}.sqlite"
+    backup_db = sqlite3.connect(backup_db_path)
+    # Back up the database and print status
+    back_up_db(db, backup_db)
+    click.echo(f"Backup complete ({timestamp})")
+
+
+def back_up_db(db, backup_db):
+    """Create a backup of the database."""
+    # Backup the database
+    with backup_db:
+        db.backup(backup_db)
+    # Close the connections
+    backup_db.close()
+    db.close()
 
 
 def close_db(exception=None):

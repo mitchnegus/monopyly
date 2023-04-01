@@ -1,7 +1,17 @@
 """Tests for the actions performed by the credit blueprint."""
+from datetime import datetime
+from unittest.mock import patch
+
 import pytest
 
-from monopyly.core.actions import format_readme_as_html_template
+from monopyly.core.actions import get_timestamp, format_readme_as_html_template
+
+
+@patch("monopyly.core.actions.datetime")
+def test_get_timestamp(mock_datetime_module):
+    mock_datetime_module.now.return_value = datetime(2023, 4, 1, 0, 0, 0)
+    timestamp = get_timestamp()
+    assert timestamp == "20230401_000000"
 
 
 def test_format_readme_as_html_template():

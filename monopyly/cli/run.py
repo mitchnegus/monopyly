@@ -22,6 +22,8 @@ def main():
     app_runner = Runner(args.mode, host=args.host, port=args.port)
     # Initialize the database and run the app
     app_runner.initialize_database()
+    if args.backup:
+        app_runner.backup_database()
     app_runner.run()
     app_runner.open_browser(delay=1)
     # Wait for the exit command to stop
@@ -32,6 +34,11 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", help="The host address where the app will be run.")
     parser.add_argument("--port", help="The port where the app will be accessible.")
+    parser.add_argument(
+        "--backup",
+        action="store_true",
+        help="A flag indicating if the database should be backed up.",
+    )
     parser.add_argument(
         "mode",
         help="The runtime mode for the app; defaults to `development`.",
@@ -60,6 +67,11 @@ class Runner:
     def initialize_database(self):
         """Run the database initializer."""
         instruction = self.command + ["init-db"]
+        subprocess.run(instruction)
+
+    def backup_database(self):
+        """Back up the app database."""
+        instruction = self.command + ["back-up-db"]
         subprocess.run(instruction)
 
     def run(self):
