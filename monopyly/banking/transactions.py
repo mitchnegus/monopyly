@@ -148,13 +148,14 @@ class BankTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):
     @classmethod
     def _filter_entries(cls, query, criteria):
         # Add a join to enable filtering by transaction ID or subtransaction ID
-        query = (
-            query.join(bank_tag_link_table)
-            .join(BankSubtransaction)
-            .join(BankTransactionView)
-            .join(BankAccountView)
-            .join(Bank)
+        join_transaction = BankTransactionView in criteria.discriminators
+        join_subtransaction = (
+            join_transaction or BankSubtransaction in criteria.discriminators
         )
+        if join_subtransaction:
+            query = query.join(bank_tag_link_table).join(BankSubtransaction)
+            if join_transaction:
+                query = query.join(BankTransactionView)
         return super()._filter_entries(query, criteria)
 
 

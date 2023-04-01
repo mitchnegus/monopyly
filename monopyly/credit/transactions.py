@@ -179,15 +179,14 @@ class CreditTagHandler(TransactionTagHandler, model=TransactionTagHandler.model)
     @classmethod
     def _filter_entries(cls, query, criteria):
         # Add a join to enable filtering by transaction ID or subtransaction ID
-        query = (
-            query.join(credit_tag_link_table)
-            .join(CreditSubtransaction)
-            .join(CreditTransactionView)
-            .join(CreditStatementView)
-            .join(CreditCard)
-            .join(CreditAccount)
-            .join(Bank)
+        join_transaction = CreditTransactionView in criteria.discriminators
+        join_subtransaction = (
+            join_transaction or CreditSubtransaction in criteria.discriminators
         )
+        if join_subtransaction:
+            query = query.join(credit_tag_link_table).join(CreditSubtransaction)
+            if join_transaction:
+                query = query.join(CreditTransactionView)
         return super()._filter_entries(query, criteria)
 
 
