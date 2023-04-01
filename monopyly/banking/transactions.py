@@ -63,11 +63,10 @@ class BankTransactionHandler(
         transactions : sqlalchemy.engine.ScalarResult
             Returns bank account transactions matching the criteria.
         """
-        criteria = [
-            cls._filter_values(cls.model.account_id, account_ids),
-            cls._filter_value(BankAccountView.active, active),
-        ]
-        transactions = super().get_entries(*criteria, sort_order=sort_order)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "account_id", account_ids)
+        criteria.add_match_filter(BankAccountView, "active", active)
+        transactions = super().get_entries(criteria, sort_order=sort_order)
         return transactions
 
     @staticmethod

@@ -39,10 +39,9 @@ class CreditAccountHandler(DatabaseHandler, model=CreditAccount):
         accounts : sqlalchemy.engine.ScalarResult
             Returns credit accounts matching the criteria.
         """
-        criteria = [
-            cls._filter_values(cls.model.bank_id, bank_ids),
-        ]
-        accounts = super().get_entries(*criteria)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "bank_id", bank_ids)
+        accounts = super().get_entries(criteria)
         return accounts
 
     @classmethod

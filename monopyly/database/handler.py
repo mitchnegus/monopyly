@@ -2,10 +2,11 @@
 A database handler for facilitating interactions with the SQLite database.
 """
 from abc import ABCMeta
+from collections import UserList
 
 from flask import current_app, g
 from sqlalchemy import inspect
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import ArgumentError, NoResultFound
 from werkzeug.exceptions import abort
 
 from .utils import validate_sort_order
@@ -96,6 +97,45 @@ class DatabaseViewHandlerMeta(DatabaseHandlerMeta):
         return cls._model_view.__tablename__
 
 
+class QueryCriteria(UserList):
+    """
+    A helper object for constructing queries using a database handler.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.discriminators = []
+
+    def add_match_filter(self, model, field, values):
+        """
+        Add a filter to the query to select only matching entries.
+
+        Parameters
+        ----------
+        model : database.models.Model
+            The ORM model representing the table to to be filtered.
+        field : str
+            The name of the field which is the subject of the filter.
+        values :
+            A list of values (or a singular value) that will applied
+            as the matching criteria for the field.
+        """
+        # Build a filter based on any given value(s)
+        if values is not None:
+            try:
+                criterion = getattr(model, field).in_(values)
+            except ArgumentError:
+                criterion = getattr(model, field) == values
+            self.data.append(criterion)
+            self.discriminators.append(model)
+
+    def append(self, item):
+        raise NotImplementedError(
+            "The `QueryCriteria` object can not be appended to directly. Use a helper "
+            "method (e.g., `add_match_filter`) instead."
+        )
+
+
 class DatabaseHandlerMixin:
     """
     A mixin providing the functionality of a database handler.
@@ -109,22 +149,10 @@ class DatabaseHandlerMixin:
     handler interface.
     """
 
-    @staticmethod
-    def _filter_value(field, value):
-        # Build a filter based on the values (if given)
-        if value is None:
-            return None
-        return field == value
-
-    @staticmethod
-    def _filter_values(field, values):
-        # Build a filter based on the values (if given)
-        if values is None:
-            return None
-        return field.in_(values)
+    _initialize_criteria_list = QueryCriteria
 
     @classmethod
-    def get_entries(cls, *filters, sort_order=None):
+    def get_entries(cls, criteria=None, sort_order=None):
         """
         Retrieve a set of entries from the database.
 
@@ -133,7 +161,7 @@ class DatabaseHandlerMixin:
 
         Parameters
         ----------
-        *filters :
+        criteria : QueryCriteria
             Criteria to use when applying filters to the query.
             (A filter with a value of `None` will be ignored.)
         sort_order : str
@@ -145,25 +173,22 @@ class DatabaseHandlerMixin:
         entries : list of database.models.Model
             Models containing matching entries from the database.
         """
-        # Ignore all filters with `None` values
-        filters = [_ for _ in filters if _ is not None]
         # Query entries for the authorized user
         query = cls.model.select_for_user()
-        query = cls._customize_entries_query(query, filters, sort_order)
+        query = cls._customize_entries_query(query, criteria, sort_order)
         entries = cls._db.session.execute(query).scalars()
         return entries
 
     @classmethod
-    def find_entry(cls, *filters, sort_order=None, require_unique=True):
+    def find_entry(cls, criteria=None, sort_order=None, require_unique=True):
         """
         Find an entry using uniquely identifying characteristics.
 
         Parameters
         ----------
-        *filters :
-            Criteria to use when applying filters to the query.
-            (If all criteria are `None`, the returned entry will be
-            `None`.)
+        criteria : QueryCriteria
+            Criteria to use when applying filters to the query. (If all
+            criteria are `None`, the returned entry will be `None`.)
         sort_order : str
             The order to use when sorting values returned by the
             database query.
@@ -178,22 +203,20 @@ class DatabaseHandlerMixin:
         entry : database.models.Model
             A model containing a matching entry from the database.
         """
-        # Ignore all filters with `None` values; return `None` with no criteria
-        filters = [_ for _ in filters if _ is not None]
-        if not filters:
-            return None
-        # Query entries from the authorized user
-        query = cls.model.select_for_user()
-        query = cls._customize_entries_query(query, filters, sort_order)
-        results = cls._db.session.execute(query)
-        if require_unique:
-            entry = results.scalar_one_or_none()
-        else:
-            entry = results.scalar()
-        return entry
+        if criteria:
+            # Query entries from the authorized user
+            query = cls.model.select_for_user()
+            query = cls._customize_entries_query(query, criteria, sort_order)
+            results = cls._db.session.execute(query)
+            if require_unique:
+                entry = results.scalar_one_or_none()
+            else:
+                entry = results.scalar()
+            return entry
+        return None
 
     @classmethod
-    def _customize_entries_query(cls, query, filters, sort_order):
+    def _customize_entries_query(cls, query, criteria, sort_order):
         """
         Customize a query to retrieve entries from the database.
 
@@ -204,12 +227,14 @@ class DatabaseHandlerMixin:
         query executed by the current `Session` object in the
         `get_entries` method.
         """
-        return cls._filter_entries(query, filters)
+        return cls._filter_entries(query, criteria)
 
     @staticmethod
-    def _filter_entries(query, filters):
-        """Apply filters to a query."""
-        return query.filter(*filters)
+    def _filter_entries(query, criteria):
+        """Apply filters to a query based on the given criteria."""
+        if criteria:
+            query = query.filter(*criteria)
+        return query
 
     @classmethod
     def _sort_query(cls, query, *column_orders):
@@ -371,14 +396,14 @@ class DatabaseViewHandlerMixin(DatabaseHandlerMixin):
 
     @classmethod
     @view_query
-    def get_entries(cls, *filters, sort_order=None):
-        return super().get_entries(*filters, sort_order=sort_order)
+    def get_entries(cls, criteria=None, sort_order=None):
+        return super().get_entries(criteria=criteria, sort_order=sort_order)
 
     @classmethod
     @view_query
-    def find_entry(cls, *filters, sort_order=None, require_unique=True):
+    def find_entry(cls, criteria=None, sort_order=None, require_unique=True):
         return super().find_entry(
-            *filters, sort_order=sort_order, require_unique=require_unique
+            criteria=criteria, sort_order=sort_order, require_unique=require_unique
         )
 
     @classmethod

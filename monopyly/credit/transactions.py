@@ -71,12 +71,11 @@ class CreditTransactionHandler(
         transactions : sqlalchemy.engine.ScalarResult
             Returns credit card transactions matching the criteria.
         """
-        criteria = [
-            cls._filter_values(cls.model.statement_id, statement_ids),
-            cls._filter_values(CreditCard.id, card_ids),
-            cls._filter_value(CreditCard.active, active),
-        ]
-        transactions = super().get_entries(*criteria, sort_order=sort_order)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "statement_id", statement_ids)
+        criteria.add_match_filter(CreditCard, "id", card_ids)
+        criteria.add_match_filter(CreditCard, "active", active)
+        transactions = super().get_entries(criteria, sort_order=sort_order)
         return transactions
 
     @classmethod
@@ -170,12 +169,11 @@ class CreditTagHandler(DatabaseHandler, model=CreditTag):
         tags : list of database.models.CreditTag
             Returns credit card transaction tags matching the criteria.
         """
-        criteria = [
-            cls._filter_values(cls.model.tag_name, tag_names),
-            cls._filter_values(CreditTransactionView.id, transaction_ids),
-            cls._filter_values(CreditSubtransaction.id, subtransaction_ids),
-        ]
-        tags = super().get_entries(*criteria).all()
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "tag_name", tag_names)
+        criteria.add_match_filter(CreditTransactionView, "id", transaction_ids)
+        criteria.add_match_filter(CreditSubtransaction, "id", subtransaction_ids)
+        tags = super().get_entries(criteria).all()
         if ancestors is True:
             # Add all ancestors for each tag in the list
             for tag in tags:
@@ -191,7 +189,7 @@ class CreditTagHandler(DatabaseHandler, model=CreditTag):
         return tags
 
     @classmethod
-    def _filter_entries(cls, query, filters):
+    def _filter_entries(cls, query, criteria):
         # Add a join to enable filtering by transaction ID or subtransaction ID
         query = (
             query.join(tag_link_table)
@@ -204,7 +202,7 @@ class CreditTagHandler(DatabaseHandler, model=CreditTag):
         )
         # Only get distinct tag entries
         query = query.distinct()
-        return super()._filter_entries(query, filters)
+        return super()._filter_entries(query, criteria)
 
     @classmethod
     def get_subtags(cls, tag):
@@ -323,9 +321,9 @@ class CreditTagHandler(DatabaseHandler, model=CreditTag):
             The tag entry matching the given criteria. If no matching
             tag is found, returns `None`.
         """
-        criteria = [cls.model.tag_name == tag_name]
-        query = cls.model.select_for_user().where(*criteria)
-        tag = cls._db.session.execute(query).scalar_one_or_none()
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "tag_name", tag_name)
+        tag = super().find_entry(criteria=criteria)
         return tag
 
 

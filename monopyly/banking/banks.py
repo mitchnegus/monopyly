@@ -39,8 +39,9 @@ class BankHandler(DatabaseHandler, model=Bank):
         banks : sqlalchemy.engine.ScalarResult
             Returns bank entries matching the criteria.
         """
-        criteria = [cls._filter_values(cls.model.bank_name, bank_names)]
-        return super().get_entries(*criteria)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "bank_name", bank_names)
+        return super().get_entries(criteria)
 
     @classmethod
     def delete_entry(cls, entry_id):

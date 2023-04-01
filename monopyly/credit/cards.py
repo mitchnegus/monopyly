@@ -54,13 +54,12 @@ class CreditCardHandler(DatabaseHandler, model=CreditCard):
         cards : sqlalchemy.engine.ScalarResult
             Returns credit cards matching the criteria.
         """
-        criteria = [
-            cls._filter_values(CreditAccount.bank_id, bank_ids),
-            cls._filter_values(cls.model.account_id, account_ids),
-            cls._filter_values(cls.model.last_four_digits, last_four_digits),
-            cls._filter_value(cls.model.active, active),
-        ]
-        cards = super().get_entries(*criteria)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(CreditAccount, "bank_id", bank_ids)
+        criteria.add_match_filter(cls.model, "account_id", account_ids)
+        criteria.add_match_filter(cls.model, "last_four_digits", last_four_digits)
+        criteria.add_match_filter(cls.model, "active", active)
+        cards = super().get_entries(criteria)
         return cards
 
     @classmethod
@@ -91,11 +90,10 @@ class CreditCardHandler(DatabaseHandler, model=CreditCard):
             A credit card entry matching the given criteria. If no
             matching card is found, returns `None`.
         """
-        criteria = [
-            cls._filter_value(Bank.bank_name, bank_name),
-            cls._filter_value(cls.model.last_four_digits, last_four_digits),
-        ]
-        card = super().find_entry(*criteria)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(Bank, "bank_name", bank_name)
+        criteria.add_match_filter(cls.model, "last_four_digits", last_four_digits)
+        card = super().find_entry(criteria=criteria)
         return card
 
     @classmethod

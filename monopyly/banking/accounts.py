@@ -85,11 +85,10 @@ class BankAccountTypeHandler(
             database matching the given criteria. If no matching account
             type is found, returns `None`.
         """
-        criteria = [
-            cls._filter_value(cls.model.type_name, type_name),
-            cls._filter_value(cls.model.type_abbreviation, type_abbreviation),
-        ]
-        account_type = super().find_entry(*criteria)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "type_name", type_name)
+        criteria.add_match_filter(cls.model, "type_abbreviation", type_abbreviation)
+        account_type = super().find_entry(criteria=criteria)
         return account_type
 
     @classmethod
@@ -166,11 +165,10 @@ class BankAccountHandler(
         accounts : sqlalchemy.engine.ScalarResult
             Returns bank accounts matching the criteria.
         """
-        criteria = [
-            cls._filter_values(cls.model.bank_id, bank_ids),
-            cls._filter_values(cls.model.account_type_id, account_type_ids),
-        ]
-        accounts = super().get_entries(*criteria)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "bank_id", bank_ids)
+        criteria.add_match_filter(cls.model, "account_type_id", account_type_ids)
+        accounts = super().get_entries(criteria)
         return accounts
 
     @classmethod
@@ -222,19 +220,18 @@ class BankAccountHandler(
             A bank account entry matching the given criteria. If no
             matching account is found, returns `None`.
         """
-        criteria = [
-            cls._filter_value(Bank.bank_name, bank_name),
-            cls._filter_value(BankAccountTypeView.type_name, account_type_name),
-            cls._filter_value(cls.model.last_four_digits, last_four_digits),
-        ]
-        account = super().find_entry(*criteria)
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(Bank, "bank_name", bank_name)
+        criteria.add_match_filter(BankAccountTypeView, "type_name", account_type_name)
+        criteria.add_match_filter(cls.model, "last_four_digits", last_four_digits)
+        account = super().find_entry(criteria=criteria)
         return account
 
     @classmethod
-    def _filter_entries(cls, query, filters):
+    def _filter_entries(cls, query, criteria):
         # Add a join to enable filtering by bank account type
         query = query.join(BankAccountTypeView)
-        return super()._filter_entries(query, filters)
+        return super()._filter_entries(query, criteria)
 
     @classmethod
     def delete_entry(cls, entry_id):
