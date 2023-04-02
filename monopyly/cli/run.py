@@ -55,7 +55,7 @@ class Runner:
     def __init__(self, mode, host=None, port=None):
         self.mode = mode
         self.host = host
-        self.port = port
+        self.port = port if port else "5000"
 
     @property
     def command(self):
