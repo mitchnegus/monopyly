@@ -97,7 +97,7 @@
 
 - Add a merchant field and tags to bank transactions
 - Add an enhanced autocompletion for assigning transaction tags
-- Swap the README instructions for the 'About' page (and move the story to a separate page)
 - Leverage SQLAlchemy 2.0 `DeclarativeBase` class and `declared_attr` decorators
 - Simplify `Model` base to avoid explicitly defining column attributes
 - Update the database backup script to work as part of the package
+- Swap the README instructions for the 'About' page (and move the story to a separate page)

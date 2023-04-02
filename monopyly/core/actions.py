@@ -17,12 +17,15 @@ def format_readme_as_html_template(readme_text):
     # Format the HTML as a valid Jinja template
     html_readme_template = (
         '{% extends "layout.html" %}'
+        "{% block title %}About{% endblock %}"
         "{% block content %}"
-        f"  {html_readme}"
-        '  <div class="resource-links">'
-        "    <h2>Links</h2>"
-        "    <p><a href=\"{{ url_for('core.story') }}\">Story</a></p>"
-        "    <p><a href=\"{{ url_for('core.credits') }}\">Credits</a></p>"
+        '  <div id="readme" class="about">'
+        f"    {html_readme}"
+        '    <div class="resource-links">'
+        "      <h2>Links</h2>"
+        '      <p><a href="{{ url_for(\"core.story\") }}">Story</a></p>'
+        '      <p><a href="{{ url_for(\"core.credits\") }}">Credits</a></p>'
+        "    </div>"
         "  </div>"
         "{% endblock %}"
     )
