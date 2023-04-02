@@ -51,7 +51,11 @@ source = 'vcs'
 
 [tool.hatch.build.targets.sdist]
 include = [
+  '/README.md',
   '/monopyly',
+]
+exclude = [
+  '*.pyc',
 ]
 
 [tool.hatch.build.hooks.vcs]
@@ -61,7 +65,7 @@ version-file = 'monopyly/_version.py'
 content-type = 'text/markdown'
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = 'README.md'
+path = 'monopyly/README.md'
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
 pattern = 'src="((?!https?:\/\/)\S+?)"'

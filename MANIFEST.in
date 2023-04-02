@@ -1,5 +1,0 @@
-include monopyly/database/*.sql
-graft monopyly/static
-graft monopyly/templates
-global-exclude *.pyc
-

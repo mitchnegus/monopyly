@@ -1,6 +1,8 @@
 """
 Routes for core functionality.
 """
+from pathlib import Path
+
 from flask import g, render_template, render_template_string
 
 from ..auth.tools import login_required
@@ -40,7 +42,8 @@ def index():
 
 @bp.route("/about")
 def about():
-    with open("README.md", encoding="utf-8") as readme_file:
+    readme_path = Path(__file__).parents[1] / "README.md"
+    with readme_path.open(encoding="utf-8") as readme_file:
         raw_readme_text = readme_file.read()
     about_page_template = format_readme_as_html_template(raw_readme_text)
     return render_template_string(about_page_template)
