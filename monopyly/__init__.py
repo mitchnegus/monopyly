@@ -10,9 +10,9 @@ from monopyly.config import DevelopmentConfig, ProductionConfig
 from monopyly.database import (
     DB_NAME,
     SQLAlchemy,
+    back_up_db_command,
     close_db,
     db,
-    back_up_db_command,
     init_db_command,
 )
 

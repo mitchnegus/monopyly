@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from monopyly.core.actions import get_timestamp, format_readme_as_html_template
+from monopyly.core.actions import format_readme_as_html_template, get_timestamp
 
 
 @patch("monopyly.core.actions.datetime")

@@ -1,5 +1,6 @@
 """Module describing logical core actions (to be used in routes)."""
 from datetime import datetime
+
 import markdown
 
 
@@ -23,8 +24,8 @@ def format_readme_as_html_template(readme_text):
         f"    {html_readme}"
         '    <div class="resource-links">'
         "      <h2>Links</h2>"
-        '      <p><a href="{{ url_for(\"core.story\") }}">Story</a></p>'
-        '      <p><a href="{{ url_for(\"core.credits\") }}">Credits</a></p>'
+        '      <p><a href="{{ url_for("core.story") }}">Story</a></p>'
+        '      <p><a href="{{ url_for("core.credits") }}">Credits</a></p>'
         "    </div>"
         "  </div>"
         "{% endblock %}"
