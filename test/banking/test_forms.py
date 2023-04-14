@@ -519,6 +519,16 @@ class TestBankTransactionForm:
         "field, sort_fields, top_expected_suggestions, expected_suggestions",
         [
             [
+                "merchant",
+                {},
+                (),
+                (
+                    "Test Merchant",
+                    "JP Morgan Chance",
+                    "Canteen",
+                ),
+            ],
+            [
                 "note",
                 {},
                 (),

@@ -5,7 +5,12 @@ from wtforms.fields import BooleanField, FieldList, FormField, StringField, Subm
 from wtforms.validators import DataRequired, Optional
 
 from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
-from ..common.forms.fields import CustomChoiceSelectField, LastFourDigitsField
+from ..common.forms.fields import (
+    CustomChoiceSelectField,
+    DateField,
+    LastFourDigitsField,
+    StringField,
+)
 from ..common.forms.utils import Autocompleter
 from ..common.utils import parse_date
 from ..database.models import (
@@ -207,6 +212,7 @@ class BankTransactionForm(TransactionForm):
             "bank_name": Bank,
             "type_name": BankAccountTypeView,
             "last_four_digits": BankAccountView,
+            "merchant": BankTransaction,
             "note": BankSubtransaction,
             "tags": TransactionTag,
         }

@@ -41,7 +41,7 @@ class StringField(wtforms_fields.StringField):
 
     def __init__(self, *args, filters=(), **kwargs):
         filters = list(filters)
-        filters.append(lambda x: x.strip() if x else "")
+        filters.append(lambda x: x.strip() if x else None)
         super().__init__(*args, filters=filters, **kwargs)
 
 

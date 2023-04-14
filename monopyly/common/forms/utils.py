@@ -66,7 +66,7 @@ class Autocompleter:
             self._sort_suggestions_by_field(
                 suggestions, model, field, sort_field, precedence_value
             )
-        return suggestions
+        return list(filter(None, suggestions))
 
     @staticmethod
     def _get_autocomplete_suggestions(model, field):

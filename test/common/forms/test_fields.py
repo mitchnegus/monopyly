@@ -47,7 +47,7 @@ class TestFields:
         [
             ["test string", "test string"],
             ["  test string   ", "test string"],
-            [None, ""],
+            [None, None],
         ],
     )
     def test_string_field(self, mock_field_form, test_value, expected_value):
