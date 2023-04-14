@@ -72,7 +72,7 @@ upload : env
 ## clean		: Clean all automatically generated files
 .PHONY : clean
 clean :
-	@rm -rf monopyly/_version.py
+	@rm -rf $(PACKAGE_DIR)/_version.py
 	@rm -rf instance/dev-monopyly.sqlite
 	@rm -rf htmlcov/
 	@rm -rf dist/ *egg-info/
