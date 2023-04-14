@@ -7,6 +7,3 @@ exclude_lines =
 omit =
     # Omit tests
     test/*
-
-    # Omit setup file
-    setup.py
