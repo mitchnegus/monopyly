@@ -1,14 +1,14 @@
 from authanor.models import AuthorizedAccessMixin, Model
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import mapped_column, relationship
 
 
 class User(Model):
     __tablename__ = "users"
     # Columns
-    id = Column(Integer, primary_key=True)
-    username = Column(String, nullable=False)
-    password = Column(String, nullable=False)
+    id = mapped_column(Integer, primary_key=True)
+    username = mapped_column(String, nullable=False)
+    password = mapped_column(String, nullable=False)
     # Relationships
     banks = relationship(
         "Bank",
@@ -25,7 +25,7 @@ class User(Model):
 class InternalTransaction(Model):
     __tablename__ = "internal_transactions"
     # Columns
-    id = Column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
     # Relationships
     bank_transactions = relationship(
         "BankTransactionView",
@@ -67,10 +67,10 @@ credit_tag_link_table = Table(
 class TransactionTag(AuthorizedAccessMixin, Model):
     __tablename__ = "transaction_tags"
     # Columns
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    parent_id = Column(Integer, ForeignKey("transaction_tags.id"))
-    tag_name = Column(String, nullable=False)
+    id = mapped_column(Integer, primary_key=True)
+    user_id = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    parent_id = mapped_column(Integer, ForeignKey("transaction_tags.id"))
+    tag_name = mapped_column(String, nullable=False)
     # Relationships
     bank_subtransactions = relationship(
         "BankSubtransaction",
@@ -87,9 +87,9 @@ class TransactionTag(AuthorizedAccessMixin, Model):
 class Bank(AuthorizedAccessMixin, Model):
     __tablename__ = "banks"
     # Columns
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    bank_name = Column(String, nullable=False)
+    id = mapped_column(Integer, primary_key=True)
+    user_id = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    bank_name = mapped_column(String, nullable=False)
     # Relationships
     user = relationship("User", back_populates="banks")
     bank_accounts = relationship(
@@ -108,10 +108,10 @@ class BankAccountType(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_account_types"
     _alt_authorized_ids = (0,)
     # Columns
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    type_name = Column(String, nullable=False)
-    type_abbreviation = Column(String)
+    id = mapped_column(Integer, primary_key=True)
+    user_id = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    type_name = mapped_column(String, nullable=False)
+    type_abbreviation = mapped_column(String)
     # Relationships
     view = relationship(
         "BankAccountTypeView",
@@ -125,11 +125,11 @@ class BankAccountTypeView(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_account_types_view"
     _alt_authorized_ids = (0,)
     # Columns
-    id = Column(Integer, ForeignKey("bank_account_types.id"), primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    type_name = Column(String, nullable=False)
-    type_abbreviation = Column(String)
-    type_common_name = Column(String, nullable=False)
+    id = mapped_column(Integer, ForeignKey("bank_account_types.id"), primary_key=True)
+    user_id = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    type_name = mapped_column(String, nullable=False)
+    type_abbreviation = mapped_column(String)
+    type_common_name = mapped_column(String, nullable=False)
     # Relationships
     account_type = relationship(
         "BankAccountType",
@@ -147,15 +147,15 @@ class BankAccount(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_accounts"
     _user_id_join_chain = (Bank,)
     # Columns
-    id = Column(Integer, primary_key=True)
-    bank_id = Column(Integer, ForeignKey("banks.id"), nullable=False)
-    account_type_id = Column(
+    id = mapped_column(Integer, primary_key=True)
+    bank_id = mapped_column(Integer, ForeignKey("banks.id"), nullable=False)
+    account_type_id = mapped_column(
         Integer,
         ForeignKey("bank_account_types_view.id"),
         nullable=False,
     )
-    last_four_digits = Column(String, nullable=False)
-    active = Column(Integer, nullable=False)
+    last_four_digits = mapped_column(String, nullable=False)
+    active = mapped_column(Integer, nullable=False)
     # Relationships
     view = relationship(
         "BankAccountView",
@@ -169,16 +169,16 @@ class BankAccountView(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_accounts_view"
     _user_id_join_chain = (Bank,)
     # Columns
-    id = Column(Integer, ForeignKey("bank_accounts.id"), primary_key=True)
-    bank_id = Column(Integer, ForeignKey("banks.id"), nullable=False)
-    account_type_id = Column(
+    id = mapped_column(Integer, ForeignKey("bank_accounts.id"), primary_key=True)
+    bank_id = mapped_column(Integer, ForeignKey("banks.id"), nullable=False)
+    account_type_id = mapped_column(
         Integer,
         ForeignKey("bank_account_types_view.id"),
         nullable=False,
     )
-    last_four_digits = Column(String, nullable=False)
-    active = Column(Integer, nullable=False)
-    balance = Column(Float, nullable=False)
+    last_four_digits = mapped_column(String, nullable=False)
+    active = mapped_column(Integer, nullable=False)
+    balance = mapped_column(Float, nullable=False)
     # Relationships
     account = relationship("BankAccount", back_populates="view")
     bank = relationship("Bank", back_populates="bank_accounts")
@@ -198,18 +198,18 @@ class BankTransaction(AuthorizedAccessMixin, Model):
     # Denote the transaction subtype
     subtype = "bank"
     # Columns
-    id = Column(Integer, primary_key=True)
-    internal_transaction_id = Column(
+    id = mapped_column(Integer, primary_key=True)
+    internal_transaction_id = mapped_column(
         Integer,
         ForeignKey("internal_transactions.id"),
     )
-    account_id = Column(
+    account_id = mapped_column(
         Integer,
         ForeignKey("bank_accounts_view.id"),
         nullable=False,
     )
-    transaction_date = Column(Date, nullable=False)
-    merchant = Column(String)
+    transaction_date = mapped_column(Date, nullable=False)
+    merchant = mapped_column(String)
     # ((Should have optional merchant field?))
     #  Relationships
     view = relationship(
@@ -226,21 +226,21 @@ class BankTransactionView(AuthorizedAccessMixin, Model):
     # Denote the transaction subtype
     subtype = "bank"
     # Columns
-    id = Column(Integer, ForeignKey("bank_transactions.id"), primary_key=True)
-    internal_transaction_id = Column(
+    id = mapped_column(Integer, ForeignKey("bank_transactions.id"), primary_key=True)
+    internal_transaction_id = mapped_column(
         Integer,
         ForeignKey("internal_transactions.id"),
     )
-    account_id = Column(
+    account_id = mapped_column(
         Integer,
         ForeignKey("bank_accounts_view.id"),
         nullable=False,
     )
-    transaction_date = Column(Date, nullable=False)
-    merchant = Column(String)
-    total = Column(Float)
-    notes = Column(String)
-    balance = Column(Float)
+    transaction_date = mapped_column(Date, nullable=False)
+    merchant = mapped_column(String)
+    total = mapped_column(Float)
+    notes = mapped_column(String)
+    balance = mapped_column(Float)
     # ((Should have optional merchant field?))
     # Relationships
     transaction = relationship(
@@ -261,14 +261,14 @@ class BankSubtransaction(AuthorizedAccessMixin, Model):
     __tablename__ = "bank_subtransactions"
     _user_id_join_chain = (BankTransactionView, BankAccountView, Bank)
     # Columns
-    id = Column(Integer, primary_key=True)
-    transaction_id = Column(
+    id = mapped_column(Integer, primary_key=True)
+    transaction_id = mapped_column(
         Integer,
         ForeignKey("bank_transactions_view.id"),
         nullable=False,
     )
-    subtotal = Column(Float, nullable=False)
-    note = Column(String, nullable=False)
+    subtotal = mapped_column(Float, nullable=False)
+    note = mapped_column(String, nullable=False)
     # Relationships
     transaction = relationship(
         "BankTransactionView",
@@ -286,10 +286,10 @@ class CreditAccount(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_accounts"
     _user_id_join_chain = (Bank,)
     # Columns
-    id = Column(Integer, primary_key=True)
-    bank_id = Column(Integer, ForeignKey("banks.id"), nullable=False)
-    statement_issue_day = Column(Integer, nullable=False)
-    statement_due_day = Column(Integer, nullable=False)
+    id = mapped_column(Integer, primary_key=True)
+    bank_id = mapped_column(Integer, ForeignKey("banks.id"), nullable=False)
+    statement_issue_day = mapped_column(Integer, nullable=False)
+    statement_due_day = mapped_column(Integer, nullable=False)
     # ((Should probably have an 'active' field))
     # Relationships
     bank = relationship("Bank", back_populates="credit_accounts")
@@ -304,14 +304,14 @@ class CreditCard(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_cards"
     _user_id_join_chain = (CreditAccount, Bank)
     # Columns
-    id = Column(Integer, primary_key=True)
-    account_id = Column(
+    id = mapped_column(Integer, primary_key=True)
+    account_id = mapped_column(
         Integer,
         ForeignKey("credit_accounts.id"),
         nullable=False,
     )
-    last_four_digits = Column(String, nullable=False)
-    active = Column(Integer, nullable=False)
+    last_four_digits = mapped_column(String, nullable=False)
+    active = mapped_column(Integer, nullable=False)
     # Relationships
     account = relationship("CreditAccount", back_populates="cards")
     statements = relationship(
@@ -325,10 +325,10 @@ class CreditStatement(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_statements"
     _user_id_join_chain = (CreditCard, CreditAccount, Bank)
     # Columns
-    id = Column(Integer, primary_key=True)
-    card_id = Column(Integer, ForeignKey("credit_cards.id"), nullable=False)
-    issue_date = Column(Date, nullable=False)
-    due_date = Column(Date, nullable=False)
+    id = mapped_column(Integer, primary_key=True)
+    card_id = mapped_column(Integer, ForeignKey("credit_cards.id"), nullable=False)
+    issue_date = mapped_column(Date, nullable=False)
+    due_date = mapped_column(Date, nullable=False)
     # Relationship
     view = relationship(
         "CreditStatementView",
@@ -342,12 +342,12 @@ class CreditStatementView(AuthorizedAccessMixin, Model):
     __tablename__ = "credit_statements_view"
     _user_id_join_chain = (CreditCard, CreditAccount, Bank)
     # Columns
-    id = Column(Integer, ForeignKey("credit_statements.id"), primary_key=True)
-    card_id = Column(Integer, ForeignKey("credit_cards.id"), nullable=False)
-    issue_date = Column(Date, nullable=False)
-    due_date = Column(Date, nullable=False)
-    balance = Column(Float, nullable=False)
-    payment_date = Column(Date)
+    id = mapped_column(Integer, ForeignKey("credit_statements.id"), primary_key=True)
+    card_id = mapped_column(Integer, ForeignKey("credit_cards.id"), nullable=False)
+    issue_date = mapped_column(Date, nullable=False)
+    due_date = mapped_column(Date, nullable=False)
+    balance = mapped_column(Float, nullable=False)
+    payment_date = mapped_column(Date)
     # Relationships
     statement = relationship(
         "CreditStatement",
@@ -365,18 +365,18 @@ class CreditTransaction(AuthorizedAccessMixin, Model):
     # Denote the transaction subtype
     subtype = "credit"
     # Columns
-    id = Column(Integer, primary_key=True)
-    internal_transaction_id = Column(
+    id = mapped_column(Integer, primary_key=True)
+    internal_transaction_id = mapped_column(
         Integer,
         ForeignKey("internal_transactions.id"),
     )
-    statement_id = Column(
+    statement_id = mapped_column(
         Integer,
         ForeignKey("credit_statements_view.id"),
         nullable=False,
     )
-    transaction_date = Column(Date, nullable=False)
-    merchant = Column(String, nullable=False)
+    transaction_date = mapped_column(Date, nullable=False)
+    merchant = mapped_column(String, nullable=False)
     # Relationships
     view = relationship(
         "CreditTransactionView",
@@ -392,24 +392,24 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
     # Denote the transaction subtype
     subtype = "credit"
     # Columns
-    id = Column(
+    id = mapped_column(
         Integer,
         ForeignKey("credit_transactions.id"),
         primary_key=True,
     )
-    internal_transaction_id = Column(
+    internal_transaction_id = mapped_column(
         Integer,
         ForeignKey("internal_transactions.id"),
     )
-    statement_id = Column(
+    statement_id = mapped_column(
         Integer,
         ForeignKey("credit_statements_view.id"),
         nullable=False,
     )
-    transaction_date = Column(Date, nullable=False)
-    merchant = Column(String, nullable=False)
-    total = Column(Float, nullable=False)
-    notes = Column(String, nullable=False)
+    transaction_date = mapped_column(Date, nullable=False)
+    merchant = mapped_column(String, nullable=False)
+    total = mapped_column(Float, nullable=False)
+    notes = mapped_column(String, nullable=False)
     # Relationships
     transaction = relationship(
         "CreditTransaction",
@@ -440,14 +440,14 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
         Bank,
     )
     # Columns
-    id = Column(Integer, primary_key=True)
-    transaction_id = Column(
+    id = mapped_column(Integer, primary_key=True)
+    transaction_id = mapped_column(
         Integer,
         ForeignKey("credit_transactions_view.id"),
         nullable=False,
     )
-    subtotal = Column(Float, nullable=False)
-    note = Column(String, nullable=False)
+    subtotal = mapped_column(Float, nullable=False)
+    note = mapped_column(String, nullable=False)
     # Relationships
     transaction = relationship(
         "CreditTransactionView",
