@@ -121,7 +121,7 @@ Payments can be made directly from a statement's page and can be linked to a ban
 ## License
 
 This project is licensed under the GNU General Public License, Version 3.
-It is fully open-source, and while you are more than welcome to fork, add, modify, etc. it is required that you also keep those changes and additions open-source.
+It is fully open-source, and while you are more than welcome to fork, add, modify, etc. it is required that you keep any distributed changes and additions open-source.
 
 
 ## Changes
