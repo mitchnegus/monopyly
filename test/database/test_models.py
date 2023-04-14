@@ -4,7 +4,6 @@ from datetime import date
 import pytest
 
 from monopyly.database.models import (
-    AuthorizedAccessMixin,
     Bank,
     BankAccount,
     BankAccountType,
@@ -15,7 +14,6 @@ from monopyly.database.models import (
     CreditStatement,
     CreditSubtransaction,
     CreditTransaction,
-    Model,
     TransactionTag,
     User,
 )
@@ -417,16 +415,3 @@ class TestCreditSubtransaction(TestModel):
     def test_model_representation(self, mapping, expected_repr_string):
         subtransaction = CreditSubtransaction(**mapping)
         assert repr(subtransaction) == expected_repr_string
-
-
-class TestAlternateModels:
-    def test_invalid_authorized_model(self):
-        # Define an "authorized access" class to test authorization
-        class AuthorizedModel(AuthorizedAccessMixin, Model):
-            # Pass a valid table name
-            __tablename__ = "users"
-
-        # Test that the model cannot make a selection based on the user
-        authorized_model = AuthorizedModel()
-        with pytest.raises(AttributeError):
-            authorized_model.select_for_user()

@@ -3,9 +3,9 @@ Tools for building a common transaction interface.
 """
 from abc import abstractmethod
 
+from authanor.handler import DatabaseHandler, DatabaseViewHandler
 from flask import current_app
 
-from ..database.handler import DatabaseHandler, DatabaseViewHandler
 from ..database.models import (
     BankAccountTypeView,
     BankTransactionView,

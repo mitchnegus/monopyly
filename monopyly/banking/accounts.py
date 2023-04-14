@@ -2,10 +2,10 @@
 Tools for interacting with bank accounts in the database.
 """
 import sqlalchemy.sql.functions as sql_func
+from authanor.handler import DatabaseViewHandler
 from werkzeug.exceptions import abort
 
 from ..common.forms.utils import execute_on_form_validation
-from ..database.handler import DatabaseViewHandler
 from ..database.models import (
     Bank,
     BankAccount,

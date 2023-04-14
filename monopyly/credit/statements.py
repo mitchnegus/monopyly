@@ -1,8 +1,9 @@
 """
 Tools for interacting with the credit statements in the database.
 """
+from authanor.handler import DatabaseViewHandler
+
 from ..common.utils import get_next_occurrence_of_day
-from ..database.handler import DatabaseViewHandler
 from ..database.models import (
     CreditAccount,
     CreditCard,
@@ -66,7 +67,7 @@ class CreditStatementHandler(
         criteria.add_match_filter(cls.model, "card_id", card_ids)
         criteria.add_match_filter(CreditAccount, "bank_id", bank_ids)
         criteria.add_match_filter(CreditCard, "active", active)
-        statements = super().get_entries(criteria, sort_order=sort_order)
+        statements = super().get_entries(criteria=criteria, sort_order=sort_order)
         return statements
 
     @classmethod

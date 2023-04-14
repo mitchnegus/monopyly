@@ -1,3 +1,4 @@
+authanor>=0.1.0
 beautifulsoup4>=4.11.2
 black>=23.1.0
 colorama>=0.4.6
