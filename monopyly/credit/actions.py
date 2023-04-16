@@ -115,9 +115,10 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
     # Add the payment as a transaction in the database
     if payment_account_id:
         # Populate a mapping for the transfer
-        payment_note = f"Credit card payment ({payee}-{card.last_four_digits})"
+        payment_note = f"Credit card payment ({payee} – {card.last_four_digits})"
         bank_mapping = {
             "account_id": payment_account_id,
+            "merchant": payee,
             "transaction_date": payment_date,
             "subtransactions": [
                 {
