@@ -101,3 +101,4 @@
 - Simplify `Model` base to avoid explicitly defining column attributes
 - Update the database backup script to work as part of the package
 - Swap the README instructions for the 'About' page (and move the story to a separate page)
+- Improve utilization of `pyroject.toml`
