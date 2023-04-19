@@ -81,7 +81,7 @@ force-exclude = 'monopyly/_version.py'
 
 [tool.isort]
 profile = 'black'
-src_paths = ['monopyly', 'test']
+src_paths = ['monopyly', 'tests']
 
 [tool.pytest.ini_options]
 filterwarnings = [

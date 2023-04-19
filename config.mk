@@ -14,7 +14,7 @@ ENV_BIN = $(ENV)/bin
 ENV_ACTIVATE = $(ENV_BIN)/activate
 
 # Testing
-TEST_DIR = test
+TEST_DIR = tests
 TEST_PYTHON_FILES = $(wildcard $(TEST_DIR)/*.py) \
 		    $(wildcard $(TEST_DIR)/**/*.py)
 COVERAGE_OPT_LOCATION = --cov=.
