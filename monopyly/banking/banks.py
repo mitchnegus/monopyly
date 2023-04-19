@@ -1,7 +1,7 @@
 """
 Tools for interacting with banks in the database.
 """
-from authanor.handler import DatabaseHandler
+from authanor.database.handler import DatabaseHandler
 
 from ..database.models import Bank
 

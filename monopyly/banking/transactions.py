@@ -1,7 +1,7 @@
 """
 Tools for interacting with the bank transactions in the database.
 """
-from authanor.handler import DatabaseViewHandler
+from authanor.database.handler import DatabaseViewHandler
 
 from ..common.forms.utils import execute_on_form_validation
 from ..common.transactions import TransactionHandler, TransactionTagHandler

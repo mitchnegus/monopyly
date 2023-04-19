@@ -3,6 +3,7 @@ from datetime import date
 from unittest.mock import Mock, call, patch
 
 import pytest
+from authanor.test.helpers import transaction_lifetime
 
 from monopyly.banking.transactions import BankTransactionHandler
 from monopyly.credit.actions import (
@@ -14,8 +15,6 @@ from monopyly.credit.actions import (
 from monopyly.credit.cards import CreditCardHandler
 from monopyly.credit.statements import CreditStatementHandler
 from monopyly.credit.transactions import CreditTransactionHandler
-
-from ..helpers import transaction_lifetime
 
 
 @patch("monopyly.credit.actions.CreditStatementHandler.get_statements")

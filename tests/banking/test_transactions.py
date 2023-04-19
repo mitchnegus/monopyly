@@ -3,6 +3,7 @@ from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
+from authanor.test.helpers import TestHandler
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
@@ -20,7 +21,6 @@ from monopyly.database.models import (
 )
 
 from ..common.helpers import TestTagHandler
-from ..helpers import TestHandler
 
 
 @pytest.fixture

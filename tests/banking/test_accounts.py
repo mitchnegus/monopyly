@@ -2,6 +2,7 @@
 from unittest.mock import patch
 
 import pytest
+from authanor.test.helpers import TestHandler
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
@@ -18,8 +19,6 @@ from monopyly.database.models import (
     BankAccountView,
     BankTransaction,
 )
-
-from ..helpers import TestHandler
 
 
 @pytest.fixture

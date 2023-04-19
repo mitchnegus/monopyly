@@ -1,7 +1,7 @@
 """
 Tools for interacting with credit accounts in the database.
 """
-from authanor.handler import DatabaseHandler
+from authanor.database.handler import DatabaseHandler
 
 from ..database.models import CreditAccount
 

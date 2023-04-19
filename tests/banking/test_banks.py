@@ -1,12 +1,11 @@
 """Tests for the banking module managing banks."""
 import pytest
+from authanor.test.helpers import TestHandler
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.banking.banks import BankHandler
 from monopyly.database.models import Bank, BankAccount
-
-from ..helpers import TestHandler
 
 
 @pytest.fixture

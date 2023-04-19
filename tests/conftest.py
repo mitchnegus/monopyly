@@ -1,11 +1,18 @@
+from contextlib import contextmanager
+from pathlib import Path
+
 import pytest
+from authanor.test.helpers import AppTestManager
 
-from .helpers import AppManager
+from monopyly import create_app
+from monopyly.config import TestingConfig
 
-# Use an app/client for authorization
+TEST_DIR = Path(__file__).parent
 
 
 class AuthActions:
+    """An object for performing authorized actions on behalf of a client."""
+
     def __init__(self, client):
         self._client = client
 
@@ -18,42 +25,57 @@ class AuthActions:
         return self._client.get("/auth/logout")
 
 
-def pytest_generate_tests(metafunc):
+class AppManager(AppTestManager):
     """
-    Control test generation.
+    An object for managing apps during testing.
 
-    This function overrides the built-in Pytest function to explicitly
-    control test generation. Here, controlling test generation is
-    required to alter the order of the `metafunc.fixturenames`
-    attribute. The fixtures defined in that list are called (in order)
-    when setting up a test function; however, for this app's tests to
-    perform optimally, the `transaction_app_context` must be the very
-    first fixture called so that the proper testing context is used.
+    Flask tests require access to an app, and this app provides access
+    to the database. To avoid recreating the database on every test (and
+    thus substantially improve test performance times), it is convenient
+    to persist the app and database throughout the duration of testing.
+    However, tests that consist of complete SQLAlchemy transactions
+    which alter the database (e.g., additions, updates, deletions;
+    operations that include a commit) would change this persistent
+    database version and impact subsequent tests. Since simply rolling
+    back the changes is insufficient to restore the database, this
+    object manages which app (and database) are used for a transaction.
+    The current app options are either
+        (1) A persistent app, which survives through the entire test
+            process and provides quick database access; or
+        (2) An ephemeral app, which is designed to survive through only
+            one single test.
+
+    To enable switching between the two types of apps, this class relies
+    on two Pytest fixtures (`app_context` and `app_transaction_context`)
+    to control the scope of the two apps. The `app_context` fixture is
+    created just once for the session and is then automatically used in
+    all tests. On the other hand, the `app_transaction_context` fixture
+    may be manually included in any test, which causes an ephemeral app
+    to be created (and then used) only for that one test. To avoid
+    cluttering test signatures, the `transaction_lifetime` decorator
+    helper is provided to signal that a test should use the ephemeral
+    app rather than calling the `app_transaction_context` fixture
+    directly.
     """
-    priority_fixture = "transaction_app_context"
-    if priority_fixture in metafunc.fixturenames:
-        metafunc.fixturenames.remove(priority_fixture)
-        metafunc.fixturenames.insert(0, priority_fixture)
+
+    @staticmethod
+    def prepare_test_config(test_database_path):
+        """Prepare the test configuration object."""
+        preload_data_path = TEST_DIR / "data.sql"
+        test_config = TestingConfig(
+            db_path=test_database_path,
+            preload_data_path=preload_data_path,
+        )
+        return test_config
 
 
-# Build a test database, use it in an app, and then create a test client
-
-
-@pytest.fixture(scope="session", autouse=True)
-def app_context():
-    with AppManager.persistent_context():
-        yield
-
-
-@pytest.fixture
-def transaction_app_context():
-    with AppManager.ephemeral_context():
-        yield
+# Instantiate the app manager to determine the correct app (persistent/ephemeral)
+app_manager = AppManager(factory=create_app)
 
 
 @pytest.fixture
 def app():
-    yield AppManager.get_app()
+    yield app_manager.get_app()
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@
 Tools for interacting with bank accounts in the database.
 """
 import sqlalchemy.sql.functions as sql_func
-from authanor.handler import DatabaseViewHandler
+from authanor.database.handler import DatabaseViewHandler
 from werkzeug.exceptions import abort
 
 from ..common.forms.utils import execute_on_form_validation
@@ -113,8 +113,8 @@ class BankAccountTypeHandler(
         super().delete_entry(entry_id)
 
     @classmethod
-    def _confirm_manipulation_authorization(cls, entry_id):
-        account_type = super()._confirm_manipulation_authorization(entry_id)
+    def _validate_authorization(cls, entry_id):
+        account_type = super()._validate_authorization(entry_id)
         # Limit manipulation to only the user (excluding common entries)
         if account_type.user_id != cls.user_id:
             abort_msg = (

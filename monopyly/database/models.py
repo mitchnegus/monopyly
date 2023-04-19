@@ -1,4 +1,4 @@
-from authanor.models import AuthorizedAccessMixin, Model
+from authanor.database.models import AuthorizedAccessMixin, Model
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import mapped_column, relationship
 
@@ -96,6 +96,7 @@ class Bank(AuthorizedAccessMixin, Model):
         "BankAccountView",
         viewonly=True,
         back_populates="bank",
+        cascade="all, delete",
     )
     credit_accounts = relationship(
         "CreditAccount",

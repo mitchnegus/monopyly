@@ -3,6 +3,7 @@ from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
+from authanor.test.helpers import TestHandler
 from sqlalchemy.exc import StatementError
 from werkzeug.exceptions import NotFound
 
@@ -12,8 +13,6 @@ from monopyly.database.models import (
     CreditStatementView,
     CreditTransaction,
 )
-
-from ..helpers import TestHandler
 
 
 @pytest.fixture
@@ -127,7 +126,10 @@ class TestCreditStatementHandler(TestHandler):
 
     @pytest.mark.parametrize(
         "statement_id, exception",
-        [[1, NotFound], [8, NotFound]],  # Not the logged in user  # Not in the database
+        [
+            [1, NotFound],  # the statement user is not the logged in user
+            [8, NotFound],  # the statement is not in the database
+        ],
     )
     def test_get_entry_invalid(self, statement_handler, statement_id, exception):
         with pytest.raises(exception):

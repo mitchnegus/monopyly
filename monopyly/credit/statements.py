@@ -1,7 +1,7 @@
 """
 Tools for interacting with the credit statements in the database.
 """
-from authanor.handler import DatabaseViewHandler
+from authanor.database.handler import DatabaseViewHandler
 
 from ..common.utils import get_next_occurrence_of_day
 from ..database.models import (

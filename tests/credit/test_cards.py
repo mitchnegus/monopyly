@@ -2,13 +2,12 @@
 from unittest.mock import patch
 
 import pytest
+from authanor.test.helpers import TestHandler
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.cards import CreditCardHandler, save_card
 from monopyly.database.models import CreditCard, CreditStatement
-
-from ..helpers import TestHandler
 
 
 @pytest.fixture

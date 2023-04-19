@@ -3,10 +3,11 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
+from authanor.test.helpers import transaction_lifetime
 from flask import url_for
 from werkzeug.exceptions import NotFound
 
-from ..helpers import TestRoutes, transaction_lifetime
+from ..helpers import TestRoutes
 
 
 class TestCreditRoutes(TestRoutes):

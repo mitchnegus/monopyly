@@ -1,12 +1,11 @@
 """Tests for the credit module managing credit card accounts."""
 import pytest
+from authanor.test.helpers import TestHandler
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.accounts import CreditAccountHandler
 from monopyly.database.models import CreditAccount, CreditCard
-
-from ..helpers import TestHandler
 
 
 @pytest.fixture
