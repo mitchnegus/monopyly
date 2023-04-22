@@ -76,15 +76,25 @@ replacement = 'src="https://raw.githubusercontent.com/mitchnegus/monopyly/main/\
 pattern = '\[(.+?)\]\(((?!https?://)\S+?)\)'
 replacement = '[\1](https://github.com/mitchnegus/monopyly/blob/main/\g<2>)'
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    'ignore::DeprecationWarning',
+    'ignore:INSECURE:UserWarning',
+]
+
+[tool.coverage.run]
+omit = [
+    'tests/*',
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    'raise NotImplementedError',
+]
+
 [tool.black]
 force-exclude = 'monopyly/_version.py'
 
 [tool.isort]
 profile = 'black'
 src_paths = ['monopyly', 'tests']
-
-[tool.pytest.ini_options]
-filterwarnings = [
-    'ignore::DeprecationWarning',
-    'ignore:INSECURE:UserWarning',
-]

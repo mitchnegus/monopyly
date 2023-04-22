@@ -1,9 +1,0 @@
-[report]
-exclude_lines =
-    # Omit `NotImplemented` code
-    raise NotImplementedError
-
-[run]
-omit =
-    # Omit tests
-    tests/*
