@@ -12,7 +12,6 @@ from flask.cli import with_appcontext
 from sqlalchemy.schema import Table
 
 from ..core.actions import get_timestamp
-from .schema import DATABASE_SCHEMA
 
 DB_NAME = "monopyly.sqlite"
 
