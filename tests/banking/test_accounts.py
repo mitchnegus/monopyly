@@ -180,9 +180,7 @@ class TestBankAccountTypeHandler(TestHandler):
             "type_abbreviation": "Paper",
         }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        self.assert_invalid_user_entry_add_fails(
-            account_type_handler, mapping, invalid_user_id=1, invalid_matches=1
-        )
+        self.assert_invalid_user_entry_add_fails(account_type_handler, mapping)
 
     @pytest.mark.parametrize(
         "mapping",
@@ -428,9 +426,7 @@ class TestBankAccountHandler(TestHandler):
             "active": 1,
         }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        self.assert_invalid_user_entry_add_fails(
-            account_handler, mapping, invalid_user_id=1, invalid_matches=1
-        )
+        self.assert_invalid_user_entry_add_fails(account_handler, mapping)
 
     @pytest.mark.parametrize(
         "mapping",

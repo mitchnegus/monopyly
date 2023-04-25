@@ -259,9 +259,7 @@ class TestBankTransactionHandler(TestHandler):
             "subtransactions": mock_subtransaction_mappings,
         }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        self.assert_invalid_user_entry_add_fails(
-            transaction_handler, mapping, invalid_user_id=1, invalid_matches=1
-        )
+        self.assert_invalid_user_entry_add_fails(transaction_handler, mapping)
 
     @pytest.mark.parametrize(
         "mapping",
