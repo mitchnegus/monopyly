@@ -68,8 +68,8 @@ class TestBankAccountTypeHandler(TestHandler):
 
     def test_initialization(self, account_type_handler):
         assert account_type_handler.model == BankAccountType
-        assert account_type_handler.table == "bank_account_types"
-        assert account_type_handler.table_view == "bank_account_types_view"
+        assert account_type_handler.table.name == "bank_account_types"
+        assert account_type_handler.table_view.name == "bank_account_types_view"
         assert account_type_handler.user_id == 3
 
     def test_model_view_access(self, account_type_handler):
@@ -276,8 +276,8 @@ class TestBankAccountHandler(TestHandler):
 
     def test_initialization(self, account_handler):
         assert account_handler.model == BankAccount
-        assert account_handler.table == "bank_accounts"
-        assert account_handler.table_view == "bank_accounts_view"
+        assert account_handler.table.name == "bank_accounts"
+        assert account_handler.table_view.name == "bank_accounts_view"
         assert account_handler.user_id == 3
 
     def test_model_view_access(self, account_handler):

@@ -26,7 +26,7 @@ class TestCreditCardHandler(TestHandler):
 
     def test_initialization(self, card_handler):
         assert card_handler.model == CreditCard
-        assert card_handler.table == "credit_cards"
+        assert card_handler.table.name == "credit_cards"
         assert card_handler.user_id == 3
 
     @pytest.mark.parametrize(

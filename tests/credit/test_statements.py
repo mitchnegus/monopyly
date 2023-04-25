@@ -82,8 +82,8 @@ class TestCreditStatementHandler(TestHandler):
 
     def test_initialization(self, statement_handler):
         assert statement_handler.model == CreditStatement
-        assert statement_handler.table == "credit_statements"
-        assert statement_handler.table_view == "credit_statements_view"
+        assert statement_handler.table.name == "credit_statements"
+        assert statement_handler.table_view.name == "credit_statements_view"
         assert statement_handler.user_id == 3
 
     def test_model_view_access(self, statement_handler):

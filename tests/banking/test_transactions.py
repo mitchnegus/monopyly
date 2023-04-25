@@ -129,8 +129,8 @@ class TestBankTransactionHandler(TestHandler):
 
     def test_initialization(self, transaction_handler):
         assert transaction_handler.model == BankTransaction
-        assert transaction_handler.table == "bank_transactions"
-        assert transaction_handler.table_view == "bank_transactions_view"
+        assert transaction_handler.table.name == "bank_transactions"
+        assert transaction_handler.table_view.name == "bank_transactions_view"
         assert transaction_handler.user_id == 3
 
     def test_model_view_access(self, transaction_handler):

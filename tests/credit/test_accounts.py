@@ -22,7 +22,7 @@ class TestCreditAccountHandler(TestHandler):
 
     def test_initialization(self, account_handler):
         assert account_handler.model == CreditAccount
-        assert account_handler.table == "credit_accounts"
+        assert account_handler.table.name == "credit_accounts"
         assert account_handler.user_id == 3
 
     @pytest.mark.parametrize(

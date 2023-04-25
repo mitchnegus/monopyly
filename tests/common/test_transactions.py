@@ -23,7 +23,7 @@ class TestTransactionTagHandler(TestTagHandler):
 
     def test_initialization(self, tag_handler):
         assert tag_handler.model == TransactionTag
-        assert tag_handler.table == "transaction_tags"
+        assert tag_handler.table.name == "transaction_tags"
         assert tag_handler.user_id == 3
 
     @pytest.mark.parametrize(

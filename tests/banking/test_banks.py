@@ -22,7 +22,7 @@ class TestBankHandler(TestHandler):
 
     def test_initialization(self, bank_handler):
         assert bank_handler.model == Bank
-        assert bank_handler.table == "banks"
+        assert bank_handler.table.name == "banks"
         assert bank_handler.user_id == 3
 
     @pytest.mark.parametrize(

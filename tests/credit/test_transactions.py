@@ -177,8 +177,8 @@ class TestCreditTransactionHandler(TestHandler):
 
     def test_initialization(self, transaction_handler):
         assert transaction_handler.model == CreditTransaction
-        assert transaction_handler.table == "credit_transactions"
-        assert transaction_handler.table_view == "credit_transactions_view"
+        assert transaction_handler.table.name == "credit_transactions"
+        assert transaction_handler.table_view.name == "credit_transactions_view"
         assert transaction_handler.user_id == 3
 
     def test_model_view_access(self, transaction_handler):
@@ -339,7 +339,7 @@ class TestCreditTransactionHandler(TestHandler):
             "subtransactions": mock_subtransaction_mappings,
         }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        self.assert_invalid_user_entry_add_fails(transaction_handler)
+        self.assert_invalid_user_entry_add_fails(transaction_handler, mapping)
 
     @pytest.mark.parametrize(
         "mapping",
