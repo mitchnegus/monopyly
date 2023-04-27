@@ -42,7 +42,7 @@ class BankHandler(DatabaseHandler, model=Bank):
         """
         criteria = cls._initialize_criteria_list()
         criteria.add_match_filter(cls.model, "bank_name", bank_names)
-        return super().get_entries(criteria)
+        return super().get_entries(criteria=criteria)
 
     @classmethod
     def delete_entry(cls, entry_id):

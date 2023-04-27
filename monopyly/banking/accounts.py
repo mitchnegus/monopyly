@@ -168,7 +168,7 @@ class BankAccountHandler(
         criteria = cls._initialize_criteria_list()
         criteria.add_match_filter(cls.model, "bank_id", bank_ids)
         criteria.add_match_filter(cls.model, "account_type_id", account_type_ids)
-        accounts = super().get_entries(criteria)
+        accounts = super().get_entries(criteria=criteria)
         return accounts
 
     @classmethod

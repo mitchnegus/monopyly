@@ -30,15 +30,19 @@ class TransactionHandler(DatabaseViewHandler):
     """
 
     @classmethod
-    def _customize_entries_query(cls, query, criteria, sort_order):
-        query = super()._customize_entries_query(query, criteria, sort_order)
+    def _customize_entries_query(cls, query, criteria, column_orders):
         # Group transactions and order by transaction date
         query = query.group_by(cls.model.id)
-        query = cls._sort_query(
-            query,
-            (cls.model.transaction_date, sort_order),
+        return super()._customize_entries_query(query, criteria, column_orders)
+
+    @classmethod
+    def _get_transactions(cls, criteria=None, sort_order="DESC"):
+        # Specify transaction order
+        column_orders = {cls.model.transaction_date: sort_order}
+        entries = cls.get_entries(
+            entry_ids=None, criteria=criteria, column_orders=column_orders
         )
-        return query
+        return entries
 
     @classmethod
     def add_entry(cls, **field_values):
@@ -202,7 +206,7 @@ class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
         tags : list of database.models.TransactionTag
             Returns transaction tags matching the criteria.
         """
-        tags = super().get_entries(criteria).all()
+        tags = super().get_entries(criteria=criteria).all()
         if ancestors is True:
             # Add all ancestors for each tag in the list
             for tag in tags:

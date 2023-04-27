@@ -67,7 +67,10 @@ class CreditStatementHandler(
         criteria.add_match_filter(cls.model, "card_id", card_ids)
         criteria.add_match_filter(CreditAccount, "bank_id", bank_ids)
         criteria.add_match_filter(CreditCard, "active", active)
-        statements = super().get_entries(criteria=criteria, sort_order=sort_order)
+        statements = super().get_entries(
+            criteria=criteria,
+            column_orders={cls.model.issue_date: sort_order, CreditCard.active: "DESC"},
+        )
         return statements
 
     @classmethod
@@ -100,20 +103,11 @@ class CreditStatementHandler(
         criteria.add_match_filter(CreditCard, "id", card_id)
         criteria.add_match_filter(cls.model, "issue_date", issue_date)
         statement = super().find_entry(
-            criteria=criteria, sort_order="DESC", require_unique=False
+            criteria=criteria,
+            column_orders={cls.model.issue_date: "DESC", CreditCard.active: "DESC"},
+            require_unique=False,
         )
         return statement
-
-    @classmethod
-    def _customize_entries_query(cls, query, filters, sort_order):
-        query = super()._customize_entries_query(query, filters, sort_order)
-        # Order by statement issue date
-        query = cls._sort_query(
-            query,
-            (cls.model.issue_date, sort_order),
-            (CreditCard.active, "DESC"),
-        )
-        return query
 
     @classmethod
     def infer_statement(cls, card, transaction_date, creation=False):

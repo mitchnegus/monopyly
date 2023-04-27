@@ -75,7 +75,9 @@ class CreditTransactionHandler(
         criteria.add_match_filter(cls.model, "statement_id", statement_ids)
         criteria.add_match_filter(CreditCard, "id", card_ids)
         criteria.add_match_filter(CreditCard, "active", active)
-        transactions = super().get_entries(criteria, sort_order=sort_order)
+        transactions = super()._get_transactions(
+            criteria=criteria, sort_order=sort_order
+        )
         return transactions
 
     @classmethod

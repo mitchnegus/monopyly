@@ -60,7 +60,7 @@ class CreditCardHandler(DatabaseHandler, model=CreditCard):
         criteria.add_match_filter(cls.model, "account_id", account_ids)
         criteria.add_match_filter(cls.model, "last_four_digits", last_four_digits)
         criteria.add_match_filter(cls.model, "active", active)
-        cards = super().get_entries(criteria)
+        cards = super().get_entries(criteria=criteria)
         return cards
 
     @classmethod
