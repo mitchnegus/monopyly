@@ -3,7 +3,7 @@ from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
-from authanor.test.helpers import TestHandler
+from authanor.testing.helpers import TestHandler
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 

@@ -1,5 +1,5 @@
 """Tests for internal transactions."""
-from authanor.test.helpers import transaction_lifetime
+from authanor.testing.helpers import transaction_lifetime
 from sqlalchemy import select
 from sqlalchemy.sql.expression import func
 

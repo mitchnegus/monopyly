@@ -1,6 +1,6 @@
 """Tests for user authentication."""
 import pytest
-from authanor.test.helpers import transaction_lifetime
+from authanor.testing.helpers import transaction_lifetime
 from flask import g, session
 from sqlalchemy import select
 

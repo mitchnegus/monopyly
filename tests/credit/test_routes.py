@@ -3,7 +3,7 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
-from authanor.test.helpers import transaction_lifetime
+from authanor.testing.helpers import transaction_lifetime
 from flask import url_for
 from werkzeug.exceptions import NotFound
 

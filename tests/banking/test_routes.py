@@ -2,7 +2,7 @@
 import json
 
 import pytest
-from authanor.test.helpers import transaction_lifetime
+from authanor.testing.helpers import transaction_lifetime
 
 from ..helpers import TestRoutes
 

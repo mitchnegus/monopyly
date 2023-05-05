@@ -1,6 +1,6 @@
 """Tests for the credit module managing credit card accounts."""
 import pytest
-from authanor.test.helpers import TestHandler
+from authanor.testing.helpers import TestHandler
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.accounts import CreditAccountHandler

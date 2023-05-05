@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
-from authanor.test.helpers import AppTestManager
+from authanor.testing.helpers import AppTestManager
 
 from monopyly import create_app
 from monopyly.config import TestingConfig

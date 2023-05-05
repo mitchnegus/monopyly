@@ -2,7 +2,7 @@
 from unittest.mock import patch
 
 import pytest
-from authanor.test.helpers import TestHandler
+from authanor.testing.helpers import TestHandler
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.cards import CreditCardHandler, save_card
