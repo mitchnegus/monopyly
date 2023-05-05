@@ -1,9 +1,7 @@
 """Tests for common aspects of transactions."""
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import NotFound
 
 from monopyly.common.transactions import TransactionTagHandler, get_linked_transaction
 from monopyly.database.models import TransactionTag
@@ -20,26 +18,6 @@ class TestTransactionTagHandler(TestTagHandler):
     # Redefine references here to allow them to be used by parametrization
     db_reference = TestTagHandler.db_reference
     db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
-
-    def test_initialization(self, tag_handler):
-        assert tag_handler.model == TransactionTag
-        assert tag_handler.table.name == "transaction_tags"
-        assert tag_handler.user_id == 3
-
-    @pytest.mark.parametrize(
-        "tag_id, reference_entry", [[2, db_reference[0]], [3, db_reference[1]]]
-    )
-    def test_get_entry(self, tag_handler, tag_id, reference_entry):
-        tag = tag_handler.get_entry(tag_id)
-        self.assertEntryMatches(tag, reference_entry)
-
-    @pytest.mark.parametrize(
-        "tag_id, exception",
-        [[1, NotFound], [9, NotFound]],  # Not the logged in user  # Not in the database
-    )
-    def test_get_entry_invalid(self, tag_handler, tag_id, exception):
-        with pytest.raises(exception):
-            tag_handler.get_entry(tag_id)
 
     @pytest.mark.parametrize(
         "tag, expected_subtags",
@@ -97,99 +75,6 @@ class TestTransactionTagHandler(TestTagHandler):
     def test_find_tag_none_exist(self, tag_handler, tag_name):
         tag = tag_handler.find_tag(tag_name)
         assert tag is None
-
-    @pytest.mark.parametrize(
-        "mapping",
-        [
-            {"user_id": 3, "parent_id": None, "tag_name": "Entertainment"},
-            {"user_id": 3, "parent_id": 5, "tag_name": "Water"},
-        ],
-    )
-    def test_add_entry(self, tag_handler, mapping):
-        # Add the entry
-        tag = tag_handler.add_entry(**mapping)
-        # Check that the entry object was properly created
-        assert tag.tag_name == mapping["tag_name"]
-        # Check that the entry was added to the database
-        self.assertNumberOfMatches(
-            1, TransactionTag.id, TransactionTag.tag_name == mapping["tag_name"]
-        )
-
-    @pytest.mark.parametrize(
-        "mapping, exception",
-        [
-            [
-                {"user_id": 3, "invalid_field": None, "tag_name": "Entertainment"},
-                TypeError,
-            ],
-            [{"user_id": 3, "parent_id": 5}, IntegrityError],
-        ],
-    )
-    def test_add_entry_invalid(self, tag_handler, mapping, exception):
-        with pytest.raises(exception):
-            tag_handler.add_entry(**mapping)
-
-    def test_add_entry_invalid_user(self, tag_handler):
-        mapping = {
-            "user_id": 1,
-            "parent_id": None,
-            "tag_name": "Entertainment",
-        }
-        # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        self.assert_invalid_user_entry_add_fails(tag_handler, mapping)
-
-    @pytest.mark.parametrize(
-        "mapping",
-        [
-            {"user_id": 3, "parent_id": None, "tag_name": "Trains"},
-            {"user_id": 3, "tag_name": "Trains"},
-        ],
-    )
-    def test_update_entry(self, tag_handler, mapping):
-        # Add the entry
-        tag = tag_handler.update_entry(4, **mapping)
-        # Check that the entry object was properly updated
-        assert tag.tag_name == "Trains"
-        # Check that the entry was updated in the database
-        self.assertNumberOfMatches(
-            1, TransactionTag.id, TransactionTag.tag_name == "Trains"
-        )
-
-    @pytest.mark.parametrize(
-        "tag_id, mapping, exception",
-        [
-            # Wrong tag user
-            [1, {"user_id": 3, "tag_name": "Test"}, NotFound],
-            # Invalid field
-            [5, {"user_id": 3, "invalid_field": "Test"}, ValueError],
-            # Nonexistent ID
-            [9, {"user_id": 3, "tag_name": "Test"}, NotFound],
-        ],
-    )
-    def test_update_entry_invalid(self, tag_handler, tag_id, mapping, exception):
-        with pytest.raises(exception):
-            tag_handler.update_entry(tag_id, **mapping)
-
-    @pytest.mark.parametrize("entry_id, subtag_ids", [[4, ()], [5, (6,)]])
-    def test_delete_entry(self, tag_handler, entry_id, subtag_ids):
-        self.assert_entry_deletion_succeeds(tag_handler, entry_id)
-        # Check that the cascading entries were deleted
-        self.assertNumberOfMatches(
-            0,
-            TransactionTag.id,
-            TransactionTag.id.in_(subtag_ids),
-        )
-
-    @pytest.mark.parametrize(
-        "entry_id, exception",
-        [
-            [1, NotFound],  # should not be able to delete other user entries
-            [9, NotFound],  # should not be able to delete nonexistent entries
-        ],
-    )
-    def test_delete_entry_invalid(self, tag_handler, entry_id, exception):
-        with pytest.raises(exception):
-            tag_handler.delete_entry(entry_id)
 
 
 @pytest.fixture

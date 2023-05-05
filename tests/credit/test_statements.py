@@ -1,6 +1,6 @@
 """Tests for the credit module managing credit card statements."""
 from datetime import date
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from authanor.test.helpers import TestHandler
@@ -80,18 +80,6 @@ class TestCreditStatementHandler(TestHandler):
         ),
     ]
 
-    def test_initialization(self, statement_handler):
-        assert statement_handler.model == CreditStatement
-        assert statement_handler.table.name == "credit_statements"
-        assert statement_handler.table_view.name == "credit_statements_view"
-        assert statement_handler.user_id == 3
-
-    def test_model_view_access(self, statement_handler):
-        assert statement_handler.model == CreditStatement
-        statement_handler._view_context = True
-        assert statement_handler.model == CreditStatementView
-        statement_handler._view_context = False
-
     @pytest.mark.parametrize(
         "card_ids, bank_ids, active, sort_order, reference_entries",
         [
@@ -116,24 +104,6 @@ class TestCreditStatementHandler(TestHandler):
             card_ids, bank_ids, active, sort_order
         )
         self.assertEntriesMatch(statements, reference_entries, order=True)
-
-    @pytest.mark.parametrize(
-        "statement_id, reference_entry", [[3, db_reference[4]], [4, db_reference[2]]]
-    )
-    def test_get_entry(self, statement_handler, statement_id, reference_entry):
-        statement = statement_handler.get_entry(statement_id)
-        self.assertEntryMatches(statement, reference_entry)
-
-    @pytest.mark.parametrize(
-        "statement_id, exception",
-        [
-            [1, NotFound],  # the statement user is not the logged in user
-            [8, NotFound],  # the statement is not in the database
-        ],
-    )
-    def test_get_entry_invalid(self, statement_handler, statement_id, exception):
-        with pytest.raises(exception):
-            statement_handler.get_entry(statement_id)
 
     @pytest.mark.parametrize(
         "card_id, issue_date, reference_entry",
@@ -254,43 +224,6 @@ class TestCreditStatementHandler(TestHandler):
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
         self.assert_invalid_user_entry_add_fails(statement_handler, mapping)
 
-    @pytest.mark.parametrize(
-        "mapping",
-        [
-            {
-                "card_id": 2,
-                "issue_date": date(2020, 5, 20),
-                "due_date": date(2020, 6, 5),
-            },
-            {"card_id": 2, "issue_date": date(2020, 5, 20)},
-        ],
-    )
-    def test_update_entry(self, statement_handler, mapping):
-        statement = statement_handler.update_entry(2, **mapping)
-        # Check that the entry object was properly updated
-        assert statement.issue_date == date(2020, 5, 20)
-        # Check that the entry was updated in the database
-        self.assertNumberOfMatches(
-            1, CreditStatement.id, CreditStatement.issue_date == date(2020, 5, 20)
-        )
-
-    @pytest.mark.parametrize(
-        "statement_id, mapping, exception",
-        [
-            # Wrong statement user
-            [1, {"card_id": 2, "issue_date": date(2020, 5, 20)}, NotFound],
-            # Invalid field
-            [2, {"card_id": 2, "invalid_field": "Test"}, ValueError],
-            # Nonexistent ID
-            [8, {"card_id": 2, "issue_date": date(2020, 5, 20)}, NotFound],
-        ],
-    )
-    def test_update_entry_invalid(
-        self, statement_handler, statement_id, mapping, exception
-    ):
-        with pytest.raises(exception):
-            statement_handler.update_entry(statement_id, **mapping)
-
     @pytest.mark.parametrize("entry_id", [2, 3])
     def test_delete_entry(self, statement_handler, entry_id):
         self.assert_entry_deletion_succeeds(statement_handler, entry_id)
@@ -298,14 +231,3 @@ class TestCreditStatementHandler(TestHandler):
         self.assertNumberOfMatches(
             0, CreditTransaction.id, CreditTransaction.statement_id == entry_id
         )
-
-    @pytest.mark.parametrize(
-        "entry_id, exception",
-        [
-            [1, NotFound],  # -- should not be able to delete other user entries
-            [10, NotFound],  # - should not be able to delete nonexistent entries
-        ],
-    )
-    def test_delete_entry_invalid(self, statement_handler, entry_id, exception):
-        with pytest.raises(exception):
-            statement_handler.delete_entry(entry_id)

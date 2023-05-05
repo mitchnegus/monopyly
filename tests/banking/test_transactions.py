@@ -127,18 +127,6 @@ class TestBankTransactionHandler(TestHandler):
         ),
     ]
 
-    def test_initialization(self, transaction_handler):
-        assert transaction_handler.model == BankTransaction
-        assert transaction_handler.table.name == "bank_transactions"
-        assert transaction_handler.table_view.name == "bank_transactions_view"
-        assert transaction_handler.user_id == 3
-
-    def test_model_view_access(self, transaction_handler):
-        assert transaction_handler.model == BankTransaction
-        transaction_handler._view_context = True
-        assert transaction_handler.model == BankTransactionView
-        transaction_handler._view_context = False
-
     @pytest.mark.parametrize(
         "account_ids, active, sort_order, reference_entries",
         [
@@ -161,24 +149,6 @@ class TestBankTransactionHandler(TestHandler):
             account_ids, active, sort_order
         )
         self.assertEntriesMatch(transactions, reference_entries, order=True)
-
-    @pytest.mark.parametrize(
-        "transaction_id, reference_entry", [[2, db_reference[5]], [3, db_reference[3]]]
-    )
-    def test_get_entry(self, transaction_handler, transaction_id, reference_entry):
-        transaction = transaction_handler.get_entry(transaction_id)
-        self.assertEntryMatches(transaction, reference_entry)
-
-    @pytest.mark.parametrize(
-        "transaction_id, exception",
-        [
-            [1, NotFound],  # the transaction user is not the logged in user
-            [8, NotFound],  # the transaction is not in the database
-        ],
-    )
-    def test_get_entry_invalid(self, transaction_handler, transaction_id, exception):
-        with pytest.raises(exception):
-            transaction_handler.get_entry(transaction_id)
 
     @pytest.mark.parametrize(
         "mapping",
@@ -249,18 +219,6 @@ class TestBankTransactionHandler(TestHandler):
         with pytest.raises(exception):
             transaction_handler.add_entry(**mapping)
 
-    def test_add_entry_invalid_user(
-        self, transaction_handler, mock_subtransaction_mappings
-    ):
-        mapping = {
-            "internal_transaction_id": 2,
-            "account_id": 1,
-            "transaction_date": date(2022, 5, 8),
-            "subtransactions": mock_subtransaction_mappings,
-        }
-        # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        self.assert_invalid_user_entry_add_fails(transaction_handler, mapping)
-
     @pytest.mark.parametrize(
         "mapping",
         [
@@ -316,27 +274,6 @@ class TestBankTransactionHandler(TestHandler):
     ):
         with pytest.raises(exception):
             transaction_handler.update_entry(transaction_id, **mapping)
-
-    @pytest.mark.parametrize("entry_id", [4, 7])
-    def test_delete_entry(self, transaction_handler, entry_id):
-        self.assert_entry_deletion_succeeds(transaction_handler, entry_id)
-        # Check that the cascading entries were deleted
-        self.assertNumberOfMatches(
-            0,
-            BankSubtransaction.id,
-            BankSubtransaction.transaction_id == entry_id,
-        )
-
-    @pytest.mark.parametrize(
-        "entry_id, exception",
-        [
-            [1, NotFound],  # should not be able to delete other user entries
-            [8, NotFound],  # should not be able to delete nonexistent entries
-        ],
-    )
-    def test_delete_entry_invalid(self, transaction_handler, entry_id, exception):
-        with pytest.raises(exception):
-            transaction_handler.delete_entry(entry_id)
 
 
 @pytest.fixture

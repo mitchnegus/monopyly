@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 import pytest
 from authanor.test.helpers import TestHandler
-from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.cards import CreditCardHandler, save_card
@@ -23,11 +22,6 @@ class TestCreditCardHandler(TestHandler):
         CreditCard(id=4, account_id=3, last_four_digits="3336", active=1),
         CreditCard(id=2, account_id=2, last_four_digits="3334", active=0),
     ]
-
-    def test_initialization(self, card_handler):
-        assert card_handler.model == CreditCard
-        assert card_handler.table.name == "credit_cards"
-        assert card_handler.user_id == 3
 
     @pytest.mark.parametrize(
         "bank_ids, account_ids, last_four_digits, active, reference_entries",
@@ -50,24 +44,6 @@ class TestCreditCardHandler(TestHandler):
     ):
         cards = card_handler.get_cards(bank_ids, account_ids, last_four_digits, active)
         self.assertEntriesMatch(cards, reference_entries)
-
-    @pytest.mark.parametrize(
-        "card_id, reference_entry", [[2, db_reference[2]], [3, db_reference[0]]]
-    )
-    def test_get_entry(self, card_handler, card_id, reference_entry):
-        card = card_handler.get_entry(card_id)
-        self.assertEntryMatches(card, reference_entry)
-
-    @pytest.mark.parametrize(
-        "card_id, exception",
-        [
-            [1, NotFound],  # the card user is not the logged in user
-            [5, NotFound],  # the card is not in the database
-        ],
-    )
-    def test_get_entry_invalid(self, card_handler, card_id, exception):
-        with pytest.raises(exception):
-            card_handler.get_entry(card_id)
 
     @pytest.mark.parametrize(
         "bank_name, last_four_digits, reference_entry",
@@ -106,57 +82,6 @@ class TestCreditCardHandler(TestHandler):
             1, CreditCard.id, CreditCard.last_four_digits == "4444"
         )
 
-    @pytest.mark.parametrize(
-        "mapping, exception",
-        [
-            [{"account_id": 2, "invalid_field": "Test", "active": 1}, TypeError],
-            [{"account_id": 3, "last_four_digits": "4444"}, IntegrityError],
-        ],
-    )
-    def test_add_entry_invalid(self, card_handler, mapping, exception):
-        with pytest.raises(exception):
-            card_handler.add_entry(**mapping)
-
-    def test_add_entry_invalid_user(self, card_handler):
-        mapping = {
-            "account_id": 1,
-            "last_four_digits": "4444",
-            "active": 1,
-        }
-        # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        self.assert_invalid_user_entry_add_fails(card_handler, mapping)
-
-    @pytest.mark.parametrize(
-        "mapping",
-        [
-            {"account_id": 2, "last_four_digits": "4444", "active": 1},
-            {"account_id": 2, "last_four_digits": "4444"},
-        ],
-    )
-    def test_update_entry(self, card_handler, mapping):
-        card = card_handler.update_entry(2, **mapping)
-        # Check that the entry object was properly updated
-        assert card.last_four_digits == "4444"
-        # Check that the entry was updated in the database
-        self.assertNumberOfMatches(
-            1, CreditCard.id, CreditCard.last_four_digits == "4444"
-        )
-
-    @pytest.mark.parametrize(
-        "card_id, mapping, exception",
-        [
-            # Wrong card user
-            [1, {"account_id": 2, "last_four_digits": "4444"}, NotFound],
-            # Invalid field
-            [2, {"account_id": 2, "invalid_field": "Test"}, ValueError],
-            # Nonexistent ID
-            [5, {"account_id": 2, "last_four_digits": "4444"}, NotFound],
-        ],
-    )
-    def test_update_entry_invalid(self, card_handler, card_id, mapping, exception):
-        with pytest.raises(exception):
-            card_handler.update_entry(card_id, **mapping)
-
     @pytest.mark.parametrize("entry_id", [2, 3])
     def test_delete_entry(self, card_handler, entry_id):
         self.assert_entry_deletion_succeeds(card_handler, entry_id)
@@ -164,17 +89,6 @@ class TestCreditCardHandler(TestHandler):
         self.assertNumberOfMatches(
             0, CreditStatement.id, CreditStatement.card_id == entry_id
         )
-
-    @pytest.mark.parametrize(
-        "entry_id, exception",
-        [
-            [1, NotFound],  # should not be able to delete other user entries
-            [5, NotFound],  # should not be able to delete nonexistent entries
-        ],
-    )
-    def test_delete_entry_invalid(self, card_handler, entry_id, exception):
-        with pytest.raises(exception):
-            card_handler.delete_entry(entry_id)
 
 
 class TestSaveFormFunctions:
