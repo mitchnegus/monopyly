@@ -29,7 +29,7 @@ class TestTagHandler(TestHandler):
     }
 
     def _compare_hierarchies(self, hierarchy, reference_hierarchy):
-        self.assertEntriesMatch(hierarchy.keys(), reference_hierarchy.keys())
+        self.assert_entries_match(hierarchy.keys(), reference_hierarchy.keys())
         # Double loop over heirarchies to test equivalence regardless of order
         for key, subhierarchy in hierarchy.items():
             for ref_key, ref_subhierarchy in reference_hierarchy.items():

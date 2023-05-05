@@ -43,7 +43,7 @@ class TestCreditCardHandler(TestHandler):
         reference_entries,
     ):
         cards = card_handler.get_cards(bank_ids, account_ids, last_four_digits, active)
-        self.assertEntriesMatch(cards, reference_entries)
+        self.assert_entries_match(cards, reference_entries)
 
     @pytest.mark.parametrize(
         "bank_name, last_four_digits, reference_entry",
@@ -57,7 +57,7 @@ class TestCreditCardHandler(TestHandler):
         self, card_handler, bank_name, last_four_digits, reference_entry
     ):
         card = card_handler.find_card(bank_name, last_four_digits)
-        self.assertEntryMatches(card, reference_entry)
+        self.assert_entry_matches(card, reference_entry)
 
     @pytest.mark.parametrize(
         "bank_name, last_four_digits", [["Jail", "6666"], [None, None]]
@@ -78,7 +78,7 @@ class TestCreditCardHandler(TestHandler):
         # Check that the entry object was properly created
         assert card.last_four_digits == "4444"
         # Check that the entry was added to the database
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             1, CreditCard.id, CreditCard.last_four_digits == "4444"
         )
 
@@ -86,7 +86,7 @@ class TestCreditCardHandler(TestHandler):
     def test_delete_entry(self, card_handler, entry_id):
         self.assert_entry_deletion_succeeds(card_handler, entry_id)
         # Check that the cascading entries were deleted
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             0, CreditStatement.id, CreditStatement.card_id == entry_id
         )
 

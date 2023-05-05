@@ -222,7 +222,7 @@ class TestCreditTransactionHandler(TestHandler):
         transactions = transaction_handler.get_transactions(
             statement_ids, card_ids, active, sort_order
         )
-        self.assertEntriesMatch(transactions, reference_entries, order=True)
+        self.assert_entries_match(transactions, reference_entries, order=True)
 
     @pytest.mark.parametrize(
         "mapping",
@@ -255,7 +255,7 @@ class TestCreditTransactionHandler(TestHandler):
         assert isinstance(transaction.subtransactions[0], CreditSubtransaction)
         assert transaction.subtransactions[0].subtotal == 100.00
         # Check that the entry was added to the database
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             1,
             CreditTransaction.id,
             CreditTransaction.transaction_date == date(2020, 5, 3),
@@ -327,7 +327,7 @@ class TestCreditTransactionHandler(TestHandler):
         assert len(transaction.subtransactions) == subtransaction_count
         assert transaction.subtransactions[0].subtotal == first_subtotal
         # Check that the entry was updated in the database
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             1,
             CreditTransaction.id,
             CreditTransaction.transaction_date == date(2022, 5, 3),
@@ -384,7 +384,7 @@ class TestCreditTagHandler(TestTagHandler):
         tags = tag_handler.get_tags(
             tag_names, transaction_ids, subtransaction_ids, ancestors
         )
-        self.assertEntriesMatch(tags, reference_entries)
+        self.assert_entries_match(tags, reference_entries)
 
 
 class TestSaveFormFunctions:

@@ -66,14 +66,14 @@ class TestBankAccountTypeHandler(TestHandler):
 
     def test_get_account_types(self, account_type_handler):
         account_types = account_type_handler.get_account_types()
-        self.assertEntriesMatch(account_types, self.db_reference)
+        self.assert_entries_match(account_types, self.db_reference)
 
     @pytest.mark.parametrize(
         "bank_id, reference_entries", [[2, db_reference[:2]], [3, db_reference[2:3]]]
     )
     def test_get_types_for_bank(self, account_type_handler, bank_id, reference_entries):
         account_types = account_type_handler.get_types_for_bank(bank_id)
-        self.assertEntriesMatch(account_types, reference_entries)
+        self.assert_entries_match(account_types, reference_entries)
 
     @pytest.mark.parametrize(
         "type_name, type_abbreviation, reference_entry",
@@ -91,7 +91,7 @@ class TestBankAccountTypeHandler(TestHandler):
         account_type = account_type_handler.find_account_type(
             type_name, type_abbreviation
         )
-        self.assertEntryMatches(account_type, reference_entry)
+        self.assert_entry_matches(account_type, reference_entry)
 
     @pytest.mark.parametrize(
         "type_name, type_abbreviation",
@@ -121,7 +121,7 @@ class TestBankAccountTypeHandler(TestHandler):
         # Check that the entry object was properly created
         assert account_type.type_name == "Well Stocked Hand"
         # Check that the entry was added to the database
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             1,
             BankAccountType.id,
             BankAccountType.type_name.like("Well Stocked%"),
@@ -143,7 +143,7 @@ class TestBankAccountTypeHandler(TestHandler):
         # Check that the entry object was properly updated
         assert account_type.type_name == "Trustworthy Friend"
         # Check that the entry was updated in the database
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             1, BankAccountType.id, BankAccountType.type_name.like("%Friend")
         )
 
@@ -151,7 +151,7 @@ class TestBankAccountTypeHandler(TestHandler):
     def test_delete_entry(self, account_type_handler, entry_id):
         self.assert_entry_deletion_succeeds(account_type_handler, entry_id)
         # Check that the cascading entries were deleted
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             0, BankAccountView.id, BankAccountView.account_type_id == entry_id
         )
 
@@ -214,7 +214,7 @@ class TestBankAccountHandler(TestHandler):
         self, account_handler, bank_ids, account_type_ids, reference_entries
     ):
         accounts = account_handler.get_accounts(bank_ids, account_type_ids)
-        self.assertEntriesMatch(accounts, reference_entries)
+        self.assert_entries_match(accounts, reference_entries)
 
     @pytest.mark.parametrize(
         "bank_id, expected_balance", [[2, (443.90 - 409.21)], [3, 200.00]]
@@ -254,7 +254,7 @@ class TestBankAccountHandler(TestHandler):
         account = account_handler.find_account(
             bank_name, account_type_name, last_four_digits
         )
-        self.assertEntryMatches(account, reference_entry)
+        self.assert_entry_matches(account, reference_entry)
 
     @pytest.mark.parametrize(
         "bank_name, account_type_name, last_four_digits",
@@ -272,7 +272,7 @@ class TestBankAccountHandler(TestHandler):
     def test_delete_entry(self, account_handler, entry_id):
         self.assert_entry_deletion_succeeds(account_handler, entry_id)
         # Check that the cascading entries were deleted
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             0, BankTransaction.id, BankTransaction.account_id == entry_id
         )
 

@@ -25,7 +25,7 @@ class TestTransactionTagHandler(TestTagHandler):
     )
     def test_get_subtags(self, tag_handler, tag, expected_subtags):
         subtags = tag_handler.get_subtags(tag)
-        self.assertEntriesMatch(subtags, expected_subtags)
+        self.assert_entries_match(subtags, expected_subtags)
 
     @pytest.mark.parametrize(
         "tag, expected_supertag",
@@ -37,7 +37,7 @@ class TestTransactionTagHandler(TestTagHandler):
     )
     def test_get_supertag(self, tag_handler, tag, expected_supertag):
         supertag = tag_handler.get_supertag(tag)
-        self.assertEntryMatches(supertag, expected_supertag)
+        self.assert_entry_matches(supertag, expected_supertag)
 
     @pytest.mark.parametrize(
         "root_tag, expected_hierarchy",
@@ -61,7 +61,7 @@ class TestTransactionTagHandler(TestTagHandler):
     )
     def test_get_ancestors(self, tag_handler, tag, expected_ancestors):
         ancestors = tag_handler.get_ancestors(tag)
-        self.assertEntriesMatch(ancestors, expected_ancestors)
+        self.assert_entries_match(ancestors, expected_ancestors)
 
     @pytest.mark.parametrize(
         "tag_name, reference_entry",
@@ -69,7 +69,7 @@ class TestTransactionTagHandler(TestTagHandler):
     )
     def test_find_tag(self, tag_handler, tag_name, reference_entry):
         tag = tag_handler.find_tag(tag_name)
-        self.assertEntryMatches(tag, reference_entry)
+        self.assert_entry_matches(tag, reference_entry)
 
     @pytest.mark.parametrize("tag_name", ["Trains", None])
     def test_find_tag_none_exist(self, tag_handler, tag_name):

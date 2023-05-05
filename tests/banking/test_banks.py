@@ -29,10 +29,12 @@ class TestBankHandler(TestHandler):
     )
     def test_get_banks(self, bank_handler, bank_names, reference_entries):
         banks = bank_handler.get_banks(bank_names)
-        self.assertEntriesMatch(banks, reference_entries)
+        self.assert_entries_match(banks, reference_entries)
 
     @pytest.mark.parametrize("entry_id", [2, 3])
     def test_delete_entry(self, bank_handler, entry_id):
         self.assert_entry_deletion_succeeds(bank_handler, entry_id)
         # Check that the cascading entries were deleted
-        self.assertNumberOfMatches(0, BankAccount.id, BankAccount.bank_id == entry_id)
+        self.assert_number_of_matches(
+            0, BankAccount.id, BankAccount.bank_id == entry_id
+        )

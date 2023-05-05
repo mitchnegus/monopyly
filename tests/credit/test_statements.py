@@ -103,7 +103,7 @@ class TestCreditStatementHandler(TestHandler):
         statements = statement_handler.get_statements(
             card_ids, bank_ids, active, sort_order
         )
-        self.assertEntriesMatch(statements, reference_entries, order=True)
+        self.assert_entries_match(statements, reference_entries, order=True)
 
     @pytest.mark.parametrize(
         "card_id, issue_date, reference_entry",
@@ -117,7 +117,7 @@ class TestCreditStatementHandler(TestHandler):
         self, statement_handler, card_id, issue_date, reference_entry
     ):
         statement = statement_handler.find_statement(card_id, issue_date)
-        self.assertEntryMatches(statement, reference_entry)
+        self.assert_entry_matches(statement, reference_entry)
 
     @pytest.mark.parametrize(
         "card_id, issue_date", [[3, date(2020, 12, 1)], [None, None]]
@@ -185,7 +185,7 @@ class TestCreditStatementHandler(TestHandler):
         # Check that the entry object was properly created
         assert statement.due_date == expected_due_date
         # Check that the entry was added to the database
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             1, CreditStatement.id, CreditStatement.due_date == expected_due_date
         )
 
@@ -228,6 +228,6 @@ class TestCreditStatementHandler(TestHandler):
     def test_delete_entry(self, statement_handler, entry_id):
         self.assert_entry_deletion_succeeds(statement_handler, entry_id)
         # Check that the cascading entries were deleted
-        self.assertNumberOfMatches(
+        self.assert_number_of_matches(
             0, CreditTransaction.id, CreditTransaction.statement_id == entry_id
         )
