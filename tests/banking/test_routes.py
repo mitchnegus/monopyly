@@ -281,6 +281,11 @@ class TestBankingRoutes(TestRoutes):
         assert sorted(json.loads(self.response.data)) == sorted(suggestions)
 
     @transaction_lifetime
+    def test_update_bank_name(self, authorization):
+        self.post_route("/_update_bank_name/2", json="Prison")  # less fun than jail...
+        assert self.response.data == b"Prison"
+
+    @transaction_lifetime
     def test_delete_bank(self, authorization):
         self.get_route("/delete_bank/2", follow_redirects=True)
         assert "Profile" in self.html
