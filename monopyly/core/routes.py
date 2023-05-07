@@ -62,8 +62,6 @@ def credits():
 @bp.route("/profile")
 @login_required
 def load_profile():
-    # Allow password update
-    # Allow banks update
     banks = BankHandler.get_banks()
-    # Allow transaction tag management
-    return render_template("profile.html", banks=banks)
+    # Return banks as a list to allow multiple reuse
+    return render_template("profile.html", banks=list(banks))

@@ -227,6 +227,16 @@ def suggest_transaction_autocomplete():
     return jsonify(suggestions)
 
 
+@bp.route("/_update_bank_name/<int:bank_id>", methods=("POST",))
+@login_required
+@db_transaction
+def update_bank_name(bank_id):
+    # Get the bank name from the AJAX request
+    bank_name = request.get_json()
+    BankHandler.update_entry(bank_id, bank_name=bank_name)
+    return bank_name
+
+
 @bp.route("/delete_bank/<int:bank_id>")
 @login_required
 @db_transaction

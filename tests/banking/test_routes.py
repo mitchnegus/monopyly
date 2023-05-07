@@ -285,4 +285,4 @@ class TestBankingRoutes(TestRoutes):
         self.get_route("/delete_bank/2", follow_redirects=True)
         assert "Profile" in self.html
         # 1 remaining bank for the user
-        assert self.html.count('class="bank-block box-row"') == 1
+        assert self.html.count('class="bank-block box-row') == 1

@@ -12,10 +12,15 @@ function toggleBoxRow($boxRow) {
   // Set timing variables
   const slideTime = 250;
 
-  $boxRow.on('click', function() {
-    // Show the expanded box row
-    const $expandedRow = $(this).find('.expanded');
-    $expandedRow.slideToggle(slideTime);
+  $boxRow.on('click', function(e) {
+    // Ignore the click if it is on a button
+    const $buttons = $(this).find(".icon-button");
+    const $clickTarget = $(e.target)
+    if (!$clickTarget.is($buttons)) {
+      // Toggle the expanded box row
+      const $expandedRow = $(this).find('.expanded');
+      $expandedRow.slideToggle(slideTime);
+    }
   });
 }
 

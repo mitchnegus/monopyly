@@ -572,11 +572,6 @@ form .autocomplete-box .item.active {
 /*
  * Style the widget for performing "live" database updates
  */
-.update-db-widget {
-  display: flex;
-  align-items: center;
-}
-
 .update-db-widget .widget-text {
   position: relative;
   font-size: inherit;
@@ -584,7 +579,7 @@ form .autocomplete-box .item.active {
 }
 
 .update-db-widget .widget-display {
-  padding: 0 5px;
+  padding: 0 6px;
   font-size: inherit;
   font-weight: inherit;
 }
@@ -600,7 +595,16 @@ form .autocomplete-box .item.active {
   font-weight: inherit;
 }
 
-.update-db-widget .widget-edit-button {
+
+/*
+ * Style the "right-hover-style" version of the update widget
+ */
+.update-db-widget.right-hover-style {
+  display: flex;
+  align-items: center;
+}
+
+.update-db-widget.right-hover-style .widget-edit-button {
   height: 20px;
   width: 20px;
   margin-left: 5px;
@@ -608,7 +612,7 @@ form .autocomplete-box .item.active {
   visibility: hidden;
 }
 
-.update-db-widget:hover .widget-edit-button {
+.update-db-widget.right-hover-style:hover .widget-edit-button {
   visibility: visible;
 }
 
@@ -1937,7 +1941,11 @@ form .autocomplete-box .item.active {
 }
 
 #profile .banking.profile-section .bank-list .bank-block {
-  padding: 10px 0 10px 30px;
+  padding: 10px 30px;
+}
+
+#profile .banking.profile-section .bank-list .bank-block .bank {
+  font-weight: bold;
 }
 
 #profile .banking.profile-section .bank-list .bank-block .expanded {
