@@ -38,7 +38,14 @@
 
         <div class="bank-list">
           {% for bank in banks %}
-            <div class="bank">{{ bank.bank_name }}</div>
+
+            <div class="bank-block">
+              <b>{{ bank.bank_name }}</b>
+
+              <div class="expanded">...coming soon</div>
+
+            </div>
+
           {% endfor %}
         </div>
 
@@ -56,4 +63,10 @@
 
   </div>
 
+{% endblock %}
+
+
+{% block javascript %}
+  <script type="module" src="{{ url_for('static', filename='js/expand_bank.js') }}">
+  </script>
 {% endblock %}
