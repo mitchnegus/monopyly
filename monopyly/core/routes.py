@@ -59,7 +59,11 @@ def credits():
     return render_template("credits.html")
 
 
-@bp.route("/settings")
+@bp.route("/profile")
 @login_required
-def settings():
-    return render_template("settings.html")
+def profile():
+    # Allow password update
+    # Allow banks update
+    banks = BankHandler.get_banks()
+    # Allow transaction tag management
+    return render_template("profile.html", banks=banks)

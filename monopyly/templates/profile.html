@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Profile
+{% endblock %}
+
+{% block header %}
+  <h1>Profile</h1>
+{% endblock %}
+
+{% block content %}
+
+  <div id="profile">
+
+    <div class="username-section">
+      <p class="username">{{ g.user.username }}</span>
+    </div>
+
+    <div class="profile-sections-container">
+
+      <div class="settings profile-section">
+
+        <h2>Settings</h2>
+
+        <div class=user-settings">
+
+          <div class="password">
+            <a style="color: gray;" href="">Change password (coming soon)</a>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="banking profile-section">
+
+        <h2>Banks</h2>
+
+        <div class="bank-list">
+          {% for bank in banks %}
+            <div class="bank">{{ bank.bank_name }}</div>
+          {% endfor %}
+        </div>
+
+      </div>
+
+      <div class="transactions profile-section">
+
+        <h2>Transactions</h2>
+
+        <a href="{{ url_for('credit.load_tags') }}">Manage transaction tags</a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+{% endblock %}

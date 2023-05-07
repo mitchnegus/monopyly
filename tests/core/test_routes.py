@@ -40,13 +40,13 @@ class TestCoreRoutes(TestRoutes):
         assert "<h1>Credits</h1>" in self.html
 
     def test_login_required(self, auth):
-        self.get_route("/settings")
-        assert "Settings" not in self.html
+        self.get_route("/profile")
+        assert "<h2>Settings</h2>" not in self.html
         assert "Redirecting..." in self.html
         auth.login()
-        self.get_route("/settings")
-        assert "Settings" in self.html
+        self.get_route("/profile")
+        assert "<h2>Settings</h2>" in self.html
 
     def test_settings(self, authorization):
-        self.get_route("/settings")
-        assert "Settings coming soon..." in self.html
+        self.get_route("/profile")
+        assert "<h2>Settings</h2>" in self.html
