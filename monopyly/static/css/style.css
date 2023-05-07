@@ -753,6 +753,38 @@ form .autocomplete-box .item.active {
 
 
 /*
+ * Style generic box tables
+ */
+.box-table {
+  border: 2px solid #dddddd;
+}
+
+.box-table .icon-button {
+  display: inline-block;
+  height: 25px;
+  width: 25px;
+  margin: 0 5px;
+  background-size: 25px;
+  filter: brightness(0.8);
+}
+
+.box-table .icon-button:hover {
+  filter: none;
+}
+
+.box-table .box-row {
+  border-top: 0.5px solid #dddddd;
+  border-bottom: 0.5px solid #dddddd;
+  background-color: #f5f5f5;
+}
+
+.box-table .box-row:hover {
+  cursor: pointer;
+  filter: brightness(0.98);
+}
+
+
+/*
  * Style the card filter
  */
 #card-filter {
@@ -1412,6 +1444,7 @@ form .autocomplete-box .item.active {
   left: 0;
   width: 100%;
   text-align: center;
+  color: #999999;
   font-size: 1.5em;
   transition: font-size 0.3s;
 }
@@ -1901,14 +1934,10 @@ form .autocomplete-box .item.active {
 
 #profile .banking.profile-section .bank-list {
   width: 90%;
-  border: 2px solid #dddddd;
-  background-color: #f5f5f5;
 }
 
 #profile .banking.profile-section .bank-list .bank-block {
   padding: 10px 0 10px 30px;
-  border-top: 0.5px solid #dddddd;
-  border-bottom: 0.5px solid #dddddd;
 }
 
 #profile .banking.profile-section .bank-list .bank-block .expanded {
@@ -1930,20 +1959,8 @@ form .autocomplete-box .item.active {
   /*text-align: center;*/
 }
 
-#bank-container .account-blocks {
-  border: 2px solid #dddddd;
-}
-
 #bank-container .account-block {
   padding: 25px 30px;
-  border-top: 0.5px solid #dddddd;
-  border-bottom: 0.5px solid #dddddd;
-  background-color: #f5f5f5;
-}
-
-#bank-container .account-block:hover {
-  cursor: pointer;
-  filter: brightness(0.98);
 }
 
 #bank-container .account-block .account-info {
@@ -1962,17 +1979,8 @@ form .autocomplete-box .item.active {
   margin-top: 20px;
 }
 
-#bank-container .icon-button {
-  display: inline-block;
-  height: 25px;
-  width: 25px;
-  margin: 0 15px;
-  background-size: 25px;
-  filter: brightness(0.8);
-}
-
-#bank-container .icon-button:hover {
-  filter: none;
+#bank-container .box-row .expanded .options {
+  margin: 0 25px;
 }
 
 #bank-account-settings {

@@ -22,9 +22,10 @@
         <div class="bank-block grouping">
           <h3>{{ bank.bank_name }}</h3>
 
-          <div class="account-blocks">
+          <div class="account-blocks box-table">
             {% for account in bank_accounts %}
-              <div class="account-block">
+
+              <div class="account-block box-row">
 
                 <div class="account-info">
                   <span class="digits">{{ account.last_four_digits }}</span> <b>{{ account.account_type.type_name }}</b>
@@ -38,6 +39,7 @@
                 </div>
 
               </div>
+
             {% endfor %}
           </div>
 

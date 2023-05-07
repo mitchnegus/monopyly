@@ -15,7 +15,7 @@ class TestBankingRoutes(TestRoutes):
         assert "Bank Accounts" in self.html
         # 2 banks for the user, with 3 total accounts
         assert self.html.count("bank-block") == 2
-        assert self.html.count('class="account-block"') == 3
+        assert self.html.count('class="account-block box-row"') == 3
 
     def test_add_account_get(self, authorization):
         self.get_route("/add_account")
@@ -43,7 +43,7 @@ class TestBankingRoutes(TestRoutes):
         # Returns the "Bank Accounts" page with the new account added
         assert "Bank Accounts" in self.html
         assert self.html.count("bank-block") == 2
-        assert self.html.count('class="account-block"') == 4
+        assert self.html.count('class="account-block box-row"') == 4
         assert "8888" in self.html
 
     @transaction_lifetime
@@ -61,7 +61,7 @@ class TestBankingRoutes(TestRoutes):
         # Returns the "Bank Accounts" page with the new account added
         assert "Bank Accounts" in self.html
         assert self.html.count("bank-block") == 3
-        assert self.html.count('class="account-block"') == 4
+        assert self.html.count('class="account-block box-row"') == 4
         assert "8888" in self.html
 
     @transaction_lifetime
@@ -70,7 +70,7 @@ class TestBankingRoutes(TestRoutes):
         assert "Bank Accounts" in self.html
         # 2 banks for the user, with 2 total accounts
         assert self.html.count("bank-block") == 2
-        assert self.html.count('class="account-block"') == 2
+        assert self.html.count('class="account-block box-row"') == 2
 
     def test_load_account_summaries(self, authorization):
         self.get_route("/account_summaries/2")
