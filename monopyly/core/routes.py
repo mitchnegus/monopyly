@@ -61,7 +61,7 @@ def credits():
 
 @bp.route("/profile")
 @login_required
-def profile():
+def load_profile():
     # Allow password update
     # Allow banks update
     banks = BankHandler.get_banks()
