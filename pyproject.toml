@@ -11,7 +11,7 @@ description = 'A homemade personal finance manager.'
 license = { text = 'GNU GPLv3' }
 requires-python = '>=3.9,<3.11'
 dependencies = [
-    'authanor>=0.2.3',
+    'authanor>=1.0.1',
     'flask>=2.2.2',
     'flask-wtf',
     'markdown>=3.4.3',
