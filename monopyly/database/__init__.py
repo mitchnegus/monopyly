@@ -71,7 +71,7 @@ def init_db_command():
     db_path = current_app.config["DATABASE"]
     if not db_path.is_file():
         preload_path = current_app.config.get("PRELOAD_DATA_PATH")
-        current_app.db.initialize(preload_path)
+        current_app.db.initialize(current_app)
         click.echo(f"Initialized the database ('{db_path}')")
         if preload_path:
             click.echo(f"Prepopulated the database using '{preload_path}'")
