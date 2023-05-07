@@ -36,13 +36,22 @@
 
         <h2>Banks</h2>
 
-        <div class="bank-list">
+        <div class="bank-list box-table">
           {% for bank in banks %}
 
-            <div class="bank-block">
+            <div class="bank-block box-row">
               <b>{{ bank.bank_name }}</b>
 
-              <div class="expanded">...coming soon</div>
+              <div class="expanded">
+                <div class="options">
+                  <a class="button" href="">
+                    <img class="icon-button edit" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+                  </a>
+                  <!--<a class="icon-button action delete" href="{{ url_for('banking.delete_bank', bank_id=bank.id) }}" onclick="return confirm('Are you sure you want to delete this bank from the current user profile?');"> -->
+                  <a class="icon-button action delete" href="{{ url_for('banking.delete_bank', bank_id=bank.id) }}" onclick="return confirm('Are you sure you want to delete this bank from the current user profile?');">
+                  </a>
+                </div>
+              </div>
 
             </div>
 

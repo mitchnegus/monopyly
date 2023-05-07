@@ -279,3 +279,10 @@ class TestBankingRoutes(TestRoutes):
         # Returned suggestions are not required to be in any particular order
         # (for this test)
         assert sorted(json.loads(self.response.data)) == sorted(suggestions)
+
+    @transaction_lifetime
+    def test_delete_bank(self, authorization):
+        self.get_route("/delete_bank/2", follow_redirects=True)
+        assert "Profile" in self.html
+        # 1 remaining bank for the user
+        assert self.html.count('class="bank-block box-row"') == 1

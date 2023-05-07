@@ -225,3 +225,11 @@ def suggest_transaction_autocomplete():
     else:
         suggestions = BankTransactionForm.autocomplete(field)
     return jsonify(suggestions)
+
+
+@bp.route("/delete_bank/<int:bank_id>")
+@login_required
+@db_transaction
+def delete_bank(bank_id):
+    BankHandler.delete_entry(bank_id)
+    return redirect(url_for("core.load_profile"))
