@@ -2,6 +2,13 @@
 /*     Style sheet for the Monopyly app      */
 /*-------------------------------------------*/
 
+
+/* Define custom colors for consistent branding */
+:root {
+  --moneytree: #5e8f40;
+  --moneytree-leaves: #85bb65;
+}
+
 html {
   height: 100%;
 }
@@ -18,7 +25,7 @@ body {
 }
 
 a {
-  color: #5e8f40;
+  color: var(--moneytree);
   text-decoration: none;
 }
 
@@ -27,7 +34,7 @@ a:hover {
 }
 
 a:focus {
-  color: #85bb65;
+  color: var(--moneytree-leaves);
   outline: none;
 }
 
@@ -43,7 +50,7 @@ input {
 }
 
 input:focus-visible {
-  outline: #85bb65 solid medium;
+  outline: var(--moneytree-leaves) solid medium;
 }
 
 input[type="text"],
@@ -81,7 +88,7 @@ header#masthead {
   width: 100%;
   border-width: 0 0 4px 3px;
   border-style: solid;
-  border-color: #85bb65;
+  border-color: var(--moneytree-leaves);
   background-color: #2b2b2b;
   opacity: 0.9;
 }
@@ -130,6 +137,14 @@ header#masthead {
 
 #nav-menu li a:hover {
   color: #cdcdcd;
+}
+
+#nav-menu li .username {
+  color: #777;
+}
+
+#nav-menu li .username:hover {
+  color: var(--moneytree-leaves);
 }
 
 
@@ -243,7 +258,7 @@ aside.sidebar {
 }
 
 .paid-notice {
-  color: #85bb65;
+  color: var(--moneytree-leaves);
   font-weight: bold;
   letter-spacing: 1px;
 }
@@ -479,7 +494,7 @@ form .autocomplete-box .item:hover {
 }
 
 form .autocomplete-box .item.active {
-  background-color: #85bb65;
+  background-color: var(--moneytree-leaves);
   color: black;
   font-weight: bold;
 }
@@ -724,12 +739,12 @@ form .autocomplete-box .item.active {
 }
 
 .toggle-switch-gadget input:checked + .option .text {
-  color: #85bb65;
+  color: var(--moneytree-leaves);
   filter: none;
 }
 
 .toggle-switch-gadget input:checked + .option .slider {
-  background-color: #85bb65;
+  background-color: var(--moneytree-leaves);
 }
 
 .toggle-switch-gadget input:checked + .option .slider .switch {
@@ -914,7 +929,7 @@ form .autocomplete-box .item.active {
   align-items: flex-end;
   padding-bottom: 5px;
   margin-bottom: 10px;
-  border-bottom: 2px solid #85bb65;
+  border-bottom: 2px solid var(--moneytree-leaves);
   color: #444444;
   font-size: 24pt;
 }
@@ -1469,7 +1484,7 @@ form .autocomplete-box .item.active {
 }
 
 #linked-transaction-display .linked-transaction.selected {
-  border: 5px solid #85bb65;
+  border: 5px solid var(--moneytree-leaves);
 }
 
 #linked-transaction-display .linked-transaction .date {
@@ -1831,7 +1846,7 @@ form .autocomplete-box .item.active {
 
 #readme #tagline {
   margin: 10px 0 0 0;
-  color: #85bb65;
+  color: var(--moneytree-leaves);
   font-size: 16pt;
   text-align: center;
 }
@@ -2378,7 +2393,7 @@ form#pay #make-payment {
   top: 0;
   left: 0;
   background-color: green;
-  background-image: linear-gradient(90deg, #85bb65, #73a457);
+  background-image: linear-gradient(90deg, var(--moneytree-leaves), #73a457);
   color: white;
   transition: 0.1s;
 }
@@ -2490,7 +2505,7 @@ form#credit-transaction .merchant-field {
   width: 200px;
   margin: 5px 0;
   padding: 2px 15px;
-  border: 0 solid #85bb65;
+  border: 0 solid var(--moneytree-leaves);
   border-radius: 20px;
   text-align: center;
   outline: none;
@@ -2499,7 +2514,7 @@ form#credit-transaction .merchant-field {
 }
 
 #transaction-tags input.new-tag.visible {
-  border: 1.5px solid #85bb65;
+  border: 1.5px solid var(--moneytree-leaves);
 }
 
 #transaction-tags .tag {
