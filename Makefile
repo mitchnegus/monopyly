@@ -72,12 +72,14 @@ upload : env
 ## clean		: Clean all automatically generated files
 .PHONY : clean
 clean :
+	@find . -type f -name '*.pyc' -delete
+	@find . -type d -name '__pycache__' | xargs rm -rf
+	@rm -rf .pytest_cache/
 	@rm -rf $(PACKAGE_DIR)/_version.py
-	@rm -rf instance/dev-monopyly.sqlite
+	@rm -rf $(ENV)
 	@rm -rf htmlcov/
 	@rm -rf dist/ *egg-info/
-	@rm -rf .pytest_cache/
-	@rm -rf $(ENV)
+	@rm -rf instance/dev-monopyly.sqlite
 
 
 .PHONY: help
