@@ -5,18 +5,18 @@ build-backend = 'hatchling.build'
 [project]
 name = 'monopyly'
 authors = [
-    { name = 'Mitch Negus', email = 'mitchnegus57@gmail.com' },
+  { name = 'Mitch Negus', email = 'mitchnegus57@gmail.com' },
 ]
 description = 'A homemade personal finance manager.'
 license = { text = 'GNU GPLv3' }
 requires-python = '>=3.9,<3.11'
 dependencies = [
-    'authanor>=1.0.1',
-    'flask>=2.2.2',
-    'flask-wtf',
-    'markdown>=3.4.3',
-    'python-dateutil',
-    'sqlalchemy>=2.0.0',
+  'authanor>=1.0.1',
+  'flask>=2.2.2',
+  'flask-wtf',
+  'markdown>=3.4.3',
+  'python-dateutil',
+  'sqlalchemy>=2.0.0',
 ]
 keywords = [
   'Finance',
@@ -78,18 +78,18 @@ replacement = '[\1](https://github.com/mitchnegus/monopyly/blob/main/\g<2>)'
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    'ignore::DeprecationWarning',
-    'ignore:INSECURE:UserWarning',
+  'ignore::DeprecationWarning',
+  'ignore:INSECURE:UserWarning',
 ]
 
 [tool.coverage.run]
 omit = [
-    'tests/*',
+  'tests/*',
 ]
 
 [tool.coverage.report]
 exclude_lines = [
-    'raise NotImplementedError',
+  'raise NotImplementedError',
 ]
 
 [tool.black]
