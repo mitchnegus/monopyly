@@ -1,5 +1,5 @@
 """A module containing objects with various configuration settings."""
-from monopyly.config.default_settings import Config
+from .default_settings import Config
 
 
 class DevelopmentConfig(Config):

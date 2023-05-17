@@ -9,7 +9,6 @@ import click
 from authanor.database import SQLAlchemy as _SQLAlchemy
 from flask import current_app
 from flask.cli import with_appcontext
-from sqlalchemy.schema import Table
 
 from ..core.actions import get_timestamp
 
