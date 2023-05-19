@@ -104,3 +104,8 @@
 - Swap the README instructions for the 'About' page (and move the story to a separate page)
 - Improve utilization of `pyroject.toml`
 - Factor out the database handlers (now found in the Authanor package dependency)
+
+
+### 1.3.1 (in progress)
+
+- Upgrade JQuery version to 3.7.0
