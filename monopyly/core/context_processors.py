@@ -11,7 +11,7 @@ from .blueprint import bp
 def inject_global_template_variables():
     """Inject template variablees globally into the template context."""
     template_globals = {
-        "monopyly_version": _display_version(),
+        "app_version": _display_version(),
         "copyright_statement": f"© {date.today().year}",
         "date_today": str(date.today()),
     }

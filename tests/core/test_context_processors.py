@@ -24,13 +24,13 @@ class TestContextProcessors:
         assert template_globals["date_today"] == "2000-01-01"
 
     def test_inject_version(self, template_globals):
-        assert template_globals["monopyly_version"] == "M.m.p.devX"
+        assert template_globals["app_version"] == "M.m.p.devX"
 
     @patch("monopyly.core.context_processors.import_module")
     def test_inject_missing_version(self, mock_importer):
         mock_importer.side_effect = ModuleNotFoundError
         template_globals = inject_global_template_variables()
-        assert template_globals["monopyly_version"] == ""
+        assert template_globals["app_version"] == ""
 
     def test_inject_copyright(self, template_globals):
         assert "2000" in template_globals["copyright_statement"]
