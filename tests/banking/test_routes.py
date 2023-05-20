@@ -4,7 +4,7 @@ import json
 import pytest
 from authanor.testing.helpers import transaction_lifetime
 
-from ..helpers import TestRoutes
+from test_helpers import TestRoutes
 
 
 class TestBankingRoutes(TestRoutes):

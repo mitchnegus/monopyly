@@ -19,7 +19,7 @@ from monopyly.database.models import (
     TransactionTag,
 )
 
-from ..common.helpers import TestTagHandler
+from test_tag_helpers import TestTagHandler
 
 
 @pytest.fixture

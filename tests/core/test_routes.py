@@ -1,7 +1,7 @@
 """Tests for routes in the core blueprint."""
 from unittest.mock import patch
 
-from ..helpers import TestRoutes
+from test_helpers import TestRoutes
 
 
 class TestCoreRoutes(TestRoutes):

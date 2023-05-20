@@ -77,6 +77,11 @@ pattern = '\[(.+?)\]\(((?!https?://)\S+?)\)'
 replacement = '[\1](https://github.com/mitchnegus/monopyly/blob/main/\g<2>)'
 
 [tool.pytest.ini_options]
+addopts = [
+  '--import-mode=importlib',
+]
+pythonpath = ["tests/helpers"]
+norecursedirs = ["tests/helpers"]
 filterwarnings = [
   'ignore::DeprecationWarning',
   'ignore:INSECURE:UserWarning',
@@ -98,3 +103,4 @@ force-exclude = 'monopyly/_version.py'
 [tool.isort]
 profile = 'black'
 src_paths = ['monopyly', 'tests']
+known_local_folder = ["test_helpers", "test_tag_helpers"]

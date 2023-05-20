@@ -7,7 +7,7 @@ from authanor.testing.helpers import transaction_lifetime
 from flask import url_for
 from werkzeug.exceptions import NotFound
 
-from ..helpers import TestRoutes
+from test_helpers import TestRoutes
 
 
 class TestCreditRoutes(TestRoutes):

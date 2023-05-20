@@ -6,7 +6,7 @@ import pytest
 from monopyly.common.transactions import TransactionTagHandler, get_linked_transaction
 from monopyly.database.models import TransactionTag
 
-from ..common.helpers import TestTagHandler
+from test_tag_helpers import TestTagHandler
 
 
 @pytest.fixture

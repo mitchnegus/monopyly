@@ -24,7 +24,7 @@ from monopyly.database.models import (
     TransactionTag,
 )
 
-from ..helpers import helper
+from test_helpers import helper
 
 
 class TestBankSelectField:

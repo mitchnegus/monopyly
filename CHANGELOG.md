@@ -109,3 +109,4 @@
 ### 1.3.1 (in progress)
 
 - Upgrade JQuery version to 3.7.0
+- Use recommended `importlib` method for pytest
