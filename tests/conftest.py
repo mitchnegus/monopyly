@@ -58,10 +58,12 @@ class AppManager(AppTestManager):
     directly.
     """
 
-    @staticmethod
-    def prepare_test_config(test_database_path):
+    test_dir = TEST_DIR
+
+    @classmethod
+    def prepare_test_config(cls, test_database_path):
         """Prepare the test configuration object."""
-        preload_data_path = TEST_DIR / "data.sql"
+        preload_data_path = cls.test_dir / "data.sql"
         test_config = TestingConfig(
             db_path=test_database_path,
             preload_data_path=preload_data_path,
