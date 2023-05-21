@@ -1,6 +1,7 @@
 """
 Routes for site authentication.
 """
+from authanor.database import db_transaction
 from flask import (
     current_app,
     flash,
@@ -13,7 +14,6 @@ from flask import (
 from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from ..database import db_transaction
 from ..database.models import User
 from .actions import get_username_and_password
 from .blueprint import bp

@@ -2,7 +2,6 @@
 Expose commonly used database functionality to the rest of the package.
 """
 import sqlite3
-from functools import wraps
 from pathlib import Path
 
 import click
@@ -50,17 +49,6 @@ class SQLAlchemy(_SQLAlchemy):
 
 
 db = SQLAlchemy()
-
-
-def db_transaction(func):
-    """A decorator denoting the wrapped function as a database transaction."""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        with current_app.db.session.begin():
-            return func(*args, **kwargs)
-
-    return wrapper
 
 
 @click.command("init-db")

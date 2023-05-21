@@ -3,12 +3,12 @@ Routes for banking financials.
 """
 from itertools import islice
 
+from authanor.database import db_transaction
 from flask import jsonify, redirect, render_template, request, url_for
 
 from ..auth.tools import login_required
 from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import get_linked_transaction
-from ..database import db_transaction
 from .accounts import BankAccountHandler, BankAccountTypeHandler, save_account
 from .actions import get_bank_account_type_grouping
 from .banks import BankHandler
