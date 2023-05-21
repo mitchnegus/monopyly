@@ -38,7 +38,7 @@ class SQLAlchemy(_SQLAlchemy):
             sql_filepaths = [
                 sql_dir / path for path in ("schema.sql", "views.sql", "preloads.sql")
             ]
-            auxiliary_preload_path = app.config["PRELOAD_DATA_PATH"]
+            auxiliary_preload_path = app.config.get("PRELOAD_DATA_PATH")
             if auxiliary_preload_path:
                 sql_filepaths.append(auxiliary_preload_path)
             for sql_filepath in sql_filepaths:
@@ -57,9 +57,9 @@ def init_db_command():
     """Initialize the database from the command line (if it does not exist)."""
     db_path = current_app.config["DATABASE"]
     if not db_path.is_file():
-        preload_path = current_app.config.get("PRELOAD_DATA_PATH")
         current_app.db.initialize(current_app)
         click.echo(f"Initialized the database ('{db_path}')")
+        preload_path = current_app.config.get("PRELOAD_DATA_PATH")
         if preload_path:
             click.echo(f"Prepopulated the database using '{preload_path}'")
     else:
