@@ -69,7 +69,8 @@ def register_blueprints(app):
     -----
     Blueprints are imported in this function to avoid loading modules
     that require database models before those models have been set up
-    via `init_app`.
+    via `init_app`. (Rendered obsolete using Authanor; retained in order
+    to keep blueprint imports grouped.)
     """
     # Import blueprints
     from monopyly.auth.blueprint import bp as auth_bp

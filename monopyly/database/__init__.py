@@ -45,6 +45,7 @@ class SQLAlchemy(_SQLAlchemy):
                 with current_app.open_resource(sql_filepath) as sql_file:
                     raw_conn.executescript(sql_file.read().decode("utf8"))
             raw_conn.close()
+        # Top level initialization does not overwrite tables, so it goes at the end
         super().initialize(app)
 
 
