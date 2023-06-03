@@ -54,6 +54,13 @@ class SubformManager {
   }
 
   /**
+   * Remove the subform
+   */
+  removeSubform($subform) {
+    $subform.remove();
+  }
+
+  /**
    * Provide an AJAX callback that adds a subform and binds the remove button.
    */
   #handleAjaxResponse(response) {
@@ -65,7 +72,7 @@ class SubformManager {
     const $removeButtons = $(".subform .close.button");
     const manager = this;
     $removeButtons.on("click", function() {
-      this.closest(".subform").remove();
+      manager.removeSubform(this.closest(".subform"));
       if (manager.toggleButton) {
         manager.$addFormButton.show();
       }

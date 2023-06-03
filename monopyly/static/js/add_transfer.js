@@ -30,6 +30,23 @@ class BankTransferSubformManager extends SubformManager {
    */
   addSubform(response) {
     $('.add-info.buttons').after(response);
+    // Disable the merchant field (it is replaced by the linked bank name)
+    $('input#merchant').val("");
+    $('input#merchant').prop("disabled", true);
+  }
+
+  /**
+   */
+  disableMerchantField() {
+  }
+
+  /**
+   * Remove the subform
+   */
+  removeSubform($subform) {
+    $subform.remove();
+    // Reenable the merchant field
+    $('input#merchant').prop("disabled", false);
   }
 
 }

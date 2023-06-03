@@ -390,6 +390,7 @@ form input.button:hover {
 }
 
 form button:disabled,
+form input:disabled,
 form input.button:disabled {
   color: #bbbbbb;
   filter: brightness(0.95);

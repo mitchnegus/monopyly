@@ -110,3 +110,4 @@
 
 - Upgrade JQuery version to 3.7.0
 - Use recommended `importlib` method for pytest
+- Automatically use the transferring bank as the merchant in bank transfers
