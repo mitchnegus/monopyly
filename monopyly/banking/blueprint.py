@@ -7,4 +7,4 @@ from flask import Blueprint
 bp = Blueprint("banking", __name__, url_prefix="/banking")
 
 # Import routes after defining blueprint to avoid circular imports
-from . import routes
+from . import filters, routes

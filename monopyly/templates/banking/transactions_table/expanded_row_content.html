@@ -19,17 +19,21 @@
 
     <div class="description-header">
       <div class="brief">
-        {% if transaction.merchant %}
-            {% set merchant_reference = ": " + transaction.merchant %}
+        {% if transaction | is_single_bank_transfer %}
+            Transfer
         {% else %}
-            {% set merchant_reference = "" %}
-        {% endif %}
-        {% if transaction.total > 0 %}
-          Deposit{{ merchant_reference }}
-        {% elif transaction.total < 0 %}
-          Withdrawal{{ merchant_reference }}
-        {% else %}
-          Exchange
+          {% if transaction.merchant %}
+              {% set merchant_reference = ": " + transaction.merchant %}
+          {% else %}
+              {% set merchant_reference = "" %}
+          {% endif %}
+          {% if transaction.total > 0 %}
+            Deposit{{ merchant_reference }}
+          {% elif transaction.total < 0 %}
+            Withdrawal{{ merchant_reference }}
+          {% else %}
+            Exchange
+          {% endif %}
         {% endif %}
 
       </div>

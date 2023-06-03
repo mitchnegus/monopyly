@@ -106,8 +106,9 @@
 - Factor out the database handlers (now found in the Authanor package dependency)
 
 
-### 1.3.1 (in progress)
+### 1.3.1
 
 - Upgrade JQuery version to 3.7.0
 - Use recommended `importlib` method for pytest
 - Automatically use the transferring bank as the merchant in bank transfers
+- For transfers between accounts at the same bank, do not show 'Withdrawal' or 'Deposit' headers; just mark as 'Transfer'
