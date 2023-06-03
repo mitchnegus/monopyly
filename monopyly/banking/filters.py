@@ -16,4 +16,3 @@ def check_transfer_is_within_bank(transaction):
                 for transaction in linked_bank_transactions
             )
     return False
-

@@ -33,7 +33,8 @@ def multi_bank_internal_transaction():
     transaction = Mock()
     linked_transaction = Mock()
     transaction.internal_transaction.bank_transactions = [
-        transaction, linked_transaction
+        transaction,
+        linked_transaction,
     ]
     return transaction
 
@@ -45,7 +46,8 @@ def single_bank_internal_transaction():
     linked_transaction = Mock()
     linked_transaction.account.bank_id = 123
     transaction.internal_transaction.bank_transactions = [
-        transaction, linked_transaction
+        transaction,
+        linked_transaction,
     ]
     return transaction
 
@@ -58,7 +60,7 @@ def single_bank_internal_transaction():
         ["multi_bank_internal_transaction", False],
         ["single_bank_internal_transaction", True],
     ],
-    indirect=["mock_transaction"]
+    indirect=["mock_transaction"],
 )
 def test_check_transfer_is_within_bank(mock_transaction, expected_within_bank):
     assert check_transfer_is_within_bank(mock_transaction) is expected_within_bank
