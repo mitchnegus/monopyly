@@ -98,7 +98,7 @@ def expand_transaction():
 @login_required
 def show_linked_transaction():
     post_args = request.get_json()
-    transaction_id = post_args["transaction_id"]
+    transaction_id = int(post_args["transaction_id"])
     transaction = BankTransactionHandler.get_entry(transaction_id)
     linked_transaction = get_linked_transaction(transaction)
     return render_template(

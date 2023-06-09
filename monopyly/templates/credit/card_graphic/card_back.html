@@ -10,7 +10,7 @@
 <div class="options">
 
   <label class="toggle-switch-gadget" for="card-{{ card.id }}-status">
-    <input id="card-{{ card.id }}-status" type="checkbox" {{ 'checked' if card.active else '' }}/>
+    <input id="card-{{ card.id }}-status" data-card-id="{{ card.id }}" type="checkbox" {{ 'checked' if card.active else '' }}/>
 
     <div class="option">
       <div class="text">

@@ -24,13 +24,13 @@ import {
 	const $filterContainer = $('#card-filter');
 	// Identify the transactions container
 	const $container = $('.transactions-container');
-	
+
 	// Send the Ajax request on click
 	const $filters = $filterContainer.find('.card');
 	$filters.on('click', function() {
 		updateTable();
 	});
-	
+
 	// Change the table ordering and send the Ajax request on click
 	$container.on('click', '.transactions-table .sort-button', function() {
 		// Identify the table sorters
@@ -40,12 +40,12 @@ import {
 		// Update the table
 		updateTable();
 	});
-	
+
 	function updateTable() {
 		// Determine the selected credit cards to use from the filters
 		const $selectedFilters = $filterContainer.find('.card.selected');
-		const filterIDs = [];
-		$selectedFilters.each(function() {filterIDs.push(this.id);});
+		const cardIDs = [];
+		$selectedFilters.each(function() {cardIDs.push(this.dataset.cardId);});
 		// Determine the table ordering (ascending/descending transaction date)
 		const $sorter = $('.transactions-table .sort-button.selected');
 		let sortOrder
@@ -57,10 +57,10 @@ import {
 		// Update the table with the filters and ordering
 		const endpoint = FILTER_ENDPOINT;
 		const rawData = {
-			'filter_ids': filterIDs,
-			'sort_order': sortOrder
+			'card_ids': cardIDs,
+			'sort_order': sortOrder,
 		};
 		replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
 	}
-	
+
 })();

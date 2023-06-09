@@ -20,7 +20,7 @@ import { updateDBWidget } from './modules/update_database_widget.js';
   const $widgets = $('#profile .bank-block.update-db-widget');
   $widgets.each(function() {
     const $widget = $(this);
-    const bankID = $widget.data("bank_id");
+    const bankID = $widget.data("bank-id");
     const endpoint = endpoints[bankID]
     // Prepare the widget
     updateDBWidget(endpoint, $widget);

@@ -40,7 +40,7 @@
   <div id="card-filter">
     {% for card in filter_cards %}
 
-      <a id="{{ card.account.bank.bank_name }}-{{ card.last_four_digits }}" class="card {{ 'active selected' if card.active else 'inactive' }}">
+      <a id="{{ card.account.bank.bank_name }}-{{ card.last_four_digits }}" class="card {{ 'active selected' if card.active else 'inactive' }}" data-card-id="{{ card.id }}">
         {{ card.account.bank.bank_name }} (-{{card.last_four_digits }})
       </a>
 

@@ -30,11 +30,11 @@ import {
   function replaceDisplay() {
     // Determine the selected credit cards to use from the filters
     const $selectedFilters = $filterContainer.find('.card.selected');
-    const filterIDs = [];
-    $selectedFilters.each(function() {filterIDs.push(this.id);});
+    const cardIDs = [];
+    $selectedFilters.each(function() {cardIDs.push(this.dataset.cardId);});
     // Update the display with the filters
     const endpoint = FILTER_ENDPOINT;
-    const rawData = {'filter_ids': filterIDs};
+    const rawData = {'card_ids': cardIDs};
     replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
   }
 

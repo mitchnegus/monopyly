@@ -98,7 +98,7 @@ class TestCreditRoutes(TestRoutes):
         self.post_route(
             "/_update_card_status",
             json={
-                "input_id": "card-3-status",
+                "card_id": "3",
                 "active": False,
             },
         )
@@ -147,7 +147,7 @@ class TestCreditRoutes(TestRoutes):
     def test_update_statements_display(self, authorization):
         self.post_route(
             "/_update_statements_display",
-            json={"filter_ids": ["Jail-3335"]},
+            json={"card_ids": ["3"]},
         )
         # 1 card shown with the filter applied
         assert self.html.count("card-column") == 1
@@ -221,7 +221,7 @@ class TestCreditRoutes(TestRoutes):
     def test_update_transactions_display_card(self, authorization):
         self.post_route(
             "/_update_transactions_display",
-            json={"filter_ids": ["Jail-3335"], "sort_order": "asc"},
+            json={"card_ids": ["3"], "sort_order": "asc"},
         )
         # 1 card shown with the filter applied
         assert all(_ not in self.html for _ in ["3333", "3334", "3336"])
@@ -235,7 +235,7 @@ class TestCreditRoutes(TestRoutes):
     def test_update_transactions_display_order(self, authorization):
         self.post_route(
             "/_update_transactions_display",
-            json={"filter_ids": ["Jail-3335", "TheBank-3336"], "sort_order": "desc"},
+            json={"card_ids": ["3", "4"], "sort_order": "desc"},
         )
         # 2 cards shown with the filter applied
         assert all(_ not in self.html for _ in ["3333", "3334"])

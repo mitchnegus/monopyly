@@ -9,33 +9,34 @@
  */
 
 import {
-	replaceDisplayContentsAjaxRequest
-} from './modules/update_display_ajax.js';
+  replaceDisplayContentsAjaxRequest
+} from "./modules/update_display_ajax.js";
 
 
 (function() {
 
-	const endpoint = UPDATE_CARD_STATUS_ENDPOINT;
-	// Identify the key elements
-	const $switches = $('.toggle-switch-gadget');
+  const endpoint = UPDATE_CARD_STATUS_ENDPOINT;
+  // Identify the key elements
+  const $switches = $(".toggle-switch-gadget");
 
-	// Send an AJAX request when the switch is toggled
-	$switches.on('change', function() {
-		const $toggleSwitch = $(this);
-		const $card = $toggleSwitch.closest('.credit-card');
-		const $cardFront = $card.find('.card-face.front');
-		const $checkbox = $toggleSwitch.find('input[type="checkbox"]');
-		const cardActive = $checkbox.is(':checked');
-		const rawData = {
-			'input_id': $checkbox[0].id,
-			'active': cardActive,
-		};
-		replaceDisplayContentsAjaxRequest(endpoint, rawData, $cardFront);
-		if (cardActive) {
-			$card.removeClass('inactive');
-		} else {
-			$card.addClass('inactive');
-		}
-	});
+  // Send an AJAX request when the switch is toggled
+  $switches.on("change", function() {
+    const $toggleSwitch = $(this);
+    const $card = $toggleSwitch.closest(".credit-card");
+    const $cardFront = $card.find(".card-face.front");
+    const $checkbox = $toggleSwitch.find("input[type="checkbox"]");
+    const cardActive = $checkbox.is(":checked");
+    const cardID = $checkbox.data("card-id");
+    const rawData = {
+      "card_id": cardID,
+      "active": cardActive,
+    };
+    replaceDisplayContentsAjaxRequest(endpoint, rawData, $cardFront);
+    if (cardActive) {
+      $card.removeClass("inactive");
+    } else {
+      $card.addClass("inactive");
+    }
+  });
 
 })();

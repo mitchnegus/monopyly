@@ -112,3 +112,8 @@
 - Use recommended `importlib` method for pytest
 - Automatically use the transferring bank as the merchant in bank transfers
 - For transfers between accounts at the same bank, do not show 'Withdrawal' or 'Deposit' headers; just mark as 'Transfer'
+
+
+### 1.3.2 (in progress)
+
+- Make use of `data-*` HTML tag attributes rather than ID parsing

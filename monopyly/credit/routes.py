@@ -94,10 +94,8 @@ def load_account(account_id):
 def update_card_status():
     # Get the field from the AJAX request
     post_args = request.get_json()
-    input_id = post_args["input_id"]
+    card_id = int(post_args["card_id"])
     active = int(post_args["active"])
-    # Get the card ID as the second component of the input's ID attribute
-    card_id = input_id.split("-")[1]
     # Update the card in the database
     card = CreditCardHandler.update_entry(card_id, active=active)
     return render_template("credit/card_graphic/card_front.html", card=card)
@@ -167,9 +165,9 @@ def load_statements():
 def update_statements_display():
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    filter_ids = post_args["filter_ids"]
+    card_ids = map(int, post_args["card_ids"])
     # Determine the cards from the arguments of POST method
-    cards = [CreditCardHandler.find_card(*tag.split("-")) for tag in filter_ids]
+    cards = [CreditCardHandler.get_entry(card_id) for card_id in card_ids]
     card_statements = get_card_statement_grouping(cards)
     # Filter selected statements from the database
     return render_template("credit/statements.html", card_statements=card_statements)
@@ -273,7 +271,7 @@ def expand_transaction():
 @login_required
 def show_linked_transaction():
     post_args = request.get_json()
-    transaction_id = post_args["transaction_id"]
+    transaction_id = int(post_args["transaction_id"])
     transaction = CreditTransactionHandler.get_entry(transaction_id)
     linked_transaction = get_linked_transaction(transaction)
     return render_template(
@@ -289,14 +287,8 @@ def show_linked_transaction():
 def update_transactions_display():
     # Separate the arguments of the POST method
     post_args = request.get_json()
-    filter_ids = post_args["filter_ids"]
+    card_ids = map(int, post_args["card_ids"])
     sort_order = "ASC" if post_args["sort_order"] == "asc" else "DESC"
-    # Determine the card IDs from the arguments of POST method
-    card_ids = []
-    for card_tag in filter_ids:
-        bank_name, last_four_digits = card_tag.split("-")
-        card = CreditCardHandler.find_card(bank_name, last_four_digits)
-        card_ids.append(card.id)
     # Filter selected transactions from the database
     transactions = CreditTransactionHandler.get_transactions(
         card_ids=card_ids,
