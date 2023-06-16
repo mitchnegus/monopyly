@@ -21,33 +21,37 @@ import { executeAjaxRequest } from './modules/ajax.js';
   prepareForm();
 
   function prepareForm() {
+
     // Identify the key elements
     let $buttonPay = $('#make-payment[type="button"]');
-    let $inputPayAmount = $('#pay-amount');
-    let $inputPayDate = $('#pay-date');
-    let $selectPayBankAccount = $('#pay-bank-account');
-    // Change the form to allow information to be entered/submitted
-    bindButtonChange(
-      $buttonPay,
-      $inputPayAmount,
-      $inputPayDate,
-      $selectPayBankAccount
-    );
-    // Clicking outside the form returns the form to its original state
-    $(document).on('click', function(event) {
-      const $formPay = $('form#pay');
-      // Change the button type back to 'button' for clicks outside the form
-      if (!$formPay.is(event.target) && $formPay.has(event.target).length === 0) {
-        $buttonPay.off('click');
-        $buttonPay[0].type = 'button';
-        bindButtonChange(
-          $buttonPay,
-          $inputPayAmount,
-          $inputPayDate,
-          $selectPayBankAccount
-        );
-      }
-    });
+
+    if ($buttonPay.length) {
+      let $inputPayAmount = $('#pay-amount');
+      let $inputPayDate = $('#pay-date');
+      let $selectPayBankAccount = $('#pay-bank-account');
+      // Change the form to allow information to be entered/submitted
+      bindButtonChange(
+        $buttonPay,
+        $inputPayAmount,
+        $inputPayDate,
+        $selectPayBankAccount
+      );
+      // Clicking outside the form returns the form to its original state
+      $(document).on('click', function(event) {
+        const $formPay = $('form#pay');
+        // Change the button type back to 'button' for clicks outside the form
+        if (!$formPay.is(event.target) && $formPay.has(event.target).length === 0) {
+          $buttonPay.off('click');
+          $buttonPay[0].type = 'button';
+          bindButtonChange(
+            $buttonPay,
+            $inputPayAmount,
+            $inputPayDate,
+            $selectPayBankAccount
+          );
+        }
+      });
+    }
   }
 
   function bindButtonChange($buttonPay, $inputPayAmount, $inputPayDate,

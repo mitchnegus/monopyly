@@ -117,3 +117,4 @@
 ### 1.3.2 (in progress)
 
 - Make use of `data-*` HTML tag attributes rather than ID parsing
+- Prevent JavaScript errors on statement pages when buttons are non-existent
