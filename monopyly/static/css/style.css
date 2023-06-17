@@ -2503,15 +2503,6 @@ form#pay #make-payment[type="submit"] #prompt {
 
 
 /*
- * Customization for the 'Credit Transactions' page
- */
-.transactions-container .transactions {
-  width: 100%;
-  margin: 0 auto;
-}
-
-
-/*
  * Customization for the 'New Credit Transaction'/
  * 'Update Credit Transaction' pages
  */
