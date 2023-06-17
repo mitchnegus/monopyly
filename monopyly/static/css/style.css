@@ -511,7 +511,7 @@ form .autocomplete-box .item.active {
   align-self: flex-start;
   height: min-content;
   width: 30px;
-  margin-left: 20px;
+  margin-left: 30px;
   padding: 10px;
   border-radius: 10px;
   background-color: #f8f8f8;
@@ -1588,32 +1588,43 @@ form .autocomplete-box .item.active {
 .details {
   display: flex;
   flex-direction: column;
+  height: 100%;
   width: 100%;
 }
 
 .details .primary-info {
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
   width: 100%;
 }
 @media screen and (max-width: 1500px) {
   .details .primary-info {
     display: flex;
-    flex-direction: column;
     align-items: center;
+  }
+}
+
+.details .primary-info::after {
+  content: "";
+  flex-shrink: 0;
+  order: 1;
+  height: 100%;
+}
+@media screen and (max-width: 1500px) {
+  .details .primary-info::after {
+    order: 2;
+    height: 0%;
   }
 }
 
 .details .summary-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin: 0 20px 50px 0;
-}
-@media screen and (max-width: 1500px) {
-  .details .summary-container {
-    margin: 0 0 50px 0;
-  }
+  justify-content: center;
+  min-width: 45%;
+  margin: 0 0 0 0;
 }
 
 .details .summary-box {
@@ -1649,15 +1660,15 @@ form .autocomplete-box .item.active {
 
 .details .transactions-container {
   width: 50%;
+  order: 2;
   min-width: 500px;
 }
 @media screen and (max-width: 1500px) {
   .details .transactions-container {
+    order: 1;
     margin-top: 50px;
   }
 }
-
-.details #
 
 .details .transactions-table {
   width: 100%;
@@ -2084,6 +2095,29 @@ form#bank-account .hidden {
 #bank-account-summaries .account-block .balance {
   font-size: 24pt;
   font-weight: bold;
+}
+
+
+/*
+ * Customization for the (bank) 'Account Details' page
+ */
+@media screen and (max-width: 1500px) {
+  #bank-account-details .summary-container {
+    margin: 0 0 0 0;
+  }
+}
+
+#balance-chart {
+  width: 42.5%;
+  max-width: 650px;
+  margin-top: 30px;
+}
+@media screen and (max-width: 1500px) {
+  #balance-chart {
+    order: 2;
+    width: 45%;
+    min-width: 450px;
+  }
 }
 
 

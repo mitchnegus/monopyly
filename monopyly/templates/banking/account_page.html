@@ -22,6 +22,8 @@
         {% include 'banking/account_summary.html' %}
       </div>
 
+      <div id="balance-chart" class="ct-chart ct-octave"></div>
+
       <div id="account-transactions-container" class="transactions-container">
         {% with transactions = account_transactions %}
           {% include 'banking/transactions_table/transactions.html' %}
