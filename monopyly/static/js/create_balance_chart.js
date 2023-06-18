@@ -22,10 +22,12 @@ function buildLabelInterpolationFunction(dateOptions) {
 
 function createBalanceChart(data) {
 
+  const dataPoints = data.series[0].data
   // Set the number of labels per axis
   const xAxisDivisor = 5;
+  const yAxisDivisor = 5;
   // Use the number of labels and the data to determine the date format
-  const timestamps = data.series[0].data.map(point => point.x);
+  const timestamps = dataPoints.map(point => point.x);
   const earliestTimestamp = Math.min(...timestamps);
   const latestTimestamp = Math.max(...timestamps);
   const millisecondsPerDay = 1000*60*60*24;
@@ -40,6 +42,12 @@ function createBalanceChart(data) {
   if (showDay) {
     dateOptions.day = "numeric";
   }
+  // Use the data to determine the maximum y-value
+  const balances = dataPoints.map(point => point.y);
+  const maxBalance = Math.max(...balances);
+  const magnitudeOrderExponent = Math.floor(Math.log10(maxBalance));
+  const magnitudeOrder = Math.pow(10, magnitudeOrderExponent);
+  const yLimit = Math.ceil(1.25*maxBalance/magnitudeOrder)*magnitudeOrder;
 
   let smoothLine = true;
   if (timestamps.length > 50) {
@@ -51,8 +59,17 @@ function createBalanceChart(data) {
     lineSmooth: smoothLine,
     axisX: {
       type: Chartist.FixedScaleAxis,
-      divisor: 5,
+      divisor: xAxisDivisor,
       labelInterpolationFnc: buildLabelInterpolationFunction(dateOptions),
+    },
+    axisY: {
+      type: Chartist.FixedScaleAxis,
+      divisor: yAxisDivisor,
+      low: 0,
+      high: yLimit,
+      labelInterpolationFnc: function(value) {
+        return "$" + value.toLocaleString();
+      },
     },
   };
   new Chartist.Line("#balance-chart", data, options);
