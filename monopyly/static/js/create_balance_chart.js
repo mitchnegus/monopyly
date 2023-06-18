@@ -41,8 +41,14 @@ function createBalanceChart(data) {
     dateOptions.day = "numeric";
   }
 
+  let smoothLine = true;
+  if (timestamps.length > 50) {
+    smoothLine = false;
+  }
+
   const options = {
     showPoint: false,
+    lineSmooth: smoothLine,
     axisX: {
       type: Chartist.FixedScaleAxis,
       divisor: 5,
