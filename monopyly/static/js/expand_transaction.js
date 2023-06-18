@@ -14,7 +14,7 @@ import {
 import { toggleTransactionRow } from './modules/expand_transaction.js';
 
 
-function display_subtransactions($transaction) {
+function displaySubtransactions($transaction) {
 
     // Execute an AJAX request to get transaction/subtransaction information
     const endpoint = EXPAND_TRANSACTION_ENDPOINT;
@@ -24,8 +24,9 @@ function display_subtransactions($transaction) {
 
 }
 
+
 (function() {
 
-  toggleTransactionRow(display_subtransactions);
+  toggleTransactionRow(displaySubtransactions);
 
 })();
