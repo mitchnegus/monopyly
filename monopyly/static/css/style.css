@@ -2109,8 +2109,8 @@ form#bank-account .hidden {
 
 #balance-chart {
   width: 42.5%;
-  max-width: 650px;
-  margin-top: 30px;
+  max-width: 600px;
+  margin-top: 40px;
 }
 @media screen and (max-width: 1500px) {
   #balance-chart {
@@ -2118,6 +2118,14 @@ form#bank-account .hidden {
     width: 45%;
     min-width: 450px;
   }
+}
+
+#balance-chart .ct-point, #balance-chart .ct-line {
+  stroke: var(--moneytree-leaves);
+}
+
+#balance-chart .ct-line {
+  stroke-width: 2px;
 }
 
 

@@ -42,6 +42,7 @@ function createBalanceChart(data) {
   }
 
   const options = {
+    showPoint: false,
     axisX: {
       type: Chartist.FixedScaleAxis,
       divisor: 5,
