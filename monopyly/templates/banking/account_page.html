@@ -64,6 +64,9 @@
         {
           name: 'balances',
           data: [
+            {% for x, y in chart_data %}
+              {x: {{ x }}, y: {{ y }}},
+            {% endfor %}
           ],
         },
       ],

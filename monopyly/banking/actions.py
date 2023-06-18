@@ -1,4 +1,5 @@
 """Module describing logical banking actions (to be used in routes)."""
+from ..common.utils import convert_date_to_midnight_timestamp
 from .accounts import BankAccountHandler, BankAccountTypeHandler
 
 
@@ -13,3 +14,30 @@ def get_bank_account_type_grouping(bank):
             account_type_ids=(account_type.id,),
         )
     return type_accounts
+
+
+def get_balance_chart_data(transactions):
+    """
+    Build a dataset to be passed to a `chartist.js` chart constructor.
+
+    Parameters
+    ----------
+    transactions : list
+        A list of transactions to be used for generating the chart data.
+
+    Returns
+    -------
+    chart_data : list
+        A list of sorted (x, y) pairs consisting of the Unix timestamp
+        (in milliseconds) and the bank account balance.
+    """
+    chart_data = sorted(map(make_transaction_balance_ordered_pair, transactions))
+    return chart_data
+
+
+def make_transaction_balance_ordered_pair(transaction):
+    """Create an ordered pair of date (timestamp) and account balance."""
+    timestamp = convert_date_to_midnight_timestamp(
+        transaction.transaction_date, milliseconds=True
+    )
+    return timestamp, transaction.balance

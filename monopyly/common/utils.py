@@ -107,6 +107,31 @@ class _DateParser:
         raise ValueError(self.err_msg)
 
 
+def convert_date_to_midnight_timestamp(date, milliseconds=False):
+    """
+    Convert a date to the corresponding Unix timestamp (at midnight).
+
+    Parameters
+    ----------
+    date : datetime.date
+        The date to be converted to a timestamp.
+    milliseconds : bool
+        A flag indicating if the converted date should be represented
+        in milliseconds. The default is `False`, and the timestamp will
+        be given in full seconds since the epoch.
+
+    Returns
+    -------
+    timestamp : int
+        The timestamp corresponding to the given date (at midnight).
+    """
+    midnight = datetime.datetime.min.time()
+    timestamp = int(datetime.datetime.combine(date, midnight).timestamp())
+    if milliseconds:
+        timestamp *= 1000
+    return timestamp
+
+
 def get_next_occurrence_of_day(day, given_date):
     """
     Given a day of the month and a date, find the next occurrence of the day.

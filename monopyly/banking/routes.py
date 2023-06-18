@@ -1,8 +1,6 @@
 """
 Routes for banking financials.
 """
-from itertools import islice
-
 from authanor.database import db_transaction
 from flask import jsonify, redirect, render_template, request, url_for
 
@@ -10,7 +8,7 @@ from ..auth.tools import login_required
 from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import get_linked_transaction
 from .accounts import BankAccountHandler, BankAccountTypeHandler, save_account
-from .actions import get_bank_account_type_grouping
+from .actions import get_balance_chart_data, get_bank_account_type_grouping
 from .banks import BankHandler
 from .blueprint import bp
 from .forms import BankAccountForm, BankTransactionForm
@@ -70,15 +68,17 @@ def load_account_summaries(bank_id):
 @login_required
 def load_account_details(account_id):
     account = BankAccountHandler.get_entry(account_id)
-    transactions = BankTransactionHandler.get_transactions(
-        account_ids=(account_id,),
-        sort_order="DESC",
+    transactions = list(
+        BankTransactionHandler.get_transactions(
+            account_ids=(account_id,), sort_order="DESC"
+        )
     )
     # Only display the first 100 transactions
     return render_template(
         "banking/account_page.html",
         account=account,
-        account_transactions=islice(transactions, 100),
+        account_transactions=transactions[:100],
+        chart_data=get_balance_chart_data(transactions),
     )
 
 
