@@ -4,6 +4,7 @@ from datetime import date
 import pytest
 
 from monopyly.common.utils import (
+    convert_date_to_midnight_timestamp,
     dedelimit_float,
     get_next_occurrence_of_day,
     parse_date,
@@ -68,6 +69,19 @@ class TestDateParser:
     def test_invalid_date_string_formats(self, date_string):
         with pytest.raises(ValueError):
             parse_date(date_string)
+
+
+@pytest.mark.parametrize(
+    "date, milliseconds, timestamp",
+    [
+        [date(2020, 3, 3), False, 1_583_218_800],
+        [date(2020, 3, 3), True, 1_583_218_800_000],
+        [date(2020, 3, 4), False, 1_583_305_200],
+        [date(2020, 3, 6), False, 1_583_478_000],
+    ],
+)
+def test_timestamp_converter(date, milliseconds, timestamp):
+    assert timestamp == convert_date_to_midnight_timestamp(date, milliseconds)
 
 
 class TestDateOccurrenceFinder:

@@ -31,12 +31,12 @@ def get_balance_chart_data(transactions):
         A list of sorted (x, y) pairs consisting of the Unix timestamp
         (in milliseconds) and the bank account balance.
     """
-    chart_data = sorted(map(make_transaction_balance_ordered_pair, transactions))
+    chart_data = sorted(map(_make_transaction_balance_ordered_pair, transactions))
     return chart_data
 
 
-def make_transaction_balance_ordered_pair(transaction):
-    """Create an ordered pair of date (timestamp) and account balance."""
+def _make_transaction_balance_ordered_pair(transaction):
+    # Create an ordered pair of date (timestamp) and account balance
     timestamp = convert_date_to_midnight_timestamp(
         transaction.transaction_date, milliseconds=True
     )

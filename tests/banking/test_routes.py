@@ -92,6 +92,7 @@ class TestBankingRoutes(TestRoutes):
         assert self.html.count('class="transaction ') == 3
         for id_ in (2, 3, 4):
             assert f"transaction-{id_}" in self.html
+        assert "balance-chart" in self.html
 
     def test_expand_transaction(self, authorization):
         self.post_route("/_expand_transaction", json="transaction-5")
