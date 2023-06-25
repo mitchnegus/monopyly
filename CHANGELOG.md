@@ -114,7 +114,9 @@
 - For transfers between accounts at the same bank, do not show 'Withdrawal' or 'Deposit' headers; just mark as 'Transfer'
 
 
-### 1.3.2 (in progress)
+## 1.4.0 (in progress)
 
+- Add charts showing historical balances to bank account details page
 - Make use of `data-*` HTML tag attributes rather than ID parsing
 - Prevent JavaScript errors on statement pages when buttons are non-existent
+- Generalize transaction forms using Jinja `super` blocks

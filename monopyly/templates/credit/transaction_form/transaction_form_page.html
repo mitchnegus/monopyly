@@ -1,4 +1,4 @@
-{% extends "common/form_page.html" %}
+{% extends "common/transaction_form/transaction_form_page.html" %}
 
 
 {% block javascript %}
@@ -9,13 +9,10 @@
     const INFER_STATEMENT_ENDPOINT = "{{ url_for('credit.infer_statement') }}";
     const ADD_SUBTRANSACTION_FORM_ENDPOINT = "{{ url_for('credit.add_subtransaction_fields') }}";
   </script>
-  <script type="module" src="{{ url_for('static', filename='js/autocomplete_transaction.js') }}">
-  </script>
   <script type="module" src="{{ url_for('static', filename='js/infer_card.js') }}">
   </script>
   <script type="module" src="{{ url_for('static', filename='js/infer_statement.js') }}">
   </script>
-  <script type="module" src="{{ url_for('static', filename='js/add_subtransaction.js') }}">
-  </script>
+  {{ super() }}
 
 {% endblock %}

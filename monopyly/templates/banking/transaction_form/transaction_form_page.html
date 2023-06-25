@@ -1,4 +1,4 @@
-{% extends "common/form_page.html" %}
+{% extends "common/transaction_form/transaction_form_page.html" %}
 
 
 {% block javascript %}
@@ -8,11 +8,8 @@
     const ADD_SUBTRANSACTION_FORM_ENDPOINT = "{{ url_for('banking.add_subtransaction_fields') }}";
     const ADD_TRANSFER_FORM_ENDPOINT = "{{ url_for('banking.add_transfer_field') }}";
   </script>
-  <script type="module" src="{{ url_for('static', filename='js/autocomplete_transaction.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/add_subtransaction.js') }}">
-  </script>
   <script type="module" src="{{ url_for('static', filename='js/add_transfer.js') }}">
   </script>
+  {{ super() }}
 
 {% endblock %}
