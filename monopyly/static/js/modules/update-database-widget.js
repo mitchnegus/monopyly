@@ -8,7 +8,7 @@
  * the input or the enter button is pressed.
  */
 
-import { replaceDisplayContentsAjaxRequest } from './update_display_ajax.js';
+import { replaceDisplayContentsAjaxRequest } from './update-display-ajax.js';
 
 
 function updateDBWidget(endpoint, $widget) {

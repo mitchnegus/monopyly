@@ -10,7 +10,7 @@
  * and displayed.
  */
 
-import { updateDBWidget } from './modules/update_database_widget.js';
+import { updateDBWidget } from './modules/update-database-widget.js';
 
 
 (function() {
@@ -20,5 +20,5 @@ import { updateDBWidget } from './modules/update_database_widget.js';
 	const $widget = $('#due-date.update-db-widget');
 	// Prepare the widget
 	updateDBWidget(endpoint, $widget);
-	
+
 })();

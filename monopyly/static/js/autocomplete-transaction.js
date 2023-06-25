@@ -8,7 +8,7 @@
  * the input field is changed.
  */
 
-import { AutocompleteBox } from './modules/autocomplete_input.js';
+import { AutocompleteBox } from './modules/autocomplete-input.js';
 
 
 (function() {

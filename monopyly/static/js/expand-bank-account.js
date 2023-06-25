@@ -8,7 +8,7 @@
  * view (that is not otherwise a button).
  */
 
-import { toggleBoxRow } from './modules/expand_box_row.js';
+import { toggleBoxRow } from './modules/expand-box-row.js';
 
 
 (function() {

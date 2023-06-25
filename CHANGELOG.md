@@ -120,3 +120,4 @@
 - Make use of `data-*` HTML tag attributes rather than ID parsing
 - Prevent JavaScript errors on statement pages when buttons are non-existent
 - Generalize transaction forms using Jinja `super` blocks
+- Convert JavaScript files to be named using kebab case

@@ -10,7 +10,7 @@
  * the database is preserved and displayed.
  */
 
-import { updateDBWidget } from './modules/update_database_widget.js';
+import { updateDBWidget } from './modules/update-database-widget.js';
 
 
 (function() {
@@ -23,5 +23,5 @@ import { updateDBWidget } from './modules/update_database_widget.js';
 	// Prepare the widget
 	updateDBWidget(endpointDueDay, $widgetDueDay);
 	updateDBWidget(endpointIssueDay, $widgetIssueDay);
-	
+
 })();

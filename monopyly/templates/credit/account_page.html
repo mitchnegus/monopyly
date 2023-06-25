@@ -109,11 +109,11 @@
     const UPDATE_ACCOUNT_STATEMENT_ISSUE_DAY_ENDPOINT = "{{ url_for('credit.update_account_statement_issue_day', account_id=account.id) }}";
     const UPDATE_ACCOUNT_STATEMENT_DUE_DAY_ENDPOINT = "{{ url_for('credit.update_account_statement_due_day', account_id=account.id) }}";
   </script>
-  <script src="{{ url_for('static', filename='js/flip_card.js') }}">
+  <script src="{{ url_for('static', filename='js/flip-card.js') }}">
   </script>
-  <script type="module" src="{{ url_for('static', filename='js/update_card_status.js') }}">
+  <script type="module" src="{{ url_for('static', filename='js/update-card-status.js') }}">
   </script>
-  <script type="module" src="{{ url_for('static', filename='js/update_account_statement_parameters.js') }}">
+  <script type="module" src="{{ url_for('static', filename='js/update-account-statement-parameters.js') }}">
   </script>
 
 {% endblock %}

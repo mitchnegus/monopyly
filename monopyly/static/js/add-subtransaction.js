@@ -10,7 +10,7 @@
  * is updated with the new field information.
  */
 
-import { SubformManager } from './modules/manage_subforms.js';
+import { SubformManager } from './modules/manage-subforms.js';
 
 
 /**

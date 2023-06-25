@@ -1,7 +1,7 @@
 /* Display inputs for a new bank name when collecting new bank account info.
  */
 
-import { AcquisitionFormManager } from './modules/manage_acquisition_form.js';
+import { AcquisitionFormManager } from './modules/manage-acquisition-form.js';
 
 
 (function() {

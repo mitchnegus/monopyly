@@ -10,7 +10,7 @@
 
 import {
   replaceDisplayContentsAjaxRequest
-} from './modules/update_display_ajax.js';
+} from './modules/update-display-ajax.js';
 
 
 (function() {

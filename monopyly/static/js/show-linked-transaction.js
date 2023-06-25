@@ -8,7 +8,7 @@
  */
 
 import { executeAjaxRequest } from './modules/ajax.js';
-import { OverlayManager } from './modules/manage_overlays.js';
+import { OverlayManager } from './modules/manage-overlays.js';
 
 
 (function() {

@@ -1,7 +1,7 @@
 /* Display inputs for a new credit account when collecting new credit card info.
  */
 
-import { AcquisitionFormManager } from './modules/manage_acquisition_form.js';
+import { AcquisitionFormManager } from './modules/manage-acquisition-form.js';
 
 
 (function() {

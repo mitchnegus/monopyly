@@ -10,8 +10,8 @@
 
 import {
   replaceDisplayContentsAjaxRequest
-} from './modules/update_display_ajax.js';
-import { toggleTransactionRow } from './modules/expand_transaction.js';
+} from './modules/update-display-ajax.js';
+import { toggleTransactionRow } from './modules/expand-transaction.js';
 
 
 function displaySubtransactions($transaction) {
