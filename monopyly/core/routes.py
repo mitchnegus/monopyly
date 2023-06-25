@@ -3,7 +3,7 @@ Routes for core functionality.
 """
 from pathlib import Path
 
-from flask import g, render_template, render_template_string
+from flask import g, render_template, render_template_string, session
 
 from ..auth.tools import login_required
 from ..banking.accounts import BankAccountHandler
@@ -17,6 +17,8 @@ from .blueprint import bp
 @bp.route("/")
 def index():
     if g.user:
+        # Set the homepage to show the welcome statement (unless otherwise set)
+        session.setdefault("show_homepage_block", True)
         # Get the user's banks and credit cards from the database
         banks = BankHandler.get_banks()
         bank_accounts = {}
@@ -34,10 +36,18 @@ def index():
             else:
                 card.last_statement_id = None
     else:
+        session["show_homepage_block"] = True
         bank_accounts, active_cards = None, None
     return render_template(
         "index.html", bank_accounts=bank_accounts, cards=active_cards
     )
+
+
+@bp.route("/_hide_homepage_block")
+@login_required
+def hide_homepage_block():
+    session["show_homepage_block"] = False
+    return ""
 
 
 @bp.route("/about")

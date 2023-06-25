@@ -1,11 +1,17 @@
 {% extends "layout.html" %}
 
 {% block content %}
-  <div id="homepage-block">
-    <h2>Don't go broke!</h2>
-    <h3>A homemade personal finance manager, built in Flask.</h3>
-  </div>
-  <br>
+  {% if session["show_homepage_block"] %}
+    <div id="homepage-block">
+      <div class="buttons">
+        {% if g.user %}
+          <img class="hide button" src="{{ url_for('static', filename='img/icons/x-thick.png') }}">
+        {% endif %}
+      </div>
+      <h2>Don't go broke!</h2>
+      <h3>A homemade personal finance manager, built in Flask.</h3>
+    </div>
+  {% endif %}
 
   {% if g.user %}
     <div id="homepage-panels">
@@ -142,4 +148,12 @@
 
     </div>
   {% endif %}
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    const HIDE_HOMEPAGE_BLOCK_ENDPOINT = "{{ url_for('core.hide_homepage_block') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/hide-homepage-block.js') }}">
+  </script>
 {% endblock %}

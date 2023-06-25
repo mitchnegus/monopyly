@@ -27,6 +27,27 @@ class TestCoreRoutes(TestRoutes):
         self.get_route("/")
         assert "See most recent statement" not in self.html
 
+    def test_hide_homepage_block(self, auth):
+        auth.login()
+        self.get_route("/_hide_homepage_block")
+        self.get_route("/")
+        assert "Don't go broke!" not in self.html
+        assert "homepage-panels" in self.html
+
+    def test_hide_homepage_block_logout(self, auth):
+        auth.login()
+        self.get_route("/_hide_homepage_block")
+        self.get_route("/")
+        # Logout should reset the homepage block
+        auth.logout()
+        self.get_route("/")
+        assert "Don't go broke!" in self.html
+        # ...including for subsequent logins
+        auth.login()
+        self.get_route("/")
+        assert "Don't go broke!" in self.html
+        assert "homepage-panels" in self.html
+
     def test_about(self):
         self.get_route("/about")
         assert "<em>The Money Game</em>" in self.html

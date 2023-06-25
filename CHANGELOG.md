@@ -117,6 +117,7 @@
 ## 1.4.0 (in progress)
 
 - Add charts showing historical balances to bank account details page
+- Allow users to remove the welcome block from the homepage
 - Make use of `data-*` HTML tag attributes rather than ID parsing
 - Prevent JavaScript errors on statement pages when buttons are non-existent
 - Generalize transaction forms using Jinja `super` blocks
