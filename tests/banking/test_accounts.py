@@ -1,8 +1,10 @@
 """Tests for the banking module managing bank accounts."""
+from datetime import date, timedelta
 from unittest.mock import patch
 
 import pytest
 from authanor.testing.helpers import TestHandler
+from fuisce.testing import transaction_lifetime
 from werkzeug.exceptions import NotFound
 
 from monopyly.banking.accounts import (
@@ -16,6 +18,7 @@ from monopyly.database.models import (
     BankAccountTypeView,
     BankAccountView,
     BankTransaction,
+    BankTransactionView,
 )
 
 
@@ -183,6 +186,7 @@ class TestBankAccountHandler(TestHandler):
             last_four_digits="5556",
             active=1,
             balance=443.90,
+            projected_balance=443.90,
         ),
         BankAccountView(
             id=3,
@@ -191,6 +195,7 @@ class TestBankAccountHandler(TestHandler):
             last_four_digits="5556",
             active=0,
             balance=-409.21,
+            projected_balance=-409.21,
         ),
         BankAccountView(
             id=4,
@@ -199,8 +204,21 @@ class TestBankAccountHandler(TestHandler):
             last_four_digits="5557",
             active=1,
             balance=200.00,
+            projected_balance=200.00,
         ),
     ]
+
+    @transaction_lifetime
+    def test_projected_balance(self, app):
+        # Adjust one of the transactions to take place in the future
+        with app.db.session.begin():
+            future_transaction = app.db.session.get(BankTransaction, 4)
+            future_transaction.transaction_date = date.today() + timedelta(days=1)
+        # Check that the balance and projected balance are different
+        account = app.db.session.get(BankAccountView, 2)
+        expected_difference = future_transaction.view.total
+        assert account.projected_balance == 443.90
+        assert account.projected_balance == account.balance + expected_difference
 
     @pytest.mark.parametrize(
         "bank_ids, account_type_ids, reference_entries",

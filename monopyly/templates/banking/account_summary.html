@@ -13,4 +13,10 @@
     <div>{{ account.balance|currency }}</div>
   </div>
 
+  {% if account.balance != account.projected_balance %}
+    <div class="projected-balance">
+      <span>Projected balance:</span> <span>${{ account.projected_balance|currency }}</span>
+    </div>
+  {% endif %}
+
 </div>

@@ -180,6 +180,7 @@ class BankAccountView(AuthorizedAccessMixin, Model):
     last_four_digits = mapped_column(String, nullable=False)
     active = mapped_column(Integer, nullable=False)
     balance = mapped_column(Float, nullable=False)
+    projected_balance = mapped_column(Float, nullable=False)
     # Relationships
     account = relationship("BankAccount", back_populates="view")
     bank = relationship("Bank", back_populates="bank_accounts")

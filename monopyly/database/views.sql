@@ -16,19 +16,6 @@ SELECT
 FROM bank_account_types AS t;
 
 
-/* Prepare a view giving enhanced bank account information */
-CREATE VIEW bank_accounts_view AS
-SELECT
-  a.*,
-  ROUND(COALESCE(SUM(subtotal), 0), 2) balance
-FROM bank_accounts AS a
-  LEFT OUTER JOIN bank_transactions AS t
-    ON t.account_id = a.id
-  LEFT OUTER JOIN bank_subtransactions AS s_t
-    ON s_t.transaction_id = t.id
-GROUP BY a.id;
-
-
 /* Prepare a view giving enhanced bank account transaction information */
 CREATE VIEW bank_transactions_view AS
 WITH view AS (
@@ -48,6 +35,21 @@ SELECT
     2
   ) balance
 FROM view;
+
+
+/* Prepare a view giving enhanced bank account information */
+CREATE VIEW bank_accounts_view AS
+SELECT
+  a.*,
+  ROUND(COALESCE(
+      SUM(CASE WHEN t.transaction_date <= DATE('now') THEN t.total END),
+      0
+  ), 2) balance,
+  ROUND(COALESCE(SUM(t.total), 0), 2) projected_balance
+FROM bank_accounts AS a
+  LEFT OUTER JOIN bank_transactions_view AS t
+    ON t.account_id = a.id
+GROUP BY a.id;
 
 
 /* Prepare a view giving consolidated credit card transaction information */
