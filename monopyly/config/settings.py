@@ -2,6 +2,12 @@
 from .default_settings import Config
 
 
+class ProductionConfig(Config):
+    """A configuration object with settings for production."""
+
+    SECRET_KEY = "INSECURE PRODUCTION TEST KEY"
+
+
 class DevelopmentConfig(Config):
     """A configuration object with settings for development."""
 
@@ -23,9 +29,3 @@ class TestingConfig(Config):
     def __init__(self, db_path=None, preload_data_path=None):
         super().__init__(db_path=db_path)
         self.PRELOAD_DATA_PATH = preload_data_path
-
-
-class ProductionConfig(Config):
-    """A configuration object with settings for production."""
-
-    SECRET_KEY = "INSECURE PRODUCTION TEST KEY"

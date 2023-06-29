@@ -7,13 +7,7 @@ from pathlib import Path
 from flask import Flask
 
 from monopyly.config import DevelopmentConfig, ProductionConfig
-from monopyly.database import (
-    DB_NAME,
-    SQLAlchemy,
-    back_up_db_command,
-    db,
-    init_db_command,
-)
+from monopyly.database import DB_NAME, SQLAlchemy, db, register_db_cli_commands
 
 
 def create_app(test_config=None):
@@ -30,14 +24,13 @@ def create_app(test_config=None):
         # Load the development/production config when not testing
         if app.debug:
             db_path = instance_path / f"dev-{DB_NAME}"
-            preload_data_path = _get_preload_data_path(instance_path)
             config = DevelopmentConfig(
-                db_path=db_path, preload_data_path=preload_data_path
+                db_path=db_path, preload_data_path=_get_preload_data_path(instance_path)
             )
         else:
             db_path = instance_path / DB_NAME
             config = ProductionConfig(db_path=db_path)
-            # Give a while the secret key remains insecure
+            # Give an alert while the secret key remains insecure
             warnings.formatwarning = lambda msg, *args, **kwargs: f"\n{msg}\n"
             warnings.warn("INSECURE: Production mode has not yet been fully configured")
     app.config.from_object(config)
@@ -56,9 +49,7 @@ def _get_preload_data_path(instance_path):
 def init_app(app):
     """Initialize the app."""
     register_blueprints(app)
-    # Register the database actions with the app
-    app.cli.add_command(init_db_command)
-    app.cli.add_command(back_up_db_command)
+    register_db_cli_commands(app)
 
 
 def register_blueprints(app):

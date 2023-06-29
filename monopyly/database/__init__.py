@@ -92,3 +92,9 @@ def back_up_db(db, backup_db):
     # Close the connections
     backup_db.close()
     db.close()
+
+
+def register_db_cli_commands(app):
+    """Register database CLI commands with the app."""
+    app.cli.add_command(init_db_command)
+    app.cli.add_command(back_up_db_command)
