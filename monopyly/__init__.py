@@ -2,12 +2,11 @@
 Run a development server for the Monopyly app.
 """
 import warnings
-from pathlib import Path
 
 from flask import Flask
 
 from monopyly.config import DevelopmentConfig, ProductionConfig
-from monopyly.database import DB_NAME, SQLAlchemy, db, register_db_cli_commands
+from monopyly.database import SQLAlchemy, register_db_cli_commands
 
 
 def create_app(test_config=None):
@@ -18,18 +17,11 @@ def create_app(test_config=None):
     if test_config:
         config = test_config
     else:
-        # Ensure the instance path exists
-        instance_path = Path(app.instance_path)
-        instance_path.mkdir(parents=True, exist_ok=True)
         # Load the development/production config when not testing
         if app.debug:
-            db_path = instance_path / f"dev-{DB_NAME}"
-            config = DevelopmentConfig(
-                db_path=db_path, preload_data_path=_get_preload_data_path(instance_path)
-            )
+            config = DevelopmentConfig.configure_for_instance(app.instance_path)
         else:
-            db_path = instance_path / DB_NAME
-            config = ProductionConfig(db_path=db_path)
+            config = ProductionConfig.configure_for_instance(app.instance_path)
             # Give an alert while the secret key remains insecure
             warnings.formatwarning = lambda msg, *args, **kwargs: f"\n{msg}\n"
             warnings.warn("INSECURE: Production mode has not yet been fully configured")
@@ -40,12 +32,7 @@ def create_app(test_config=None):
     return app
 
 
-def _get_preload_data_path(instance_path):
-    dev_data_path = instance_path / "preload_dev_data.sql"
-    return dev_data_path if dev_data_path.exists() else None
-
-
-@SQLAlchemy.interface_selector(db)
+@SQLAlchemy.interface_selector
 def init_app(app):
     """Initialize the app."""
     register_blueprints(app)

@@ -11,7 +11,7 @@ from flask.cli import with_appcontext
 
 from ..core.actions import get_timestamp
 
-DB_NAME = "monopyly.sqlite"
+BASE_DB_NAME = "monopyly.sqlite"
 
 
 class SQLAlchemy(_SQLAlchemy):
@@ -49,7 +49,7 @@ class SQLAlchemy(_SQLAlchemy):
         super().initialize(app)
 
 
-db = SQLAlchemy()
+SQLAlchemy.create_default_interface()
 
 
 @click.command("init-db")

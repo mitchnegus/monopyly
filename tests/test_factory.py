@@ -15,7 +15,7 @@ def test_development_config():
     assert app.config["SECRET_KEY"] == "development key"
 
 
-@patch("monopyly.Path.exists")
+@patch("monopyly.config.settings.Path.exists")
 def test_production_config(mock_exists_method):
     mock_exists_method.return_value = True
     app = create_app()
