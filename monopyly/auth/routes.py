@@ -1,7 +1,7 @@
 """
 Routes for site authentication.
 """
-from authanor.database import db_transaction
+from fuisce.database import db_transaction
 from flask import (
     current_app,
     flash,

@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 
 import click
-from authanor.database import SQLAlchemy as _SQLAlchemy
+from fuisce.database import SQLAlchemy as _SQLAlchemy
 from flask import current_app
 from flask.cli import with_appcontext
 

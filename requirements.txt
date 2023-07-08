@@ -1,10 +1,11 @@
-authanor>=1.0.2
+authanor>=1.1.0
 beautifulsoup4>=4.11.2
 black>=23.1.0
 colorama>=0.4.6
 coverage>=7.1.0
 flask>=2.2.3
 flask-wtf>=1.1.1
+fuisce>=1.0.0
 hatch>=1.6.3
 isort>=5.12.0
 markdown>=3.4.3

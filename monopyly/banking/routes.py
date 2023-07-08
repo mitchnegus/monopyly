@@ -1,7 +1,7 @@
 """
 Routes for banking financials.
 """
-from authanor.database import db_transaction
+from fuisce.database import db_transaction
 from flask import jsonify, redirect, render_template, request, url_for
 
 from ..auth.tools import login_required

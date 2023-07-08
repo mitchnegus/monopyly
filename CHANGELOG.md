@@ -122,3 +122,4 @@
 - Prevent JavaScript errors on statement pages when buttons are non-existent
 - Generalize transaction forms using Jinja `super` blocks
 - Convert JavaScript files to be named using kebab case
+- Use Fuisce in place of Authanor for db/testing interfaces

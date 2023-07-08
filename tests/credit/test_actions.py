@@ -3,7 +3,7 @@ from datetime import date
 from unittest.mock import Mock, call, patch
 
 import pytest
-from authanor.testing.helpers import transaction_lifetime
+from fuisce.testing import transaction_lifetime
 
 from monopyly.banking.transactions import BankTransactionHandler
 from monopyly.credit.actions import (

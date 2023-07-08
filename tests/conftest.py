@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from authanor.testing.helpers import AppTestManager
+from fuisce.testing import AppTestManager
 
 from monopyly import create_app
 from monopyly.config import TestingConfig
