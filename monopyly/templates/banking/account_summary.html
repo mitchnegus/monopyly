@@ -1,7 +1,7 @@
 <div id="account-summary" class="summary-box">
 
   <div class="account suptitle">
-    {{ account.bank.bank_name.upper() }} {{ account.last_four_digits }}
+    {{ account.bank.bank_name }} {{ account.last_four_digits }}
   </div>
 
   <div class="title">
@@ -14,8 +14,11 @@
   </div>
 
   {% if account.balance != account.projected_balance %}
-    <div class="projected-balance">
-      <span>Projected balance:</span> <span>${{ account.projected_balance|currency }}</span>
+    <div class="projected-balance subtitle">
+      <span>Projected balance: </span>
+      <span class="amount{{ ' negative' if account.projected_balance < 0 }}">
+        ${{ account.projected_balance|currency }}
+      </span>
     </div>
   {% endif %}
 

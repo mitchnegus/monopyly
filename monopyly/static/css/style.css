@@ -1648,14 +1648,32 @@ form .autocomplete-box .item.active {
   text-align: center;
 }
 
+.details .summary-box .projected-balance .amount {
+  color: var(--moneytree);
+}
+
+.details .summary-box .projected-balance .amount.negative {
+  color: crimson;
+}
+
 .details .summary-box .title {
   font-size: 28pt;
 }
 
+.details .summary-box .suptitle,
+.details .summary-box .subtitle {
+  color: #888888;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
 .details .summary-box .suptitle {
   margin-bottom: 10px;
-  color: #888888;
   font-size: 14pt;
+}
+
+.details .summary-box .subtitle {
+  font-size: 12pt;
 }
 
 .details .transactions-container {

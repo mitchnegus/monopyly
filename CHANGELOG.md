@@ -117,6 +117,7 @@
 ## 1.4.0 (in progress)
 
 - Add charts showing historical balances to bank account details page
+- Show projected balances for bank transactions occurring in the future
 - Allow users to remove the welcome block from the homepage
 - Make use of `data-*` HTML tag attributes rather than ID parsing
 - Prevent JavaScript errors on statement pages when buttons are non-existent
