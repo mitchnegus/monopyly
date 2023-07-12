@@ -114,7 +114,7 @@
 - For transfers between accounts at the same bank, do not show 'Withdrawal' or 'Deposit' headers; just mark as 'Transfer'
 
 
-## 1.4.0 (in progress)
+## 1.4.0
 
 - Add charts showing historical balances to bank account details page
 - Show projected balances for bank transactions occurring in the future
