@@ -1043,7 +1043,7 @@ form .autocomplete-box .item.active {
   flex: 4;
   min-width: 175px;
   white-space: nowrap;
-  overflow: auto;
+  overflow: hidden;
 }
 @media screen and (max-width: 1000px) {
   /* Mobile layout */
@@ -1051,6 +1051,11 @@ form .autocomplete-box .item.active {
     display: none;
   }
 }
+
+.transactions-table .notes.column:hover {
+  overflow: auto;
+}
+
 
 .transactions-table .card.column {
   flex: 1;
@@ -1710,8 +1715,6 @@ form .autocomplete-box .item.active {
 .details .transactions-table .notes.column {
   flex: 4;
   min-width: 100px;
-  white-space: nowrap;
-  overflow: auto;
 }
 
 @media screen and (max-width: 1500px) {

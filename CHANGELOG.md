@@ -121,6 +121,7 @@
 - Allow users to remove the welcome block from the homepage
 - Make use of `data-*` HTML tag attributes rather than ID parsing
 - Prevent JavaScript errors on statement pages when buttons are non-existent
+- Clean up transaction table overflow for transaction notes
 - Generalize transaction forms using Jinja `super` blocks
 - Convert JavaScript files to be named using kebab case
 - Use Fuisce in place of Authanor for db/testing interfaces
