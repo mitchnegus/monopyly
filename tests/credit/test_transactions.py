@@ -388,7 +388,7 @@ class TestCreditTagHandler(TestTagHandler):
 
 
 class TestSaveFormFunctions:
-    @patch("monopyly.credit.transactions.CreditTransactionHandler")
+    @patch("monopyly.credit.transactions._transactions.CreditTransactionHandler")
     @patch("monopyly.credit.forms.CreditTransactionForm")
     def test_save_new_transaction(self, mock_form, mock_handler):
         # Mock the form and primary method
@@ -399,7 +399,7 @@ class TestSaveFormFunctions:
         mock_method.assert_called_once_with(**mock_form.transaction_data)
         assert transaction == mock_method.return_value
 
-    @patch("monopyly.credit.transactions.CreditTransactionHandler")
+    @patch("monopyly.credit.transactions._transactions.CreditTransactionHandler")
     @patch("monopyly.credit.forms.CreditTransactionForm")
     def test_save_updated_transaction(self, mock_form, mock_handler):
         # Mock the form and primary method
