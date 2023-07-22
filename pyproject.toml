@@ -39,7 +39,6 @@ dynamic = ['readme', 'version']
 
 [project.scripts]
 monopyly = 'monopyly.cli.run:main'
-backup_db = 'monopyly.cli.backup_db:main'
 
 [project.urls]
 Download = 'https://pypi.org/project/monopyly'
