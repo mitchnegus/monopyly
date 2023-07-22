@@ -135,7 +135,7 @@ class CreditStatementHandler(
 
         Returns
         -------
-        statement : sqlite3.Row
+        statement : database.models.CreditStatementView
             The inferred statement entry for the transaction.
         """
         issue_day = card.account.statement_issue_day

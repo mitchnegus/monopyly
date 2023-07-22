@@ -125,3 +125,8 @@
 - Generalize transaction forms using Jinja `super` blocks
 - Convert JavaScript files to be named using kebab case
 - Use Fuisce in place of Authanor for db/testing interfaces
+
+
+### 1.4.1 (in progress)
+
+- Fix incorrect return type in `CreditStatementHandler.infer_statement` method
