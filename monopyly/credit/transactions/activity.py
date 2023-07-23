@@ -1,7 +1,50 @@
 import csv
 from abc import ABC, abstractmethod
+from collections import UserList, namedtuple
 
 from monopyly.common.utils import parse_date
+
+
+def parse_transaction_activity_file(transaction_file):
+    """
+    Parse a CSV file containing reported transaction activity.
+
+    Parameters
+    ----------
+    transaction_file : pathlib.Path
+        The CSV file containing transaction activity data.
+
+    Returns
+    -------
+    activities : TransactionActivities
+        The list-like object containing credit transaction activity
+        data.
+    """
+    return _TransactionActivityParser(transaction_file).data
+
+
+class TransactionActivities(UserList):
+    """
+    A list-like datatype for storing transaction activity information.
+
+    A subclass of `UserList` that stores transaction activity data in an
+    easily accessible format. The object is constructed by passing a
+    normal list of ordered lists/tuples, and converts each row into an
+    equivalent `namedtuple` object, with data recorded according to
+    its column type.
+
+    Parameters
+    ----------
+    data : list
+        A list of ordered lists/tuples that contain the data to be
+        converted into this `TransactionActivities` instance.
+    """
+
+    column_types = ("transaction_date", "total", "description")
+
+    def __init__(self, data=()):
+        row_cls = namedtuple("TransactionActivity", self.column_types)
+        super().__init__([row_cls(*row) for row in data])
 
 
 class _ColumnIdentifier(ABC):
@@ -91,7 +134,7 @@ class _TransactionTypeColumnIdentifier(_ColumnIdentifier):
         return standardized_title == "type"
 
 
-class ActivityParser:
+class _TransactionActivityParser:
     """
     A parser for arbitrary CSV files containing transaction activity.
 
@@ -103,7 +146,7 @@ class ActivityParser:
     Parameters
     ----------
     transaction_file : pathlib.Path
-        The CSV file containing transaction data.
+        The CSV file containing transaction activity data.
     """
 
     _column_identifiers = {
@@ -123,7 +166,7 @@ class ActivityParser:
         self._raw_column_indices = self._determine_column_indices(raw_header)
         self._negative_charges = self._determine_expenditure_sign(raw_data)
         self.column_indices = {name: i for i, name in enumerate(self.column_types)}
-        self.data = [self._process_data(row) for row in raw_data]
+        self.data = TransactionActivities(self._process_data(row) for row in raw_data)
 
     @staticmethod
     def _load_data(transaction_file):
@@ -140,7 +183,7 @@ class ActivityParser:
             column_type: identifier(raw_header).determine_index()
             for column_type, identifier in self._column_identifiers.items()
         }
-        for column_type in self._required_raw_column_types:
+        for column_type in self.column_types:
             if raw_column_indices[column_type] is None:
                 raise RuntimeError(
                     f"The '{column_type}' column could not be identified in the data."
