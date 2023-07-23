@@ -1,8 +1,8 @@
 """
 Routes for banking financials.
 """
-from fuisce.database import db_transaction
 from flask import jsonify, redirect, render_template, request, url_for
+from fuisce.database import db_transaction
 
 from ..auth.tools import login_required
 from ..common.forms.utils import extend_field_list_for_ajax

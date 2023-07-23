@@ -3,8 +3,8 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
-from fuisce.testing import transaction_lifetime
 from flask import url_for
+from fuisce.testing import transaction_lifetime
 from werkzeug.exceptions import NotFound
 
 from test_helpers import TestRoutes

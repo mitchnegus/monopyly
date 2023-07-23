@@ -3,8 +3,8 @@ Routes for credit card financials.
 """
 from itertools import islice
 
-from fuisce.database import db_transaction
 from flask import flash, g, jsonify, redirect, render_template, request, url_for
+from fuisce.database import db_transaction
 from sqlalchemy.exc import MultipleResultsFound
 from werkzeug.exceptions import abort
 from wtforms.validators import ValidationError

@@ -5,9 +5,9 @@ import sqlite3
 from pathlib import Path
 
 import click
-from fuisce.database import SQLAlchemy as _SQLAlchemy
 from flask import current_app
 from flask.cli import with_appcontext
+from fuisce.database import SQLAlchemy as _SQLAlchemy
 
 from ..core.actions import get_timestamp
 
