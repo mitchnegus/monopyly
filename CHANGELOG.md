@@ -129,4 +129,5 @@
 
 ### 1.4.1 (in progress)
 
+- Use local time for determining projected balances
 - Fix incorrect return type in `CreditStatementHandler.infer_statement` method

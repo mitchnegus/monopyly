@@ -42,7 +42,7 @@ CREATE VIEW bank_accounts_view AS
 SELECT
   a.*,
   ROUND(COALESCE(
-      SUM(CASE WHEN t.transaction_date <= DATE('now') THEN t.total END),
+      SUM(CASE WHEN t.transaction_date <= DATE('now', 'localtime') THEN t.total END),
       0
   ), 2) balance,
   ROUND(COALESCE(SUM(t.total), 0), 2) projected_balance
