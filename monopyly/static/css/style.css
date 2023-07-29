@@ -2604,6 +2604,70 @@ form#pay #make-payment[type="submit"] #prompt {
 
 
 /*
+ * Customization for the (credit) 'Statement Reconciliation' details page
+ */
+#credit-statement-reconciliation-details .note {
+  font-size: 9pt;
+  color: #888888;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container {
+  width: 45%;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container h2 {
+  margin: 25px 0;
+  color: #888888;
+  font-size: 14pt;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#credit-statement-reconciliation-details #statement-transactions-container .note {
+  padding: 0 20px 20px;
+}
+
+#credit-statement-reconciliation-details div.discrepancy-category {
+  margin-bottom: 30px;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container .discrepant-activity,
+#credit-statement-reconciliation-details #statement-discrepancies-container .unrecorded-activity {
+  padding: 5px 15px;
+}
+
+
+/*
+ * Customization for the statement reconciliation modal
+ */
+#statement-reconciliation.modal {
+  width: 50%;
+  min-width: 300px;
+  transform: translate(-50%, 100%);
+}
+
+#statement-reconciliation.modal .modal-box {
+  height: 100%;
+  width: 100%;
+  padding: 30px;
+}
+
+#statement-reconciliation.modal p {
+  width: 80%;
+  margin: auto;
+}
+
+#statement-reconciliation.modal form {
+  margin-top: 20px;
+}
+
+#statement-reconciliation.modal form input {
+  margin: 3px 0;
+}
+
+
+/*
  * Customization for the 'New Credit Transaction'/
  * 'Update Credit Transaction' pages
  */

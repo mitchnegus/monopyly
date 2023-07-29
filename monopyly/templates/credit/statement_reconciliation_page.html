@@ -14,6 +14,74 @@
 
 {% block content %}
 
+  <div id="credit-statement-reconciliation-details" class="details">
+
+    <div id="credit-statement-reconciliation-info" class="primary-info">
+
+      <div id="statement-reconciliation-summary-container" class="summary-container">
+        {% include 'credit/statement_reconciliation_summary.html' %}
+      </div>
+
+      {% if discrepant_records or unrecorded_activities %}
+        <div id="statement-discrepancies-container">
+          <h2>Discrepancies</h3>
+
+          {% if discrepant_records %}
+            <div class="discrepancy-category">
+              <h3>Discrepant Records</h3>
+              <p class="note">
+                {% set plural = discrepant_records|length != 1 %}
+                The following {% if plural %}activities were{% else %}activity was{% endif %} reported in the credit activity file and matched in the database, but the charge amount{%if plural %}s do{% else %} does{% endif %} not match:
+              </p>
+              <div class="discrepant-activities transactions-table">
+                {% for transaction, activity in discrepant_records.items() %}
+                  <div class="discrepant-activity" data-transaction-id="{{ transaction.id }}">
+                    <div class="date">{{ activity.transaction_date }}</div>
+                    <div class="text">{{ activity.description }}</div>
+                    <div class="amount">
+                      <span class="dollar-sign">$</span>
+                      {{ activity.total|currency }}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if unrecorded_activities %}
+            <div class="discrepancy-category">
+              <h3>Unrecorded Activity</h3>
+              <p class="note">
+              {% set plural = unrecorded_activities|length != 1 %}
+              The following {% if plural %}activities were{% else %}activity was{% endif %} reported in the credit activity file, but {% if plural %}do{% else %}does{% endif %} not exist in the Monopyly database:
+              </p>
+              <div class="unrecorded-activities transactions-table">
+                {% for activity in unrecorded_activities %}
+                  <div class="unrecorded-activity">
+                    <div class="date">{{ activity.transaction_date }}</div>
+                    <div class="text">{{ activity.description }}</div>
+                    <div class="amount">
+                      <span class="dollar-sign">$</span>
+                      {{ activity.total|currency }}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+        </div>
+      {% endif %}
+      <div id="statement-transactions-container" class="transactions-container">
+        {% with transactions = statement_transactions, full_view = False %}
+          {% include 'credit/transactions_table/transactions.html' %}
+        {% endwith %}
+      </div>
+
+    </div>
+
+  </div>
+
 {% endblock %}
 
 
@@ -31,6 +99,11 @@
           <img class="icon" src="{{ url_for('static', filename='img/icons/statement.png') }}" />
         </a>
       </div>
+      <div class="button">
+        <div class="action">
+          <img id="reconciliation-button" class="icon" src="{{ url_for('static', filename='img/icons/statement-pair.png') }}" />
+        </div>
+      </div>
 
     </div>
 
@@ -38,5 +111,17 @@
 
 
 {% block javascript %}
+
+  <script>
+    const CREDIT_ACTIVITY_RECONCILIATION_ENDPOINT = "{{ url_for('credit.reconcile_activity', statement_id=statement.id) }}";
+    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show-credit-activity-loader.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
+  </script>
 
 {% endblock %}
