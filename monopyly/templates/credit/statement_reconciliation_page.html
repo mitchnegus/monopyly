@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+
+{% block header %}
+
+  <h1>
+    {% block title %}
+      Statement Reconciliation
+    {% endblock %}
+  </h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+{% endblock %}
+
+
+{% block right_sidebar %}
+
+    <div class="sidebar-menu">
+
+      <div class="button">
+        <a class="action" href="{{ url_for('credit.add_transaction', card_id=statement.card_id, statement_id=statement.id) }}">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+        </a>
+      </div>
+      <div class="button">
+        <a class="action" href="{{ url_for('credit.load_statement_details', statement_id=statement.id) }}">
+          <img class="icon" src="{{ url_for('static', filename='img/icons/statement.png') }}" />
+        </a>
+      </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+{% endblock %}
