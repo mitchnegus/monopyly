@@ -82,4 +82,3 @@ class OverlayManager {
 
 
 export { OverlayManager };
-

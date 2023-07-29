@@ -1,0 +1,21 @@
+<div class="discrepant-activities transactions-table">
+
+  {% for transaction, activity in discrepant_records.items() %}
+
+    <div class="reconciliation-activity discrepant-activity" data-transaction-id="{{ transaction.id }}">
+
+      <div class="activity-info">
+        <div class="date">{{ activity.transaction_date }}</div>
+        <div class="text">{{ activity.description }}</div>
+        <div class="amount">
+          <span class="dollar-sign">$</span>
+          {{ activity.total|currency }}
+        </div>
+      </div>
+
+    </div>
+
+  {% endfor %}
+
+</div>
+
