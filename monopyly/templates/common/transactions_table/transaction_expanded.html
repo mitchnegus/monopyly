@@ -11,7 +11,7 @@
 
       {% if 'statement_id' in transaction.__dict__.keys() %}
         <a class="button" href="{{ url_for('credit.load_statement_details', statement_id=transaction.statement_id) }}">
-          <img class="icon" src="{{ url_for('static', filename='img/icons/statement.png') }}" />
+          <img class="icon" src="{{ url_for('static', filename='img/icons/statement-thick.png') }}" />
         </a>
       {% endif %}
 
