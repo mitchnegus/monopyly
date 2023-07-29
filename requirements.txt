@@ -5,6 +5,7 @@ colorama>=0.4.6
 coverage>=7.4.2
 hatch>=1.9.3
 isort>=5.13.2
+nltk>=3.8.1
 pip>=24.0
 pytest>=8.0.1
 pytest-cov>=4.1.0
