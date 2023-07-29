@@ -250,14 +250,15 @@ def reconcile_activity(statement_id):
             )
         matchmaker = ActivityMatchmaker(transactions, data)
         return render_template(
-            "credit/statement_reconciliation_page.html",
+            "credit/statement_reconciliation/statement_reconciliation_page.html",
             statement=statement,
             statement_transactions=transactions,
             discrepant_records=matchmaker.match_discrepancies,
             unrecorded_activities=matchmaker.unmatched_activities,
         )
     return render_template(
-        "credit/statement_reconciliation_inquiry.html", statement_id=statement_id
+        "credit/statement_reconciliation/statement_reconciliation_inquiry.html",
+        statement_id=statement_id,
     )
 
 

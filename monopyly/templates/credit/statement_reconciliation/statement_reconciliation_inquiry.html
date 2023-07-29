@@ -1,0 +1,17 @@
+<div class="overlay">
+  <div id="statement-reconciliation" class="modal">
+    <div class="modal-box">
+
+      <p class="instructions">
+      Load a CSV file containing credit activity for comparison against this statement. The CSV file must be located in the <code>Downloads</code> directory on the machine running the Monopyly app.
+      </p>
+
+      <form action="{{ url_for('credit.reconcile_activity', statement_id=statement_id) }}" method="post" enctype="multipart/form-data">
+        <label for="activity-file-upload">Activity Filename</label>
+        <input id="activity-file-upload" type="file" name="activity-file" accept="text/csv" />
+        <input class="button" type="submit" value="Reconcile Activity" />
+      </form>
+
+    </div>
+  </div>
+</div>
