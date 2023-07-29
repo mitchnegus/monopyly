@@ -31,6 +31,7 @@ from .cards import CreditCardHandler, save_card
 from .forms import CardStatementTransferForm, CreditCardForm, CreditTransactionForm
 from .statements import CreditStatementHandler
 from .transactions import CreditTagHandler, CreditTransactionHandler, save_transaction
+from .transactions.activity import ActivityMatchmaker, parse_transaction_activity_file
 
 
 @bp.route("/cards")
@@ -232,6 +233,32 @@ def pay_credit_card(card_id, statement_id):
         transactions=transactions,
     )
     return jsonify((summary_template, transactions_table_template))
+
+
+@bp.route("/_reconcile_activity/<int:statement_id>", methods=("GET", "POST"))
+@login_required
+def reconcile_activity(statement_id):
+    if request.method == "POST":
+        statement, transactions = get_statement_and_transactions(statement_id)
+        activity_file = request.files.get("activity-file")
+        # Parse the data and match transactions to activities
+        data = parse_transaction_activity_file(activity_file)
+        if not data:
+            flash("ERROR")
+            return redirect(
+                url_for("credit.load_statement_details", statement_id=statement_id)
+            )
+        matchmaker = ActivityMatchmaker(transactions, data)
+        return render_template(
+            "credit/statement_reconciliation_page.html",
+            statement=statement,
+            statement_transactions=transactions,
+            discrepant_records=matchmaker.match_discrepancies,
+            unrecorded_activities=matchmaker.unmatched_activities,
+        )
+    return render_template(
+        "credit/statement_reconciliation_inquiry.html", statement_id=statement_id
+    )
 
 
 @bp.route("/transactions", defaults={"card_id": None})
