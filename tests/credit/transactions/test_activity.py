@@ -1,7 +1,8 @@
 """Tests for the credit module managing transaction activity reconciliation."""
 
+from datetime import date
 from pathlib import Path
-from unittest.mock import mock_open, patch
+from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
@@ -14,6 +15,13 @@ from monopyly.credit.transactions.activity.data import (
 from monopyly.credit.transactions.activity.parser import (
     _TransactionActivityParser,
     parse_transaction_activity_file,
+)
+from monopyly.credit.transactions.activity.reconciliation import (
+    ActivityMatchmaker,
+    ExactMatchFinder,
+    ExactMatchmaker,
+    NearMatchFinder,
+    NearMatchmaker,
 )
 
 
@@ -283,3 +291,232 @@ class TestTransactionActivityParser:
         with patch.object(Path, "open", new=mock_open_method):
             with pytest.raises(RuntimeError):
                 _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
+
+
+class TestActivityMatchFinders:
+    mock_transaction = Mock(transaction_date=date(2000, 1, 1), total=50, notes="...")
+    mock_small_total_transaction = Mock(
+        transaction_date=date(2000, 2, 20), total=3, notes="..."
+    )
+    mock_refund_transaction = Mock(
+        transaction_date=date(2000, 3, 30), total=-1, notes="..."
+    )
+    mock_activity = TransactionActivities(
+        [
+            [date(2000, 1, 1), 50, "Restaurant"],
+            [date(2000, 1, 1), 51, "Restaurant"],  # ---- only near match
+            [date(2000, 1, 2), 50, "Restaurant"],  # ---- only near match
+            [date(2000, 1, 1), 40, "Restaurant"],  # ---- too low
+            [date(2000, 1, 1), 60, "Restaurant"],  # ---- too high
+            [date(1999, 12, 20), 50, "Restaurant"],  # -- too early date
+            [date(2000, 1, 10), 50, "Restaurant"],  # --- too late date
+            [date(2000, 1, 3), 50, "Restaurant"],  # ---- slightly late, but exact total
+            [date(2000, 2, 20), 5, "Pharmacy"],  # ------ near (small value)
+            [date(2000, 3, 30), 2, "Pharmacy"],  # ------ near, but wrong sign
+        ]
+    )
+
+    def test_exact_match_finder_initialization(self):
+        mock_data = self.mock_activity[:3]
+        # Exact matches should have the same transaction date and total
+        expected_matches = mock_data[:1]
+        matches = ExactMatchFinder.find(self.mock_transaction, mock_data)
+        assert matches == expected_matches
+
+    def test_near_match_finder_initialization(self):
+        mock_data = self.mock_activity
+        # Near matches should have a date:
+        #  - within 1 day or total within 10%
+        #  - within 2 days or an exactly matching total
+        expected_matches = mock_data[:3] + mock_data[7:8]
+        matches = NearMatchFinder.find(self.mock_transaction, mock_data)
+        assert matches == expected_matches
+
+    def test_near_match_finder_close_total(self):
+        mock_data = self.mock_activity
+        # Near match should be close (absolutely) for low values
+        expected_matches = [mock_data[8]]
+        matches = NearMatchFinder.find(self.mock_small_total_transaction, mock_data)
+        print(matches)
+        print(expected_matches)
+        assert matches == expected_matches
+
+    def test_near_match_finder_close_total_wrong_sign(self):
+        mock_data = self.mock_activity
+        # Near match should be close (absolutely) for low values,
+        # except when that changes the sign
+        expected_matches = []
+        matches = NearMatchFinder.find(self.mock_refund_transaction, mock_data)
+        assert matches == expected_matches
+
+
+class TestActivityMatchmakers:
+    mock_transactions = [
+        Mock(
+            transaction_date=date(2000, 1, 1),
+            total=50,
+            merchant="Restaurant",
+            notes="Brunch",
+        ),
+        Mock(
+            transaction_date=date(2000, 1, 1),
+            total=51,
+            merchant="Restaurant",
+            notes="Brunch",
+        ),
+        Mock(
+            transaction_date=date(2000, 1, 1),
+            total=25,
+            merchant="Restaurant",
+            notes="Lunch",
+        ),
+        Mock(
+            transaction_date=date(2000, 1, 5),
+            total=60,
+            merchant="Restaurant",
+            notes="Dinner",
+        ),
+        Mock(
+            transaction_date=date(2000, 1, 10),
+            total=30,
+            merchant="Restaurant",
+            notes="Lunch",
+        ),
+        Mock(
+            transaction_date=date(2000, 1, 15),
+            total=40,
+            merchant="Restaurant One",
+            notes="Dinner",
+        ),
+        Mock(
+            transaction_date=date(2000, 1, 15),
+            total=40,
+            merchant="Restaurant Two",
+            notes="Dinner",
+        ),
+        Mock(
+            transaction_date=date(2000, 2, 14),
+            total=66,
+            merchant="Florist",
+            notes="Flowers",
+        ),
+        Mock(
+            transaction_date=date(2000, 2, 14),
+            total=82.17,
+            merchant="Restaurant",
+            notes="Romantic dinner",
+        ),
+    ]
+    mock_activity = TransactionActivities(
+        [
+            # Unique exact match:
+            [date(2000, 1, 1), 50, "Restaurant"],
+            # Ambiguous exact match (ambiguous activity, selected by description):
+            [date(2000, 1, 1), 51, "Restaurant"],
+            # Ambiguous exact match (ambiguous activity):
+            [date(2000, 1, 1), 51, "Mechanic"],
+            # Unique exact match:
+            [date(2000, 1, 5), 60, "Restaurant"],
+            # Ambiguous exact match (best match indeterminable from description)
+            [date(2000, 1, 10), 30, "Restaurant One"],
+            # Ambiguous exact match (best match indeterminable from description)
+            [date(2000, 1, 10), 30, "Restaurant Two"],
+            # Ambiguous exact match (matches multiple transactions)
+            [date(2000, 1, 15), 40, "Restaurant"],
+            # Non-match
+            [date(2000, 2, 1), 100, "Supermarket"],
+            # Near match by amount
+            [date(2000, 2, 14), 80, "Restaurant"],
+            # Near match by date
+            [date(2000, 2, 15), 66, "Florist"],
+        ]
+    )
+
+    def test_exact_matchmaker_initialization(self):
+        mock_transactions = self.mock_transactions[:8]
+        mock_data = self.mock_activity[:8]
+        # Use the `ExactMatchmaker` to find exact matches
+        expected_best_matches = {
+            mock_transactions[0]: mock_data[0],
+            mock_transactions[1]: mock_data[1],
+            mock_transactions[3]: mock_data[3],
+            mock_transactions[4]: mock_data[4],  # indeterminate; match based on order
+            mock_transactions[5]: mock_data[6],  # indeterminate; match based on order
+        }
+        matchmaker = ExactMatchmaker(mock_transactions, mock_data)
+        assert matchmaker.best_matches == expected_best_matches
+
+    def test_near_matchmaker_initialization(self):
+        mock_transactions = self.mock_transactions
+        mock_data = self.mock_activity
+        # Use the `NearMatchmaker` to find near matches
+        # (near matches should include all exact matches for this test)
+        expected_best_matches = {
+            mock_transactions[0]: mock_data[0],
+            mock_transactions[1]: mock_data[1],
+            mock_transactions[3]: mock_data[3],
+            mock_transactions[4]: mock_data[4],  # indeterminate; match based on order
+            mock_transactions[5]: mock_data[6],  # indeterminate; match based on order
+            mock_transactions[8]: mock_data[8],
+            mock_transactions[7]: mock_data[9],
+        }
+        matchmaker = NearMatchmaker(mock_transactions, mock_data)
+        assert matchmaker.best_matches == expected_best_matches
+
+    def test_activity_matchmaker_initialization(self):
+        mock_transactions = self.mock_transactions
+        mock_data = self.mock_activity
+        # Use the `ActivityMatchmaker` to find exact and near matches
+        expected_best_matches = {
+            mock_transactions[0]: mock_data[0],
+            mock_transactions[1]: mock_data[1],
+            mock_transactions[3]: mock_data[3],
+            mock_transactions[4]: mock_data[4],  # indeterminate; match based on order
+            mock_transactions[5]: mock_data[6],  # indeterminate; match based on order
+            mock_transactions[8]: mock_data[8],
+            mock_transactions[7]: mock_data[9],
+        }
+        expected_unmatched_transactions = [
+            mock_transactions[2],
+            mock_transactions[6],
+        ]
+        expected_unmatched_activities = [mock_data[2], mock_data[5], mock_data[7]]
+        expected_match_discrepancies = {
+            mock_transactions[8]: mock_data[8],
+            # Date discrepancies are not considered notable and are excluded
+        }
+        matchmaker = ActivityMatchmaker(mock_transactions, mock_data)
+        assert matchmaker.best_matches == expected_best_matches
+        assert matchmaker.unmatched_transactions == expected_unmatched_transactions
+        assert matchmaker.unmatched_activities == expected_unmatched_activities
+        assert matchmaker.match_discrepancies == expected_match_discrepancies
+
+    @pytest.mark.parametrize(
+        "field, token_count",
+        [
+            ("Life is a Game", 4),
+            ("life is a game", 4),
+            ("Monopyly is a game", 4),
+            ("Game", 1),
+        ],
+    )
+    def test_matchmaker_tokenization(self, field, token_count):
+        tokens = ActivityMatchmaker.tokenize(field)
+        assert len(tokens) == token_count
+        for token in tokens:
+            assert token.lower() == token
+
+    @pytest.mark.parametrize(
+        "reference, test, score",
+        [
+            ("Life is a Game", "Life is a Game", 0),  # --- identical
+            ("Life is a Game", "life is a game", 0),  # --- identical
+            ("Monopyly is a game", "life is a game", 0.4),
+            ("Game", "Life is a Game", 0.75),
+            ("Other Test", "Life is a Game", 1),  # ------- entirely dissimilar
+        ],
+    )
+    def test_matchmaker_scoring(self, reference, test, score):
+        reference_tokens = ActivityMatchmaker.tokenize(reference)
+        test_tokens = ActivityMatchmaker.tokenize(test)
+        assert ActivityMatchmaker.score_tokens(reference_tokens, test_tokens) == score
