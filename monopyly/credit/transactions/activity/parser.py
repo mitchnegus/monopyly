@@ -2,7 +2,7 @@ import csv
 from abc import ABC, abstractmethod
 from collections import UserList, namedtuple
 
-from monopyly.common.utils import parse_date
+from ....common.utils import parse_date
 
 
 def parse_transaction_activity_file(transaction_file):
