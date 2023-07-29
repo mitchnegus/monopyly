@@ -3419,6 +3419,97 @@ form#pay #make-payment[type="submit"] #prompt {
 
 
 /*
+ * Customization for the (credit) 'Statement Reconciliation' details page
+ */
+#credit-statement-reconciliation-details .note {
+  font-size: 9pt;
+  color: #888888;
+}
+
+#statement-reconciliation-summary {
+  min-width: 75%;
+}
+
+#statement-reconciliation-summary .reconciliation-indicator {
+  width: 200px;
+  align-self: center;
+  padding: 50px;
+}
+
+#statement-reconciliation-summary #statement-discrepancies-container h2 {
+  margin: 25px 0;
+  color: #888888;
+  font-size: 14pt;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#credit-statement-reconciliation-details statement-transactions-container .note {
+  padding: 0 20px 20px;
+}
+
+#credit-statement-reconciliation-details div.discrepancy-category {
+  margin-bottom: 30px;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity {
+  display: flex;
+  flex-direction: row;
+  margin: 3px 0px;
+  padding: 5px 15px;
+  border-radius: 10px;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity .button {
+  margin-left: auto;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity .button .icon {
+  width: 25px;
+  opacity: 0;
+  transition: 0.2s ease;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity:hover .button .icon {
+  opacity: 1;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container .discrepant-activity {
+  cursor: pointer;
+}
+
+
+/*
+ * Customization for the statement reconciliation modal
+ */
+#statement-reconciliation.modal {
+  width: 50%;
+  min-width: 300px;
+  transform: translate(-50%, 100%);
+}
+
+#statement-reconciliation.modal .modal-box {
+  height: 100%;
+  width: 100%;
+  padding: 30px;
+}
+
+#statement-reconciliation.modal p {
+  width: 80%;
+  margin: auto;
+}
+
+#statement-reconciliation.modal form {
+  margin-top: 20px;
+}
+
+#statement-reconciliation.modal form input {
+  margin: 3px 0;
+}
+
+
+/*
  * Customization for the 'New Credit Transaction'/
  * 'Update Credit Transaction' pages
  */

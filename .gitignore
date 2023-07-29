@@ -80,6 +80,7 @@ monopyly/_version.py
 monopyly/static/img/**/*.pptx
 monopyly/static/img/**/*.key
 monopyly/static/img/**/*.xcf
+monopyly/static/img/**/*.svg
 monopyly/static/favicon/*.ai
 
 # Flask instance files/data
