@@ -3,6 +3,7 @@ Routes for credit card financials.
 """
 
 from itertools import islice
+from pathlib import Path
 
 from flask import flash, g, jsonify, redirect, render_template, request, url_for
 from fuisce.database import db_transaction
@@ -30,6 +31,7 @@ from .cards import CreditCardHandler, save_card
 from .forms import CardStatementTransferForm, CreditCardForm, CreditTransactionForm
 from .statements import CreditStatementHandler
 from .transactions import CreditTagHandler, CreditTransactionHandler, save_transaction
+from .transactions.activity import ActivityMatchmaker, parse_transaction_activity_file
 
 
 @bp.route("/cards")
@@ -224,6 +226,30 @@ def pay_credit_card(card_id, statement_id):
         "credit/statement_summary.html",
         statement=statement,
         bank_accounts=bank_accounts,
+    )
+
+
+@bp.route("/_reconcile_activity/<int:statement_id>", methods=("GET", "POST"))
+@login_required
+def reconcile_activity(statement_id):
+    if request.method == "POST":
+        statement = CreditStatementHandler.get_entry(statement_id)
+        transactions = statement.transactions
+        # Temporarily load activity files from the user's `Downloads` directory
+        filename = request.form["filename"]
+        filepath = Path.home() / "Downloads" / filename
+        # Parse the data and match transactions to activities
+        data = parse_transaction_activity_file(filepath)
+        matchmaker = ActivityMatchmaker(transactions, data)
+        return render_template(
+            "credit/statement_reconciliation_page.html",
+            statement=statement,
+            statement_transactions=transactions,
+            discrepant_records=matchmaker.match_discrepancies,
+            unrecorded_activities=matchmaker.unmatched_activities,
+        )
+    return render_template(
+        "credit/statement_reconciliation_inquiry.html", statement_id=statement_id
     )
 
 
