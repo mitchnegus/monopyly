@@ -198,7 +198,7 @@ class TestCreditRoutes(TestRoutes):
         assert self.html.count('class="transaction ') == 6
 
     def test_expand_transaction(self, authorization):
-        self.post_route("/_expand_transaction", json="transaction-4")
+        self.post_route("/_expand_transaction", json="4")
         # 2 subtransactions in this transaction
         assert self.html.count("subtransaction-details") == 2
         assert "One for the park" in self.html

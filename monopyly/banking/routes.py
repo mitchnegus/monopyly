@@ -86,7 +86,7 @@ def load_account_details(account_id):
 @login_required
 def expand_transaction():
     # Get the transaction ID from the AJAX request
-    transaction_id = request.get_json().split("-")[-1]
+    transaction_id = int(request.get_json())
     transaction = BankTransactionHandler.get_entry(transaction_id)
     return render_template(
         "common/transactions_table/subtransactions.html",

@@ -95,7 +95,7 @@ class TestBankingRoutes(TestRoutes):
         assert "balance-chart" in self.html
 
     def test_expand_transaction(self, authorization):
-        self.post_route("/_expand_transaction", json="transaction-5")
+        self.post_route("/_expand_transaction", json="5")
         # 1 subtransaction in this transaction
         assert self.html.count("subtransaction-details") == 1
         assert "Credit card payment" in self.html

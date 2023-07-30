@@ -18,7 +18,7 @@ function displaySubtransactions($transaction) {
 
     // Execute an AJAX request to get transaction/subtransaction information
     const endpoint = EXPAND_TRANSACTION_ENDPOINT;
-    const rawData = $transaction[0].id;
+    const rawData = $transaction.data("transaction-id");
     const $container = $transaction.find('.subtransaction-container');
     replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
 

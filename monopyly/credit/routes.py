@@ -257,7 +257,7 @@ def load_transactions(card_id):
 @login_required
 def expand_transaction():
     # Get the transaction ID from the AJAX request
-    transaction_id = request.get_json().split("-")[-1]
+    transaction_id = int(request.get_json())
     transaction = CreditTransactionHandler.get_entry(transaction_id)
     # Get the subtransactions
     subtransactions = transaction.subtransactions
