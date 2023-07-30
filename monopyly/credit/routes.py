@@ -17,7 +17,10 @@ from ..banking.banks import BankHandler
 from ..banking.transactions import BankTransactionHandler
 from ..common.forms import form_err_msg
 from ..common.forms.utils import extend_field_list_for_ajax
-from ..common.transactions import get_linked_transaction
+from ..common.transactions import (
+    get_linked_transaction,
+    highlight_unmatched_transactions,
+)
 from ..common.utils import dedelimit_float, parse_date, sort_by_frequency
 from .accounts import CreditAccountHandler
 from .actions import (
@@ -234,13 +237,20 @@ def pay_credit_card(card_id, statement_id):
 def reconcile_activity(statement_id):
     if request.method == "POST":
         statement = CreditStatementHandler.get_entry(statement_id)
-        transactions = statement.transactions
+        transactions = list(
+            CreditTransactionHandler.get_transactions(
+                statement_ids=(statement_id,),
+                sort_order="DESC",
+            )
+        )
         # Temporarily load activity files from the user's `Downloads` directory
         filename = request.form["filename"]
         filepath = Path.home() / "Downloads" / filename
         # Parse the data and match transactions to activities
         data = parse_transaction_activity_file(filepath)
         matchmaker = ActivityMatchmaker(transactions, data)
+        non_matches = matchmaker.unmatched_transactions
+        transactions = list(highlight_unmatched_transactions(transactions, non_matches))
         return render_template(
             "credit/statement_reconciliation_page.html",
             statement=statement,

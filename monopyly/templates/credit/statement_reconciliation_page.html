@@ -73,6 +73,12 @@
         </div>
       {% endif %}
       <div id="statement-transactions-container" class="transactions-container">
+        {% if statement_transactions|selectattr("highlight")|first %}
+          <p class="note">
+            <span class="highlight">Highlighted</span> transactions indicate that the transaction was not identified in the reported activity file.
+          </p>
+        {% endif %}
+
         {% with transactions = statement_transactions, full_view = False %}
           {% include 'credit/transactions_table/transactions.html' %}
         {% endwith %}
@@ -118,6 +124,8 @@
     const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
   </script>
   <script type="module" src="{{ url_for('static', filename='js/show-credit-activity-loader.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/highlight-discrepant-transactions.js') }}">
   </script>
   <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
   </script>
