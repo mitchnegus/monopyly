@@ -473,6 +473,13 @@ aside.sidebar {
   color: inherit;
 }
 
+.highlight {
+  background-color: #fff9ee;
+  background-image: linear-gradient(135deg, #ffffff, 15%, #fff9ee, 85%, #ffffff);
+  color: sienna;
+  font-weight: 500;
+}
+
 .screenshot {
   width: 100%; /* override the markdown default */
   margin: 20px 0;
@@ -3477,6 +3484,17 @@ form#pay #make-payment[type="submit"] #prompt {
 
 #credit-statement-reconciliation-details #statement-discrepancies-container .discrepant-activity {
   cursor: pointer;
+}
+
+#credit-statement-reconciliation-details #statement-discrepancies-container .discrepancy-highlight {
+  box-shadow: 0 0 5px 0 var(--moneytree-leaves);
+}
+
+#credit-statement-reconciliation-details #statement-transactions-container .discrepancy-highlight {
+  background-color: #f1fbeb;
+  background-image: linear-gradient(135deg, #fff, 5%, #f1fbeb, 95%, #fff);
+  color: var(--moneytree);
+  font-weight: 500;
 }
 
 

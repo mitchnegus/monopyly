@@ -43,7 +43,7 @@ import { executeAjaxRequest } from './modules/ajax.js';
       });
     });
     // Bind remove tag buttons
-    $buttonsDelete.on('click', function () {
+    $buttonsDelete.on('click', function() {
       if (confirmDelete()) {
         const $container = $(this).closest('.tag-container');
         const $tag = $container.find('.tag').first();

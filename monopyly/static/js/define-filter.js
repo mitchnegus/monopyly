@@ -17,7 +17,7 @@
 	let defaultText;
 	inactiveCardFilters.hover(
 		// Change text when hovering over the filter
-		function () {
+		function() {
 			const $this = $(this);
 			const defaultWidth = $this.width();
 			defaultText = $this.text();

@@ -26,7 +26,7 @@ class OverlayManager {
   /**
    * Add the overlay.
    *
-   * @param {string} The AJAX request response containing the overlay.
+   * @param {string} response - The AJAX request response containing the overlay.
    */
   addOverlay(response) {
     this.$container.prepend(response)
@@ -55,7 +55,6 @@ class OverlayManager {
    * Bind an exit capability to the escape key in the overlay.
    */
   #bindCloseFromEscapeKey() {
-    const manager = this;
     $(window).on('keydown', this.#closeOnEscapePress.bind(this))
   }
 

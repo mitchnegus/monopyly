@@ -158,6 +158,15 @@ def _get_linked_credit_transaction(transaction_id, internal_transaction_id):
     return transaction
 
 
+def highlight_unmatched_transactions(transactions, unmatched_transactions):
+    """Highlight transactions that are unmatched."""
+    unmatched_transaction_ids = [_.id for _ in unmatched_transactions]
+    for transaction in transactions:
+        if transaction.id in unmatched_transaction_ids:
+            transaction.highlight = True
+        yield transaction
+
+
 class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
     """
     A database handler for managing transaction tags.
