@@ -1,33 +1,40 @@
 <div id="statement-reconciliation-summary" class="summary-box">
 
-  {% if discrepant_records or unrecorded_activities %}
-    <div id="statement-discrepancies-container">
-      <h2>Discrepancies</h3>
+  {% if not (highlighted_transactions or discrepant_records or unrecorded_activities) %}
 
-      {% if discrepant_records %}
-        <div class="discrepancy-category">
-          <h3>Discrepant Records</h3>
-          <p class="note">
-            {% set plural = discrepant_records|length != 1 %}
-            The following {% if plural %}activities were{% else %}activity was{% endif %} reported in the credit activity file and matched in the database, but the charge amount{%if plural %}s do{% else %} does{% endif %} not match:
-          </p>
-          {% include 'credit/statement_reconciliation/discrepant_records.html' %}
-        </div>
-      {% endif %}
+    <img class="reconciliation-indicator" src="{{ url_for('static', filename='img/icons/checkmark.png') }}" />
 
-      {% if unrecorded_activities %}
-        <div class="discrepancy-category">
-          <h3>Unrecorded Activity</h3>
-          <p class="note">
-          {% set plural = unrecorded_activities|length != 1 %}
-          The following {% if plural %}activities were{% else %}activity was{% endif %} reported in the credit activity file, but {% if plural %}do{% else %}does{% endif %} not exist in the Monopyly database:
-          </p>
-          {% include 'credit/statement_reconciliation/unrecorded_activities.html' %}
+  {% else %}
+
+    {% if highlighted_transactions or discrepant_records or unrecorded_activities %}
+      <div id="statement-discrepancies-container">
+        <h2>Discrepancies</h3>
+
+        {% if discrepant_records %}
+          <div class="discrepancy-category">
+            <h3>Discrepant Records</h3>
+            <p class="note">
+              {% set plural = discrepant_records|length != 1 %}
+              The following {% if plural %}activities were{% else %}activity was{% endif %} reported in the credit activity file and matched in the database, but the charge amount{%if plural %}s do{% else %} does{% endif %} not match:
+            </p>
+            {% include 'credit/statement_reconciliation/discrepant_records.html' %}
           </div>
-        </div>
-      {% endif %}
+        {% endif %}
 
-    </div>
+        {% if unrecorded_activities %}
+          <div class="discrepancy-category">
+            <h3>Unrecorded Activity</h3>
+            <p class="note">
+            {% set plural = unrecorded_activities|length != 1 %}
+            The following {% if plural %}activities were{% else %}activity was{% endif %} reported in the credit activity file, but {% if plural %}do{% else %}does{% endif %} not exist in the Monopyly database:
+            </p>
+            {% include 'credit/statement_reconciliation/unrecorded_activities.html' %}
+          </div>
+        {% endif %}
+
+      </div>
+    {% endif %}
+
   {% endif %}
 
 </div>

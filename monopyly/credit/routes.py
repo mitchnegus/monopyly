@@ -16,7 +16,11 @@ from ..banking.banks import BankHandler
 from ..banking.transactions import BankTransactionHandler
 from ..common.forms import form_err_msg
 from ..common.forms.utils import extend_field_list_for_ajax
-from ..common.transactions import categorize, get_linked_transaction
+from ..common.transactions import (
+    categorize,
+    get_linked_transaction,
+    highlight_unmatched_transactions,
+)
 from ..common.utils import dedelimit_float, parse_date, sort_by_frequency
 from .accounts import CreditAccountHandler
 from .actions import (
@@ -249,6 +253,8 @@ def reconcile_activity(statement_id):
                 url_for("credit.load_statement_details", statement_id=statement_id)
             )
         matchmaker = ActivityMatchmaker(transactions, data)
+        non_matches = matchmaker.unmatched_transactions
+        transactions = list(highlight_unmatched_transactions(transactions, non_matches))
         return render_template(
             "credit/statement_reconciliation/statement_reconciliation_page.html",
             statement=statement,
