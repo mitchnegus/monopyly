@@ -64,14 +64,18 @@ select {
   background-color: #dfdfdf;
 }
 
-code {
+pre code {
   display: inline-block;
   width: 100%;
   box-sizing: border-box;
   margin: 5px 0;
   padding: 10px 20px;
-  background-color: #f5f5f5;
   border: 1px solid #eeeeee;
+}
+
+code {
+  background-color: #f5f5f5;
+  padding: 2px 3px;
   border-radius: 3px;
 }
 
@@ -141,7 +145,7 @@ header#masthead {
 }
 
 #nav-menu li .username {
-  color: #777;
+  color: #777777;
 }
 
 #nav-menu li .username:hover {

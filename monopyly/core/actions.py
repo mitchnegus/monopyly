@@ -12,7 +12,7 @@ def get_timestamp():
 def format_readme_as_html_template(readme_text):
     """Given the README text in Markdown, convert it to a renderable HTML template."""
     # Convert Markdown to HTML
-    raw_html_readme = markdown.markdown(readme_text)
+    raw_html_readme = markdown.markdown(readme_text, extensions=["fenced_code"])
     # Replace README relative links with app relevant links
     html_readme = raw_html_readme.replace('src="monopyly/static', 'src="/static')
     # Format the HTML as a valid Jinja template

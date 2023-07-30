@@ -131,3 +131,4 @@
 
 - Use local time for determining projected balances
 - Fix incorrect return type in `CreditStatementHandler.infer_statement` method
+- Distinguish between inline code and "fenced" code using a Markdown library extension
