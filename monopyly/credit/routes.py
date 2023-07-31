@@ -244,7 +244,7 @@ def reconcile_activity(statement_id):
             )
         )
         # Temporarily load activity files from the user's `Downloads` directory
-        filename = request.form["filename"]
+        filename = request.form["activity-file"]
         filepath = Path.home() / "Downloads" / filename
         # Parse the data and match transactions to activities
         data = parse_transaction_activity_file(filepath)
