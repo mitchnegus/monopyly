@@ -1659,6 +1659,7 @@ form .autocomplete-box .item.active {
 
 .details .summary-box .projected-balance .amount {
   color: var(--moneytree);
+  font-weight: 500;
 }
 
 .details .summary-box .projected-balance .amount.negative {
