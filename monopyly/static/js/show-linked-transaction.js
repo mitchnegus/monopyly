@@ -26,7 +26,7 @@ import { OverlayManager } from './modules/manage-overlays.js';
 
   // Add AJAX request action to the link button
   $linkButton.on('click', function() {
-    const transactionID = this.data("transaction-id");
+    const transactionID = $(this).data("transaction-id");
     const rawData = {
       'transaction_id': transactionID,
     };

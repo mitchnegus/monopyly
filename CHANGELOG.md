@@ -108,7 +108,7 @@
 
 ### 1.3.1
 
-- Upgrade JQuery version to 3.7.0
+- Upgrade jQuery version to 3.7.0
 - Use recommended `importlib` method for pytest
 - Automatically use the transferring bank as the merchant in bank transfers
 - For transfers between accounts at the same bank, do not show 'Withdrawal' or 'Deposit' headers; just mark as 'Transfer'
@@ -133,3 +133,4 @@
 - Fix incorrect return type in `CreditStatementHandler.infer_statement` method
 - Distinguish between inline code and "fenced" code using a Markdown library extension
 - Use more `data-*` attributes for processing transaction IDs
+- Fix bug where linked transactions did not use jQuery reference
