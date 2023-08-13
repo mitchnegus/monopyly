@@ -10,7 +10,8 @@ def abstract_subform():
 
 
 class TestSubtransactionForm:
-
-    def test_abstract_subform_gather_entry_data_invalid(self, client_context, abstract_subform):
+    def test_abstract_subform_gather_entry_data_invalid(
+        self, client_context, abstract_subform
+    ):
         with pytest.raises(RuntimeError):
             abstract_subform.gather_entry_data(None)
