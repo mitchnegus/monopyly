@@ -1,10 +1,14 @@
 """Tests for common aspects of transactions."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from monopyly.common.transactions import TransactionTagHandler, get_linked_transaction
+from monopyly.common.transactions import (
+    TransactionTagHandler,
+    get_linked_transaction,
+    highlight_unmatched_transactions,
+)
 from monopyly.database.models import TransactionTag
 
 from test_tag_helpers import TestTagHandler
@@ -13,6 +17,15 @@ from test_tag_helpers import TestTagHandler
 @pytest.fixture
 def tag_handler(client_context):
     return TransactionTagHandler
+
+
+def test_unmatched_transaction_highlighter():
+    transactions = [Mock(id=_) for _ in range(1, 5)]
+    unmatched_transactions = [Mock(id=_) for _ in range(2, 5)]
+    highlighted_transactions = list(
+        highlight_unmatched_transactions(transactions, unmatched_transactions)
+    )
+    assert all(transaction.highlighted for transaction in highlighted_transactions[1:])
 
 
 class TestTransactionTagHandler(TestTagHandler):
