@@ -190,8 +190,8 @@ class _Matchmaker(ABC):
     def _get_potential_matches(self, matches):
         """Get the set of potential valid matches from the set of matches."""
         # Potential matches are only those where the transaction is unmatched
-        for item in filter(self._is_unmatched, matches.items()):
-            transaction, activities = item
+        for transaction in filter(self._is_unmatched, matches):
+            activities = matches[transaction]
             # Potential matches are only those where activities are unmatched
             potential_activities = sorted(
                 set(activities) - set(self.best_matches.values())
@@ -199,9 +199,8 @@ class _Matchmaker(ABC):
             if potential_activities:
                 yield transaction, potential_activities
 
-    def _is_unmatched(self, item):
+    def _is_unmatched(self, transaction):
         """Check whether the given transaction is not yet matched."""
-        transaction, activities = item
         return transaction not in self.best_matches
 
 
@@ -359,11 +358,7 @@ class ActivityMatchmaker(_Matchmaker):
             best_matches = matchmaker(transactions, data, best_matches).best_matches
         super().__init__(transactions, data, best_matches=best_matches)
         # Store references to unmatched transactions and activities
-        self.unmatched_transactions = [
-            transaction
-            for transaction in transactions
-            if transaction not in self.best_matches
-        ]
+        self.unmatched_transactions = list(filter(self._is_unmatched, transactions))
         self.unmatched_activities = [
             activity for activity in data if activity not in self.best_matches.values()
         ]
