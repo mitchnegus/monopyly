@@ -220,6 +220,23 @@ class ExactMatchmaker(_Matchmaker):
     attempts to compare merchant and note information from the
     transaction with the description of the activity to make a
     determination.
+
+    Parameters
+    ----------
+    transactions : list
+        A list of transactions to be matched with the activities.
+    activities : TransactionActivities
+        A list-like collection of activity data to be matched with
+        transactions.
+    best_matches : dict
+        A mapping between any transactions and the activity believed to
+        represent the best match in the data.
+
+    Attributes
+    ----------
+    best_matches : dict
+        A mapping between transactions and their best match (as
+        determined by the matcher's algorithm).
     """
 
     _match_finder = ExactMatchFinder
@@ -250,6 +267,23 @@ class NearMatchmaker(_Matchmaker):
     information, the procedure attempts to compare merchant and note
     information from the transaction with the description of the
     activity to make a determination.
+
+    Parameters
+    ----------
+    transactions : list
+        A list of transactions to be matched with the activities.
+    activities : TransactionActivities
+        A list-like collection of activity data to be matched with
+        transactions.
+    best_matches : dict
+        A mapping between any transactions and the activity believed to
+        represent the best match in the data.
+
+    Attributes
+    ----------
+    best_matches : dict
+        A mapping between transactions and their best match (as
+        determined by the matcher's algorithm).
     """
 
     _match_finder = NearMatchFinder
