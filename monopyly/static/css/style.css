@@ -266,6 +266,11 @@ aside.sidebar {
   color: var(--moneytree-leaves);
   font-weight: bold;
   letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.paid-notice.scheduled {
+  color: GoldenRod;
 }
 
 .card-background {
@@ -629,7 +634,7 @@ form .autocomplete-box .item.active {
 .slide-text-gadget {
   position: relative;
   height: 1.2em;
-  width: 150px;
+  width: 220px;
   overflow: hidden;
 }
 
@@ -2451,6 +2456,10 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the (credit) 'Statement Details' page
  */
+#credit-statement-details #statement-summary {
+  min-width: 375px;
+}
+
 #credit-statement-details #statement-summary #payment {
   width: 100%;
   font-size: 12pt;
@@ -2459,11 +2468,10 @@ form#card #statement-due-day-field  {
 #credit-statement-details #statement-summary #due {
   float: left;
   display: flex;
-  width: 175px;
+  width: 140px;
 }
 
 #credit-statement-details #statement-summary #due-date {
-  margin-top: -0.5px;
   margin-left: 5px;
   font-weight: bold;
 }

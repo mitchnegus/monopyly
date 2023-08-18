@@ -21,11 +21,16 @@
                 <div class="balance">
                   ${{ statement.balance|currency }}
                 </div>
-                {% if statement.payment_date %}
-                  <div class="paid-notice flip-text-gadget">
+                {% if statement.payment_date and (statement.balance or statement.due_date < date_today) %}
+
+                  {% if statement.payment_date > date_today %}
+                    {% set scheduled = ' scheduled' %}
+                  {% endif %}
+
+                  <div class="paid-notice{{ scheduled }} flip-text-gadget">
                     <div class="flip-text-inner">
                       <div class="front">
-                        PAID
+                        {{ 'Scheduled' if scheduled else 'Paid' }}
                       </div>
                       <div class="back">
                         {{ statement.payment_date }}

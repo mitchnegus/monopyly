@@ -26,16 +26,20 @@
       </div>
     </div>
 
-    {% if statement.payment_date %}
+    {% if statement.payment_date and (statement.balance or statement.due_date < date_today) %}
 
-      <div id="paid" class="paid-notice slide-text-gadget">
+      {% if statement.payment_date > date_today %}
+        {% set scheduled = ' scheduled' %}
+      {% endif %}
+
+      <div id="paid" class="paid-notice{{ scheduled }} slide-text-gadget">
         <div class="sleeve">
-          <div class="main">PAID</div>
+          <div class="main">{{ 'Scheduled' if scheduled else 'Paid' }}</div>
           <div class="reveal">{{ statement.payment_date }}</div>
         </div>
       </div>
 
-    {% else %}
+    {% elif statement.balance %}
 
       <form id="pay" action="" method="post">
 

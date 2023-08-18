@@ -130,6 +130,7 @@
 ### 1.4.1 (in progress)
 
 - Use local time for determining projected balances
+- Show future credit statement payments as "scheduled" (and improve logic for displaying paid notices)
 - Fix incorrect return type in `CreditStatementHandler.infer_statement` method
 - Distinguish between inline code and "fenced" code using a Markdown library extension
 - Use more `data-*` attributes for processing transaction IDs

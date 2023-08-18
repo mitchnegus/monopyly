@@ -181,7 +181,7 @@ class TestCreditRoutes(TestRoutes):
         )
         # Returns the template for the summary section of the statement page
         assert "statement-summary" in self.html
-        assert "PAID" in self.html
+        assert "Paid" in self.html
 
     def test_load_user_transactions(self, authorization):
         self.get_route("/transactions")
