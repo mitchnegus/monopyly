@@ -160,7 +160,7 @@ class TestCreditRoutes(TestRoutes):
         assert "statement-summary" in self.html
         # 3 transactions in the table on the statement
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 3
+        self.assert_tag_count_equal(3, "div", class_="transaction")
         for id_ in (5, 6, 7):
             assert f"transaction-{id_}" in self.html
 
@@ -188,14 +188,14 @@ class TestCreditRoutes(TestRoutes):
         assert "Credit Transactions" in self.html
         # 10 transactions in the table for the user on active cards
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 10
+        self.assert_tag_count_equal(10, "div", class_="transaction")
 
     def test_load_card_transactions(self, authorization):
         self.get_route("/transactions/3")
         assert "Credit Transactions" in self.html
         # 6 transactions in the table for the associated card
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 6
+        self.assert_tag_count_equal(6, "div", class_="transaction")
 
     def test_expand_transaction(self, authorization):
         self.post_route("/_expand_transaction", json="4")
@@ -364,7 +364,7 @@ class TestCreditRoutes(TestRoutes):
         assert "Credit Transactions" in self.html
         # 9 transactions in the table for the user
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 9
+        self.assert_tag_count_equal(9, "div", class_="transaction")
         # Ensure that the transaction was deleted
         assert "Water Works" not in self.html
 

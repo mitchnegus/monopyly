@@ -13,7 +13,7 @@ def inject_global_template_variables():
     template_globals = {
         "app_version": _display_version(),
         "copyright_statement": f"© {date.today().year}",
-        "date_today": str(date.today()),
+        "date_today": date.today(),
     }
     return template_globals
 

@@ -89,7 +89,7 @@ class TestBankingRoutes(TestRoutes):
         assert "account-summary" in self.html
         # 3 transactions in the table for the account
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 3
+        self.assert_tag_count_equal(3, "div", class_="transaction")
         for id_ in (2, 3, 4):
             assert f"transaction-{id_}" in self.html
         assert "balance-chart" in self.html
@@ -165,7 +165,7 @@ class TestBankingRoutes(TestRoutes):
         assert "account-summary" in self.html
         # 4 transactions in the table for the account
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 4
+        self.assert_tag_count_equal(4, "div", class_="transaction")
         for id_ in (2, 3, 4, 8):
             assert f"transaction-{id_}" in self.html
 
@@ -194,7 +194,7 @@ class TestBankingRoutes(TestRoutes):
         assert "account-summary" in self.html
         # 4 transactions in the table for the account
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 4
+        self.assert_tag_count_equal(4, "div", class_="transaction")
         for id_ in (2, 3, 4, 8):
             assert f"transaction-{id_}" in self.html
 
@@ -227,7 +227,7 @@ class TestBankingRoutes(TestRoutes):
         assert "account-summary" in self.html
         # 4 transactions in the table for the account
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 1
+        self.assert_tag_count_equal(1, "div", class_="transaction")
         for id_ in (7,):
             assert f"transaction-{id_}" in self.html
         assert "Do not pass GO, do not collect $200" in self.html
@@ -252,7 +252,7 @@ class TestBankingRoutes(TestRoutes):
         assert "Account Details" in self.html
         # 2 transactions in the table for the user
         assert "transactions-table" in self.html
-        assert self.html.count('class="transaction ') == 2
+        self.assert_tag_count_equal(2, "div", class_="transaction")
         # Ensure that the transaction was deleted
         assert 'value="What else is there to do in Jail?"' not in self.html
 

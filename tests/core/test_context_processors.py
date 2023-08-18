@@ -21,7 +21,7 @@ def template_globals():
 class TestContextProcessors:
     @patch("monopyly.core.context_processors.date")
     def test_inject_date_today(self, mock_date_module, template_globals):
-        assert template_globals["date_today"] == "2000-01-01"
+        assert template_globals["date_today"] == date(2000, 1, 1)
 
     def test_inject_version(self, template_globals):
         assert template_globals["app_version"] == "M.m.p.devX"
