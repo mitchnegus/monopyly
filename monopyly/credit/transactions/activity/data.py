@@ -36,6 +36,40 @@ class TransactionActivities(UserList):
         return sum(_.total for _ in self.data)
 
 
+class TransactionActivityGroup(UserList):
+    """A minimalistic class for aggregating individual transaction activities."""
+
+    def __init__(self, transaction_activities):
+        transaction_activities = list(transaction_activities)
+        self._check_grouping_validity(transaction_activities)
+        super().__init__(transaction_activities)
+
+    @property
+    def transaction_date(self):
+        return self.data[0].transaction_date
+
+    @property
+    def total(self):
+        return sum(activity.total for activity in self.data)
+
+    @property
+    def description(self):
+        return self.data[0].description
+
+    def _check_grouping_validity(self, activities):
+        self._ensure_field_commonality("transaction_date", activities)
+        self._ensure_field_commonality("description", activities)
+
+    @staticmethod
+    def _ensure_field_commonality(field, activities):
+        field_value = getattr(activities[0], field)
+        if not all(getattr(activity, field) == field_value for activity in activities):
+            raise ValueError(
+                "All transaction activities in a grouping must share the same value "
+                f"for the '{field}' field."
+            )
+
+
 class ActivityLoadingError(RuntimeError):
     """A special exception indicating that an activity CSV failed to load."""
 

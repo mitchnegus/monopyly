@@ -8,6 +8,7 @@ import pytest
 from monopyly.credit.transactions.activity.data import (
     ActivityLoadingError,
     TransactionActivities,
+    TransactionActivityGroup,
     TransactionActivityLoader,
 )
 from monopyly.credit.transactions.activity.parser import (
@@ -61,6 +62,37 @@ class TestTransactionActivities:
     def test_data_total(self):
         activities = TransactionActivities(self.test_data)
         assert activities.total == 600
+
+
+class TestTransactionActivityGroup:
+    test_data = [
+        ["date", 100, "description"],
+        ["date", 200, "description"],
+        ["date", 300, "description"],
+        ["other date", 250, "description"],
+        ["date", 150, "other description"],
+    ]
+    activities = TransactionActivities(test_data)
+
+    def test_initialization(self):
+        transaction_activities = self.activities[:3]
+        grouping = TransactionActivityGroup(transaction_activities)
+        assert grouping.transaction_date == "date"
+        assert grouping.total == 600
+        assert grouping.description == "description"
+
+    @pytest.mark.parametrize(
+        "transaction_activities, exception",
+        [
+            # Wrong date
+            [activities[1:4], ValueError],
+            # Wrong description
+            [[activities[1], activities[2], activities[4]], ValueError],
+        ],
+    )
+    def test_initialization_invalid(self, transaction_activities, exception):
+        with pytest.raises(exception):
+            TransactionActivityGroup(transaction_activities)
 
 
 @pytest.fixture
