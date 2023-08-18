@@ -83,7 +83,6 @@ addopts = [
 pythonpath = ["tests/helpers"]
 norecursedirs = ["tests/helpers"]
 filterwarnings = [
-  'ignore::DeprecationWarning',
   'ignore:INSECURE:UserWarning',
 ]
 
