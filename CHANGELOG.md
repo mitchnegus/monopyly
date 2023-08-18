@@ -150,8 +150,9 @@
 - Fix bug where transaction toggling failed on filter updates
 
 
-### 1.4.4 (in progress)
+### 1.4.4
 
 - Update date-to-timestamp conversion to be timezone invariant
-- Fix databbase initialization for development mode
+- Fix database initialization for development mode
 - Fix bug where credit card number was not displayed in card summary
+- Use Beautiful Soup to make tests more robust

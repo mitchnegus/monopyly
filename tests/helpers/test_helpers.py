@@ -58,9 +58,9 @@ class TestRoutes:
 
         return _wrapper
 
-    def assert_page_header_includes_substring(self, substring, level="h1"):
+    def page_header_includes_substring(self, substring, level="h1"):
         """
-        Assert that the page header includes a matching substring.
+        Return true if the page header includes a matching substring.
 
         Parameters
         ----------
@@ -70,17 +70,37 @@ class TestRoutes:
             The tag type to treat as the page header. The default is
             'h1'.
         """
-        assert self.soup.find("h1", string=self.match_substring(substring))
+        return bool(self.soup.find("h1", string=self.match_substring(substring)))
 
-    def assert_tag_count_equal(self, count, tag_type, **find_kwargs):
-        """Assert that the count of some tag with some class is correct."""
-        len(list(self.soup.find_all(tag_type, **find_kwargs))) == count
+    def tag_count_is_equal(self, count, tag_type, **find_kwargs):
+        """Return true if the count of some tag with some class is correct."""
+        return len(list(self.soup.find_all(tag_type, **find_kwargs))) == count
 
-    def assert_div_exists(self, **find_kwargs):
-        """Find a <div> with any given characteristics."""
-        x = self.soup.find("div", class_="notes")
-        assert self.soup.find("div", **find_kwargs)
+    def tag_exists(self, tag_type, **find_kwargs):
+        """Return true if a specific tag type exists with any given characteristics."""
+        return bool(self.soup.find_all(tag_type, **find_kwargs))
 
-    def assert_form_exists(self, **find_kwargs):
-        """Find a <form> with any given characteristics."""
-        assert self.soup.find("form", **find_kwargs)
+    def anchor_exists(self, **find_kwargs):
+        """Return true if a <a> exists with any given characteristics."""
+        return self.tag_exists("a", **find_kwargs)
+
+    def div_exists(self, **find_kwargs):
+        """Return true if a <div> exists with any given characteristics."""
+        return self.tag_exists("div", **find_kwargs)
+
+    def span_exists(self, **find_kwargs):
+        """Return true if a <span> exists with any given characteristics."""
+        return self.tag_exists("span", **find_kwargs)
+
+    def form_exists(self, **find_kwargs):
+        """Return true if a <form> exists with any given characteristics."""
+        return self.tag_exists("form", **find_kwargs)
+
+    def input_exists(self, **find_kwargs):
+        """Return true if an <input> exists with any given characteristics."""
+        return self.tag_exists("input", **find_kwargs)
+
+    def input_has_value(self, value, **find_kwargs):
+        """Return true if an <input> exists with the given value."""
+        attrs = find_kwargs.pop("attrs", {}) | {"value": value}
+        return bool(self.soup.find("input", attrs=attrs, **find_kwargs))

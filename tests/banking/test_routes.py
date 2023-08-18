@@ -12,22 +12,22 @@ class TestBankingRoutes(TestRoutes):
 
     def test_load_accounts(self, authorization):
         self.get_route("/accounts")
-        assert "Bank Accounts" in self.html
+        assert self.page_header_includes_substring("Bank Accounts")
         # 2 banks for the user, with 3 total accounts
-        assert self.html.count("bank-block") == 2
-        assert self.html.count('class="account-block box-row"') == 3
+        assert self.tag_count_is_equal(2, "div", class_="bank-block")
+        assert self.tag_count_is_equal(3, "div", class_="account-block")
 
     def test_add_account_get(self, authorization):
         self.get_route("/add_account")
-        assert "New Bank Account" in self.html
-        assert '<form id="bank-account"' in self.html
+        assert self.page_header_includes_substring("New Bank Account")
+        assert self.form_exists(id="bank-account")
 
     def test_add_bank_account_get(self, authorization):
         self.get_route("/add_account/2")
-        assert "New Bank Account" in self.html
-        assert '<form id="bank-account"' in self.html
+        assert self.page_header_includes_substring("New Bank Account")
+        assert self.form_exists(id="bank-account")
         # Form should be prepopulated with the bank info
-        assert 'value="Jail"' in self.html
+        assert self.input_has_value("Jail", id="bank_info-bank_name")
 
     @transaction_lifetime
     def test_add_account_post(self, authorization):
@@ -41,10 +41,11 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns the "Bank Accounts" page with the new account added
-        assert "Bank Accounts" in self.html
-        assert self.html.count("bank-block") == 2
-        assert self.html.count('class="account-block box-row"') == 4
-        assert "8888" in self.html
+        assert self.page_header_includes_substring("Bank Accounts")
+        assert self.tag_count_is_equal(2, "div", class_="bank-block")
+        assert self.tag_count_is_equal(4, "div", class_="account-block")
+        digit_tags = self.soup.find_all("span", class_="digits")
+        assert any(tag.text == "8888" for tag in digit_tags)
 
     @transaction_lifetime
     def test_add_new_bank_account_post(self, authorization):
@@ -59,92 +60,107 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns the "Bank Accounts" page with the new account added
-        assert "Bank Accounts" in self.html
-        assert self.html.count("bank-block") == 3
-        assert self.html.count('class="account-block box-row"') == 4
-        assert "8888" in self.html
+        assert self.page_header_includes_substring("Bank Accounts")
+        assert self.tag_count_is_equal(3, "div", class_="bank-block")
+        assert self.tag_count_is_equal(4, "div", class_="account-block")
+        digit_tags = self.soup.find_all("span", class_="digits")
+        assert any(tag.text == "8888" for tag in digit_tags)
 
     @transaction_lifetime
     def test_delete_account(self, authorization):
         self.get_route("/delete_account/3", follow_redirects=True)
-        assert "Bank Accounts" in self.html
+        assert self.page_header_includes_substring("Bank Accounts")
         # 2 banks for the user, with 2 total accounts
-        assert self.html.count("bank-block") == 2
-        assert self.html.count('class="account-block box-row"') == 2
+        assert self.tag_count_is_equal(2, "div", class_="bank-block")
+        assert self.tag_count_is_equal(2, "div", class_="account-block")
 
     def test_load_account_summaries(self, authorization):
         self.get_route("/account_summaries/2")
-        assert "Bank Account Summaries" in self.html
+        assert self.page_header_includes_substring("Bank Account Summaries")
         # 2 accounts (1 checking, 1 savings)
         total_balance = 42.00 + 43.00 + 300 + 58.90 - 109.21 - 300
-        assert f'<h2 class="bank">Jail (${total_balance:.2f})</h2' in self.html
-        assert self.html.count("account-type-block") == 2
-        assert self.html.count('<span class="digits">5556</span>') == 2
-        assert self.html.count("<b>Savings</b>") == 1
-        assert self.html.count("<b>Checking</b>") == 1
+        assert self.soup.find(
+            "h2", class_="bank", string=f"Jail (${total_balance:.2f})"
+        )
+        self.tag_count_is_equal(2, "div", class_="account-type-block")
+        self.tag_count_is_equal(2, "span", class_="digits", string="5556")
+        self.tag_count_is_equal(1, "b", string="Savings")
+        self.tag_count_is_equal(1, "b", string="Checking")
 
     def test_load_account_details(self, authorization):
         self.get_route("/account/2")
-        assert "Account Details" in self.html
-        assert "account-summary" in self.html
+        assert self.page_header_includes_substring("Account Details")
+        assert self.div_exists(id="account-summary")
         # 3 transactions in the table for the account
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(3, "div", class_="transaction")
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(3, "div", class_="transaction")
         for id_ in (2, 3, 4):
-            assert f"transaction-{id_}" in self.html
-        assert "balance-chart" in self.html
+            assert self.div_exists(id=f"transaction-{id_}")
+        assert self.div_exists(id="balance-chart")
 
     def test_expand_transaction(self, authorization):
         self.post_route("/_expand_transaction", json="5")
         # 1 subtransaction in this transaction
-        assert self.html.count("subtransaction-details") == 1
-        assert "Credit card payment" in self.html
-        assert "$-109.21" in self.html
+        assert self.tag_count_is_equal(1, "div", class_="subtransaction-details")
+        assert self.span_exists(string="Credit card payment")
+        assert "$-109.21" in self.soup.find("div", class_="subtotal").text
 
     def test_show_linked_bank_transaction(self, authorization):
         self.post_route("/_show_linked_transaction", json={"transaction_id": 6})
         # Show the overlay
-        assert "overlay" in self.html
-        assert "linked-transaction-display" in self.html
+        assert self.div_exists(class_="overlay")
+        assert self.div_exists(id="linked-transaction-display")
         # The current transaction is a bank transaction
-        assert "Jail (5556)" in self.html
-        assert "Checking" in self.html
+        selected_transaction_tag = self.soup.find(
+            "div", class_="linked-transaction selected modal-box"
+        )
+        assert "Jail (5556)" in selected_transaction_tag.text
+        assert "Checking" in selected_transaction_tag.text
         # The linked transaction is also a bank transaction
-        assert "Jail (5556)" in self.html
-        assert "Savings" in self.html
+        linked_transaction_tag = self.soup.find(
+            "div", class_="linked-transaction modal-box"
+        )
+        assert "Jail (5556)" in linked_transaction_tag.text
+        assert "Savings" in linked_transaction_tag.text
 
     def test_show_linked_credit_transaction(self, authorization):
         self.post_route("/_show_linked_transaction", json={"transaction_id": 5})
         # Show the overlay
-        assert "overlay" in self.html
-        assert "linked-transaction-display" in self.html
+        assert self.div_exists(class_="overlay")
+        assert self.div_exists(id="linked-transaction-display")
         # The current transaction is a bank transaction
-        assert "Jail (5556)" in self.html
-        assert "Checking" in self.html
+        selected_transaction_tag = self.soup.find(
+            "div", class_="linked-transaction selected modal-box"
+        )
+        assert "Jail (5556)" in selected_transaction_tag.text
+        assert "Checking" in selected_transaction_tag.text
         # The linked transaction is a credit transaction
-        assert "JP Morgan Chance" in self.html
-        assert "Credit Card" in self.html
+        linked_transaction_tag = self.soup.find(
+            "div", class_="linked-transaction modal-box"
+        )
+        assert "JP Morgan Chance" in linked_transaction_tag.text
+        assert "Credit Card" in linked_transaction_tag.text
 
     def test_add_transaction_get(self, authorization):
         self.get_route("/add_transaction")
-        assert "New Bank Transaction" in self.html
-        assert '<form id="bank-transaction"' in self.html
+        assert self.page_header_includes_substring("New Bank Transaction")
+        assert self.form_exists(id="bank-transaction")
 
     def test_add_bank_transaction_get(self, authorization):
         self.get_route("/add_transaction/2")
-        assert "New Bank Transaction" in self.html
-        assert '<form id="bank-transaction"' in self.html
+        assert self.page_header_includes_substring("New Bank Transaction")
+        assert self.form_exists(id="bank-transaction")
         # Form should be prepopulated with the bank info
-        assert 'value="Jail"' in self.html
-        assert 'value="5556"' not in self.html
+        assert self.input_has_value("Jail", id="account_info-bank_name")
+        assert not self.input_has_value("5556", id="account_info-last_four_digits")
 
     def test_add_account_transaction_get(self, authorization):
         self.get_route("/add_transaction/2/3")
-        assert "New Bank Transaction" in self.html
-        assert '<form id="bank-transaction"' in self.html
+        assert self.page_header_includes_substring("New Bank Transaction")
+        assert self.form_exists(id="bank-transaction")
         # Form should be prepopulated with the account info
-        assert 'value="Jail"' in self.html
-        assert 'value="5556"' in self.html
+        assert self.input_has_value("Jail", id="account_info-bank_name")
+        assert self.input_has_value("5556", id="account_info-last_four_digits")
 
     @transaction_lifetime
     def test_add_transaction_post(self, authorization):
@@ -161,13 +177,13 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns to the "Account Details" page with the new transaction added
-        assert "Account Details" in self.html
-        assert "account-summary" in self.html
+        assert self.page_header_includes_substring("Account Details")
+        assert self.div_exists(id="account-summary")
         # 4 transactions in the table for the account
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(4, "div", class_="transaction")
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(4, "div", class_="transaction")
         for id_ in (2, 3, 4, 8):
-            assert f"transaction-{id_}" in self.html
+            assert self.div_exists(id=f"transaction-{id_}")
 
     @transaction_lifetime
     def test_add_transaction_multiple_subtransactions_post(self, authorization):
@@ -190,23 +206,27 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns to the "Account Details" page with the new transaction added
-        assert "Account Details" in self.html
-        assert "account-summary" in self.html
+        assert self.page_header_includes_substring("Account Details")
+        assert self.div_exists(id="account-summary")
         # 4 transactions in the table for the account
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(4, "div", class_="transaction")
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(4, "div", class_="transaction")
         for id_ in (2, 3, 4, 8):
-            assert f"transaction-{id_}" in self.html
+            assert self.div_exists(id=f"transaction-{id_}")
 
     def test_update_transaction_get(self, authorization):
         self.get_route("/update_transaction/4")
-        assert "Update Bank Transaction" in self.html
-        assert '<form id="bank-transaction"' in self.html
+        assert self.page_header_includes_substring("Update Bank Transaction")
+        assert self.form_exists(id="bank-transaction")
         # Form should be prepopulated with the transaction info
-        assert 'value="Jail"' in self.html
-        assert 'value="5556"' in self.html
-        assert 'value="2020-05-06"' in self.html
-        assert 'value="What else is there to do in Jail?"' in self.html
+        input_id_values = {
+            "account_info-bank_name": "Jail",
+            "account_info-last_four_digits": "5556",
+            "transaction_date": "2020-05-06",
+            "subtransactions-0-note": "What else is there to do in Jail?",
+        }
+        for id_, value in input_id_values.items():
+            assert self.input_has_value(value, id=id_)
 
     @transaction_lifetime
     def test_update_transaction_post(self, authorization):
@@ -223,38 +243,40 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns to the "Account Details" page with the new transaction added
-        assert "Account Details" in self.html
-        assert "account-summary" in self.html
-        # 4 transactions in the table for the account
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(1, "div", class_="transaction")
+        assert self.page_header_includes_substring("Account Details")
+        assert self.div_exists(id="account-summary")
+        # 1 transaction in the table for the account
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(1, "div", class_="transaction")
         for id_ in (7,):
-            assert f"transaction-{id_}" in self.html
-        assert "Do not pass GO, do not collect $200" in self.html
+            assert self.div_exists(id=f"transaction-{id_}")
+        notes_tag = self.soup.find("div", class_="notes text column")
+        assert "Do not pass GO, do not collect $200" in notes_tag.text
 
     def test_add_subtransaction_fields(self, authorization):
         self.post_route("/_add_subtransaction_fields", json={"subtransaction_count": 1})
         # Created a second transaction with index 1
-        assert 'id="subtransactions-1"' in self.html
-        assert "subtransactions-1-subtotal" in self.html
-        assert "subtransactions-1-note" in self.html
+        assert self.div_exists(id="subtransactions-1")
+        assert self.input_exists(id="subtransactions-1-subtotal")
+        assert self.input_exists(id="subtransactions-1-note")
+        assert self.input_exists(id="subtransactions-1-tags")
 
     def test_add_transfer_field(self, authorization):
         self.post_route("/_add_transfer_field")
-        assert 'id="transfer_accounts_info-0"' in self.html
-        assert "transfer_accounts_info-0-bank_name" in self.html
-        assert "transfer_accounts_info-0-type_name" in self.html
-        assert "transfer_accounts_info-0-last_four_digits" in self.html
+        assert self.div_exists(id="transfer_accounts_info-0")
+        assert self.input_exists(id="transfer_accounts_info-0-bank_name")
+        assert self.input_exists(id="transfer_accounts_info-0-type_name")
+        assert self.input_exists(id="transfer_accounts_info-0-last_four_digits")
 
     @transaction_lifetime
     def test_delete_transaction(self, authorization):
         self.get_route("/delete_transaction/4", follow_redirects=True)
-        assert "Account Details" in self.html
+        assert self.page_header_includes_substring("Account Details")
         # 2 transactions in the table for the user
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(2, "div", class_="transaction")
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(2, "div", class_="transaction")
         # Ensure that the transaction was deleted
-        assert 'value="What else is there to do in Jail?"' not in self.html
+        assert not self.input_has_value("What else is there to do in Jail?")
 
     @pytest.mark.parametrize(
         "field, suggestions",
@@ -289,6 +311,6 @@ class TestBankingRoutes(TestRoutes):
     @transaction_lifetime
     def test_delete_bank(self, authorization):
         self.get_route("/delete_bank/2", follow_redirects=True)
-        assert "Profile" in self.html
+        assert self.page_header_includes_substring("Profile")
         # 1 remaining bank for the user
-        assert self.html.count('class="bank-block box-row') == 1
+        assert self.tag_count_is_equal(1, "div", class_="bank-block")

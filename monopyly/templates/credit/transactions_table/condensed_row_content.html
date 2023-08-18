@@ -20,7 +20,7 @@
 {% if full_view %}
   <div class="card column">
     <span class="bank">{{ transaction.statement.card.account.bank.bank_name }}</span>
-    -{{ transaction.statement.card.last_four_digits }}
+    -<span class="digits">{{ transaction.statement.card.last_four_digits }}</span>
   </div>
 {% endif %}
 

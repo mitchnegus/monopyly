@@ -1,5 +1,6 @@
 """Tests for routes in the credit blueprint."""
 import json
+import re
 from unittest.mock import Mock, patch
 
 import pytest
@@ -15,14 +16,14 @@ class TestCreditRoutes(TestRoutes):
 
     def test_load_cards(self, authorization):
         self.get_route("/cards")
-        assert "Credit Cards" in self.html
+        assert self.page_header_includes_substring("Credit Cards")
         # 3 credit cards for the user; 1 for the 'Add card' button
-        assert self.html.count("credit-card-block") == (3 + 1)
+        assert self.tag_count_is_equal(3 + 1, "a", class_="credit-card-block")
 
     def test_add_card_get(self, authorization):
         self.get_route("/add_card")
-        assert "New Card" in self.html
-        assert '<form id="card"' in self.html
+        assert self.page_header_includes_substring("New Card")
+        assert self.form_exists(id="card")
 
     @transaction_lifetime
     def test_add_card_post(self, authorization):
@@ -36,11 +37,11 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Returns the form page again with a prompt asking about card transfers
-        assert "overlay" in self.html
-        assert "Your card has been saved successfully." in self.html
-        assert "this new card may be a replacement" in self.html
-        assert "(ending in 3336)" in self.html
-        assert "_transfer_card_statement" in self.html
+        assert self.div_exists(class_="overlay")
+        assert "Your card has been saved successfully." in self.soup.text
+        assert "this new card may be a replacement" in self.soup.text
+        assert "(ending in 3336)" in self.soup.text
+        assert self.form_exists(action=self.match_substring("_transfer_card_statement"))
 
     @transaction_lifetime
     def test_add_new_account_card_post(self, authorization):
@@ -57,12 +58,13 @@ class TestCreditRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns the "Credit Account" page for the new account with the card
-        assert "Credit Account Details" in self.html
+        assert self.page_header_includes_substring("Credit Account Details")
         # 4 rows with information
-        assert self.html.count("info-row") == 4
+        assert self.tag_count_is_equal(4, "div", class_="info-row")
         # 1 credit card for the account (only the new card)
-        assert self.html.count("credit-card-block") == 1
-        assert "3337" in self.html
+        assert self.tag_count_is_equal(1, "div", class_="credit-card-block")
+        digit_tags = self.soup.find_all("div", class_="digits")
+        assert any(tag.text == "3337" for tag in digit_tags)
 
     @patch("monopyly.credit.routes.CardStatementTransferForm")
     @patch("monopyly.credit.routes.transfer_credit_card_statement")
@@ -87,11 +89,11 @@ class TestCreditRoutes(TestRoutes):
 
     def test_load_account(self, authorization):
         self.get_route("/account/2")
-        assert "Credit Account Details" in self.html
+        assert self.page_header_includes_substring("Credit Account Details")
         # 4 rows with information
-        assert self.html.count("info-row") == 4
+        assert self.tag_count_is_equal(4, "div", class_="info-row")
         # 2 credit cards for the account
-        assert self.html.count("credit-card-block") == 2
+        assert self.tag_count_is_equal(2, "div", class_="credit-card-block")
 
     @transaction_lifetime
     def test_update_card_status(self, authorization):
@@ -103,18 +105,19 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # The formerly active card should now be displayed as inactive
-        assert "INACTIVE" in self.html
+        assert self.div_exists(class_="notice", string="INACTIVE")
 
     @transaction_lifetime
     def test_delete_card(self, authorization):
         self.get_route("/delete_card/3", follow_redirects=True)
-        assert "Credit Account Details" in self.html
+        assert self.page_header_includes_substring("Credit Account Details")
         # 4 rows with information
-        assert self.html.count("info-row") == 4
+        assert self.tag_count_is_equal(4, "div", class_="info-row")
         # 1 credit card for the account
-        assert self.html.count("credit-card-block") == 1
+        assert self.tag_count_is_equal(1, "div", class_="credit-card-block")
         # Ensure that the card (ending in "3335") was deleted
-        assert "3335" not in self.html
+        digit_tags = self.soup.find_all("div", class_="digits")
+        assert not any(tag.text == "3337" for tag in digit_tags)
 
     @transaction_lifetime
     def test_update_account_statement_issue_day(self, authorization):
@@ -129,20 +132,20 @@ class TestCreditRoutes(TestRoutes):
     @transaction_lifetime
     def test_delete_account(self, authorization):
         self.get_route("/delete_account/2", follow_redirects=True)
-        assert "Credit Cards" in self.html
+        assert self.page_header_includes_substring("Credit Cards")
         # 1 credit card for the user; 1 for the 'Add card' button
-        assert self.html.count("credit-card-block") == (1 + 1)
+        assert self.tag_count_is_equal(1 + 1, "a", class_="credit-card-block")
         # Ensure that the cards associated with the credit account were deleted
-        assert "3334" not in self.html
-        assert "3335" not in self.html
+        digit_tags = self.soup.find_all("div", class_="digits")
+        assert not any(tag.text in ("3334", "3335") for tag in digit_tags)
 
     def test_load_statements(self, authorization):
         self.get_route("/statements")
-        assert "Credit Card Statements" in self.html
+        assert self.page_header_includes_substring("Credit Card Statements")
         # 2 active cards with statements for the user
-        assert self.html.count("card-column") == 2
+        assert self.tag_count_is_equal(2, "div", class_="card-column")
         # 5 statements on those active cards
-        assert self.html.count("statement-block ") == 5
+        assert self.tag_count_is_equal(5, "a", class_="statement-block")
 
     def test_update_statements_display(self, authorization):
         self.post_route(
@@ -150,19 +153,19 @@ class TestCreditRoutes(TestRoutes):
             json={"card_ids": ["3"]},
         )
         # 1 card shown with the filter applied
-        assert self.html.count("card-column") == 1
+        assert self.tag_count_is_equal(1, "div", class_="card-column")
         # 3 statements on that card
-        assert self.html.count("statement-block ") == 3
+        assert self.tag_count_is_equal(3, "a", class_="statement-block")
 
     def test_load_statement_details(self, authorization):
         self.get_route("/statement/4")
-        assert "Statement Details" in self.html
-        assert "statement-summary" in self.html
+        assert self.page_header_includes_substring("Statement Details")
+        assert self.div_exists(id="statement-summary")
         # 3 transactions in the table on the statement
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(3, "div", class_="transaction")
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(3, "div", class_="transaction")
         for id_ in (5, 6, 7):
-            assert f"transaction-{id_}" in self.html
+            assert self.div_exists(id=f"transaction-{id_}")
 
     @transaction_lifetime
     def test_update_statement_due_date(self, authorization):
@@ -180,43 +183,54 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Returns the template for the summary section of the statement page
-        assert "statement-summary" in self.html
-        assert "Paid" in self.html
+        assert self.div_exists(id="statement-summary")
+        assert self.div_exists(string="Paid")
 
     def test_load_user_transactions(self, authorization):
         self.get_route("/transactions")
-        assert "Credit Transactions" in self.html
+        assert self.page_header_includes_substring("Credit Transactions")
         # 10 transactions in the table for the user on active cards
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(10, "div", class_="transaction")
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(10, "div", class_="transaction")
 
     def test_load_card_transactions(self, authorization):
         self.get_route("/transactions/3")
-        assert "Credit Transactions" in self.html
+        assert self.page_header_includes_substring("Credit Transactions")
         # 6 transactions in the table for the associated card
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(6, "div", class_="transaction")
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(6, "div", class_="transaction")
 
     def test_expand_transaction(self, authorization):
         self.post_route("/_expand_transaction", json="4")
         # 2 subtransactions in this transaction
-        assert self.html.count("subtransaction-details") == 2
-        assert "One for the park" in self.html
-        assert "$30.00" in self.html
-        assert "One for the place" in self.html
-        assert "$35.00" in self.html
+        assert self.tag_count_is_equal(2, "div", class_="subtransaction-details")
+        for tag, (note, amount) in zip(
+            self.soup.find_all("div", class_="subtransaction-details"),
+            [("One for the park", "$30.00"), ("One for the place", "$35.00")],
+        ):
+            assert note in tag.find("div", class_="notes").find("span").text
+            assert amount in tag.find("div", class_="subtotal").text
 
     def test_show_linked_bank_transaction(self, authorization):
         self.post_route("/_show_linked_transaction", json={"transaction_id": 7})
         # Show the overlay
-        assert "overlay" in self.html
-        assert "linked-transaction-display" in self.html
+        assert self.div_exists(class_="overlay")
+        assert self.div_exists(id="linked-transaction-display")
         # The current transaction is a credit transaction
-        assert "JP Morgan Chance" in self.html
-        assert "Credit Card" in self.html
+        selected_transaction_tag = self.soup.find(
+            "div", class_="linked-transaction selected modal-box"
+        )
+        assert "JP Morgan Chance" in selected_transaction_tag.text
+        assert "Credit Card" in selected_transaction_tag.text
         # The linked transaction is a bank transaction
-        assert "Jail (5556)" in self.html
-        assert "Checking" in self.html
+        linked_transaction_tag = self.soup.find(
+            "div", class_="linked-transaction modal-box"
+        )
+        assert "Jail (5556)" in linked_transaction_tag.text
+        assert "Checking" in linked_transaction_tag.text
+
+    def _get_displayed_card_digits(self):
+        return [_.text for _ in self.soup.find_all("span", class_="digits")]
 
     def test_update_transactions_display_card(self, authorization):
         self.post_route(
@@ -224,10 +238,13 @@ class TestCreditRoutes(TestRoutes):
             json={"card_ids": ["3"], "sort_order": "asc"},
         )
         # 1 card shown with the filter applied
-        assert all(_ not in self.html for _ in ["3333", "3334", "3336"])
-        assert all(_ in self.html for _ in ["3335"])
+        displayed_digits = self._get_displayed_card_digits()
+        assert all(
+            digits not in displayed_digits for digits in ["3333", "3334", "3336"]
+        )
+        assert all(digits in displayed_digits for digits in ["3335"])
         # 6 transactions on that card
-        assert self.html.count('id="transaction-') == 6
+        assert self.tag_count_is_equal(6, "div", class_="transaction")
         # Most recent transactions at the top
         dates = [_.text for _ in self.soup.find_all("span", "numeric-date")]
         assert sorted(dates) == dates
@@ -238,36 +255,45 @@ class TestCreditRoutes(TestRoutes):
             json={"card_ids": ["3", "4"], "sort_order": "desc"},
         )
         # 2 cards shown with the filter applied
-        assert all(_ not in self.html for _ in ["3333", "3334"])
-        assert all(_ in self.html for _ in ["3335", "3336"])
+        displayed_digits = self._get_displayed_card_digits()
+        assert all(digits not in displayed_digits for digits in ["3333", "3334"])
+        assert all(digits in displayed_digits for digits in ["3335", "3336"])
         # 10 transactions for those cards
-        assert self.html.count('id="transaction-') == 10
+        assert self.tag_count_is_equal(10, "div", class_="transaction")
         # Most recent transactions at the bottom
         dates = [_.text for _ in self.soup.find_all("span", "numeric-date")]
         assert sorted(dates, reverse=True) == dates
 
     def test_add_transaction_get(self, authorization):
         self.get_route("/add_transaction")
-        assert "New Credit Transaction" in self.html
-        assert '<form id="credit-transaction"' in self.html
+        assert self.page_header_includes_substring("New Credit Transaction")
+        assert self.form_exists(id="credit-transaction")
 
     def test_add_card_transaction_get(self, authorization):
         self.get_route("/add_transaction/3")
-        assert "New Credit Transaction" in self.html
-        assert '<form id="credit-transaction"' in self.html
+        assert self.page_header_includes_substring("New Credit Transaction")
+        assert self.form_exists(id="credit-transaction")
         # Form should be prepopulated with the card info
-        assert 'value="Jail"' in self.html
-        assert 'value="3335"' in self.html
-        assert 'value="2020-06-10"' not in self.html
+        input_id_values = {
+            "statement_info-card_info-bank_name": "Jail",
+            "statement_info-card_info-last_four_digits": "3335",
+        }
+        for id_, value in input_id_values.items():
+            assert self.input_has_value(value, id=id_)
+        assert not self.input_has_value("2020-06-10", id="statement_info-issue_date")
 
     def test_add_statement_transaction_get(self, authorization):
         self.get_route("/add_transaction/3/5")
-        assert "New Credit Transaction" in self.html
-        assert '<form id="credit-transaction"' in self.html
+        assert self.page_header_includes_substring("New Credit Transaction")
+        assert self.form_exists(id="credit-transaction")
         # Form should be prepopulated with the statement info
-        assert 'value="Jail"' in self.html
-        assert 'value="3335"' in self.html
-        assert 'value="2020-06-10"' in self.html
+        input_id_values = {
+            "statement_info-card_info-bank_name": "Jail",
+            "statement_info-card_info-last_four_digits": "3335",
+            "statement_info-issue_date": "2020-06-10",
+        }
+        for id_, value in input_id_values.items():
+            assert self.input_has_value(value, id=id_)
 
     @transaction_lifetime
     def test_add_transaction_post(self, authorization):
@@ -285,11 +311,11 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Move to the transaction submission page
-        assert "Transaction Submitted" in self.html
-        assert "The transaction was saved successfully." in self.html
-        assert "2020-06-10" in self.html
-        assert "$250.00" in self.html
-        assert "New Token" in self.html
+        assert self.page_header_includes_substring("Transaction Submitted")
+        assert "The transaction was saved successfully." in self.soup.text
+        assert "2020-06-10" in self.soup.text
+        assert "$250.00" in self.soup.text
+        assert "New Token" in self.soup.text
 
     @transaction_lifetime
     def test_add_transaction_multiple_subtransactions_post(self, authorization):
@@ -310,23 +336,27 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Move to the transaction submission page
-        assert "Transaction Submitted" in self.html
-        assert "The transaction was saved successfully." in self.html
-        assert "2020-06-10" in self.html
-        assert "$1,500.00" in self.html
-        assert "New token" in self.html
-        assert "Race car, forever and always" in self.html
+        assert self.page_header_includes_substring("Transaction Submitted")
+        assert "The transaction was saved successfully." in self.soup.text
+        assert "2020-06-10" in self.soup.text
+        assert "$1,500.00" in self.soup.text
+        assert "New token" in self.soup.text
+        assert "Race car, forever and always" in self.soup.text
 
     def test_update_transaction_get(self, authorization):
         self.get_route("/update_transaction/8")
-        assert "Update Credit Transaction" in self.html
-        assert '<form id="credit-transaction"' in self.html
+        assert self.page_header_includes_substring("Update Credit Transaction")
+        assert self.form_exists(id="credit-transaction")
         # Form should be prepopulated with the transaction info
-        assert 'value="Jail"' in self.html
-        assert 'value="3335"' in self.html
-        assert 'value="2020-05-30"' in self.html
-        assert 'value="Water Works"' in self.html
-        assert 'value="2020-06-10"' in self.html
+        input_id_values = {
+            "statement_info-card_info-bank_name": "Jail",
+            "statement_info-card_info-last_four_digits": "3335",
+            "transaction_date": "2020-05-30",
+            "merchant": "Water Works",
+            "statement_info-issue_date": "2020-06-10",
+        }
+        for id_, value in input_id_values.items():
+            assert self.input_has_value(value, id=id_)
 
     @transaction_lifetime
     def test_update_transaction_post(self, authorization):
@@ -344,35 +374,35 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Move to the transaction submission page
-        assert "Transaction Updated" in self.html
-        assert "The transaction was saved successfully." in self.html
-        assert "2020-05-10" in self.html
-        assert "$-2,345.00" in self.html
-        assert "Bigger refund" in self.html
+        assert self.page_header_includes_substring("Transaction Updated")
+        assert "The transaction was saved successfully." in self.soup.text
+        assert "2020-05-10" in self.soup.text
+        assert "$-2,345.00" in self.soup.text
+        assert "Bigger refund" in self.soup.text
 
     def test_add_subtransaction_fields(self, authorization):
         self.post_route("/_add_subtransaction_fields", json={"subtransaction_count": 1})
         # Created a second transaction with index 1
-        assert 'id="subtransactions-1"' in self.html
-        assert "subtransactions-1-subtotal" in self.html
-        assert "subtransactions-1-note" in self.html
-        assert "subtransactions-1-tags" in self.html
+        assert self.div_exists(id="subtransactions-1")
+        assert self.input_exists(id="subtransactions-1-subtotal")
+        assert self.input_exists(id="subtransactions-1-note")
+        assert self.input_exists(id="subtransactions-1-tags")
 
     @transaction_lifetime
     def test_delete_transaction(self, authorization):
-        self.get_route("/delete_transaction/8", follow_redirects=True)
-        assert "Credit Transactions" in self.html
+        self.get_route("/delete_transaction/9", follow_redirects=True)
+        assert self.page_header_includes_substring("Credit Transactions")
         # 9 transactions in the table for the user
-        assert "transactions-table" in self.html
-        self.assert_tag_count_equal(9, "div", class_="transaction")
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(9, "div", class_="transaction")
         # Ensure that the transaction was deleted
-        assert "Water Works" not in self.html
+        assert self.div_exists(class_="merchant", string=re.compile(".*Water Works.*"))
 
     def test_load_tags(self, authorization):
         self.get_route("/tags")
-        assert "Transaction Tags" in self.html
+        assert self.page_header_includes_substring("Transaction Tags")
         # 7 tags for the user
-        assert self.html.count('class="tag"') == 7
+        assert self.tag_count_is_equal(7, "div", class_="tag")
 
     @transaction_lifetime
     def test_add_tag(self, authorization):
@@ -509,7 +539,7 @@ class TestCreditRoutes(TestRoutes):
                 "transaction_date": "2020-06-15",
             },
         )
-        assert "404 Not Found" in self.html
+        assert "404 Not Found" in self.soup.text
 
     def test_infer_statement(self, authorization):
         self.post_route(
