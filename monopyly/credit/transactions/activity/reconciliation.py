@@ -29,10 +29,7 @@ class MatchFinder(ABC):
             The full set of activities that may match this finder's
             transaction.
         """
-        matches = []
-        for row in data:
-            if cls.is_match(transaction, row):
-                matches.append(row)
+        matches = [row for row in data if cls.is_match(transaction, row)]
         return matches
 
     @abstractmethod
@@ -108,8 +105,8 @@ class _Matchmaker(ABC):
         """Assign the transaction-activity pair to be a "best match"."""
         self.best_matches[transaction] = activity
 
-    def _assign_unambiguous_best_match(self, matches):
-        """Find unambiguous matches and assign them as the "best" match."""
+    def _assign_unambiguous_best_matches(self, matches):
+        """Find unambiguous matches and assign them as the "best" matches."""
         for transaction, activities in self._get_potential_matches(matches):
             # Check that this transaction only matches one activity
             if len(activities) == 1:
@@ -117,16 +114,23 @@ class _Matchmaker(ABC):
                 if self._is_unambiguous_match(transaction, activity, matches):
                     self._assign_best_match(transaction, activity)
 
-    def _disambiguate_best_match(self, matches):
-        """Disambiguate the best match from a set of potential matches."""
+    def _is_unambiguous_match(self, transaction, activity, matches):
+        """Check whether the transaction and activity match unambiguously."""
+        other_transactions_activities = filter(
+            lambda item: item[0] is not transaction,
+            self._get_potential_matches(matches),
+        )
+        for _, other_activities in other_transactions_activities:
+            if activity in other_activities:
+                return False
+        return True
+
+    def _disambiguate_best_matches(self, matches):
+        """Disambiguate the best matches from sets of potential matches."""
         ambiguous_matches = self._get_potential_matches(matches)
         for transaction, activities in ambiguous_matches:
-            match = self._choose_best_ambiguous_match(transaction, activities)
-            self.best_matches[transaction] = match
-
-    def _disambiguate_best_near_match(self, matches):
-        """Disambiguate the best near match from a set of potential matches."""
-        self._disambiguate_best_match(matches)
+            activity = self._choose_best_ambiguous_match(transaction, activities)
+            self._assign_best_match(transaction, activity)
 
     def _choose_best_ambiguous_match(self, transaction, activities):
         """Determine a transaction-activity match from an ambiuguous set."""
@@ -189,7 +193,7 @@ class _Matchmaker(ABC):
         for item in filter(self._is_unmatched, matches.items()):
             transaction, activities = item
             # Potential matches are only those where activities are unmatched
-            potential_activities = list(
+            potential_activities = sorted(
                 set(activities) - set(self.best_matches.values())
             )
             if potential_activities:
@@ -199,17 +203,6 @@ class _Matchmaker(ABC):
         """Check whether the given transaction is not yet matched."""
         transaction, activities = item
         return transaction not in self.best_matches
-
-    def _is_unambiguous_match(self, transaction, activity, matches):
-        """Check whether the transaction and activity match unambiguously."""
-        other_transactions_activities = filter(
-            lambda item: item[0] is not transaction,
-            self._get_potential_matches(matches),
-        )
-        for _, other_activities in other_transactions_activities:
-            if activity in other_activities:
-                return False
-        return True
 
 
 class ExactMatchmaker(_Matchmaker):
@@ -229,16 +222,16 @@ class ExactMatchmaker(_Matchmaker):
     determination.
     """
 
-    match_finder = ExactMatchFinder
+    _match_finder = ExactMatchFinder
 
     def __init__(self, transactions, data, best_matches=None):
         super().__init__(transactions, data, best_matches=best_matches)
         matches = {
-            transaction: self.match_finder.find(transaction, data)
+            transaction: self._match_finder.find(transaction, data)
             for transaction in transactions
         }
-        self._assign_unambiguous_best_match(matches)
-        self._disambiguate_best_match(matches)
+        self._assign_unambiguous_best_matches(matches)
+        self._disambiguate_best_matches(matches)
 
 
 class NearMatchmaker(_Matchmaker):
@@ -259,16 +252,16 @@ class NearMatchmaker(_Matchmaker):
     activity to make a determination.
     """
 
-    match_finder = NearMatchFinder
+    _match_finder = NearMatchFinder
 
     def __init__(self, transactions, data, best_matches=None):
         super().__init__(transactions, data, best_matches=best_matches)
         matches = {
-            transaction: self.match_finder.find(transaction, data)
+            transaction: self._match_finder.find(transaction, data)
             for transaction in transactions
         }
-        self._assign_unambiguous_best_match(matches)
-        self._disambiguate_best_match(matches)
+        self._assign_unambiguous_best_matches(matches)
+        self._disambiguate_best_matches(matches)
 
     def _assign_best_match(self, transaction, activity):
         """Assign the transaction-activity pair to be a "best match"."""
