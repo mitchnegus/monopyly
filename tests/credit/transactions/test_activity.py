@@ -5,7 +5,10 @@ from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
-from monopyly.credit.transactions.activity.data import TransactionActivities
+from monopyly.credit.transactions.activity.data import (
+    TransactionActivities,
+    TransactionActivityGroup,
+)
 from monopyly.credit.transactions.activity.parser import (
     _TransactionActivityParser,
     parse_transaction_activity_file,
@@ -28,15 +31,46 @@ def test_parse_activity_file(mock_parser):
 class TestTransactionActivities:
     def test_initialization(self):
         test_data = [
-            ["date0", "total0", "description0"],
-            ["date1", "total1", "description1"],
-            ["date2", "total2", "description2"],
+            ["date0", 100, "description0"],
+            ["date1", 200, "description1"],
+            ["date2", 300, "description2"],
         ]
         activities = TransactionActivities(test_data)
         for activity, row_data in zip(activities, test_data):
             assert activity.transaction_date == row_data[0]
             assert activity.total == row_data[1]
             assert activity.description == row_data[2]
+
+
+class TestTransactionActivityGroup:
+    test_data = [
+        ["date", 100, "description"],
+        ["date", 200, "description"],
+        ["date", 300, "description"],
+        ["other date", 250, "description"],
+        ["date", 150, "other description"],
+    ]
+    activities = TransactionActivities(test_data)
+
+    def test_initialization(self):
+        transaction_activities = self.activities[:3]
+        grouping = TransactionActivityGroup(transaction_activities)
+        assert grouping.transaction_date == "date"
+        assert grouping.total == 600
+        assert grouping.description == "description"
+
+    @pytest.mark.parametrize(
+        "transaction_activities, exception",
+        [
+            # Wrong date
+            [activities[1:4], ValueError],
+            # Wrong description
+            [[activities[1], activities[2], activities[4]], ValueError],
+        ],
+    )
+    def test_initialization_invalid(self, transaction_activities, exception):
+        with pytest.raises(exception):
+            TransactionActivityGroup(transaction_activities)
 
 
 class TestTransactionActivityParser:
