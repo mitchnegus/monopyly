@@ -5,8 +5,8 @@ from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
+from monopyly.credit.transactions.activity.data import TransactionActivities
 from monopyly.credit.transactions.activity.parser import (
-    TransactionActivities,
     _TransactionActivityParser,
     parse_transaction_activity_file,
 )
