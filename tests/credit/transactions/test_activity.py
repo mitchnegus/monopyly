@@ -406,6 +406,18 @@ class TestActivityMatchmakers:
             merchant="Restaurant",
             notes="Romantic dinner",
         ),
+        Mock(
+            transaction_date=date(2000, 4, 1),
+            total=0,
+            merchant="Magician",
+            notes="April Fools!",
+        ),
+        Mock(
+            transaction_date=date(2000, 6, 1),
+            total=19,
+            merchant="Pharmacy",
+            notes="Snacks, groceries",
+        ),
     ]
     mock_activity = TransactionActivities(
         [
@@ -429,6 +441,14 @@ class TestActivityMatchmakers:
             [date(2000, 2, 14), 80, "Restaurant"],
             # Near match by date
             [date(2000, 2, 15), 66, "Florist"],
+            # Activity group matches single transaction
+            [date(2000, 4, 1), 1000, "Magic Show"],
+            [date(2000, 4, 1), 2000, "Magic Show"],
+            [date(2000, 4, 1), -3000, "Magic Show"],
+            # Subset of activity group matches single transaction
+            [date(2000, 6, 1), 4, "Pharmacy"],
+            [date(2000, 6, 1), 15, "Pharmacy"],
+            [date(2000, 6, 1), 40, "Pharmacy"],
         ]
     )
 
@@ -475,12 +495,19 @@ class TestActivityMatchmakers:
             mock_transactions[5]: mock_data[6],  # indeterminate; match based on order
             mock_transactions[8]: mock_data[8],
             mock_transactions[7]: mock_data[9],
+            mock_transactions[9]: TransactionActivityGroup(mock_data[10:13]),
+            mock_transactions[10]: TransactionActivityGroup(mock_data[13:15]),
         }
         expected_unmatched_transactions = [
             mock_transactions[2],
             mock_transactions[6],
         ]
-        expected_unmatched_activities = [mock_data[2], mock_data[5], mock_data[7]]
+        expected_unmatched_activities = [
+            mock_data[2],
+            mock_data[5],
+            mock_data[7],
+            mock_data[15],
+        ]
         expected_match_discrepancies = {
             mock_transactions[8]: mock_data[8],
             # Date discrepancies are not considered notable and are excluded
