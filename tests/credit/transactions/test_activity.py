@@ -207,6 +207,8 @@ class TestActivityMatchFinders:
             [date(2000, 1, 1), 60, "Restaurant"],  # ---- too high
             [date(1999, 12, 20), 50, "Restaurant"],  # -- too early date
             [date(2000, 1, 10), 50, "Restaurant"],  # --- too late date
+            [date(2000, 2, 20), 5, "Pharmacy"],  # ------ near (small value)
+            [date(2000, 3, 30), 2, "Pharmacy"],  # ------ near, but wrong sign
         ]
     )
 
@@ -227,6 +229,27 @@ class TestActivityMatchFinders:
         mock_data = self.mock_activity
         # Near matches should have a date within a day or total within 10%
         expected_matches = mock_data[:3]
+        matches = NearMatchFinder.find(mock_transaction, mock_data)
+        assert matches == expected_matches
+
+    def test_near_match_finder_close_total(self):
+        mock_transaction = Mock(
+            transaction_date=date(2000, 2, 20), total=3, notes="..."
+        )
+        mock_data = self.mock_activity
+        # Near match should be close (absolutely) for low values
+        expected_matches = [mock_data[7]]
+        matches = NearMatchFinder.find(mock_transaction, mock_data)
+        assert matches == expected_matches
+
+    def test_near_match_finder_close_total_wrong_sign(self):
+        mock_transaction = Mock(
+            transaction_date=date(2000, 3, 30), total=-1, notes="..."
+        )
+        mock_data = self.mock_activity
+        # Near match should be close (absolutely) for low values,
+        # except when that changes the sign
+        expected_matches = []
         matches = NearMatchFinder.find(mock_transaction, mock_data)
         assert matches == expected_matches
 

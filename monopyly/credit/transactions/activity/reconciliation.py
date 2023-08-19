@@ -82,8 +82,11 @@ class NearMatchFinder(MatchFinder):
 
     @classmethod
     def _is_near_amount(cls, transaction, activity):
-        low_amount = min(activity.total - 3, activity.total * 0.9)
-        high_amount = max(activity.total + 3, activity.total * 1.1)
+        # Ensure that the low amount is fixed at zero for small magnitudes
+        sign = 1 if activity.total >= 0 else -1
+        total_magnitude = abs(activity.total)
+        low_amount = sign * min(max(0, total_magnitude - 3), total_magnitude * 0.9)
+        high_amount = sign * max(total_magnitude + 3, total_magnitude * 1.1)
         return low_amount <= transaction.total <= high_amount
 
 
