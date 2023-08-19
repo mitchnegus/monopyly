@@ -3,10 +3,14 @@ Tools for reconciling credit transactions with associated activity data.
 """
 
 from abc import ABC, abstractmethod
+from collections import UserDict
 from datetime import timedelta
+from itertools import chain, combinations
 
 from nltk import wordpunct_tokenize
 from nltk.metrics.distance import jaccard_distance
+
+from .data import TransactionActivityGroup
 
 
 class MatchFinder(ABC):
@@ -101,8 +105,36 @@ class NearMatchFinder(MatchFinder):
 class _Matchmaker(ABC):
     """An abstract base class for defining matchmaker objects."""
 
-    def __init__(self, transactions, data, best_matches=None):
-        self.best_matches = best_matches if best_matches else {}
+    class _BestMatches(UserDict):
+        """A dictionary with custom methods for querying membership."""
+
+        def includes_transaction(self, transaction):
+            return transaction in self.keys()
+
+        def includes_activity(self, activity):
+            for value in self.values():
+                if activity == value:
+                    return True
+                elif isinstance(value, TransactionActivityGroup) and activity in value:
+                    return True
+            return False
+
+        def pair(self, transaction, activity):
+            """Assign the transaction-activity pair to be a "best match"."""
+            self[transaction] = activity
+
+    def __init__(self, transactions, activities, best_matches=None):
+        self._transactions = transactions
+        self._activities = activities
+        self.best_matches = self._BestMatches(best_matches if best_matches else {})
+
+    @property
+    def unmatched_transactions(self):
+        return list(filter(self._is_unmatched_transaction, self._transactions))
+
+    @property
+    def unmatched_activities(self):
+        return list(filter(self._is_unmatched_activity, self._activities))
 
     @property
     def match_discrepancies(self):
@@ -112,9 +144,25 @@ class _Matchmaker(ABC):
 
         return dict(filter(_match_has_discrepancy, self.best_matches.items()))
 
-    def _assign_best_match(self, transaction, activity):
-        """Assign the transaction-activity pair to be a "best match"."""
-        self.best_matches[transaction] = activity
+    def _is_unmatched_transaction(self, transaction):
+        """Check whether the given transaction is not yet matched."""
+        return not self.best_matches.includes_transaction(transaction)
+
+    def _is_unmatched_activity(self, activity):
+        """Check whether the given activity is not yet matched."""
+        return not self.best_matches.includes_activity(activity)
+
+    def _get_potential_matches(self, matches):
+        """Get the set of potential valid matches from the set of matches."""
+        # Potential matches are only those where the transaction is unmatched
+        for transaction in filter(self._is_unmatched_transaction, matches):
+            activities = matches[transaction]
+            # Potential matches are only those where activities are unmatched
+            potential_activities = sorted(
+                set(activities) - set(self.best_matches.values())
+            )
+            if potential_activities:
+                yield transaction, potential_activities
 
     def _assign_unambiguous_best_matches(self, matches):
         """Find unambiguous matches and assign them as the "best" matches."""
@@ -123,7 +171,7 @@ class _Matchmaker(ABC):
             if len(activities) == 1:
                 activity = activities[0]
                 if self._is_unambiguous_match(transaction, activity, matches):
-                    self._assign_best_match(transaction, activity)
+                    self.best_matches.pair(transaction, activity)
 
     def _is_unambiguous_match(self, transaction, activity, matches):
         """Check whether the transaction and activity match unambiguously."""
@@ -141,7 +189,7 @@ class _Matchmaker(ABC):
         ambiguous_matches = self._get_potential_matches(matches)
         for transaction, activities in ambiguous_matches:
             activity = self._choose_best_ambiguous_match(transaction, activities)
-            self._assign_best_match(transaction, activity)
+            self.best_matches.pair(transaction, activity)
 
     def _choose_best_ambiguous_match(self, transaction, activities):
         """Determine a transaction-activity match from an ambiuguous set."""
@@ -198,22 +246,6 @@ class _Matchmaker(ABC):
         """Use the Jaccard distance to measure the similarity of token sets."""
         return jaccard_distance(reference, test)
 
-    def _get_potential_matches(self, matches):
-        """Get the set of potential valid matches from the set of matches."""
-        # Potential matches are only those where the transaction is unmatched
-        for transaction in filter(self._is_unmatched, matches):
-            activities = matches[transaction]
-            # Potential matches are only those where activities are unmatched
-            potential_activities = sorted(
-                set(activities) - set(self.best_matches.values())
-            )
-            if potential_activities:
-                yield transaction, potential_activities
-
-    def _is_unmatched(self, transaction):
-        """Check whether the given transaction is not yet matched."""
-        return transaction not in self.best_matches
-
 
 class ExactMatchmaker(_Matchmaker):
     """
@@ -247,14 +279,20 @@ class ExactMatchmaker(_Matchmaker):
     best_matches : dict
         A mapping between transactions and their best match (as
         determined by the matcher's algorithm).
+    unmatched_transactions : list
+        An list of transactions where no matching activity could be
+        identified.
+    unmatched_activities : list
+        An list of activities where no matching transaction could be
+        identified.
     """
 
     _match_finder = ExactMatchFinder
 
-    def __init__(self, transactions, data, best_matches=None):
-        super().__init__(transactions, data, best_matches=best_matches)
+    def __init__(self, transactions, activities, best_matches=None):
+        super().__init__(transactions, activities, best_matches=best_matches)
         matches = {
-            transaction: self._match_finder.find(transaction, data)
+            transaction: self._match_finder.find(transaction, activities)
             for transaction in transactions
         }
         self._assign_unambiguous_best_matches(matches)
@@ -294,22 +332,24 @@ class NearMatchmaker(_Matchmaker):
     best_matches : dict
         A mapping between transactions and their best match (as
         determined by the matcher's algorithm).
+    unmatched_transactions : list
+        An list of transactions where no matching activity could be
+        identified.
+    unmatched_activities : list
+        An list of activities where no matching transaction could be
+        identified.
     """
 
     _match_finder = NearMatchFinder
 
-    def __init__(self, transactions, data, best_matches=None):
-        super().__init__(transactions, data, best_matches=best_matches)
+    def __init__(self, transactions, activities, best_matches=None):
+        super().__init__(transactions, activities, best_matches=best_matches)
         matches = {
-            transaction: self._match_finder.find(transaction, data)
+            transaction: self._match_finder.find(transaction, activities)
             for transaction in transactions
         }
         self._assign_unambiguous_best_matches(matches)
         self._disambiguate_best_matches(matches)
-
-    def _assign_best_match(self, transaction, activity):
-        """Assign the transaction-activity pair to be a "best match"."""
-        self.best_matches[transaction] = activity
 
 
 class ActivityMatchmaker(_Matchmaker):
@@ -363,13 +403,54 @@ class ActivityMatchmaker(_Matchmaker):
         identified.
     """
 
-    def __init__(self, transactions, data, best_matches=None):
+    def __init__(self, transactions, activities, best_matches=None):
         # Collect all "exact" matches (same date and amount), then near matches
-        for matchmaker in (ExactMatchmaker, NearMatchmaker):
-            best_matches = matchmaker(transactions, data, best_matches).best_matches
-        super().__init__(transactions, data, best_matches=best_matches)
-        # Store references to unmatched transactions and activities
-        self.unmatched_transactions = list(filter(self._is_unmatched, transactions))
-        self.unmatched_activities = [
-            activity for activity in data if activity not in self.best_matches.values()
+        for matchmaker_cls in (ExactMatchmaker, NearMatchmaker):
+            matchmaker = matchmaker_cls(transactions, activities, best_matches)
+            best_matches = matchmaker.best_matches
+        super().__init__(transactions, activities, best_matches=best_matches)
+        # Find further matches between transactions and groups of activity information
+        for transaction in self.unmatched_transactions:
+            self._match_activity_groups(transaction, activities)
+
+    def _match_activity_groups(self, transaction, activities):
+        """Match transaction to groups of activity with the same total and merchant."""
+        potential_activity_groups = self._gather_potential_activity_groups(
+            transaction.transaction_date
+        )
+        for group in potential_activity_groups:
+            for group_subset in self._get_group_subsets(group):
+                if (
+                    sum(activity.total for activity in group_subset)
+                    == transaction.total
+                ):
+                    self.best_matches.pair(
+                        transaction, TransactionActivityGroup(group_subset)
+                    )
+                    break
+
+    def _gather_potential_activity_groups(self, transaction_date):
+        # Group activities on the transaction date by shared descriptions
+        date_activities = self._group_activities_for_date(transaction_date)
+        potential_activity_groups = {}
+        for activity in date_activities:
+            if activity.description in potential_activity_groups:
+                potential_activity_groups[activity.description].append(activity)
+            else:
+                potential_activity_groups[activity.description] = [activity]
+        # Only return the groups with multiple potential activities
+        return filter(lambda group: len(group) != 1, potential_activity_groups.values())
+
+    def _group_activities_for_date(self, transaction_date):
+        # Provide a list of activities that share a transaction date
+        return [
+            activity
+            for activity in self.unmatched_activities
+            if activity.transaction_date == transaction_date
         ]
+
+    def _get_group_subsets(self, group):
+        # Return combinations of activities that represent a subset of the full group
+        return chain.from_iterable(
+            combinations(group, r=r) for r in range(len(group), 0, -1)
+        )
