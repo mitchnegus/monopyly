@@ -25,7 +25,8 @@ def main():
     if args.backup:
         app_runner.backup_database()
     app_runner.run()
-    app_runner.open_browser(delay=1)
+    if args.browser:
+        app_runner.open_browser(delay=1)
     # Wait for the exit command to stop
     app_runner.wait_for_exit()
 
@@ -38,6 +39,11 @@ def parse_arguments():
         "--backup",
         action="store_true",
         help="a flag indicating if the database should be backed up",
+    )
+    parser.add_argument(
+        "--browser",
+        action="store_true",
+        help="a flag indicating if a new browswer window should be opened",
     )
     parser.add_argument(
         "mode",

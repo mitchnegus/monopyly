@@ -140,4 +140,4 @@
 ### 1.4.2 (in progress)
 
 - Standardize CLI usage messages
-
+- Make browser usage optional in CLI run script
