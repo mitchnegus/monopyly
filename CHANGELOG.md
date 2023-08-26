@@ -135,3 +135,9 @@
 - Distinguish between inline code and "fenced" code using a Markdown library extension
 - Use more `data-*` attributes for processing transaction IDs
 - Fix bug where linked transactions did not use jQuery reference
+
+
+### 1.4.2 (in progress)
+
+- Standardize CLI usage messages
+

@@ -32,16 +32,16 @@ def main():
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", help="The host address where the app will be run.")
-    parser.add_argument("--port", help="The port where the app will be accessible.")
+    parser.add_argument("--host", help="the host address where the app will be run")
+    parser.add_argument("--port", help="the port where the app will be accessible")
     parser.add_argument(
         "--backup",
         action="store_true",
-        help="A flag indicating if the database should be backed up.",
+        help="a flag indicating if the database should be backed up",
     )
     parser.add_argument(
         "mode",
-        help="The runtime mode for the app; defaults to `development`.",
+        help="the runtime mode for the app; defaults to `development`",
         choices=["development", "production"],
     )
     return parser.parse_args()
