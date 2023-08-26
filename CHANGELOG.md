@@ -127,7 +127,7 @@
 - Use Fuisce in place of Authanor for db/testing interfaces
 
 
-### 1.4.1 (in progress)
+### 1.4.1
 
 - Use local time for determining projected balances
 - Show future credit statement payments as "scheduled" (and improve logic for displaying paid notices)
