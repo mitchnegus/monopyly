@@ -11,7 +11,7 @@ from fuisce.database import SQLAlchemy as _SQLAlchemy
 
 from ..core.actions import get_timestamp
 
-BASE_DB_NAME = "monopyly.sqlite"
+BASE_DB_NAME = f"monopyly.sqlite"
 
 
 class SQLAlchemy(_SQLAlchemy):

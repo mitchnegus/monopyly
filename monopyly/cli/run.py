@@ -13,22 +13,26 @@ from threading import Event
 
 from flask import current_app
 
+from .apps import DevelopmentApplication, LocalApplication, ProductionApplication
+
 # Set the Flask environment variable
 os.environ["FLASK_APP"] = "monopyly"
 
 
 def main():
     args = parse_arguments()
-    app_runner = Runner(args.mode, host=args.host, port=args.port)
+    app_launcher = Launcher(args.mode, host=args.host, port=args.port)
     # Initialize the database and run the app
-    app_runner.initialize_database()
+    app_launcher.initialize_database()
     if args.backup:
-        app_runner.backup_database()
-    app_runner.run()
-    if args.browser:
-        app_runner.open_browser(delay=1)
-    # Wait for the exit command to stop
-    app_runner.wait_for_exit()
+        app_launcher.backup_database()
+    app_launcher.launch()
+    if args.mode in ("development", "local"):
+        # Enable browser viewing in development mode
+        if args.browser:
+            app_launcher.open_browser(delay=1)
+        # Wait for the exit command to stop
+        app_launcher.wait_for_exit()
 
 
 def parse_arguments():
@@ -48,27 +52,27 @@ def parse_arguments():
     parser.add_argument(
         "mode",
         help="the runtime mode for the app; defaults to `development`",
-        choices=["development", "production"],
+        choices=["development", "local", "production"],
     )
     return parser.parse_args()
 
 
-class Runner:
+class Launcher:
     """A tool to build and execute Flask commands."""
 
+    _application_types = {
+        "development": DevelopmentApplication,
+        "local": LocalApplication,
+        "production": ProductionApplication,
+    }
     _exit = Event()
+    command = ["flask"]
 
     def __init__(self, mode, host=None, port=None):
-        self.mode = mode
-        self.host = host
-        self.port = port if port else "5000"
-
-    @property
-    def command(self):
-        _command = ["flask"]
-        if self.mode == "development":
-            _command.append("--debug")
-        return _command
+        app_type = self._application_types[mode]
+        self.host = host if host else "127.0.0.1"
+        self.port = port if port else app_type.default_port
+        self.app = app_type(host=self.host, port=self.port)
 
     def initialize_database(self):
         """Run the database initializer."""
@@ -80,19 +84,14 @@ class Runner:
         instruction = self.command + ["back-up-db"]
         subprocess.run(instruction)
 
-    def run(self):
-        """Run the Monopyly application."""
-        instruction = self.command + ["run"]
-        if self.host:
-            instruction += ["--host", self.host]
-        if self.port:
-            instruction += ["--port", self.port]
-        server = subprocess.Popen(instruction)
+    def launch(self):
+        """Launch the Monopyly application."""
+        self.app.run()
 
     def open_browser(self, delay=0):
         """Open the default web browser."""
         time.sleep(delay)
-        webbrowser.open(f"http://127.0.0.1:{self.port}/")
+        webbrowser.open(f"http://{self.host}:{self.port}/")
 
     @classmethod
     def wait_for_exit(cls):

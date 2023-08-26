@@ -1,4 +1,6 @@
 """A module containing objects with various configuration settings."""
+import json
+import warnings
 from pathlib import Path
 
 from ..database import BASE_DB_NAME
@@ -8,8 +10,18 @@ from .default_settings import Config, InstanceBasedConfig
 class ProductionConfig(InstanceBasedConfig):
     """A configuration object with settings for production."""
 
-    SECRET_KEY = "INSECURE PRODUCTION TEST KEY"
+    SECRET_KEY = "INSECURE"
     db_name = BASE_DB_NAME
+
+    def __init__(self, db_path=None):
+        super().__init__(db_path=db_path)
+        if self.SECRET_KEY == "INSECURE":
+            # Give an alert while the secret key remains insecure
+            warnings.formatwarning = lambda msg, *args, **kwargs: f"\n{msg}\n"
+            warnings.warn(
+                "INSECURE: Production mode has not yet been fully configured; "
+                "a secret key is required."
+            )
 
 
 class DevelopmentConfig(InstanceBasedConfig):

@@ -15,6 +15,7 @@ dependencies = [
   'flask>=2.2.2',
   'flask-wtf',
   'fuisce>1.0.0',
+  'gunicorn>=21.2.0',
   'markdown>=3.4.3',
   'python-dateutil',
   'sqlalchemy>=2.0.0',
@@ -102,4 +103,4 @@ force-exclude = 'monopyly/_version.py'
 [tool.isort]
 profile = 'black'
 src_paths = ['monopyly', 'tests']
-known_local_folder = ["test_helpers", "test_tag_helpers"]
+known_local_folder = ['test_helpers', 'test_tag_helpers']

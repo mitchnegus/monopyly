@@ -22,9 +22,6 @@ def create_app(test_config=None):
             config = DevelopmentConfig.configure_for_instance(app.instance_path)
         else:
             config = ProductionConfig.configure_for_instance(app.instance_path)
-            # Give an alert while the secret key remains insecure
-            warnings.formatwarning = lambda msg, *args, **kwargs: f"\n{msg}\n"
-            warnings.warn("INSECURE: Production mode has not yet been fully configured")
     app.config.from_object(config)
 
     # Initialize the app, including CLI commands and blueprints
