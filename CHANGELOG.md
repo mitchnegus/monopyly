@@ -142,3 +142,8 @@
 - Configure production mode via Gunicorn
 - Standardize CLI usage messages
 - Make browser usage optional in CLI run script
+
+
+### 1.4.3 (in progress)
+
+- Reconfigure makefile for smoother installation

@@ -1,6 +1,5 @@
 # Coverage configuration
-PYTHON = python3.9
-PIP = $(PYTHON) -m pip
+PYTHON = python3
 # Package
 PACKAGE = monopyly
 PACKAGE_DIR = $(PACKAGE)
@@ -10,9 +9,11 @@ TEST_DIR = tests
 # Requirements files
 REQS = requirements.txt
 # Package environment (for building and testing)
-ENV = monopyly-env
+ENV = $(PACKAGE)-env
 ENV_BIN = $(ENV)/bin
 ENV_ACTIVATE = $(ENV_BIN)/activate
+# Production environment (for deployment)
+PRODUCTION_ENV = $(PACKAGE)-production-env
 
 COVERAGE_OPT_LOCATION = --cov=.
 COVERAGE_OPTIONS = $(COVERAGE_OPT_LOCATION)

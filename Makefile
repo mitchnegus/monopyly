@@ -5,13 +5,14 @@ include config.mk
 ## install	: Install the package
 .PHONY: install
 install :
-	$(PIP) install .
+	@if [ ! -d "$(PRODUCTION_ENV)" ]; then $(PYTHON) -m venv $(PRODUCTION_ENV); fi
+	@. $(PRODUCTION_ENV)/bin/activate; \
+	pip install .
 
 
 ## develop 	: Install the package in development mode
 .PHONY: develop
-develop :
-	$(PIP) install -e .
+develop : env
 
 
 ## env		: Prepare a virtual environment to run the package
@@ -26,7 +27,7 @@ $(ENV)/.touchfile : $(REQS) pyproject.toml
 	@echo "Installing/updating the environment ($(ENV))."
 	@if [ ! -d "$(ENV)" ]; then $(PYTHON) -m venv $(ENV); fi
 	@. $(ENV_ACTIVATE); \
-	$(PIP) install -r $(REQS) -e .
+	pip install -r $(REQS) -e .
 	@touch $(ENV)/.touchfile
 
 

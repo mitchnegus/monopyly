@@ -62,7 +62,6 @@ def test_production_config_instance_file(
         new=[default_config_file],
     ):
         config = ProductionConfig.configure_for_instance(instance_path)
-        print(config.config_filepaths)
         assert config.SECRET_KEY == "test secret key"
         assert config.OTHER == "test supersede"
 
