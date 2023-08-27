@@ -47,7 +47,10 @@ def parse_arguments():
     parser.add_argument(
         "--browser",
         action="store_true",
-        help="a flag indicating if a new browswer window should be opened",
+        help=(
+            "a flag indicating if a new browser window should be opened (development "
+            "and local modes only)"
+        ),
     )
     parser.add_argument(
         "mode",
