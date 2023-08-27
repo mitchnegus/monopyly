@@ -60,6 +60,7 @@ def about():
 
 
 @bp.route("/story")
+@login_required
 def story():
     return render_template("story.html")
 

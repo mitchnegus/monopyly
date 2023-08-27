@@ -252,8 +252,9 @@ aside.sidebar {
 
 .screenshot {
   width: 100%; /* override the markdown default */
+	margin: 20px 0;
   border: 1px solid #f3f3f3;
-  box-shadow: 3px 3px 2px #fafafa;
+	box-shadow: 3px 3px 5px #bbbbbb;
 }
 
 .grouping {

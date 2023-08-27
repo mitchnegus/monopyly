@@ -30,10 +30,10 @@ The package requires a recent version of Python (3.9+).
 Once the package is properly installed, run the app from the command line (the default options should be sensible, but you may customize the host and port if necessary):
 
 ```
-$ monopyly production [--host HOST] [--port PORT]
+$ monopyly development --browser [--host HOST] [--port PORT]
 ```
 
-This will open to an empty homepage with a welcome message.
+By using the `--browser` option in development mode, this will open to an empty homepage with a welcome message.
 
 <img class="screenshot" src="monopyly/static/img/about/homepage.png" alt="user homepage" width="800px">
 
