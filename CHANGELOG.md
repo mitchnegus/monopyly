@@ -137,7 +137,8 @@
 - Fix bug where linked transactions did not use jQuery reference
 
 
-### 1.4.2 (in progress)
+### 1.4.2
 
+- Configure production mode via Gunicorn
 - Standardize CLI usage messages
 - Make browser usage optional in CLI run script
