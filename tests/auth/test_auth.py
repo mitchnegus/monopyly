@@ -18,6 +18,15 @@ def test_registration(app, client, user_table):
         assert db_session.execute(query).fetchone() is not None
 
 
+def test_registration_deactivated(app, client):
+    app.config["REGISTRATION"] = False
+    # Check that the 'register' route is successfully reached
+    assert client.get("/auth/register").status_code == 200
+    # Perform a test registration
+    response = client.post("/auth/register", data={"username": "a", "password": "a"})
+    assert b"The app is not currently accepting new registrations." in response.data
+
+
 @transaction_lifetime
 @pytest.mark.parametrize(
     "username, password, message",

@@ -26,7 +26,9 @@ def register():
         # Get username and passwords from the form
         username, password = get_username_and_password(request.form)
         # Check for errors in the accessed information
-        if not username:
+        if not current_app.config["REGISTRATION"]:
+            error = "The app is not currently accepting new registrations."
+        elif not username:
             error = "Username is required."
         elif not password:
             error = "Password is required."

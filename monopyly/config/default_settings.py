@@ -10,6 +10,7 @@ class Config:
     """A base configuration object with some default settings."""
 
     config_filepaths = [DEFAULT_CONFIG_PATH]
+    REGISTRATION = True
 
     def __init__(self, db_path=None):
         # Read parameters from the configuration files in order of specificity
