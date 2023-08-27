@@ -1,10 +1,7 @@
-# Coverage configuration
 PYTHON = python3
 # Package
 PACKAGE = monopyly
 PACKAGE_DIR = $(PACKAGE)
-# Testing
-TEST_DIR = tests
 
 # Requirements files
 REQS = requirements.txt
@@ -15,6 +12,9 @@ ENV_ACTIVATE = $(ENV_BIN)/activate
 # Production environment (for deployment)
 PRODUCTION_ENV = $(PACKAGE)-production-env
 
+# Testing
+TEST_DIR = tests
+# Coverage configuration
 COVERAGE_OPT_LOCATION = --cov=.
 COVERAGE_OPTIONS = $(COVERAGE_OPT_LOCATION)
 

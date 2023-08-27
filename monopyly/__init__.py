@@ -1,8 +1,6 @@
 """
 Run a development server for the Monopyly app.
 """
-import warnings
-
 from flask import Flask
 
 from monopyly.config import DevelopmentConfig, ProductionConfig
