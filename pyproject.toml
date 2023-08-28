@@ -44,7 +44,7 @@ monopyly = 'monopyly.cli.run:main'
 
 [project.urls]
 Download = 'https://pypi.org/project/monopyly'
-Homepage = 'https://github.com/mitchnegus/monopyly'
+Homepage = 'http://monopyly.com'
 Repository = 'https://github.com/mitchnegus/monopyly'
 Changelog = 'https://github.com/mitchnegus/monopyly/blob/main/CHANGELOG.md'
 
