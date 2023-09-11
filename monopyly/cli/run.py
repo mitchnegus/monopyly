@@ -12,6 +12,7 @@ from pathlib import Path
 from threading import Event
 
 from flask import current_app
+from rich.console import Console
 
 from .apps import DevelopmentApplication, LocalApplication, ProductionApplication
 
@@ -54,7 +55,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "mode",
-        help="the runtime mode for the app; defaults to `development`",
+        help="the runtime mode for the app",
         choices=["development", "local", "production"],
     )
     return parser.parse_args()
@@ -68,6 +69,7 @@ class Launcher:
         "local": LocalApplication,
         "production": ProductionApplication,
     }
+    _console = Console()
     _exit = Event()
     command = ["flask"]
 
@@ -80,15 +82,20 @@ class Launcher:
     def initialize_database(self):
         """Run the database initializer."""
         instruction = self.command + ["init-db"]
+        self._console.print("[deep_sky_blue1]Initializing the database...")
         subprocess.run(instruction)
+        print("\n")
 
     def backup_database(self):
         """Back up the app database."""
+        self._console.print("[deep_sky_blue1]Backing up the database...")
         instruction = self.command + ["back-up-db"]
         subprocess.run(instruction)
+        print("\n")
 
     def launch(self):
         """Launch the Monopyly application."""
+        self._console.print("[deep_sky_blue1]Running the Monopyly application...\n")
         self.app.run()
 
     def open_browser(self, delay=0):
