@@ -11,7 +11,7 @@
 
 	// Identify the card filters
 	const $filterContainer = $('#card-filter');
-	
+
 	// Label inactive cards when they are hovered over
 	const inactiveCardFilters = $filterContainer.find('.inactive.card');
 	let defaultText;
@@ -31,7 +31,7 @@
 			$this.text(defaultText);
 		}
 	);
-	
+
 	// Change the filter status on click
 	const $filters = $filterContainer.find('.card');
 	$filters.on('click', function() {

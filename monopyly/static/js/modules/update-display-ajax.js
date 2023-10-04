@@ -11,14 +11,21 @@
 import { executeAjaxRequest } from './ajax.js';
 
 
-function replaceDisplayContentsAjaxRequest(endpoint, rawData, $display) {
+function replaceDisplayContentsAjaxRequest(
+  endpoint, rawData, $display, callback = null
+) {
 
-	// The action is to replace the display's contents
-	function action(response) {
-		$display.html(response);
-	}
-	// Assign the response to the display object
-	executeAjaxRequest(endpoint, rawData, action);
+  // The action is to replace the display's contents
+  function action(response) {
+    $display.html(response);
+    // Execute the callback function, if given
+    if (callback != null) {
+      callback();
+    }
+  }
+
+  // Assign the response to the display object
+  executeAjaxRequest(endpoint, rawData, action);
 
 }
 
