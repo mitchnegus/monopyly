@@ -252,9 +252,9 @@ aside.sidebar {
 
 .screenshot {
   width: 100%; /* override the markdown default */
-	margin: 20px 0;
+  margin: 20px 0;
   border: 1px solid #f3f3f3;
-	box-shadow: 3px 3px 5px #bbbbbb;
+  box-shadow: 3px 3px 5px #bbbbbb;
 }
 
 .grouping {
@@ -1208,6 +1208,7 @@ form .autocomplete-box .item.active {
 .transactions-table .expanded .setting .date {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   flex: 2;
   padding-top: 3px;
