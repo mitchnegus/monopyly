@@ -9,24 +9,10 @@
  */
 
 import {
-  replaceDisplayContentsAjaxRequest
-} from './modules/update-display-ajax.js';
-import { toggleTransactionRow } from './modules/expand-transaction.js';
-
-
-function displaySubtransactions($transaction) {
-
-    // Execute an AJAX request to get transaction/subtransaction information
-    const endpoint = EXPAND_TRANSACTION_ENDPOINT;
-    const rawData = $transaction.data("transaction-id");
-    const $container = $transaction.find('.subtransaction-container');
-    replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
-
-}
+  TransactionToggleManager, displaySubtransactions
+} from './modules/expand-transaction.js';
 
 
 (function() {
-
-  toggleTransactionRow(displaySubtransactions);
-
+  const toggleManager = new TransactionToggleManager(displaySubtransactions)
 })();
