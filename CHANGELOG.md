@@ -144,6 +144,7 @@
 - Make browser usage optional in CLI run script
 
 
-### 1.4.3 (in progress)
+### 1.4.3
 
 - Reconfigure makefile for smoother installation
+- Fix bug where transaction toggling failed on filter updates
