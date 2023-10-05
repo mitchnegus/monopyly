@@ -74,10 +74,10 @@ class TestDateParser:
 @pytest.mark.parametrize(
     "date, milliseconds, timestamp",
     [
-        [date(2020, 3, 3), False, 1_583_218_800],
-        [date(2020, 3, 3), True, 1_583_218_800_000],
-        [date(2020, 3, 4), False, 1_583_305_200],
-        [date(2020, 3, 6), False, 1_583_478_000],
+        [date(2020, 3, 3), False, 1_583_193_600],
+        [date(2020, 3, 3), True, 1_583_193_600_000],
+        [date(2020, 3, 4), False, 1_583_280_000],
+        [date(2020, 3, 6), False, 1_583_452_800],
     ],
 )
 def test_timestamp_converter(date, milliseconds, timestamp):

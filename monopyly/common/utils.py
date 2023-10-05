@@ -3,6 +3,7 @@ General utility objects.
 """
 import datetime
 from collections import Counter
+from datetime import timezone
 
 from dateutil.relativedelta import relativedelta
 
@@ -109,7 +110,7 @@ class _DateParser:
 
 def convert_date_to_midnight_timestamp(date, milliseconds=False):
     """
-    Convert a date to the corresponding Unix timestamp (at midnight).
+    Convert a date to the corresponding Unix timestamp (at midnight UTC).
 
     Parameters
     ----------
@@ -123,10 +124,11 @@ def convert_date_to_midnight_timestamp(date, milliseconds=False):
     Returns
     -------
     timestamp : int
-        The timestamp corresponding to the given date (at midnight).
+        The timestamp corresponding to the given date (at midnight UTC).
     """
     midnight = datetime.datetime.min.time()
-    timestamp = int(datetime.datetime.combine(date, midnight).timestamp())
+    utc_datetime = datetime.datetime.combine(date, midnight, tzinfo=timezone.utc)
+    timestamp = int(utc_datetime.timestamp())
     if milliseconds:
         timestamp *= 1000
     return timestamp

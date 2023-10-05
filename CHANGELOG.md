@@ -148,3 +148,8 @@
 
 - Reconfigure makefile for smoother installation
 - Fix bug where transaction toggling failed on filter updates
+
+
+### 1.4.4 (in progress)
+
+- Update date-to-timestamp conversion to be timezone invariant
