@@ -90,6 +90,7 @@ filterwarnings = [
 [tool.coverage.run]
 omit = [
   'tests/*',
+  'monopyly/_version.py',
 ]
 
 [tool.coverage.report]
