@@ -153,3 +153,4 @@
 ### 1.4.4 (in progress)
 
 - Update date-to-timestamp conversion to be timezone invariant
+- Fix databbase initialization for development mode

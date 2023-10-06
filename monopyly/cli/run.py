@@ -75,6 +75,8 @@ class Launcher:
 
     def __init__(self, mode, host=None, port=None):
         app_type = self._application_types[mode]
+        if mode == "development":
+            self.command = self.command + ["--debug"]
         self.host = host if host else "127.0.0.1"
         self.port = port if port else app_type.default_port
         self.app = app_type(host=self.host, port=self.port)
