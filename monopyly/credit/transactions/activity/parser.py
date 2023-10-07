@@ -1,6 +1,10 @@
 """Define a parser and associated functionality for reading activity data CSV files."""
 import csv
 from abc import ABC, abstractmethod
+from pathlib import Path
+
+from flask import current_app
+from werkzeug.utils import secure_filename
 
 from ....common.utils import parse_date
 from .data import TransactionActivities
@@ -126,6 +130,7 @@ class _TransactionActivityParser:
         The CSV file containing transaction activity data.
     """
 
+    _activity_dir = None
     _column_identifiers = {
         "transaction_date": _TransactionDateColumnIdentifier,
         "total": _TransactionTotalColumnIdentifier,
@@ -137,18 +142,33 @@ class _TransactionActivityParser:
     column_types = _raw_column_types[:3]
 
     def __init__(self, transaction_file):
-        raw_header, raw_data = self._load_data(transaction_file)
+        activity_filepath = self._upload_activity_file(transaction_file)
+        # Load data from the activity file
+        raw_header, raw_data = self._load_data(activity_filepath)
         if not raw_data:
             raise RuntimeError("The activity file contains no actionable data.")
+        # Parse the loaded activity data
         self._raw_column_indices = self._determine_column_indices(raw_header)
         self._negative_charges = self._determine_expenditure_sign(raw_data)
         self.column_indices = {name: i for i, name in enumerate(self.column_types)}
         self.data = TransactionActivities(self._process_data(row) for row in raw_data)
 
+    def _upload_activity_file(self, transaction_file):
+        self._prepare_activity_dir()
+        transaction_filename = secure_filename(transaction_file.filename)
+        transaction_filepath = self._activity_dir / transaction_filename
+        transaction_file.save(transaction_filepath)
+        return transaction_filepath
+
+    def _prepare_activity_dir(self):
+        if self._activity_dir is None:
+            self._activity_dir = Path(current_app.instance_path) / ".credit_activity"
+            self._activity_dir.mkdir(exist_ok=True)
+
     @staticmethod
-    def _load_data(transaction_file):
+    def _load_data(transaction_filepath):
         # Load raw header information and data from the transaction file
-        with transaction_file.open() as csv_file:
+        with transaction_filepath.open() as csv_file:
             csv_reader = csv.reader(csv_file)
             raw_header = next(csv_reader)
             raw_data = list(csv_reader)
