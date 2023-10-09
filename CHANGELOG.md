@@ -154,3 +154,4 @@
 
 - Update date-to-timestamp conversion to be timezone invariant
 - Fix databbase initialization for development mode
+- Fix bug where credit card number was not displayed in card summary
