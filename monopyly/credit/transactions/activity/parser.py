@@ -7,7 +7,7 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 
 from ....common.utils import parse_date
-from .data import TransactionActivities
+from .data import ActivityLoadingError, TransactionActivities, TransactionActivityLoader
 
 
 def parse_transaction_activity_file(transaction_file):
@@ -25,7 +25,10 @@ def parse_transaction_activity_file(transaction_file):
         The list-like object containing credit transaction activity
         data.
     """
-    return _TransactionActivityParser(transaction_file).data
+    try:
+        return _TransactionActivityParser(transaction_file).data
+    except ActivityLoadingError:
+        return None
 
 
 class _ColumnIdentifier(ABC):
@@ -126,11 +129,13 @@ class _TransactionActivityParser:
 
     Parameters
     ----------
-    transaction_file : pathlib.Path
+    activity_file : pathlib.Path
         The CSV file containing transaction activity data.
+    activity_dir : pathlib.Path
+        The path to the directory where activity files to be parsed will
+        be stored after uploading.
     """
 
-    _activity_dir = None
     _column_identifiers = {
         "transaction_date": _TransactionDateColumnIdentifier,
         "total": _TransactionTotalColumnIdentifier,
@@ -141,29 +146,18 @@ class _TransactionActivityParser:
     _raw_column_types = list(_column_identifiers.keys())
     column_types = _raw_column_types[:3]
 
-    def __init__(self, transaction_file):
-        activity_filepath = self._upload_activity_file(transaction_file)
+    def __init__(self, activity_file, activity_dir=None):
+        file_loader = TransactionActivityLoader(activity_dir=activity_dir)
+        activity_filepath = file_loader.upload(activity_file)
         # Load data from the activity file
         raw_header, raw_data = self._load_data(activity_filepath)
         if not raw_data:
-            raise RuntimeError("The activity file contains no actionable data.")
+            raise ActivityLoadingError("The activity file contains no actionable data.")
         # Parse the loaded activity data
         self._raw_column_indices = self._determine_column_indices(raw_header)
         self._negative_charges = self._determine_expenditure_sign(raw_data)
         self.column_indices = {name: i for i, name in enumerate(self.column_types)}
         self.data = TransactionActivities(self._process_data(row) for row in raw_data)
-
-    def _upload_activity_file(self, transaction_file):
-        self._prepare_activity_dir()
-        transaction_filename = secure_filename(transaction_file.filename)
-        transaction_filepath = self._activity_dir / transaction_filename
-        transaction_file.save(transaction_filepath)
-        return transaction_filepath
-
-    def _prepare_activity_dir(self):
-        if self._activity_dir is None:
-            self._activity_dir = Path(current_app.instance_path) / ".credit_activity"
-            self._activity_dir.mkdir(exist_ok=True)
 
     @staticmethod
     def _load_data(transaction_filepath):

@@ -1,5 +1,9 @@
 """Data structures for working with credit card activity data."""
 from collections import UserList, namedtuple
+from pathlib import Path
+
+from flask import current_app
+from werkzeug.utils import secure_filename
 
 
 class TransactionActivities(UserList):
@@ -58,3 +62,64 @@ class TransactionActivityGroup(UserList):
                 "All transaction activities in a grouping must share the same value "
                 f"for the '{field}' field."
             )
+
+
+class ActivityLoadingError(RuntimeError):
+    """A special exception indicating that an activity CSV failed to load."""
+
+    def __init__(self, msg="", *args, **kwargs):
+        self.msg = msg
+        super().__init__(msg, *args, **kwargs)
+
+
+class TransactionActivityLoader:
+    """
+    A tool to load transaction activity CSV files.
+
+    This is an object designed to load CSV files provided by a user. It
+    loads the file, stores it in an app-local directory, and then
+    provides access to uploaded file path.
+
+    Parameters
+    ----------
+    activity_file : werkzeug.datastructures.FileStorage
+        The file object to be loaded.
+    activity_dir : pathlib.Path
+        The path to the directory where uploaded activity files will be
+        stored. The default path is a directory named `.credit_activity`
+        within the app's instance directory.
+
+    Attributes
+    ----------
+    activity_dir : pathlib.Path
+        The path to the directory where uploaded activity files will be
+        stored. If left unset, the default path will be a directory
+        named `.credit_activity` within the app's instance directory.
+    """
+
+    def __init__(self, activity_dir=None):
+        # Create and use a directory to store uploaded activity files
+        default_activity_dir = Path(current_app.instance_path) / ".credit_activity"
+        self.activity_dir = Path(activity_dir) if activity_dir else default_activity_dir
+        self.activity_dir.mkdir(exist_ok=True)
+
+    def upload(self, activity_file):
+        """
+        Upload a CSV file containing credit transaction activity.
+
+        Parameters
+        ----------
+        activity_file : werkzeug.datastructures.FileStorage
+            The file object to be loaded.
+
+        Returns
+        -------
+        activity_filepath : pathlib.Path
+            The path to the uploaded activity file.
+        """
+        activity_filename = secure_filename(activity_file.filename)
+        if not activity_filename:
+            raise ActivityLoadingError("No activity file was specified.")
+        activity_filepath = self.activity_dir / activity_filename
+        activity_file.save(activity_filepath)
+        return activity_filepath

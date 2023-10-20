@@ -246,6 +246,11 @@ def reconcile_activity(statement_id):
         activity_file = request.files.get("activity-file")
         # Parse the data and match transactions to activities
         data = parse_transaction_activity_file(activity_file)
+        if not data:
+            flash("ERROR")
+            return redirect(
+                url_for("credit.load_statement_details", statement_id=statement_id)
+            )
         matchmaker = ActivityMatchmaker(transactions, data)
         non_matches = matchmaker.unmatched_transactions
         transactions = list(highlight_unmatched_transactions(transactions, non_matches))
