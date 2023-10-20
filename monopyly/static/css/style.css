@@ -2618,11 +2618,17 @@ form#pay #make-payment[type="submit"] #prompt {
   color: #888888;
 }
 
-#credit-statement-reconciliation-details #statement-discrepancies-container {
-  width: 45%;
+#statement-reconciliation-summary {
+  min-width: 75%;
 }
 
-#credit-statement-reconciliation-details #statement-discrepancies-container h2 {
+#statement-reconciliation-summary .reconciliation-indicator {
+  width: 200px;
+  align-self: center;
+  padding: 50px;
+}
+
+#statement-reconciliation-summary #statement-discrepancies-container h2 {
   margin: 25px 0;
   color: #888888;
   font-size: 14pt;
@@ -2631,7 +2637,7 @@ form#pay #make-payment[type="submit"] #prompt {
   text-transform: uppercase;
 }
 
-#credit-statement-reconciliation-details #statement-transactions-container .note {
+#credit-statement-reconciliation-details statement-transactions-container .note {
   padding: 0 20px 20px;
 }
 
