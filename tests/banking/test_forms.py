@@ -286,9 +286,11 @@ class TestBankAccountForm:
     def test_prepopulate(
         self, mock_gather_method, mock_meta_call, account_form, mock_account
     ):
-        account_form.prepopulate(mock_account)
+        mock_data = Mock()
+        account_form.prepopulate(mock_account, mock_data)
         # Forms are instantiated via the `FormMeta` metaclass, so mock that
-        mock_meta_call.assert_called_once_with(data=mock_gather_method.return_value)
+        mock_gather_method.return_value.__or__.assert_called_with(mock_data)
+        mock_meta_call.assert_called_once()
 
 
 @pytest.fixture
@@ -509,13 +511,15 @@ class TestBankTransactionForm:
             transaction_form.gather_entry_data(None)
 
     @patch("wtforms.form.FormMeta.__call__")
-    @patch("monopyly.banking.forms.BankAccountForm.gather_entry_data")
+    @patch("monopyly.banking.forms.BankTransactionForm.gather_entry_data")
     def test_prepopulate(
-        self, mock_gather_method, mock_meta_call, account_form, mock_account
+        self, mock_gather_method, mock_meta_call, transaction_form, mock_transaction
     ):
-        account_form.prepopulate(mock_account)
+        mock_data = Mock()
+        transaction_form.prepopulate(mock_transaction, mock_data)
         # Forms are instantiated via the `FormMeta` metaclass, so mock that
-        mock_meta_call.assert_called_once_with(data=mock_gather_method.return_value)
+        mock_gather_method.return_value.__or__.assert_called_with(mock_data)
+        mock_meta_call.assert_called_once()
 
     @pytest.mark.parametrize(
         "field, sort_fields, top_expected_suggestions, expected_suggestions",
