@@ -170,7 +170,8 @@ def parse_request_transaction_data(request_args):
             "transaction_date": parse_date(request_args.get("transaction_date")),
             "subtransactions": [{"subtotal": float(request_args.get("total"))}],
         }
-        transaction_data["merchant"] = request_args.get("description")
+        if merchant := request_args.get("description"):
+            transaction_data["merchant"] = merchant
     else:
         transaction_data = {}
     return transaction_data

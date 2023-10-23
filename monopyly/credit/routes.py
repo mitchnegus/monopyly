@@ -405,8 +405,13 @@ def update_transaction(transaction_id):
             update=True,
         )
     else:
+        # Show subtransaction info, rather than attempt to deduce their updates
+        transaction_data = parse_request_transaction_data(request.args)
+        if transaction_data:
+            suggested_total = transaction_data.pop("subtransactions")[0]["subtotal"]
+            flash(f"Alternate total: ${suggested_total:,.2f}")
         transaction = CreditTransactionHandler.get_entry(transaction_id)
-        form = form.prepopulate(transaction)
+        form = form.prepopulate(transaction, data=transaction_data)
     # Display the form for accepting user input
     return render_template(
         "credit/transaction_form/transaction_form_page_update.html",

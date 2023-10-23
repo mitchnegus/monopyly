@@ -2648,6 +2648,7 @@ form#pay #make-payment[type="submit"] #prompt {
 #credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity {
   display: flex;
   flex-direction: row;
+  margin: 3px 0px;
   padding: 5px 15px;
   border-radius: 10px;
 }
