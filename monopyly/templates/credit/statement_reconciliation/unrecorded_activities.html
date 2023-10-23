@@ -1,0 +1,24 @@
+<div class="unrecorded-activities transactions-table">
+
+  {% for activity in unrecorded_activities %}
+
+    <div class="reconciliation-activity unrecorded-activity">
+
+      <div class=" activity-info">
+        <div class="date">{{ activity.transaction_date }}</div>
+        <div class="text">{{ activity.description }}</div>
+        <div class="amount">
+          <span class="dollar-sign">$</span>
+          {{ activity.total|currency }}
+        </div>
+      </div>
+
+      <a class="button" href="{{ url_for('credit.add_transaction', card_id=statement.card.id, statement_id=statement.id) }}">
+        <img class="icon" src="{{ url_for('static', filename='img/icons/plus.png') }}" />
+      </a>
+
+    </div>
+
+  {% endfor %}
+
+</div>

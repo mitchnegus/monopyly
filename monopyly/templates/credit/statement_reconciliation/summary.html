@@ -17,18 +17,7 @@
               {% set plural = discrepant_records|length != 1 %}
               The following {% if plural %}activities were{% else %}activity was{% endif %} reported in the credit activity file and matched in the database, but the charge amount{%if plural %}s do{% else %} does{% endif %} not match:
             </p>
-            <div class="discrepant-activities transactions-table">
-              {% for transaction, activity in discrepant_records.items() %}
-                <div class="discrepant-activity" data-transaction-id="{{ transaction.id }}">
-                  <div class="date">{{ activity.transaction_date }}</div>
-                  <div class="text">{{ activity.description }}</div>
-                  <div class="amount">
-                    <span class="dollar-sign">$</span>
-                    {{ activity.total|currency }}
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
+            {% include 'credit/statement_reconciliation/discrepant_records.html' %}
           </div>
         {% endif %}
 
@@ -39,18 +28,7 @@
             {% set plural = unrecorded_activities|length != 1 %}
             The following {% if plural %}activities were{% else %}activity was{% endif %} reported in the credit activity file, but {% if plural %}do{% else %}does{% endif %} not exist in the Monopyly database:
             </p>
-            <div class="unrecorded-activities transactions-table">
-              {% for activity in unrecorded_activities %}
-                <div class="unrecorded-activity">
-                  <div class="date">{{ activity.transaction_date }}</div>
-                  <div class="text">{{ activity.description }}</div>
-                  <div class="amount">
-                    <span class="dollar-sign">$</span>
-                    {{ activity.total|currency }}
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
+            {% include 'credit/statement_reconciliation/unrecorded_activities.html' %}
           </div>
         {% endif %}
 
