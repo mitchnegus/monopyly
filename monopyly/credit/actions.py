@@ -2,6 +2,7 @@
 
 from ..banking.transactions import record_new_transfer
 from ..common.forms.utils import execute_on_form_validation
+from ..common.utils import parse_date
 from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
 from .transactions import CreditTransactionHandler
@@ -174,3 +175,31 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
         ],
     }
     CreditTransactionHandler.add_entry(**credit_mapping)
+
+
+def parse_request_transaction_data(request_args):
+    """
+    Parse transaction data given as arguments on the request.
+
+    Parameters
+    ----------
+    request_args : dict
+        A dictionary of URL arguments provided by the request.
+
+    Returns
+    -------
+    transaction_data : dict
+        A dictionary of transaction data parsed from the request
+        arguments.
+    """
+    if request_args:
+        transaction_data = {
+            "transaction_date": parse_date(request_args.get("transaction_date")),
+        }
+        if (subtotal := request_args.get("total")) is not None:
+            transaction_data["subtransactions"] = [{"subtotal": float(subtotal)}]
+        if (merchant := request_args.get("description")) is not None:
+            transaction_data["merchant"] = merchant
+    else:
+        transaction_data = {}
+    return transaction_data

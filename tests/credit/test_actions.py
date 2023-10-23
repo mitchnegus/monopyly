@@ -11,6 +11,7 @@ from monopyly.credit.actions import (
     get_card_statement_grouping,
     get_potential_preceding_card,
     make_payment,
+    parse_request_transaction_data,
     transfer_credit_card_statement,
 )
 from monopyly.credit.cards import CreditCardHandler
@@ -156,3 +157,18 @@ def test_make_payment_no_bank_account(client_context):
     assert len(payment_credit_transaction.subtransactions) == 1
     assert payment_credit_transaction.subtransactions[0].subtotal == -100
     assert payment_credit_transaction.subtransactions[0].note == "Card payment"
+
+
+@patch("monopyly.credit.actions.parse_date")
+def test_parse_request_transaction_data(mock_date_parser):
+    mock_request_args = {
+        "transaction_date": "YYYY-MM-DD",
+        "total": "123.45",
+        "description": "test description",
+    }
+    data = parse_request_transaction_data(mock_request_args)
+    # Confirm the returned data is the expected transaction data
+    mock_date_parser.assert_called_once_with(mock_request_args["transaction_date"])
+    assert data["transaction_date"] == mock_date_parser.return_value
+    assert data["subtransactions"][0]["subtotal"] == float(mock_request_args["total"])
+    assert data["merchant"] == mock_request_args["description"]
