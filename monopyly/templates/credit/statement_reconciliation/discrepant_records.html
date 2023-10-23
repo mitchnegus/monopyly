@@ -13,6 +13,10 @@
         </div>
       </div>
 
+      <a class="button" href="{{ url_for('credit.update_transaction', transaction_id=transaction.id, transaction_date=activity.transaction_date, total=activity.total) }}">
+        <img class="icon" src="{{ url_for('static', filename='img/icons/edit.png') }}" />
+      </a>
+
     </div>
 
   {% endfor %}
