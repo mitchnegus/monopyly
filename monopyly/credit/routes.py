@@ -5,7 +5,16 @@ Routes for credit card financials.
 from itertools import islice
 from pathlib import Path
 
-from flask import flash, g, jsonify, redirect, render_template, request, url_for
+from flask import (
+    flash,
+    g,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from fuisce.database import db_transaction
 from sqlalchemy.exc import MultipleResultsFound
 from werkzeug.exceptions import abort
@@ -27,6 +36,7 @@ from .actions import (
     get_card_statement_grouping,
     get_potential_preceding_card,
     make_payment,
+    parse_request_transaction_data,
     transfer_credit_card_statement,
 )
 from .blueprint import bp
@@ -367,12 +377,13 @@ def add_transaction(card_id, statement_id):
             update=False,
         )
     else:
+        transaction_data = parse_request_transaction_data(request.args)
         if statement_id:
             statement = CreditStatementHandler.get_entry(statement_id)
-            form = form.prepopulate(statement)
+            form = form.prepopulate(statement, data=transaction_data)
         elif card_id:
             card = CreditCardHandler.get_entry(card_id)
-            form = form.prepopulate(card)
+            form = form.prepopulate(card, data=transaction_data)
     # Display the form for accepting user input
     return render_template(
         "credit/transaction_form/transaction_form_page_new.html", form=form
