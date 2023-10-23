@@ -31,7 +31,7 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
     that follows the same naming schema.
     """
 
-    def prepopulate(self, entry):
+    def prepopulate(self, entry, data=None):
         """
         Generate a duplicate prepopulated form.
 
@@ -40,6 +40,11 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
         entry : database.models.Model
             A database entry from which to pull information for
             prepopulating the form.
+        data : dict, optional
+            A dictionary containing extra data that will be joined with
+            data gathered from the given database entry. Fields defined
+            in this data dictionary will supersed fields defined on the
+            entry.
 
         Returns
         -------
@@ -57,7 +62,9 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
         can not be used as a replacement for populating an existing
         form.
         """
-        data = self.gather_entry_data(entry)
+        entry_data = self.gather_entry_data(entry) if entry else {}
+        # Merge data parsed from the entry with any data provided directly
+        data = entry_data | (data or {})
         return self.__class__(data=data)
 
     @abstractmethod

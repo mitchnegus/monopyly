@@ -201,9 +201,11 @@ class TestCreditCardForm:
     def test_prepopulate(
         self, mock_gather_method, mock_meta_call, card_form, mock_card
     ):
-        card_form.prepopulate(mock_card)
+        mock_data = Mock()
+        card_form.prepopulate(mock_card, mock_data)
         # Forms are instantiated via the `FormMeta` metaclass, so mock that
-        mock_meta_call.assert_called_once_with(data=mock_gather_method.return_value)
+        mock_gather_method.return_value.__or__.assert_called_with(mock_data)
+        mock_meta_call.assert_called_once()
 
 
 class TestCardStatementTransferForm:
@@ -491,9 +493,11 @@ class TestCreditTransactionForm:
     def test_prepopulate(
         self, mock_gather_method, mock_meta_call, transaction_form, mock_transaction
     ):
-        transaction_form.prepopulate(mock_transaction)
+        mock_data = Mock()
+        transaction_form.prepopulate(mock_transaction, mock_data)
         # Forms are instantiated via the `FormMeta` metaclass, so mock that
-        mock_meta_call.assert_called_once_with(data=mock_gather_method.return_value)
+        mock_gather_method.return_value.__or__.assert_called_with(mock_data)
+        mock_meta_call.assert_called_once()
 
     @pytest.mark.parametrize(
         "field, sort_fields, top_expected_suggestions, expected_suggestions",
