@@ -3,6 +3,7 @@ Tools for interacting with the credit statements in the database.
 """
 
 from authanor.database.handler import DatabaseViewHandler
+from dateutil.relativedelta import relativedelta
 
 from ..common.utils import get_next_occurrence_of_day
 from ..database.models import (
@@ -136,7 +137,7 @@ class CreditStatementHandler(
 
         Returns
         -------
-        statement : database.models.CreditStatementView
+        statement : database.models.CreditStatement
             The inferred statement entry for the transaction.
         """
         issue_day = card.account.statement_issue_day
@@ -145,6 +146,25 @@ class CreditStatementHandler(
         if not statement and creation:
             statement = cls.add_statement(card, issue_date)
         return statement
+
+    @classmethod
+    @DatabaseViewHandler.view_query
+    def get_prior_statement(cls, statement):
+        """
+        Given a statement, get the immediately preceding statement.
+
+        Parameters
+        ----------
+        statement : database.models.CreditStatement
+            The statement for which to find the preceding statement.
+
+        Returns
+        -------
+        statement : database.models.CreditStatementView
+            The statement immediately preceding the given statement.
+        """
+        issue_date = statement.issue_date + relativedelta(months=-1)
+        return cls.find_statement(statement.card.id, issue_date=issue_date)
 
     @classmethod
     def add_statement(cls, card, issue_date, due_date=None):
