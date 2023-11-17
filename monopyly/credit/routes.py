@@ -265,11 +265,16 @@ def reconcile_activity(statement_id):
         matchmaker = ActivityMatchmaker(transactions, data)
         non_matches = matchmaker.unmatched_transactions
         transactions = list(highlight_unmatched_transactions(transactions, non_matches))
+        # Calculate the amount charged/refunded during this statement timeframe
+        prior_statement = CreditStatementHandler.get_prior_statement(statement)
+        prior_statement_balance = prior_statement.balance if prior_statement else 0
+        statement_transaction_balance = statement.balance - prior_statement_balance
         return render_template(
             "credit/statement_reconciliation/statement_reconciliation_page.html",
             statement=statement,
             statement_transactions=transactions,
             discrepant_records=matchmaker.match_discrepancies,
+            discrepant_amount=abs(statement_transaction_balance - data.total),
             unrecorded_activities=matchmaker.unmatched_activities,
         )
     return render_template(
