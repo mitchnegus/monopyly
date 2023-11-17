@@ -29,6 +29,11 @@ class TransactionActivities(UserList):
         row_cls = namedtuple("TransactionActivity", self.column_types)
         super().__init__([row_cls(*row) for row in data])
 
+    @property
+    def total(self):
+        """The sum of the totals of each activity in the list."""
+        return sum(_.total for _ in self.data)
+
 
 class TransactionActivityGroup(UserList):
     """A minimalistic class for aggregating individual transaction activities."""

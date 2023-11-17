@@ -45,17 +45,22 @@ def test_parse_activity_file(mock_parser, mock_csv_file):
 
 
 class TestTransactionActivities:
+    test_data = [
+        ["date0", 100, "description0"],
+        ["date1", 200, "description1"],
+        ["date2", 300, "description2"],
+    ]
+
     def test_initialization(self):
-        test_data = [
-            ["date0", 100, "description0"],
-            ["date1", 200, "description1"],
-            ["date2", 300, "description2"],
-        ]
-        activities = TransactionActivities(test_data)
-        for activity, row_data in zip(activities, test_data):
+        activities = TransactionActivities(self.test_data)
+        for activity, row_data in zip(activities, self.test_data):
             assert activity.transaction_date == row_data[0]
             assert activity.total == row_data[1]
             assert activity.description == row_data[2]
+
+    def test_data_total(self):
+        activities = TransactionActivities(self.test_data)
+        assert activities.total == 600
 
 
 class TestTransactionActivityGroup:
