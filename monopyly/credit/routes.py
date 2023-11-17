@@ -34,6 +34,7 @@ from ..common.utils import dedelimit_float, parse_date, sort_by_frequency
 from .accounts import CreditAccountHandler
 from .actions import (
     get_card_statement_grouping,
+    get_statement_and_transactions,
     get_potential_preceding_card,
     make_payment,
     parse_request_transaction_data,
@@ -192,11 +193,7 @@ def update_statements_display():
 @bp.route("/statement/<int:statement_id>")
 @login_required
 def load_statement_details(statement_id):
-    statement = CreditStatementHandler.get_entry(statement_id)
-    transactions = CreditTransactionHandler.get_transactions(
-        statement_ids=(statement_id,),
-        sort_order="DESC",
-    )
+    statement, transactions = get_statement_and_transactions(statement_id)
     # Get bank accounts for potential payments
     bank_accounts = BankAccountHandler.get_accounts()
     return render_template(
@@ -246,13 +243,7 @@ def pay_credit_card(card_id, statement_id):
 @login_required
 def reconcile_activity(statement_id):
     if request.method == "POST":
-        statement = CreditStatementHandler.get_entry(statement_id)
-        transactions = list(
-            CreditTransactionHandler.get_transactions(
-                statement_ids=(statement_id,),
-                sort_order="DESC",
-            )
-        )
+        statement, transactions = get_statement_and_transactions(statement_id)
         activity_file = request.files.get("activity-file")
         # Parse the data and match transactions to activities
         data = parse_transaction_activity_file(activity_file)
