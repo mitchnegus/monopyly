@@ -34,8 +34,8 @@ from ..common.utils import dedelimit_float, parse_date, sort_by_frequency
 from .accounts import CreditAccountHandler
 from .actions import (
     get_card_statement_grouping,
-    get_statement_and_transactions,
     get_potential_preceding_card,
+    get_statement_and_transactions,
     make_payment,
     parse_request_transaction_data,
     transfer_credit_card_statement,
@@ -255,11 +255,15 @@ def reconcile_activity(statement_id):
         matchmaker = ActivityMatchmaker(transactions, data)
         non_matches = matchmaker.unmatched_transactions
         transactions = list(highlight_unmatched_transactions(transactions, non_matches))
+        # Calculate the amount charged/refunded during this statement timeframe
+        prior_statement = CreditStatementHandler.get_prior_statement(statement)
+        statement_transaction_balance = statement.balance - prior_statement.balance
         return render_template(
             "credit/statement_reconciliation_page.html",
             statement=statement,
             statement_transactions=transactions,
             discrepant_records=matchmaker.match_discrepancies,
+            discrepant_amount=abs(statement_transaction_balance - data.total),
             unrecorded_activities=matchmaker.unmatched_activities,
         )
     return render_template(
@@ -399,8 +403,11 @@ def update_transaction(transaction_id):
         # Show subtransaction info, rather than attempt to deduce their updates
         transaction_data = parse_request_transaction_data(request.args)
         if transaction_data:
-            suggested_total = transaction_data.pop("subtransactions")[0]["subtotal"]
-            flash(f"Alternate total: ${suggested_total:,.2f}")
+            suggested_new_amount = transaction_data.pop("subtransactions")[0][
+                "subtotal"
+            ]
+        else:
+            suggested_new_amount = None
         transaction = CreditTransactionHandler.get_entry(transaction_id)
         form = form.prepopulate(transaction, data=transaction_data)
     # Display the form for accepting user input
@@ -408,6 +415,7 @@ def update_transaction(transaction_id):
         "credit/transaction_form/transaction_form_page_update.html",
         transaction_id=transaction_id,
         form=form,
+        suggested_new_amount=suggested_new_amount,
     )
 
 

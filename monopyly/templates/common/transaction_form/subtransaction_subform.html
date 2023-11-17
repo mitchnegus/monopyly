@@ -17,6 +17,13 @@
 
   </div>
 
+  {% if suggested_new_amount %}
+    <div class="amount-suggestion">
+      <span>Suggested: </span><span class="currency">${{ suggested_new_amount|currency }}</span>
+    </div>
+  {% endif %}
+
+
   <div class="form-field autocomplete">
     {{ subform.tags.label }}
     {{ subform.tags }}

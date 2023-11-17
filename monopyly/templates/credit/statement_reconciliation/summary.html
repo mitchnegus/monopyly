@@ -6,9 +6,14 @@
 
   {% else %}
 
-    {% if discrepant_records or unrecorded_activities %}
+    {% if highlighted_transactions or discrepant_records or unrecorded_activities %}
       <div id="statement-discrepancies-container">
         <h2>Discrepancies</h3>
+
+        <div class="balance">
+          <div class="dollar-sign">$</div>
+          <div>{{ discrepant_amount|currency }}</div>
+        </div>
 
         {% if discrepant_records %}
           <div class="discrepancy-category">
