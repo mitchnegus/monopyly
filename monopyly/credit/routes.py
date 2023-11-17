@@ -22,6 +22,7 @@ from .accounts import CreditAccountHandler
 from .actions import (
     get_card_statement_grouping,
     get_potential_preceding_card,
+    get_statement_and_transactions,
     make_payment,
     transfer_credit_card_statement,
 )
@@ -177,11 +178,7 @@ def update_statements_display():
 @bp.route("/statement/<int:statement_id>")
 @login_required
 def load_statement_details(statement_id):
-    statement = CreditStatementHandler.get_entry(statement_id)
-    transactions = CreditTransactionHandler.get_transactions(
-        statement_ids=(statement_id,),
-        sort_order="DESC",
-    )
+    statement, transactions = get_statement_and_transactions(statement_id)
     # Get bank accounts for potential payments
     bank_accounts = BankAccountHandler.get_accounts()
     return render_template(

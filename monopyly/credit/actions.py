@@ -31,6 +31,33 @@ def get_card_statement_grouping(cards):
     return card_statements
 
 
+def get_statement_and_transactions(statement_id, transaction_sort_order="DESC"):
+    """
+    Given a statement ID, get the corresponding statement and transactions.
+
+    Parameters
+    ----------
+    statement_id : int
+        The ID of the statement to acquire.
+    transaction_sort_order : str
+        The order to sort transactions returned for the statement. The
+        default is 'DESC' for transactions sorted in descending order.
+
+    Returns
+    -------
+    statement : database.models.CreditStatementView
+        The statement with the given ID.
+    transactions : list of database.models.CreditTransactionView
+        All transactions on the statement with the given ID.
+    """
+    statement = CreditStatementHandler.get_entry(statement_id)
+    transactions = CreditTransactionHandler.get_transactions(
+        statement_ids=(statement_id,),
+        sort_order=transaction_sort_order,
+    )
+    return statement, transactions.all()
+
+
 def get_potential_preceding_card(card):
     """
     Get the card that this new card may be intended to replace (if any).

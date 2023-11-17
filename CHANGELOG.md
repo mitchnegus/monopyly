@@ -169,3 +169,4 @@
 ### 1.4.6 (in progress)
 
 - Bump dependencies (including patching security vulnerability in gunicorn)
+- Add a function for acquiring a statement and all of its transactions
