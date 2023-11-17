@@ -34,16 +34,6 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
         """
         Generate a duplicate prepopulated form.
 
-        Notes
-        -----
-        WTForms requires that a form be instantiated in order to be
-        able to properly introspect fields. Because of this, this method
-        will only return a duplicate form matching the type of the
-        form instance used to call it. Using the form's process method
-        will not properly handle enumeration of field lists, so it
-        can not be used as a replacement for populating an existing
-        form.
-
         Parameters
         ----------
         entry : database.models.Model
@@ -55,6 +45,16 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
         form : EntryForm
             A duplicate form, prepopulated with the collected database
             information.
+
+        Notes
+        -----
+        WTForms requires that a form be instantiated in order to be
+        able to properly introspect fields. Because of this, this method
+        will only return a duplicate form matching the type of the
+        form instance used to call it. Using the form's process method
+        will not properly handle enumeration of field lists, so it
+        can not be used as a replacement for populating an existing
+        form.
         """
         data = self.gather_entry_data(entry)
         return self.__class__(data=data)
