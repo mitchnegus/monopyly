@@ -14,7 +14,7 @@ def get_card_statement_grouping(cards):
 
     Parameters
     ----------
-    cards : list of sqlite3.Row
+    cards : list of database.models.CreditCard
         The database card entries for which to get statements.
 
     Returns
@@ -43,7 +43,7 @@ def get_potential_preceding_card(card):
 
     Parameters
     ----------
-    card : sqlite3.Row
+    card : database.models.CreditCard
         The new card being added to the database.
 
     Returns
