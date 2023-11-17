@@ -3437,6 +3437,15 @@ form#pay #make-payment[type="submit"] #prompt {
   min-width: 75%;
 }
 
+#statement-reconciliation-summary.summary-box .balance {
+  justify-content: center;
+  margin: 20px 0 30px;
+}
+
+#statement-reconciliation-summary.summary-box .balance .dollar-sign {
+  margin-right: 15px;
+}
+
 #statement-reconciliation-summary .reconciliation-indicator {
   width: 200px;
   align-self: center;
