@@ -162,6 +162,14 @@ class TestCreditStatementHandler(TestHandler):
         else:
             assert statement.id == inferred_statement_id
 
+    @pytest.mark.parametrize("statement_id, prior_statement_id", [[5, 4], [7, 6]])
+    def test_get_prior_statement(
+        self, statement_handler, statement_id, prior_statement_id
+    ):
+        current_statement = statement_handler.get_entry(statement_id)
+        prior_statement = statement_handler.get_prior_statement(current_statement)
+        assert prior_statement.id == prior_statement_id
+
     @pytest.mark.parametrize(
         "card_id, statement_due_day, issue_date, due_date, expected_due_date",
         [
