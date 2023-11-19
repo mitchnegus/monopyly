@@ -2,6 +2,7 @@
 
 import json
 import re
+from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
@@ -432,6 +433,26 @@ class TestCreditRoutes(TestRoutes):
         }
         for id_, value in input_id_values.items():
             assert self.input_has_value(value, id=id_)
+
+    @patch(
+        "monopyly.credit.routes.parse_request_transaction_data",
+        return_value={
+            "transaction_date": date(2020, 5, 31),
+            "subtransactions": [{"subtotal": 123}],
+            "merchant": "The Water Works",
+        },
+    )
+    def test_update_transaction_suggested_amount_get(self, _, authorization):
+        self.get_route("/update_transaction/8")
+        assert self.page_header_includes_substring("Update Credit Transaction")
+        assert '<form id="credit-transaction"' in self.html
+        # Form should be prepopulated with the transaction info
+        assert 'value="Jail"' in self.html
+        assert 'value="3335"' in self.html
+        assert 'value="2020-05-31"' in self.html
+        assert 'value="The Water Works"' in self.html
+        assert 'value="2020-06-10"' in self.html
+        assert str(123) in self.soup.find("div", class_="amount-suggestion").text
 
     @transaction_lifetime
     def test_update_transaction_post(self, authorization):

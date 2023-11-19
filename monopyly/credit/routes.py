@@ -403,9 +403,8 @@ def update_transaction(transaction_id):
         # Show subtransaction info, rather than attempt to deduce their updates
         transaction_data = parse_request_transaction_data(request.args)
         if transaction_data:
-            suggested_new_amount = transaction_data.pop("subtransactions")[0][
-                "subtotal"
-            ]
+            subtransactions = transaction_data.pop("subtransactions")
+            suggested_new_amount = subtransactions[0]["subtotal"]
         else:
             suggested_new_amount = None
         transaction = CreditTransactionHandler.get_entry(transaction_id)
