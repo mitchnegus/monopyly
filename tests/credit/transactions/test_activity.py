@@ -162,13 +162,12 @@ class TestTransactionActivityParser:
         activity_dir,
     ):
         mock_upload_filepath = mock_upload_method.return_value
-        mock_open_method = mock_open(read_data=csv_content)
-        with patch.object(mock_upload_filepath, "open", new=mock_open_method):
-            parser = _TransactionActivityParser(
-                mock_csv_file, activity_dir=activity_dir
-            )
-            parser.column_indices.values == TransactionActivities.column_types
-            assert len(parser.data) == len(csv_content.strip().split("\n")[1:])
+        mock_upload_filepath.open = mock_open(read_data=csv_content)
+        mock_unlink_method = mock_upload_filepath.unlink
+        parser = _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
+        parser.column_indices.values == TransactionActivities.column_types
+        assert len(parser.data) == len(csv_content.strip().split("\n")[1:])
+        mock_unlink_method.assert_called_once()
 
     def test_initialization_no_data(self, client_context, mock_csv_file, activity_dir):
         missing_content = "Transaction, Total, Description\n"
@@ -222,20 +221,29 @@ class TestTransactionActivityParser:
             ),
         ],
     )
+    @patch(
+        "monopyly.credit.transactions.activity.parser.TransactionActivityLoader.upload"
+    )
     def test_initialization_charge_sign(
-        self, client_context, csv_format, csv_content, mock_csv_file, activity_dir
+        self,
+        mock_upload_method,
+        client_context,
+        csv_format,
+        csv_content,
+        mock_csv_file,
+        activity_dir,
     ):
-        mock_open_method = mock_open(read_data=csv_content)
-        with patch.object(Path, "open", new=mock_open_method):
-            parser = _TransactionActivityParser(
-                mock_csv_file, activity_dir=activity_dir
-            )
-            for csv_row, activity in zip(csv_content.split("\n")[1:], parser.data):
-                # For database consistency, charges should have positive totals
-                if any(word in csv_row for word in ("Payment", "Refund")):
-                    assert activity.total < 0
-                else:
-                    assert activity.total > 0
+        mock_upload_filepath = mock_upload_method.return_value
+        mock_upload_filepath.open = mock_open(read_data=csv_content)
+        mock_unlink_method = mock_upload_filepath.unlink
+        parser = _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
+        for csv_row, activity in zip(csv_content.split("\n")[1:], parser.data):
+            # For database consistency, charges should have positive totals
+            if any(word in csv_row for word in ("Payment", "Refund")):
+                assert activity.total < 0
+            else:
+                assert activity.total > 0
+        mock_unlink_method.assert_called_once()
 
     def test_initialization_charge_sign_unknown(
         self, client_context, mock_csv_file, activity_dir
