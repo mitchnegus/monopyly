@@ -158,6 +158,8 @@ class _TransactionActivityParser:
         self._negative_charges = self._determine_expenditure_sign(raw_data)
         self.column_indices = {name: i for i, name in enumerate(self.column_types)}
         self.data = TransactionActivities(self._process_data(row) for row in raw_data)
+        # Remove the loaded activity file
+        activity_filepath.unlink()
 
     @staticmethod
     def _load_data(transaction_filepath):
