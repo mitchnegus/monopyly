@@ -257,7 +257,8 @@ def reconcile_activity(statement_id):
         transactions = list(highlight_unmatched_transactions(transactions, non_matches))
         # Calculate the amount charged/refunded during this statement timeframe
         prior_statement = CreditStatementHandler.get_prior_statement(statement)
-        statement_transaction_balance = statement.balance - prior_statement.balance
+        prior_statement_balance = prior_statement.balance if prior_statement else 0
+        statement_transaction_balance = statement.balance - prior_statement_balance
         return render_template(
             "credit/statement_reconciliation_page.html",
             statement=statement,
