@@ -16,8 +16,9 @@ def parse_transaction_activity_file(transaction_file):
 
     Parameters
     ----------
-    transaction_file : pathlib.Path
-        The CSV file containing transaction activity data.
+    activity_file : werkzeug.datastructures.FileStorage, pathlib.Path
+        The file object containing transaction activity data or a path
+        to a file containing transaction activity data.
 
     Returns
     -------
@@ -129,8 +130,9 @@ class _TransactionActivityParser:
 
     Parameters
     ----------
-    activity_file : pathlib.Path
-        The CSV file containing transaction activity data.
+    activity_file : werkzeug.datastructures.FileStorage, pathlib.Path
+        The file object containing transaction activity data or a path
+        to a file containing transaction activity data.
     activity_dir : pathlib.Path
         The path to the directory where activity files to be parsed will
         be stored after uploading.
@@ -148,7 +150,10 @@ class _TransactionActivityParser:
 
     def __init__(self, activity_file, activity_dir=None):
         file_loader = TransactionActivityLoader(activity_dir=activity_dir)
-        activity_filepath = file_loader.upload(activity_file)
+        if isinstance(activity_file, Path):
+            activity_filepath = activity_file
+        else:
+            activity_filepath = file_loader.upload(activity_file)
         # Load data from the activity file
         raw_header, raw_data = self._load_data(activity_filepath)
         if not raw_data:
@@ -159,7 +164,7 @@ class _TransactionActivityParser:
         self.column_indices = {name: i for i, name in enumerate(self.column_types)}
         self.data = TransactionActivities(self._process_data(row) for row in raw_data)
         # Remove the loaded activity file
-        activity_filepath.unlink()
+        file_loader.cleanup()
 
     @staticmethod
     def _load_data(transaction_filepath):

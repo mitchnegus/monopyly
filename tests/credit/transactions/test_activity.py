@@ -39,9 +39,17 @@ def test_parse_activity_file(mock_parser, mock_csv_file):
     "monopyly.credit.transactions.activity.parser._TransactionActivityParser",
     side_effect=ActivityLoadingError,
 )
-def test_parse_activity_file(mock_parser, mock_csv_file):
+def test_parse_activity_file_not_loaded(mock_parser, mock_csv_file):
     data = parse_transaction_activity_file(mock_csv_file)
     assert data is None
+
+
+def test_parse_real_activity_file(client_context):
+    test_activity_file = Path(__file__).parent / "test_reconciliation_data.csv"
+    data = parse_transaction_activity_file(test_activity_file)
+    assert len(data) == 3
+    assert data[0].transaction_date == date(2020, 5, 2)
+    assert data[2].total == 99.00
 
 
 class TestTransactionActivities:
@@ -108,15 +116,28 @@ class TestTransactionActivityLoader:
 
     def test_upload(self, client_context, activity_dir, mock_csv_file):
         file_loader = TransactionActivityLoader(activity_dir)
+        assert len(file_loader.loaded_files) == 0
         activity_filepath = file_loader.upload(mock_csv_file)
         mock_csv_file.save.assert_called_once()
         assert activity_filepath == activity_dir / mock_csv_file.filename
+        assert len(file_loader.loaded_files) == 1
 
     def test_upload_invalid(self, client_context, activity_dir):
         invalid_csv_file = Mock(name="mock_csv_file", filename="")
         file_loader = TransactionActivityLoader(activity_dir)
         with pytest.raises(ActivityLoadingError):
             file_loader.upload(invalid_csv_file)
+
+    @pytest.mark.parametrize("loaded_filepaths", [[Mock()], [Mock(), Mock()]])
+    @patch("pathlib.Path.unlink")
+    def test_cleanup(
+        self, mock_unlink_method, loaded_filepaths, client_context, activity_dir
+    ):
+        file_loader = TransactionActivityLoader(activity_dir)
+        file_loader.loaded_files = loaded_filepaths
+        file_loader.cleanup()
+        for mock_path in loaded_filepaths:
+            mock_path.unlink.assert_called_once()
 
 
 class TestTransactionActivityParser:
@@ -149,25 +170,23 @@ class TestTransactionActivityParser:
 
     # Pass the CSV format to the test for facilitating debugging
     @pytest.mark.parametrize("csv_format, csv_content", mock_csv_content.items())
-    @patch(
-        "monopyly.credit.transactions.activity.parser.TransactionActivityLoader.upload"
-    )
+    @patch("monopyly.credit.transactions.activity.parser.TransactionActivityLoader")
     def test_initialization(
         self,
-        mock_upload_method,
+        mock_file_uploader_cls,
         client_context,
         csv_format,
         csv_content,
         mock_csv_file,
         activity_dir,
     ):
-        mock_upload_filepath = mock_upload_method.return_value
+        mock_file_uploader = mock_file_uploader_cls.return_value
+        mock_upload_filepath = mock_file_uploader.upload.return_value
         mock_upload_filepath.open = mock_open(read_data=csv_content)
-        mock_unlink_method = mock_upload_filepath.unlink
         parser = _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
         parser.column_indices.values == TransactionActivities.column_types
         assert len(parser.data) == len(csv_content.strip().split("\n")[1:])
-        mock_unlink_method.assert_called_once()
+        mock_file_uploader.cleanup.assert_called_once()
 
     def test_initialization_no_data(self, client_context, mock_csv_file, activity_dir):
         missing_content = "Transaction, Total, Description\n"
@@ -221,21 +240,19 @@ class TestTransactionActivityParser:
             ),
         ],
     )
-    @patch(
-        "monopyly.credit.transactions.activity.parser.TransactionActivityLoader.upload"
-    )
+    @patch("monopyly.credit.transactions.activity.parser.TransactionActivityLoader")
     def test_initialization_charge_sign(
         self,
-        mock_upload_method,
+        mock_file_uploader_cls,
         client_context,
         csv_format,
         csv_content,
         mock_csv_file,
         activity_dir,
     ):
-        mock_upload_filepath = mock_upload_method.return_value
+        mock_file_uploader = mock_file_uploader_cls.return_value
+        mock_upload_filepath = mock_file_uploader.upload.return_value
         mock_upload_filepath.open = mock_open(read_data=csv_content)
-        mock_unlink_method = mock_upload_filepath.unlink
         parser = _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
         for csv_row, activity in zip(csv_content.split("\n")[1:], parser.data):
             # For database consistency, charges should have positive totals
@@ -243,7 +260,7 @@ class TestTransactionActivityParser:
                 assert activity.total < 0
             else:
                 assert activity.total > 0
-        mock_unlink_method.assert_called_once()
+        mock_file_uploader.cleanup.assert_called_once()
 
     def test_initialization_charge_sign_unknown(
         self, client_context, mock_csv_file, activity_dir

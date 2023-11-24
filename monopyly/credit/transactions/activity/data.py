@@ -87,8 +87,6 @@ class TransactionActivityLoader:
 
     Parameters
     ----------
-    activity_file : werkzeug.datastructures.FileStorage
-        The file object to be loaded.
     activity_dir : pathlib.Path
         The path to the directory where uploaded activity files will be
         stored. The default path is a directory named `.credit_activity`
@@ -100,6 +98,10 @@ class TransactionActivityLoader:
         The path to the directory where uploaded activity files will be
         stored. If left unset, the default path will be a directory
         named `.credit_activity` within the app's instance directory.
+    loaded_files : list
+        A list of paths to loaded files; this list is empty before
+        adding any files and after cleaning up any previously loaded
+        files.
     """
 
     def __init__(self, activity_dir=None):
@@ -107,6 +109,7 @@ class TransactionActivityLoader:
         default_activity_dir = Path(current_app.instance_path) / ".credit_activity"
         self.activity_dir = Path(activity_dir) if activity_dir else default_activity_dir
         self.activity_dir.mkdir(exist_ok=True)
+        self.loaded_files = []
 
     def upload(self, activity_file):
         """
@@ -127,4 +130,11 @@ class TransactionActivityLoader:
             raise ActivityLoadingError("No activity file was specified.")
         activity_filepath = self.activity_dir / activity_filename
         activity_file.save(activity_filepath)
+        self.loaded_files.append(activity_filepath)
         return activity_filepath
+
+    def cleanup(self):
+        """Clean all loaded files from the activity directory."""
+        while self.loaded_files:
+            activity_filepath = self.loaded_files.pop()
+            activity_filepath.unlink()
