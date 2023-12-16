@@ -162,7 +162,7 @@ class BankTransactionForm(TransactionForm):
         last_four_digits = LastFourDigitsField(
             "Last Four Digits", validators=[DataRequired()]
         )
-        type_name = StringField("AccountType", validators=[DataRequired()])
+        type_name = StringField("Account Type", validators=[DataRequired()])
 
         def get_account(self):
             """Get the bank account described by the form data."""
