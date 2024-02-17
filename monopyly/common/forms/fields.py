@@ -25,6 +25,15 @@ class DateField(wtforms_fields.DateField):
         super().__init__(*args, filters=filters, **kwargs)
 
 
+class OptionalDateField(DateField):
+    """A date field where the field value is optional."""
+
+    def process_formdata(self, valuelist):
+        """Process data from the form, ignoring an ommitted value."""
+        if valuelist != [""]:
+            super().process_formdata(valuelist)
+
+
 class CurrencyField(wtforms_fields.DecimalField):
     """A decimal field with currency-specific customizations."""
 

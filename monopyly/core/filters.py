@@ -29,8 +29,8 @@ def make_ordinal(integer):
         -  21 => 21st
         -  101 => 101st
 
-    Note
-    ----
+    Notes
+    -----
     This function is an adaptation of the one proposed by Stack Overflow user
     Florian Brucker (https://stackoverflow.com/a/50992575/8754471).
 

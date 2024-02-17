@@ -38,7 +38,7 @@ def register_blueprints(app):
     """
     Register blueprints with the app.
 
-    Note
+    Notes
     -----
     Blueprints are imported in this function to avoid loading modules
     that require database models before those models have been set up

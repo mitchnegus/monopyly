@@ -33,8 +33,8 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
         """
         Generate a duplicate prepopulated form.
 
-        Note
-        ----
+        Notes
+        -----
         WTForms requires that a form be instantiated in order to be
         able to properly introspect fields. Because of this, this method
         will only return a duplicate form matching the type of the

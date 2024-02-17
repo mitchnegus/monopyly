@@ -18,8 +18,8 @@ from ..banking.forms import BankSelectField, BankSubform
 from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 from ..common.forms.fields import (
     CustomChoiceSelectField,
-    DateField,
     LastFourDigitsField,
+    OptionalDateField,
     StringField,
 )
 from ..common.forms.utils import Autocompleter
@@ -69,13 +69,20 @@ class CreditCardForm(EntryForm):
         statement_issue_day = IntegerField("Statement Issue Day", [Optional()])
         statement_due_day = IntegerField("Statement Due Day", [Optional()])
 
-        def validate(self, *args, **kwargs):
-            """Validate the subform."""
-            # Unset subform `CustomChoiceSelectField` values will be invalid
+        def validate(self, extra_validators=None):
+            """
+            Validate the subform.
+
+            Notes
+            -----
+            Unset values on the ``CustomChoiceSelectField`` will take a
+            default value that will be considered to be invalid. They
+            must be replaced (after processing) with the inferred value.
+            """
             if self.bank_info.bank_id.data == -1:
                 account = self.get_account()
                 self.bank_info.bank_id.data = account.bank.id
-            return super().validate(*args, **kwargs)
+            return super().validate(extra_validators=extra_validators)
 
         def get_account(self):
             return self._produce_entry_from_field("account_id")
@@ -185,7 +192,7 @@ class CreditTransactionForm(TransactionForm):
         # Fields to identify the card/bank information for the statement
         card_info = FormField(CardSubform)
         # Fields pertaining to the statement
-        issue_date = DateField("Statement Date")
+        issue_date = OptionalDateField("Statement Date")
 
         def get_statement(self, transaction_date):
             """Get the credit card statement described by the form data."""

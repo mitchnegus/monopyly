@@ -156,3 +156,8 @@
 - Fix database initialization for development mode
 - Fix bug where credit card number was not displayed in card summary
 - Use Beautiful Soup to make tests more robust
+
+
+### 1.4.5 (in progress)
+
+- Fix bug where a transaction for a new statement was marked as invalid on entry
