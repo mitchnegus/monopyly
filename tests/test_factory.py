@@ -1,4 +1,5 @@
 """Tests for the application factory."""
+
 import json
 from pathlib import Path
 from unittest.mock import patch

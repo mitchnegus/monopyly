@@ -1,6 +1,7 @@
 """
 General utility objects for handling forms.
 """
+
 from functools import wraps
 
 from flask import current_app, flash

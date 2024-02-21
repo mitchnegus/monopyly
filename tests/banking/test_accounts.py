@@ -1,4 +1,5 @@
 """Tests for the banking module managing bank accounts."""
+
 from datetime import date, timedelta
 from unittest.mock import patch
 

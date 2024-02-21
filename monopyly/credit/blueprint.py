@@ -1,6 +1,7 @@
 """
 Flask blueprint for credit card financials.
 """
+
 from flask import Blueprint
 
 # Define the blueprint

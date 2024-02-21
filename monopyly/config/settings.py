@@ -1,4 +1,5 @@
 """A module containing objects with various configuration settings."""
+
 import warnings
 from pathlib import Path
 

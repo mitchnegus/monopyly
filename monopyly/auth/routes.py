@@ -1,6 +1,7 @@
 """
 Routes for site authentication.
 """
+
 from flask import (
     current_app,
     flash,

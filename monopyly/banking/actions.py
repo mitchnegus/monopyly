@@ -1,4 +1,5 @@
 """Module describing logical banking actions (to be used in routes)."""
+
 from ..common.utils import convert_date_to_midnight_timestamp
 from .accounts import BankAccountHandler, BankAccountTypeHandler
 

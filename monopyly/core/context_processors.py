@@ -1,6 +1,7 @@
 """
 Filters defined for the application.
 """
+
 from datetime import date
 from importlib import import_module
 

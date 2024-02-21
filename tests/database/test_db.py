@@ -1,4 +1,5 @@
 """Tests for the database."""
+
 from unittest.mock import patch
 
 from monopyly.database import back_up_db

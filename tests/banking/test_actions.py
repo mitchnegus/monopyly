@@ -1,4 +1,5 @@
 """Tests for the actions performed by the banking blueprint."""
+
 from unittest.mock import Mock, call, patch
 
 from monopyly.banking.actions import (

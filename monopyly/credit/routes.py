@@ -1,6 +1,7 @@
 """
 Routes for credit card financials.
 """
+
 from itertools import islice
 
 from flask import flash, g, jsonify, redirect, render_template, request, url_for

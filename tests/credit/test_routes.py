@@ -1,4 +1,5 @@
 """Tests for routes in the credit blueprint."""
+
 import json
 import re
 from unittest.mock import Mock, patch

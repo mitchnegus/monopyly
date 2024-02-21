@@ -1,4 +1,5 @@
 """Application objects for running the app via the CLI."""
+
 import multiprocessing
 import subprocess
 

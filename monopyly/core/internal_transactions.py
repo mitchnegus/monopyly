@@ -1,6 +1,7 @@
 """
 Tools for interacting with internal transactions in the database.
 """
+
 from flask import current_app
 from sqlalchemy import insert
 

@@ -1,4 +1,5 @@
 """Tests for custom forms."""
+
 import pytest
 
 from monopyly.common.forms import TransactionForm

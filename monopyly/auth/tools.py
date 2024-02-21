@@ -1,6 +1,7 @@
 """
 Tools for dealing with the authorization blueprint.
 """
+
 import functools
 
 from flask import current_app, g, redirect, session, url_for

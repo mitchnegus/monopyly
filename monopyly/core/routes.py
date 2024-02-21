@@ -1,6 +1,7 @@
 """
 Routes for core functionality.
 """
+
 from pathlib import Path
 
 from flask import g, render_template, render_template_string, session

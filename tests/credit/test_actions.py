@@ -1,4 +1,5 @@
 """Tests for the actions performed by the credit blueprint."""
+
 from datetime import date
 from unittest.mock import Mock, call, patch
 

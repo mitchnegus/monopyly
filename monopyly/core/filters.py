@@ -1,6 +1,7 @@
 """
 Filters defined for the application.
 """
+
 from .blueprint import bp
 
 

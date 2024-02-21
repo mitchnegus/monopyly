@@ -1,6 +1,7 @@
 """
 Commonly shared form validators.
 """
+
 from wtforms.validators import ValidationError
 
 

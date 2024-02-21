@@ -1,4 +1,5 @@
 """Tests for common aspects of transactions."""
+
 from unittest.mock import MagicMock
 
 import pytest

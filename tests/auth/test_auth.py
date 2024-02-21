@@ -1,4 +1,5 @@
 """Tests for user authentication."""
+
 import pytest
 from flask import g, session
 from fuisce.testing import transaction_lifetime

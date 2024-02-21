@@ -1,6 +1,7 @@
 """
 Tools for building a common transaction interface.
 """
+
 from abc import abstractmethod
 
 from authanor.database.handler import DatabaseHandler, DatabaseViewHandler

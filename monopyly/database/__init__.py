@@ -1,6 +1,7 @@
 """
 Expose commonly used database functionality to the rest of the package.
 """
+
 import sqlite3
 from pathlib import Path
 

@@ -1,4 +1,5 @@
 """Tests for the credit module managing credit card statements."""
+
 from datetime import date
 from unittest.mock import Mock
 

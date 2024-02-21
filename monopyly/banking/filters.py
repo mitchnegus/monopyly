@@ -1,6 +1,7 @@
 """
 Filters defined for the banking blueprint.
 """
+
 from .blueprint import bp
 
 

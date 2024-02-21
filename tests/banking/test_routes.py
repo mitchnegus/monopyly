@@ -1,4 +1,5 @@
 """Tests for routes in the banking blueprint."""
+
 import json
 
 import pytest

@@ -1,4 +1,5 @@
 """Module describing logical core actions (to be used in routes)."""
+
 from datetime import datetime
 
 import markdown

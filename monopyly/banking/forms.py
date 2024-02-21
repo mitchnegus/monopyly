@@ -1,6 +1,7 @@
 """
 Generate banking forms for the user to complete.
 """
+
 from wtforms.fields import BooleanField, FieldList, FormField, StringField, SubmitField
 from wtforms.validators import DataRequired, Optional
 

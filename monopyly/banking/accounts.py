@@ -1,6 +1,7 @@
 """
 Tools for interacting with bank accounts in the database.
 """
+
 import sqlalchemy.sql.functions as sql_func
 from authanor.database.handler import DatabaseViewHandler
 from werkzeug.exceptions import abort

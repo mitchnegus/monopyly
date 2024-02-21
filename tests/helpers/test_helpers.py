@@ -1,4 +1,5 @@
 """Helper objects to improve modularity of tests."""
+
 import functools
 import unittest
 

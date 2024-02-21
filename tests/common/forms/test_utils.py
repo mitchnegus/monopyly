@@ -1,4 +1,5 @@
 """Tests for form utilities."""
+
 from contextlib import nullcontext as does_not_raise
 from unittest.mock import Mock, patch
 

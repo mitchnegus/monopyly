@@ -1,4 +1,5 @@
 """Default configuration settings."""
+
 import json
 from pathlib import Path
 

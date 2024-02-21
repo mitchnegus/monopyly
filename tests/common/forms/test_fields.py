@@ -1,4 +1,5 @@
 """Tests for custom form fields."""
+
 from unittest.mock import Mock, patch
 
 import pytest

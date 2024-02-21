@@ -1,6 +1,7 @@
 """
 Run a development server for the Monopyly app.
 """
+
 from flask import Flask
 
 from monopyly.config import DevelopmentConfig, ProductionConfig

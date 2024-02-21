@@ -1,4 +1,5 @@
 """Tests for general utilities."""
+
 from datetime import date
 
 import pytest

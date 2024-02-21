@@ -1,6 +1,7 @@
 """
 General form constructions.
 """
+
 from abc import ABC, abstractmethod
 
 from flask_wtf import FlaskForm

@@ -1,6 +1,7 @@
 """
 Routes for banking financials.
 """
+
 from flask import jsonify, redirect, render_template, request, url_for
 from fuisce.database import db_transaction
 

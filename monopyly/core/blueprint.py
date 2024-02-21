@@ -1,6 +1,7 @@
 """
 Flask blueprint for core functionality.
 """
+
 from flask import Blueprint
 
 # Define the blueprint
