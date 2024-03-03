@@ -19,7 +19,7 @@
 
     <div class="description-header">
       <div class="brief">
-        {% if transaction | is_single_bank_transfer %}
+        {% if transaction|is_single_bank_transfer %}
             Transfer
         {% else %}
           {% if transaction.merchant %}

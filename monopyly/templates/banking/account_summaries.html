@@ -3,7 +3,7 @@
   {% for account_type in type_accounts %}
     <div class="account-type-block grouping">
 
-      {% for account in type_accounts[account_type] %}
+      {% for account in type_accounts[account_type]|sort(attribute='last_four_digits') %}
 
       <a class="account-block button-block" href="{{ url_for('banking.load_account_details', account_id=account.id) }}">
           <div class="title">
