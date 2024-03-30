@@ -162,3 +162,4 @@
 
 - Fix bug where a transaction for a new statement was marked as invalid on entry
 - Sort bank account displays by account type and last four digits
+- Use SQLAlchemy 'selectin' loading mode for commonly loaded relationships

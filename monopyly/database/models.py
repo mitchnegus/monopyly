@@ -256,6 +256,7 @@ class BankTransactionView(AuthorizedAccessMixin, Model):
     subtransactions = relationship(
         "BankSubtransaction",
         back_populates="transaction",
+        lazy="selectin",
     )
 
 
@@ -281,6 +282,7 @@ class BankSubtransaction(AuthorizedAccessMixin, Model):
         "TransactionTag",
         secondary=bank_tag_link_table,
         back_populates="bank_subtransactions",
+        lazy="selectin",
     )
 
 
@@ -429,6 +431,7 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
     subtransactions = relationship(
         "CreditSubtransaction",
         back_populates="transaction",
+        lazy="selectin",
     )
 
 
@@ -460,4 +463,5 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
         "TransactionTag",
         secondary=credit_tag_link_table,
         back_populates="credit_subtransactions",
+        lazy="selectin",
     )
