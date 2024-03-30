@@ -20,6 +20,19 @@ class TestTransactionTagHandler(TestTagHandler):
     db_reference = TestTagHandler.db_reference
     db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
 
+    def test_tag_depth(self, tag_handler):
+        # Top level tags should have a depth of 0
+        top_level_tags = tag_handler.get_subtags(None).all()
+        assert all(tag.depth == 0 for tag in top_level_tags)
+        # Subtags should have appropriate additional depth
+        for parent_tag in top_level_tags:
+            self._check_subtag_depths(parent_tag)
+
+    def _check_subtag_depths(self, parent_tag):
+        for child_tag in parent_tag.children:
+            assert child_tag.depth == parent_tag.depth + 1
+            self._check_subtag_depths(child_tag)
+
     @pytest.mark.parametrize(
         "tag, expected_subtags",
         [[db_reference[0], db_reference[1:3]], [db_reference[3], db_reference[4:5]]],

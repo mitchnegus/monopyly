@@ -1,5 +1,6 @@
 from authanor.database.models import AuthorizedAccessMixin, Model
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Table
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import mapped_column, relationship
 
 
@@ -72,6 +73,8 @@ class TransactionTag(AuthorizedAccessMixin, Model):
     parent_id = mapped_column(Integer, ForeignKey("transaction_tags.id"))
     tag_name = mapped_column(String, nullable=False)
     # Relationships
+    parent = relationship("TransactionTag", back_populates="children", remote_side=[id])
+    children = relationship("TransactionTag", back_populates="parent")
     bank_subtransactions = relationship(
         "BankSubtransaction",
         secondary=bank_tag_link_table,
@@ -82,6 +85,13 @@ class TransactionTag(AuthorizedAccessMixin, Model):
         secondary=credit_tag_link_table,
         back_populates="tags",
     )
+
+    @property
+    def depth(self):
+        tag, depth = self, 0
+        while (tag := tag.parent) is not None:
+            depth += 1
+        return depth
 
 
 class Bank(AuthorizedAccessMixin, Model):
