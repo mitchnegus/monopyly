@@ -50,7 +50,7 @@ class SQLAlchemy(_SQLAlchemy):
         super().initialize(app)
 
 
-SQLAlchemy.create_default_interface()
+SQLAlchemy.create_default_interface(echo_engine=False)
 
 
 @click.command("init-db")
