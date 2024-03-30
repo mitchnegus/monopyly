@@ -16,7 +16,7 @@ from ..banking.banks import BankHandler
 from ..banking.transactions import BankTransactionHandler
 from ..common.forms import form_err_msg
 from ..common.forms.utils import extend_field_list_for_ajax
-from ..common.transactions import get_linked_transaction
+from ..common.transactions import categorize, get_linked_transaction
 from ..common.utils import dedelimit_float, parse_date, sort_by_frequency
 from .accounts import CreditAccountHandler
 from .actions import (
@@ -181,7 +181,8 @@ def load_statement_details(statement_id):
     transactions = CreditTransactionHandler.get_transactions(
         statement_ids=(statement_id,),
         sort_order="DESC",
-    )
+    ).all()
+    categories = categorize(transactions)
     # Get bank accounts for potential payments
     bank_accounts = BankAccountHandler.get_accounts()
     return render_template(

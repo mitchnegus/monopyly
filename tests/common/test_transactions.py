@@ -1,11 +1,17 @@
 """Tests for common aspects of transactions."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from monopyly.common.transactions import TransactionTagHandler, get_linked_transaction
-from monopyly.database.models import TransactionTag
+from monopyly.common.transactions import (
+    CategoryTree,
+    RootCategoryTree,
+    TransactionTagHandler,
+    get_linked_transaction,
+    get_subtransactions,
+)
+from monopyly.database.models import TransactionTag, CreditSubtransaction
 
 from test_tag_helpers import TestTagHandler
 
@@ -128,3 +134,75 @@ class TestLinkedTransactionSearch:
         mock_transaction.internal_transaction_id = None
         linked_transaction = get_linked_transaction(mock_transaction)
         assert linked_transaction is None
+
+
+def test_get_subtransactions():
+    multiplicity = 3
+    transactions = [Mock(subtransactions=[1, 2, 3]) for _ in range(multiplicity)]
+    assert get_subtransactions(transactions) == [1, 2, 3] * multiplicity
+
+
+class TestCategoryTree:
+
+    def test_initialization(self):
+        mock_tag = Mock()
+        tree = CategoryTree(mock_tag)
+        assert tree.category is mock_tag
+        assert tree.subtransactions == []
+        assert tree.subcategories == {}
+        assert tree.subtotal == 0
+
+    def test_add_subcategory(self):
+        mock_tag, mock_subtag = Mock(tag_name="tag"), Mock(tag_name="subtag")
+        tree = CategoryTree(mock_tag)
+        subtree = tree.add_subcategory(mock_subtag)
+        assert tree.category is mock_tag
+        assert subtree.category is mock_subtag
+        assert tree.subcategories["subtag"] is subtree
+
+    def test_subtotal(self):
+        mock_tag, mock_subtag = Mock(tag_name="tag"), Mock(tag_name="subtag")
+        tree = CategoryTree(mock_tag)
+        subtree = tree.add_subcategory(mock_subtag)
+        subtotals = {"tree": [10, 20], "subtree": [5, 25]}
+        tree.subtransactions = [Mock(subtotal=_) for _ in subtotals["tree"]]
+        subtree.subtransactions = [Mock(subtotal=_) for _ in subtotals["subtree"]]
+        assert tree.subtotal == sum(subtotals["tree"] + subtotals["subtree"])
+        assert subtree.subtotal == sum(subtotals["subtree"])
+
+
+class TestRootCategoryTree:
+
+    def test_initialization(self):
+        tree = RootCategoryTree()
+        assert tree.category == "root"
+        assert tree.subtransactions == []
+        assert tree.subcategories == {}
+        assert tree.subtotal == 0
+
+    @pytest.mark.parametrize(
+        "mock_tags",
+        [
+            [Mock(tag_name=f"tag{_}", depth=_) for _ in [0, 1, 2]],
+            [Mock(tag_name=f"tag{_}", depth=_) for _ in [1, 0, 2]],
+            [Mock(tag_name=f"tag{_}", depth=_) for _ in [2, 1, 0]],
+        ],
+    )
+    def test_categorize_subtransaction(self, mock_tags):
+        # Assume that the subtransaction is categorizable based on the given tags
+        mock_subtransaction = Mock(subtotal=10, tags=mock_tags, categorizable=True)
+        tree = RootCategoryTree()
+        tree.categorize_subtransaction(mock_subtransaction)
+        assert tree.subtransactions == []
+        assert "tag0" in tree.subcategories
+        assert "tag1" in tree.subcategories["tag0"].subcategories
+        assert "tag2" in tree.subcategories["tag0"].subcategories["tag1"].subcategories
+
+    def test_uncategorizable_subtransaction(self):
+        # 'Transportation', 'Transportation/Railroad', and 'Gifts' are not categorizable
+        uncategorizable_tags = [TestTagHandler.db_reference[_] for _ in [0, 2, 6]]
+        subtransaction = CreditSubtransaction(subtotal=10, tags=uncategorizable_tags)
+        tree = RootCategoryTree()
+        tree.categorize_subtransaction(subtransaction)
+        assert tree.subtransactions == [subtransaction]
+        assert tree.subcategories == {}

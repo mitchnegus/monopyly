@@ -475,3 +475,9 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
         back_populates="credit_subtransactions",
         lazy="selectin",
     )
+
+    @property
+    def categorizable(self):
+        # Categorizable if no conflicting tags of the same depth exist
+        tag_depths = [tag.depth for tag in self.tags]
+        return len(tag_depths) == len(set(tag_depths))

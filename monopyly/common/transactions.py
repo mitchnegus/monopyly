@@ -349,3 +349,128 @@ class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
         query = cls.model.select_for_user().where(*criteria)
         tag = cls._db.session.execute(query).scalar_one_or_none()
         return tag
+
+
+def categorize(transactions):
+    """
+    Categorize subtransactions into a tree of categories and subcategories.
+
+    Given a list of transactions, this function places each transaction
+    (technically each individual subtransaction of the transaction) into
+    categories based on its assigned tags. When a category is ambiguous
+    (e.g., multiple tags have been assigned from different branches in
+    the tag tree), the subtransaction is left uncategorized.
+
+    Parameters
+    ----------
+    transactions : list
+        The transactions (and corresponding subtransactions) to be
+        categorized.
+
+    Returns
+    -------
+    categories : CategoryTree
+        A tree-like structure of transaction categories, including
+        nested subcategories and subtotals at each level.
+    """
+    # Assign the subtransactions to categories
+    categories = RootCategoryTree()
+    for subtransaction in get_subtransactions(transactions):
+        categories.categorize_subtransaction(subtransaction)
+    return categories
+
+
+def get_subtransactions(transactions):
+    """Given a list of transactions, return all the corresponding subtransactions."""
+    return [
+        subtransaction
+        for transaction in transactions
+        for subtransaction in transaction.subtransactions
+    ]
+
+
+class CategoryTree:
+    """
+    Store a tree of categories.
+
+    Parameters
+    ----------
+    category : database.models.TransactionTag, str
+        The (root) category that this tree will represent.
+
+    Attributes
+    ----------
+    category : database.models.TransactionTag, str
+        The (root) category that this tree represents.
+    subtransactions : list
+        The subtransactions that belong to this category, but which are
+        not included in any subcategory of this category.
+    subcategories : dict
+        A mapping of subcategory names and trees that comprise this
+        category.
+    subtotal : float
+        The subtotal of all transactions in this category and all of its
+        subcategories.
+    """
+
+    def __init__(self, category):
+        self.category = category
+        self.subtransactions = []
+        self.subcategories = {}
+
+    @property
+    def subtotal(self):
+        subcategories = list(self.subcategories.values())
+        return sum(item.subtotal for item in self.subtransactions + subcategories)
+
+    def add_subcategory(self, tag):
+        """
+        Add a subcategory to the tree based on the given tag.
+
+        Add a subcategory tree to the mapping of subcategories based
+        on the given tag and return it. If the tag already has a
+        subcategory tree mapped to it, return that subcategory tree
+        instead.
+
+        Parameters
+        ----------
+        tag : database.models.TransactionTag
+            The tag for which a subcategory will be added.
+
+        Returns
+        -------
+        subcategory : CategoryTree
+            The subcategory tree matching the given tag.
+        """
+        return self.subcategories.setdefault(tag.tag_name, CategoryTree(tag))
+
+
+class RootCategoryTree(CategoryTree):
+    """A special class of category tree that forms the root of a categorization."""
+
+    def __init__(self):
+        super().__init__("root")
+
+    def categorize_subtransaction(self, subtransaction):
+        """
+        Add a subtransaction to the tree of nested categories by tag.
+
+        Given a subtransaction, add that subtransaction to the category
+        tree according to its tags. If multiple tags exist at the same
+        level of the tree (i.e., a subtransaction with tags in diverging
+        branches), the tag is determined to be "uncategorizable" and the
+        tag is listed only as a member of the root tree and not as a
+        member of any other subcategory tree.
+
+        Parameters
+        ----------
+        subtransaction :
+            The subtransaction to be categorized.
+        """
+        tree = self
+        if subtransaction.categorizable:
+            # Collect all the tags for the subtransaction (ordered by tag depth)
+            tags = sorted(subtransaction.tags, key=lambda tag: tag.depth)
+            for tag in tags:
+                tree = tree.add_subcategory(tag)
+        tree.subtransactions.append(subtransaction)
