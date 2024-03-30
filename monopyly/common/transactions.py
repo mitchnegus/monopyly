@@ -249,7 +249,7 @@ class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
         # Filter the query to get only subtags of the given tag
         parent_id = tag.id if tag else None
         query = query.where(cls.model.parent_id == parent_id)
-        subtags = cls._db.session.execute(query).scalars()
+        subtags = cls._db.session.scalars(query)
         return subtags
 
     @classmethod

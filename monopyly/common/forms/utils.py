@@ -74,7 +74,7 @@ class Autocompleter:
         """Get autocomplete suggestions for a field."""
         # Get information from the database to use for autocompletion
         query = model.select_for_user(getattr(model, field))
-        values = current_app.db.session.execute(query).scalars()
+        values = current_app.db.session.scalars(query)
         suggestions = sort_by_frequency([value for value in values])
         return suggestions
 

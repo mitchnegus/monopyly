@@ -58,7 +58,7 @@ class BankAccountTypeHandler(
         query = query.join(BankAccount).join(Bank).distinct()
         # Get only types for the specified bank
         query = query.where(Bank.id == bank_id)
-        account_types = cls._db.session.execute(query).scalars()
+        account_types = cls._db.session.scalars(query)
         return account_types
 
     @classmethod
