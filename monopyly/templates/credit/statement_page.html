@@ -28,7 +28,12 @@
         {% endwith %}
       </div>
 
+      <div id="category-chart-container">
+        <div id="category-chart" class="ct-chart ct-octave"></div>
+      </div>
+
     </div>
+
 
   </div>
 
@@ -58,6 +63,24 @@
     const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
     const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
   </script>
+  <script>
+    const CATEGORY_CHART_DATA = {
+      labels: [
+        {% for label in chart_data['labels'] %}
+          {% if label == '' %}
+            "Other",
+          {% else %}
+            "{{ label }}",
+          {% endif %}
+        {% endfor %}
+      ],
+      series: [
+        {% for subtotal in chart_data['subtotals'] %}
+          {{ subtotal }},
+        {% endfor %}
+      ],
+    };
+  </script>
   <script type="module" src="{{ url_for('static', filename='js/update-statement-parameters.js') }}">
   </script>
   <script type="module" src="{{ url_for('static', filename='js/make-payment.js') }}">
@@ -65,6 +88,8 @@
   <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
   </script>
   <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/create-category-chart.js') }}">
   </script>
 
 {% endblock %}

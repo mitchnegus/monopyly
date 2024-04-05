@@ -11,7 +11,7 @@ from monopyly.common.transactions import (
     get_linked_transaction,
     get_subtransactions,
 )
-from monopyly.database.models import TransactionTag, CreditSubtransaction
+from monopyly.database.models import CreditSubtransaction, TransactionTag
 
 from test_tag_helpers import TestTagHandler
 
@@ -171,6 +171,39 @@ class TestCategoryTree:
         assert subtree.subtotal == sum(subtotals["subtree"])
 
 
+@pytest.fixture
+def root_category_tree():
+    # Define the tags
+    tag = TestTagHandler.db_reference[0]
+    child_tag = TestTagHandler.db_reference[1]
+    # Build the testable category tree by hand
+    tree = RootCategoryTree()
+    tree.subtransactions = [
+        CreditSubtransaction(subtotal=10),
+        CreditSubtransaction(subtotal=20),
+    ]
+    tree.subcategories = {tag.tag_name: CategoryTree(tag.tag_name)}
+    subtree = tree.subcategories[tag.tag_name]
+    subtree.subtransactions = [
+        CreditSubtransaction(subtotal=50, tags=[tag]),
+        CreditSubtransaction(subtotal=150, tags=[tag]),
+    ]
+    subtree.subcategories = {child_tag.tag_name: CategoryTree(child_tag.tag_name)}
+    subsubtree = subtree.subcategories[child_tag.tag_name]
+    subsubtree.subtransactions = [
+        CreditSubtransaction(subtotal=3, tags=[tag, child_tag]),
+    ]
+    return tree
+
+
+@pytest.fixture
+def root_category_tree_chart_data():
+    return {
+        "labels": ["Transportation", ""],
+        "subtotals": [(50 + 150 + 3), (10 + 20)],
+    }
+
+
 class TestRootCategoryTree:
 
     def test_initialization(self):
@@ -206,3 +239,28 @@ class TestRootCategoryTree:
         tree.categorize_subtransaction(subtransaction)
         assert tree.subtransactions == [subtransaction]
         assert tree.subcategories == {}
+
+    @pytest.mark.parametrize(
+        "extra_subtree",
+        [
+            None,
+            CategoryTree(
+                "Exclusion",
+                subtransactions=[CreditSubtransaction(subtotal=1_000)],
+            ),
+            CategoryTree(
+                "Zeros",
+                subtransactions=[
+                    CreditSubtransaction(subtotal=100, note="purchase"),
+                    CreditSubtransaction(subtotal=-100, note="return"),
+                ],
+            ),
+        ],
+    )
+    def test_assemble_chart_data(
+        self, root_category_tree, root_category_tree_chart_data, extra_subtree
+    ):
+        if extra_subtree:
+            root_category_tree.subcategories[extra_subtree.category] = extra_subtree
+        chart_data = root_category_tree.assemble_chart_data(exclude=["Exclusion"])
+        assert chart_data == root_category_tree_chart_data

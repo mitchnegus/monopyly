@@ -164,3 +164,8 @@
 - Sort bank account displays by account type and last four digits
 - Use SQLAlchemy 'selectin' loading mode for commonly loaded relationships
 - Give tags a property for identifying their depth in the user's "tag tree"
+
+
+## 1.5.0 (in progress)
+
+- Create a graphic for top-level categorical tag information on the credit statements page
