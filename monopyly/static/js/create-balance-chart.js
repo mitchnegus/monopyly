@@ -1,5 +1,5 @@
 /*
- * Prepare a chart using the `chartist.js` library.
+ * Prepare a line graph of balances using the `chartist.js` library.
  *
  * Creates a chart using data (provided in the HTML template) for bank
  * balances over time. Data (x, y) pairs  are passed in as timestamps

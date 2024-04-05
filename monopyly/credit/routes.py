@@ -187,6 +187,7 @@ def load_statement_details(statement_id):
         statement=statement,
         statement_transactions=transactions,
         bank_accounts=bank_accounts,
+        chart_data=categories.assemble_chart_data(exclude=["Credit payments"]),
     )
 
 
