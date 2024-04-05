@@ -2262,13 +2262,13 @@ form#bank-account .hidden {
   }
 }
 
-#balance-chart {
+#balance-chart-container {
   width: 42.5%;
   max-width: 600px;
-  margin-top: 40px;
+  margin: 40px auto 0;
 }
 @media screen and (max-width: 1500px) {
-  #balance-chart {
+  #balance-chart-container {
     order: 2;
     width: 45%;
     min-width: 450px;
@@ -2657,7 +2657,6 @@ form#pay .form-line #pay-date {
   border-bottom-left-radius: 0;
 }
 
-
 form#pay #make-payment {
   position: absolute;
   top: 0;
@@ -2697,6 +2696,51 @@ form#pay #make-payment[type="submit"] #prompt {
 #statement-statistics table td {
   padding: 3px 15px;
   text-align: right;
+}
+
+#category-chart-container {
+  width: 42.5%;
+  max-width: 600px;
+  margin: 40px auto 0;
+}
+@media screen and (max-width: 1500px) {
+  #category-chart-container {
+    order: 2;
+    width: 45%;
+    min-width: 450px;
+  }
+}
+
+#category-chart.ct-chart {
+  min-height: 400px;
+}
+
+#category-chart text.ct-label {
+  transition: fill 0.1s ease;
+}
+
+#category-chart text.ct-label:hover {
+  fill: rgba(0, 0, 0, 0.8);
+}
+
+#category-chart .ct-series-a .ct-slice-donut {
+  stroke: var(--moneytree-leaves);
+}
+
+#category-chart .ct-series-b .ct-slice-donut {
+  stroke: #41493b;
+}
+
+#category-chart .ct-series-c .ct-slice-donut {
+  stroke: #a4ae9d;
+}
+
+#category-chart .ct-series-d .ct-slice-donut {
+  stroke: #00bdfb;
+}
+
+#category-chart .ct-series-e .ct-slice-donut {
+  stroke: #0087c3;
 }
 
 

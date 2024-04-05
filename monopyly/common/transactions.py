@@ -397,6 +397,9 @@ class CategoryTree:
     ----------
     category : database.models.TransactionTag, str
         The (root) category that this tree will represent.
+    subtransactions : list
+        A list of subtransactions that belong to this category, but
+        which are not included in any subcategory of this category.
 
     Attributes
     ----------
@@ -413,9 +416,9 @@ class CategoryTree:
         subcategories.
     """
 
-    def __init__(self, category):
+    def __init__(self, category, subtransactions=None):
         self.category = category
-        self.subtransactions = []
+        self.subtransactions = subtransactions or []
         self.subcategories = {}
 
     @property
@@ -448,8 +451,8 @@ class CategoryTree:
 class RootCategoryTree(CategoryTree):
     """A special class of category tree that forms the root of a categorization."""
 
-    def __init__(self):
-        super().__init__("root")
+    def __init__(self, subtransactions=None):
+        super().__init__("root", subtransactions=subtransactions)
 
     def categorize_subtransaction(self, subtransaction):
         """
@@ -474,3 +477,28 @@ class RootCategoryTree(CategoryTree):
             for tag in tags:
                 tree = tree.add_subcategory(tag)
         tree.subtransactions.append(subtransaction)
+
+    def assemble_chart_data(self, exclude=()):
+        """
+        Create a dataset of categories and subtotals that can be used in a chart.
+
+        Parameters
+        ----------
+        exclude : ...
+        """
+        labels, subtotals = [], []
+        # Add chart data for categorical information
+        for name, subcategory in self.subcategories.items():
+            if name not in exclude and subcategory.subtotal > 0:
+                labels.append(name)
+                subtotals.append(subcategory.subtotal)
+        # Add chart data for uncategorized transactions
+        if (other_subtotal := sum(_.subtotal for _ in self.subtransactions)) > 0:
+            labels.append("")
+            subtotals.append(other_subtotal)
+        # Return the data in a format similar to what is required by the chart app
+        subtotal_labels = zip(subtotals, labels, strict=True)
+        return {
+            "labels": [label for _, label in sorted(subtotal_labels, reverse=True)],
+            "subtotals": sorted(subtotals, reverse=True),
+        }
