@@ -713,17 +713,17 @@ form.transaction {
   min-width: 300px;
 }
 
-form.transaction div.amount-suggestion {
+form.transaction div.form-suggestion {
   margin: 5px 0 ;
   color: #999999;
   font-size: 11pt;
 }
 
-form.transaction div.amount-suggestion .currency {
+form.transaction div.form-suggestion .suggested-value {
   font-weight: bold;
 }
 
-form.transaction div.amount-suggestion .currency:hover {
+form.transaction div.form-suggestion .suggested-value:hover {
   color: var(--moneytree-leaves);
   cursor: pointer;
 }
@@ -3492,29 +3492,33 @@ form#pay #make-payment[type="submit"] #prompt {
   border-radius: 10px;
 }
 
+#credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity:hover {
+  box-shadow: 0 0 3px 0 #cccccc;
+}
+
 #credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity .button {
   margin-left: auto;
+  cursor: pointer;
 }
 
 #credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity .button .icon {
   width: 25px;
   opacity: 0;
-  transition: 0.2s ease;
 }
 
 #credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity:hover .button .icon {
   opacity: 1;
 }
 
-#credit-statement-reconciliation-details #statement-discrepancies-container .discrepant-activity {
-  cursor: pointer;
-}
-
-#credit-statement-reconciliation-details #statement-discrepancies-container .discrepancy-highlight {
+#credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity.discrepancy-highlight {
   box-shadow: 0 0 5px 0 var(--moneytree-leaves);
 }
 
-#credit-statement-reconciliation-details #statement-transactions-container .discrepancy-highlight {
+#credit-statement-reconciliation-details #statement-discrepancies-container .reconciliation-activity.discrepancy-highlight:hover {
+  box-shadow: 0 0 5px 0 var(--moneytree-leaves);
+}
+
+#credit-statement-reconciliation-details #statement-transactions-container .transaction .discrepancy-highlight {
   background-color: #f1fbeb;
   background-image: linear-gradient(135deg, #fff, 5%, #f1fbeb, 95%, #fff);
   color: var(--moneytree);
