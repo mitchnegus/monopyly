@@ -499,11 +499,34 @@ class TestCreditTransactionForm:
         mock_gather_method.return_value.__or__.assert_called_with(mock_data)
         mock_meta_call.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "data_merchant, suggested_merchant",
+        [
+            ("The Gardens", "Marvin Gardens"),
+            ("Chance", "JP Morgan Chance"),
+            ("Penn. Avenue", "Pennsylvania Avenue"),
+        ],
+    )
     @patch("wtforms.form.FormMeta.__call__", new=Mock())
     @patch(
         "monopyly.credit.forms.CreditTransactionForm.gather_entry_data", new=MagicMock()
     )
-    def test_prepopulate_with_suggestion(self, transaction_form, mock_transaction):
+    def test_prepopulate_with_suggested_merchant(
+        self, transaction_form, mock_transaction, data_merchant, suggested_merchant
+    ):
+        mock_data = {"merchant": data_merchant}
+        transaction_form.prepopulate(
+            mock_transaction, mock_data, suggestion_fields=["merchant"]
+        )
+        assert transaction_form.suggestions == {"merchant": suggested_merchant}
+
+    @patch("wtforms.form.FormMeta.__call__", new=Mock())
+    @patch(
+        "monopyly.credit.forms.CreditTransactionForm.gather_entry_data", new=MagicMock()
+    )
+    def test_prepopulate_with_suggested_amount(
+        self, transaction_form, mock_transaction
+    ):
         mock_data = {"subtransactions": [{"subtotal": 1}, {"subtotal": 2}]}
         transaction_form.prepopulate(
             mock_transaction, mock_data, suggestion_fields=["amount"]
