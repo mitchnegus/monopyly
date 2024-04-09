@@ -4,10 +4,19 @@
 
   <div class="form-line">
 
-    <div class="form-field subtotal-field">
+    <div class="form-field subtotal-field suggestable">
+
       {{ subform.subtotal.label }}
       <span class="currency-symbol">$</span>
       {{ subform.subtotal(class_="currency") }}
+
+      {% if form and form.suggestions.get('amount') %}
+        <div class="form-suggestion amount-suggestion">
+          <span>Suggested: </span>
+          <span class="suggested-value currency">${{ form.suggestions['amount']|currency }}</span>
+        </div>
+      {% endif %}
+
     </div>
 
     <div class="form-field note-field autocomplete">
@@ -16,14 +25,6 @@
     </div>
 
   </div>
-
-  {% if form and form.suggestions.get('amount') %}
-    <div class="amount-suggestion">
-      <span>Suggested: </span>
-      <span class="currency">${{ form.suggestions['amount']|currency }}</span>
-    </div>
-  {% endif %}
-
 
   <div class="form-field autocomplete">
     {{ subform.tags.label }}
