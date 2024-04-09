@@ -23,9 +23,17 @@
       {{ form.transaction_date }}
     </div>
 
-    <div class="form-field merchant-field autocomplete">
+    <div class="form-field merchant-field autocomplete suggestable">
       {{ form.merchant.label }}
       {{ form.merchant }}
+
+      {% if form.suggestions.get('merchant') %}
+        <div class="form-suggestion merchant-suggestion">
+          <span>Suggested: </span>
+          <span class="suggested-value merchant">{{ form.suggestions['merchant'] }}</span>
+        </div>
+      {% endif %}
+
     </div>
 
   </div>

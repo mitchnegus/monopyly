@@ -386,11 +386,14 @@ def add_transaction(card_id, statement_id):
     else:
         transaction_data = parse_request_transaction_data(request.args)
         if statement_id:
-            statement = CreditStatementHandler.get_entry(statement_id)
-            form = form.prepopulate(statement, data=transaction_data)
+            entry = CreditStatementHandler.get_entry(statement_id)
         elif card_id:
-            card = CreditCardHandler.get_entry(card_id)
-            form = form.prepopulate(card, data=transaction_data)
+            entry = CreditCardHandler.get_entry(card_id)
+        else:
+            entry = None
+        form = form.prepopulate(
+            entry, data=transaction_data, suggestion_fields=["merchant"]
+        )
     # Display the form for accepting user input
     return render_template(
         "credit/transaction_form/transaction_form_page_new.html", form=form

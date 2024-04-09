@@ -36,6 +36,8 @@ from ..database.models import (
 from .accounts import CreditAccountHandler
 from .cards import CreditCardHandler
 from .statements import CreditStatementHandler
+from .transactions import CreditTransactionHandler
+from .transactions.activity.reconciliation import ActivityMatchmaker
 
 
 class CreditAccountSelectField(CustomChoiceSelectField):
@@ -296,6 +298,23 @@ class CreditTransactionForm(TransactionForm):
         """
         statement = self.get_transaction_statement()
         return self._prepare_transaction_data(statement)
+
+    def _extract_merchant_suggestion(self, data):
+        # Use the merchant transaction data as a suggestion source
+        if merchant := self._extract_suggestion(data, "merchant"):
+            merchant_tokens = ActivityMatchmaker.tokenize(merchant)
+            # Suggest a known merchant with the closest distance to the activity merchant
+            score_records = []
+            for potential_merchant in CreditTransactionHandler.get_merchants():
+                test_tokens = ActivityMatchmaker.tokenize(potential_merchant)
+                score = ActivityMatchmaker.score_tokens(merchant_tokens, test_tokens)
+                # Only consider scores that have some similarity at all
+                if score < 1:
+                    score_records.append((score, potential_merchant))
+            suggested_merchant = min(score_records)[1] if score_records else None
+        else:
+            suggested_merchant = None
+        return suggested_merchant
 
     def _extract_amount_suggestion(self, data):
         # Use the first subtransaction subtotal as a suggestion

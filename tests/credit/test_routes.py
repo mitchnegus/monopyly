@@ -349,6 +349,12 @@ class TestCreditRoutes(TestRoutes):
         assert self.form_exists(id="credit-transaction")
         assert self.input_exists(value=f"{date.today()}")
 
+    def test_add_transaction_with_merchant_suggestion_get(self, authorization):
+        self.get_route("/add_transaction?description=The%20Gardens")
+        assert self.page_header_includes_substring("New Credit Transaction")
+        assert self.form_exists(id="credit-transaction")
+        assert self.div_exists(class_="merchant-suggestion")
+
     def test_add_card_transaction_get(self, authorization):
         self.get_route("/add_transaction/3")
         assert self.page_header_includes_substring("New Credit Transaction")
