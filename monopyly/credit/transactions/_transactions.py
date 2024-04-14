@@ -82,6 +82,21 @@ class CreditTransactionHandler(
         return transactions
 
     @classmethod
+    @DatabaseViewHandler.view_query
+    def get_merchants(cls):
+        """
+        Get a credit card merchants from the database.
+
+        Returns
+        -------
+        merchants : sqlalchemy.engine.ScalarResult
+            All known credit card transaction merchants from the
+            database.
+        """
+        query = cls.model.select_for_user(cls.model.merchant).distinct()
+        return cls._db.session.scalars(query)
+
+    @classmethod
     def add_entry(cls, **field_values):
         """
         Add a transaction to the database.
