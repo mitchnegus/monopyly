@@ -225,6 +225,10 @@ class TestCreditTransactionHandler(TestHandler):
         )
         self.assert_entries_match(transactions, reference_entries, order=True)
 
+    def test_get_merchants(self, transaction_handler):
+        merchants = transaction_handler.get_merchants()
+        assert sorted(merchants) == sorted(set(_.merchant for _ in self.db_reference))
+
     @pytest.mark.parametrize(
         "mapping",
         [
