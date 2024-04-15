@@ -10,6 +10,8 @@ from flask import url_for
 from fuisce.testing import transaction_lifetime
 from werkzeug.exceptions import NotFound
 
+from monopyly.credit.transactions.activity.data import TransactionActivities
+
 from test_helpers import TestRoutes
 
 
@@ -195,69 +197,92 @@ class TestCreditRoutes(TestRoutes):
         # Check the result of the GET request
         assert self.div_exists(class_="overlay")
         assert self.div_exists(id="statement-reconciliation")
-        assert '<form action="/credit/_reconcile_activity/3"' in self.html
+        assert self.form_exists(action="/credit/reconciliation/3")
+
+    @patch("monopyly.credit.routes.ActivityMatchmaker")
+    def test_load_statement_reconciliation_details_get(
+        self, mock_matchmaker_cls, client, client_context
+    ):
+        test_data = [
+            ["2020-05-30", 27.00, "The Water Works"],
+            ["2020-05-25", 12.34, "Test Merchant 1"],
+            ["2020-05-27", 50.00, "Test Merchant 2"],
+        ]
+        with client.session_transaction() as session:
+            session["reconciliation_info"] = (5, test_data)
+        activities = TransactionActivities(test_data)
+        discrepancies = activities[:1]
+        nonmatches = activities[1:]
+        mock_matchmaker = mock_matchmaker_cls.return_value
+        mock_matchmaker.match_discrepancies = {
+            Mock(id=100): activity for activity in discrepancies
+        }
+        mock_matchmaker.unmatched_activities = nonmatches
+        discrepant_amount = activities.total - 26.87
+        self.get_route("/reconciliation/5", follow_redirects=True)
+        # Check the result of the GET request
+        assert self.page_header_includes_substring("Statement Reconciliation")
+        assert str(discrepant_amount) in self.soup.find(class_="balance").text
+        self._compare_reconciled_activities("discrepant-activity", discrepancies)
+        self._compare_reconciled_activities("unrecorded-activity", nonmatches)
+
+    def test_load_statement_reconciliation_details_get_no_data(self, client_context):
+        # Get the route without any reconciliation info being set
+        self.get_route("/reconciliation/5", follow_redirects=True)
+        # Check the result of the GET request
+        assert self.page_header_includes_substring("Statement Details")
+        assert self.div_exists(id="statement-summary")
+        assert self.div_exists(class_="flash", string="ERROR")
 
     def _compare_reconciled_activities(
         self, discrepancy_category_class, expected_activities
     ):
         activity_tags = self.soup.select(f"div.{discrepancy_category_class}")
         for activity, tag in zip(expected_activities, activity_tags, strict=True):
-            assert activity.transaction_date == tag.find(class_="date").text
+            assert str(activity.transaction_date) == tag.find(class_="date").text
             assert activity.description == tag.find(class_="text").text
             assert str(activity.total) in tag.find(class_="amount").text
 
     @patch("monopyly.credit.routes.ActivityMatchmaker")
     @patch("monopyly.credit.routes.parse_transaction_activity_file")
     @patch("flask.Request.files")
-    def test_reconcile_activity_post(
+    def test_load_statement_reconciliation_details_post(
         self,
         mock_request_files,
         mock_activity_parse_function,
         mock_matchmaker_cls,
         client_context,
     ):
-        mock_activity = [
-            Mock(
-                transaction_date="2020-05-30",
-                total=27.00,
-                description="The Water Works",
-            ),
-            Mock(
-                transaction_date="2020-05-25",
-                total=12.34,
-                description="Test Merchant 1",
-            ),
-            Mock(
-                transaction_date="2020-05-27",
-                total=50.00,
-                description="Test Merchant 2",
-            ),
+        test_data = [
+            ["2020-05-30", 27.00, "The Water Works"],
+            ["2020-05-25", 12.34, "Test Merchant 1"],
+            ["2020-05-27", 50.00, "Test Merchant 2"],
         ]
-        mock_discrepancies = mock_activity[:1]
-        mock_nonmatches = mock_activity[1:]
+        activities = TransactionActivities(test_data)
+        discrepancies = activities[:1]
+        nonmatches = activities[1:]
         mock_matchmaker = mock_matchmaker_cls.return_value
         mock_matchmaker.match_discrepancies = {
-            Mock(id=100): activity for activity in mock_discrepancies
+            Mock(id=100): activity for activity in discrepancies
         }
-        mock_matchmaker.unmatched_activities = mock_nonmatches
-        mock_data = mock_activity_parse_function.return_value
-        mock_data.total = sum(activity.total for activity in mock_activity)
-        mock_discrepant_amount = mock_data.total - 26.87
-        self.post_route("/_reconcile_activity/5", follow_redirects=True)
+        mock_matchmaker.unmatched_activities = nonmatches
+        mock_activity_parse_function.return_value = activities
+        discrepant_amount = activities.total - 26.87
+        self.post_route("/reconciliation/5", follow_redirects=True)
         # Check the result of the POST request
         mock_request_files.get.assert_called_once()
         assert self.page_header_includes_substring("Statement Reconciliation")
-        assert str(mock_discrepant_amount) in self.soup.find(class_="balance").text
-        self._compare_reconciled_activities("discrepant-activity", mock_discrepancies)
-        self._compare_reconciled_activities("unrecorded-activity", mock_nonmatches)
+        assert str(discrepant_amount) in self.soup.find(class_="balance").text
+        self._compare_reconciled_activities("discrepant-activity", discrepancies)
+        self._compare_reconciled_activities("unrecorded-activity", nonmatches)
 
     @patch("monopyly.credit.routes.parse_transaction_activity_file")
     @patch("flask.Request.files")
-    def test_reconcile_activity_no_data_post(
+    def test_load_statement_reconciliation_details_post_no_data(
         self, mock_request_files, mock_activity_parse_function, client_context
     ):
         mock_activity_parse_function.return_value = None
-        self.post_route("/_reconcile_activity/3", follow_redirects=True)
+        self.post_route("/reconciliation/5", follow_redirects=True)
         # Check the result of the POST request
         mock_request_files.get.assert_called_once()
         assert self.page_header_includes_substring("Statement Details")
