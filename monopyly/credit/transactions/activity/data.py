@@ -1,5 +1,6 @@
 """Data structures for working with credit card activity data."""
 
+import datetime
 from collections import UserList, namedtuple
 from pathlib import Path
 
@@ -27,13 +28,32 @@ class TransactionActivities(UserList):
     column_types = ("transaction_date", "total", "description")
 
     def __init__(self, data=()):
-        row_cls = namedtuple("TransactionActivity", self.column_types)
-        super().__init__([row_cls(*row) for row in data])
+        super().__init__([self._load_activity_from_data(*row) for row in data])
+
+    @classmethod
+    def _load_activity_from_data(cls, date, total, description):
+        activity_cls = namedtuple("TransactionActivity", cls.column_types)
+        if isinstance(date, datetime.date):
+            transaction_date = date
+        else:
+            try:
+                transaction_date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+            except ValueError:
+                raise ValueError(
+                    f"The given date '{date}' of type `{type(date)}` is not recognized. "
+                    "Dates must be native `datetime.date` objects or strings given in "
+                    "the form 'YYYY-MM-DD'."
+                )
+        return activity_cls(transaction_date, total, description)
 
     @property
     def total(self):
         """The sum of the totals of each activity in the list."""
         return sum(_.total for _ in self.data)
+
+    def jsonify(self):
+        """Return a JSON serializable representation of the activities."""
+        return [(str(_.transaction_date), _.total, _.description) for _ in self.data]
 
 
 class TransactionActivityGroup(UserList):
