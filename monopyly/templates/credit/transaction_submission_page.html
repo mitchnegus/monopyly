@@ -81,6 +81,14 @@
       <a href="{{ url_for('credit.add_transaction', card_id=transaction.statement.card_id, statement_id=transaction.statement_id) }}">
         Create a new transaction on this statement
       </a>
+      {% with reconciliation_info = session.get('reconciliation_info', None) %}
+        {% if reconciliation_info %}
+          <br>
+          <a href="{{ url_for('credit.load_statement_reconciliation_details', statement_id=reconciliation_info[0]) }}">
+            Return to the in-progress statement reconciliation
+          </a>
+        {% endif %}
+      {% endwith %}
     {% endif %}
 
   </div>

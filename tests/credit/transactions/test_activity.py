@@ -55,9 +55,9 @@ def test_parse_real_activity_file(client_context):
 
 class TestTransactionActivities:
     test_data = [
-        ["date0", 100, "description0"],
-        ["date1", 200, "description1"],
-        ["date2", 300, "description2"],
+        [date(2020, 1, 1), 100, "description0"],
+        [date(2020, 2, 1), 200, "description1"],
+        [date(2020, 3, 1), 300, "description2"],
     ]
 
     def test_initialization(self):
@@ -67,6 +67,19 @@ class TestTransactionActivities:
             assert activity.total == row_data[1]
             assert activity.description == row_data[2]
 
+    def test_initialization_date_string(self):
+        activities = TransactionActivities(
+            [(str(_[0]), _[1], _[2]) for _ in self.test_data]
+        )
+        for activity, row_data in zip(activities, self.test_data, strict=True):
+            assert activity.transaction_date == row_data[0]
+            assert activity.total == row_data[1]
+            assert activity.description == row_data[2]
+
+    def test_initialization_invalid_date(self):
+        with pytest.raises(ValueError):
+            activities = TransactionActivities([["invalid", 100, "description0"]])
+
     def test_data_total(self):
         activities = TransactionActivities(self.test_data)
         assert activities.total == 600
@@ -74,18 +87,18 @@ class TestTransactionActivities:
 
 class TestTransactionActivityGroup:
     test_data = [
-        ["date", 100, "description"],
-        ["date", 200, "description"],
-        ["date", 300, "description"],
-        ["other date", 250, "description"],
-        ["date", 150, "other description"],
+        ["2020-04-01", 100, "description"],
+        ["2020-04-01", 200, "description"],
+        ["2020-04-01", 300, "description"],
+        ["2020-05-05", 250, "description"],
+        ["2020-04-01", 150, "other description"],
     ]
     activities = TransactionActivities(test_data)
 
     def test_initialization(self):
         transaction_activities = self.activities[:3]
         grouping = TransactionActivityGroup(transaction_activities)
-        assert grouping.transaction_date == "date"
+        assert grouping.transaction_date == date(2020, 4, 1)
         assert grouping.total == 600
         assert grouping.description == "description"
 

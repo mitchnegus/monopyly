@@ -45,7 +45,11 @@ from .cards import CreditCardHandler, save_card
 from .forms import CardStatementTransferForm, CreditCardForm, CreditTransactionForm
 from .statements import CreditStatementHandler
 from .transactions import CreditTagHandler, CreditTransactionHandler, save_transaction
-from .transactions.activity import ActivityMatchmaker, parse_transaction_activity_file
+from .transactions.activity import (
+    ActivityMatchmaker,
+    TransactionActivities,
+    parse_transaction_activity_file,
+)
 
 
 @bp.route("/cards")
@@ -249,20 +253,29 @@ def pay_credit_card(card_id, statement_id):
     return jsonify((summary_template, transactions_table_template))
 
 
-@bp.route("/_reconcile_activity/<int:statement_id>", methods=("GET", "POST"))
+@bp.route("/_reconcile_activity/<int:statement_id>")
 @login_required
 def reconcile_activity(statement_id):
+    return render_template(
+        "credit/statement_reconciliation/statement_reconciliation_inquiry.html",
+        statement_id=statement_id,
+    )
+
+
+@bp.route("/reconciliation/<int:statement_id>", methods=("GET", "POST"))
+@login_required
+def load_statement_reconciliation_details(statement_id):
     if request.method == "POST":
-        statement, transactions = get_statement_and_transactions(statement_id)
         activity_file = request.files.get("activity-file")
         # Parse the data and match transactions to activities
-        data = parse_transaction_activity_file(activity_file)
-        if not data:
-            flash("ERROR")
-            return redirect(
-                url_for("credit.load_statement_details", statement_id=statement_id)
-            )
-        matchmaker = ActivityMatchmaker(transactions, data)
+        if activities := parse_transaction_activity_file(activity_file):
+            session["reconciliation_info"] = (statement_id, activities.jsonify())
+    else:
+        activity_data = session.get("reconciliation_info", (None, []))[1]
+        activities = TransactionActivities(activity_data)
+    if activities:
+        statement, transactions = get_statement_and_transactions(statement_id)
+        matchmaker = ActivityMatchmaker(transactions, activities)
         non_matches = matchmaker.unmatched_transactions
         transactions = list(highlight_unmatched_transactions(transactions, non_matches))
         # Calculate the amount charged/refunded during this statement timeframe
@@ -274,13 +287,32 @@ def reconcile_activity(statement_id):
             statement=statement,
             statement_transactions=transactions,
             discrepant_records=matchmaker.match_discrepancies,
-            discrepant_amount=abs(statement_transaction_balance - data.total),
+            discrepant_amount=abs(statement_transaction_balance - activities.total),
             unrecorded_activities=matchmaker.unmatched_activities,
         )
-    return render_template(
-        "credit/statement_reconciliation/statement_reconciliation_inquiry.html",
-        statement_id=statement_id,
+    else:
+        flash("ERROR")
+        return redirect(
+            url_for("credit.load_statement_details", statement_id=statement_id)
+        )
+
+
+@bp.before_app_request
+def clear_reconciliation_info():
+    exempt_endpoints = (
+        "credit.reconcile_activity",
+        "credit.load_statement_reconciliation_details",
+        "credit.expand_transaction",
+        "credit.add_transaction",
+        "credit.update_transaction",
+        "credit.infer_statement",
+        "credit.suggest_transaction_autocomplete",
+        "credit.delete_transacton",
+        "static",
+        None,
     )
+    if request.endpoint not in exempt_endpoints:
+        session.pop("reconciliation_info", None)
 
 
 @bp.route("/transactions", defaults={"card_id": None})
