@@ -166,7 +166,7 @@
 - Give tags a property for identifying their depth in the user's "tag tree"
 
 
-### 1.4.6 (in progress)
+### 1.4.6
 
 - Bump dependencies (including patching security vulnerability in gunicorn)
 - Add a function for acquiring a statement and all of its transactions
