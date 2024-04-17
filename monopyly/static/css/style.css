@@ -1664,6 +1664,10 @@ form .autocomplete-box .item.active {
   text-align: center;
 }
 
+.details .summary-box .balance .dollar-sign {
+  margin-right: 5px;
+}
+
 .details .summary-box .projected-balance .amount {
   color: var(--moneytree);
   font-weight: 500;
