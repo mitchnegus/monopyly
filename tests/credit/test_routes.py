@@ -438,6 +438,26 @@ class TestCreditRoutes(TestRoutes):
         for id_, value in input_id_values.items():
             assert self.input_has_value(value, id=id_)
 
+    @patch(
+        "monopyly.credit.routes.parse_request_transaction_data",
+        return_value={
+            "transaction_date": date(2020, 5, 31),
+            "subtransactions": [{"subtotal": 123}],
+            "merchant": "The Water Works",
+        },
+    )
+    def test_update_transaction_suggested_amount_get(self, _, authorization):
+        self.get_route("/update_transaction/8")
+        assert self.page_header_includes_substring("Update Credit Transaction")
+        assert self.form_exists(id="credit-transaction")
+        # Form should be prepopulated with the transaction info
+        assert self.input_exists(value="Jail")
+        assert self.input_exists(value="3335")
+        assert self.input_exists(value="2020-05-31")
+        assert self.input_exists(value="The Water Works")
+        assert self.input_exists(value="2020-06-10")
+        assert self.span_exists(class_="suggested-value", string="$123.00")
+
     @transaction_lifetime
     def test_update_transaction_post(self, authorization):
         self.post_route(
