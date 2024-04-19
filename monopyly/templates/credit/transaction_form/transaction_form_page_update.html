@@ -13,3 +13,12 @@
   {% endwith %}
 
 {% endblock %}
+
+
+{% block javascript %}
+
+  {{ super() }}
+  <script type="module" src="{{ url_for('static', filename='js/use-suggested-total.js') }}">
+  </script>
+
+{% endblock %}

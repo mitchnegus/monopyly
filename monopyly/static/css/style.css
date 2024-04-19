@@ -569,10 +569,6 @@ aside.sidebar {
 /*
  * Style forms
  */
-form.transaction {
-  min-width: 300px;
-}
-
 form .form-line {
   display: flex;
   justify-content: space-between;
@@ -713,6 +709,25 @@ form .subform .close.button {
 /*
  * Style transaction forms
  */
+form.transaction {
+  min-width: 300px;
+}
+
+form.transaction div.amount-suggestion {
+  margin: 5px 0 ;
+  color: #999999;
+  font-size: 11pt;
+}
+
+form.transaction div.amount-suggestion .currency {
+  font-weight: bold;
+}
+
+form.transaction div.amount-suggestion .currency:hover {
+  color: var(--moneytree-leaves);
+  cursor: pointer;
+}
+
 form .subtotal-field {
   flex: 1;
   min-width: 125px;
