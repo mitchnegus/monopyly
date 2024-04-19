@@ -402,7 +402,6 @@ def add_transaction(card_id, statement_id):
 @db_transaction
 def update_transaction(transaction_id):
     form = CreditTransactionForm()
-    suggestions = {}
     # Check if a transaction was updated (and update it in the database)
     if request.method == "POST":
         transaction = save_transaction(form, transaction_id)
@@ -413,19 +412,16 @@ def update_transaction(transaction_id):
             update=True,
         )
     else:
-        # Suggest subtransaction info, rather than attempting to deduce updates
         transaction_data = parse_request_transaction_data(request.args)
-        if transaction_data:
-            subtransactions = transaction_data.pop("subtransactions")
-            suggestions["amount"] = subtransactions[0]["subtotal"]
         transaction = CreditTransactionHandler.get_entry(transaction_id)
-        form = form.prepopulate(transaction, data=transaction_data)
+        form = form.prepopulate(
+            transaction, data=transaction_data, suggestion_fields=["amount"]
+        )
     # Display the form for accepting user input
     return render_template(
         "credit/transaction_form/transaction_form_page_update.html",
         transaction_id=transaction_id,
         form=form,
-        suggestions=suggestions,
     )
 
 

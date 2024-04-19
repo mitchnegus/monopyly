@@ -17,9 +17,10 @@
 
   </div>
 
-  {% if suggestions and suggestions.get('amount') %}
+  {% if form and form.suggestions.get('amount') %}
     <div class="amount-suggestion">
-      <span>Suggested: </span><span class="currency">${{ suggestions['amount']|currency }}</span>
+      <span>Suggested: </span>
+      <span class="currency">${{ form.suggestions['amount']|currency }}</span>
     </div>
   {% endif %}
 

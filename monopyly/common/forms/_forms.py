@@ -182,6 +182,53 @@ class TransactionForm(EntryForm):
     # Define an autocompleter for the form (in a sublcass)
     _autocompleter = None
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.suggestions = {}
+
+    def prepopulate(self, entry, data=None, suggestion_fields=()):
+        """
+        Generate a duplicate prepopulated form.
+
+        Parameters
+        ----------
+        entry : database.models.Model
+            A database entry from which to pull information for
+            prepopulating the form.
+        data : dict, optional
+            A dictionary containing extra data that will be joined with
+            data gathered from the given database entry. Fields defined
+            in this data dictionary will supersed fields defined on the
+            entry.
+        suggestion_fields : list, optional
+            A list with form-specific parameters defining how the form
+            will extract and process a suggestion from the dictionary of
+            data which will be added to the form.
+
+        Returns
+        -------
+        form : TransactionForm
+            A duplicate form, prepopulated with the collected database
+            information.
+        """
+        self.suggestions |= self._extract_suggestions(data, suggestion_fields)
+        form = super().prepopulate(entry, data=data)
+        form.suggestions = self.suggestions
+        return form
+
+    def _extract_suggestions(self, data, suggestion_fields):
+        # Extract suggestion field values from the given data as specified
+        suggestions = {}
+        for field in suggestion_fields:
+            extraction_method = getattr(self, f"_extract_{field}_suggestion")
+            suggestions[field] = extraction_method(data)
+        return suggestions
+
+    @staticmethod
+    def _extract_suggestion(data, field):
+        # Pop the field value to provide a suggestion, rather than a deduction
+        return data.pop(field, None)
+
     def _prepare_transaction_data(self):
         subtransactions_data = [
             subform.subtransaction_data for subform in self["subtransactions"]
