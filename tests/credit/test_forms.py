@@ -1,7 +1,7 @@
 """Tests for the banking module forms."""
 
 from datetime import date
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from flask_wtf import FlaskForm
@@ -498,6 +498,31 @@ class TestCreditTransactionForm:
         # Forms are instantiated via the `FormMeta` metaclass, so mock that
         mock_gather_method.return_value.__or__.assert_called_with(mock_data)
         mock_meta_call.assert_called_once()
+
+    @patch("wtforms.form.FormMeta.__call__", new=Mock())
+    @patch(
+        "monopyly.credit.forms.CreditTransactionForm.gather_entry_data", new=MagicMock()
+    )
+    def test_prepopulate_with_suggestion(self, transaction_form, mock_transaction):
+        mock_data = {"subtransactions": [{"subtotal": 1}, {"subtotal": 2}]}
+        transaction_form.prepopulate(
+            mock_transaction, mock_data, suggestion_fields=["amount"]
+        )
+        assert transaction_form.suggestions == {"amount": 1}
+
+    @patch("wtforms.form.FormMeta.__call__", new=Mock())
+    @patch(
+        "monopyly.credit.forms.CreditTransactionForm.gather_entry_data", new=MagicMock()
+    )
+    def test_prepopulate_with_manual_suggestion(
+        self, transaction_form, mock_transaction
+    ):
+        mock_data = {"subtransactions": [{"subtotal": 1}, {"subtotal": 2}]}
+        transaction_form.suggestions["test-key"] = "TEST_VALUE"
+        transaction_form.prepopulate(
+            mock_transaction, mock_data, suggestion_fields=["amount"]
+        )
+        assert transaction_form.suggestions == {"amount": 1, "test-key": "TEST_VALUE"}
 
     @pytest.mark.parametrize(
         "field, sort_fields, top_expected_suggestions, expected_suggestions",

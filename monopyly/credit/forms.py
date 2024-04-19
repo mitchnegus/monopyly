@@ -297,6 +297,12 @@ class CreditTransactionForm(TransactionForm):
         statement = self.get_transaction_statement()
         return self._prepare_transaction_data(statement)
 
+    def _extract_amount_suggestion(self, data):
+        # Use the first subtransaction subtotal as a suggestion
+        subtransactions = self._extract_suggestion(data, "subtransactions")
+        suggested_amount = subtransactions[0]["subtotal"] if subtransactions else None
+        return suggested_amount
+
     def get_transaction_statement(self):
         """Get the credit card statement associated with the transaction."""
         return self.statement_info.get_statement(self.transaction_date.data)
