@@ -1,6 +1,7 @@
 """Tests for routes in the banking blueprint."""
 
 import json
+from datetime import date
 
 import pytest
 from fuisce.testing import transaction_lifetime
@@ -146,6 +147,7 @@ class TestBankingRoutes(TestRoutes):
         self.get_route("/add_transaction")
         assert self.page_header_includes_substring("New Bank Transaction")
         assert self.form_exists(id="bank-transaction")
+        assert self.input_exists(value=f"{date.today()}")
 
     def test_add_bank_transaction_get(self, authorization):
         self.get_route("/add_transaction/2")

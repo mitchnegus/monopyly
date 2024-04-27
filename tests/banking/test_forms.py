@@ -343,6 +343,7 @@ class TestBankTransactionForm:
         )
         for field in form_fields:
             assert hasattr(transaction_form, field)
+        assert transaction_form.transaction_date.default == date.today
 
     def test_account_info_subform_initialization(self, transaction_form):
         subform_fields = ("bank_name", "last_four_digits", "type_name")

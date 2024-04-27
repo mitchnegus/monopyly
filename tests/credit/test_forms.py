@@ -246,6 +246,7 @@ class TestCreditTransactionForm:
         )
         for field in form_fields:
             assert hasattr(transaction_form, field)
+        assert transaction_form.transaction_date.default == date.today
 
     def test_statement_subform_initialization(self, transaction_form):
         subform_fields = ("card_info", "issue_date")

@@ -2,6 +2,7 @@
 
 import json
 import re
+from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
@@ -272,6 +273,7 @@ class TestCreditRoutes(TestRoutes):
         self.get_route("/add_transaction")
         assert self.page_header_includes_substring("New Credit Transaction")
         assert self.form_exists(id="credit-transaction")
+        assert self.input_exists(value=f"{date.today()}")
 
     def test_add_card_transaction_get(self, authorization):
         self.get_route("/add_transaction/3")

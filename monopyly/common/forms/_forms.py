@@ -3,6 +3,7 @@ General form constructions.
 """
 
 from abc import ABC, abstractmethod
+from datetime import date
 
 from flask_wtf import FlaskForm
 from wtforms.fields import FieldList, FormField, SelectField, StringField, SubmitField
@@ -165,7 +166,9 @@ class TransactionForm(EntryForm):
             return data
 
     # Fields pertaining to the transaction
-    transaction_date = DateField("Transaction Date", [DataRequired()])
+    transaction_date = DateField(
+        "Transaction Date", validators=[DataRequired()], default=date.today
+    )
     # Subtransactions should be defined as a `FieldList` in a subclass
     subtransactions = None
     submit = SubmitField("Save Transaction")
