@@ -184,8 +184,10 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Returns the template for the summary section of the statement page
-        assert self.div_exists(id="statement-summary")
-        assert self.div_exists(string="Paid")
+        statement_summary, transactions_table = self.soup
+        assert statement_summary.find_all("div", id="statement-summary")
+        assert statement_summary.find_all("div", string="Paid")
+        assert transactions_table.find_all("div", class_="transactions-table")
 
     def test_load_user_transactions(self, authorization):
         self.get_route("/transactions")

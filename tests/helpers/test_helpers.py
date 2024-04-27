@@ -1,6 +1,7 @@
 """Helper objects to improve modularity of tests."""
 
 import functools
+import json
 import unittest
 
 import pytest
@@ -28,9 +29,19 @@ class TestRoutes:
             if self.blueprint_prefix is not None:
                 route = f"/{self.blueprint_prefix}{route}"
             method(self, route, *args, **kwargs)
-            # Save the response as HTML
-            self.html = self.response.data.decode("utf-8")
-            self.soup = BeautifulSoup(self.html, "html.parser")
+            # Save the response(s) as HTML
+            response_string = self.response.data.decode("utf-8")
+            try:
+                self.html = json.loads(response_string)
+            except json.decoder.JSONDecodeError:
+                self.html = response_string
+            # Convert HTML response(s) to parseable BeautifulSoup objects when sensible
+            if isinstance(self.html, list):
+                self.soup = [BeautifulSoup(_, "html.parser") for _ in self.html]
+            elif isinstance(self.html, str):
+                self.soup = BeautifulSoup(self.html, "html.parser")
+            else:
+                self.soup = None
 
         return wrapper
 
@@ -79,6 +90,13 @@ class TestRoutes:
 
     def tag_exists(self, tag_type, **find_kwargs):
         """Return true if a specific tag type exists with any given characteristics."""
+        if not isinstance(self.soup, BeautifulSoup):
+            raise RuntimeError(
+                "The returned response did not resolve to a single HTML excerpt and a "
+                "tag cannot be found (the response was an object of type "
+                f"`{type(self.soup).__name__}`). If that object is an iterable, you "
+                "may need to operate individually on its elements."
+            )
         return bool(self.soup.find_all(tag_type, **find_kwargs))
 
     def anchor_exists(self, **find_kwargs):

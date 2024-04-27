@@ -171,3 +171,8 @@
 - Bump dependencies (including patching security vulnerability in gunicorn)
 - Add a function for acquiring a statement and all of its transactions
 - Add a convenience method to the statement handler for getting the preceding statement
+
+
+### 1.4.7 (in progress)
+
+- Refresh the table of transactions after making a payment on a credit card statement

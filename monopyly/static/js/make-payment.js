@@ -17,7 +17,8 @@ import { executeAjaxRequest } from './modules/ajax.js';
 
 (function() {
 
-  const $container = $('#statement-summary-container');
+  const $summaryContainer = $('#statement-summary-container');
+  const $transactionContainer = $('#statement-transactions-container');
   prepareForm();
 
   function prepareForm() {
@@ -82,7 +83,8 @@ import { executeAjaxRequest } from './modules/ajax.js';
   function updateStatementPaymentAjaxRequest(rawData) {
     // Return the newly updated statement payment info
     function updateAction(response) {
-      $container.html(response)
+      $summaryContainer.html(response[0]);
+      $transactionContainer.html(response[1]);
       // Prepare the form again (in case statement is not paid in full)
       prepareForm();
     }

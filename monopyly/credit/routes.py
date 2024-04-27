@@ -216,12 +216,20 @@ def pay_credit_card(card_id, statement_id):
     make_payment(card_id, payment_account_id, payment_date, payment_amount)
     # Get the current statement information from the database
     statement = CreditStatementHandler.get_entry(statement_id)
+    transactions = CreditTransactionHandler.get_transactions(
+        statement_ids=(statement_id,)
+    )
     bank_accounts = BankAccountHandler.get_accounts()
-    return render_template(
+    summary_template = render_template(
         "credit/statement_summary.html",
         statement=statement,
         bank_accounts=bank_accounts,
     )
+    transactions_table_template = render_template(
+        "credit/transactions_table/transactions.html",
+        transactions=transactions,
+    )
+    return jsonify((summary_template, transactions_table_template))
 
 
 @bp.route("/transactions", defaults={"card_id": None})
