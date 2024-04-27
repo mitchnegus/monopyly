@@ -52,7 +52,7 @@ class CreditTransactionHandler(
 
         Parameters
         ----------
-        statement_ids : tuple of str, optional
+        statement_ids : tuple of int, optional
             A sequence of statement IDs with which to filter
             transactions (if `None`, all statement IDs will be shown).
         card_ids : tuple of int, optional
