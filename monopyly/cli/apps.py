@@ -9,8 +9,17 @@ from .. import create_app
 
 
 class LocalApplication:
-    """An object for running the application locally."""
+    """
+    An object for running the application locally.
 
+    This application object will run the Flask application using the
+    built-in Python server on localhost, just like the Flask development
+    mode. However, it will launch from port 5001 to avoid conflicting
+    with other Python servers that may attempt to run on the default
+    port 5000.
+    """
+
+    mode_name = "local"
     default_port = "5001"
     command = ["flask"]
 
@@ -20,7 +29,7 @@ class LocalApplication:
         self._port = port
         if options:
             raise NotImplementedError(
-                "Options besides `host` and `port` are not handled in development mode."
+                f"Options besides `host` and `port` are not handled in {self.mode_name} mode."
             )
 
     def run(self):
@@ -34,14 +43,26 @@ class LocalApplication:
 
 
 class DevelopmentApplication(LocalApplication):
-    """An object for running the application in development mode."""
+    """
+    An object for running the application in development mode.
 
+    This application object will run the Flask application using the
+    built-in Python server on localhost, just like the Flask development
+    mode.
+    """
+
+    mode_name = "development"
     default_port = "5000"
     command = LocalApplication.command + ["--debug"]
 
 
 class ProductionApplication(BaseApplication):
-    """An object for running the application in production mode (via Gunicorn)."""
+    """
+    An object for running the application in production mode (via Gunicorn).
+
+    This application object will run the Flask application using a
+    Gunicorn server instead of the built-in Python server.
+    """
 
     default_port = "8000"
     _default_worker_count = (multiprocessing.cpu_count() * 2) + 1
