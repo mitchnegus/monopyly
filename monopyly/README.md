@@ -27,11 +27,22 @@ The package requires a recent version of Python (3.9+).
 
 ## Getting started
 
-Once the package is properly installed, run the app from the command line (the default options should be sensible, but you may customize the host and port if necessary):
+Once the package is properly installed, run the app in local mode from the command line (the default options should be sensible, but you may customize the host and port if necessary):
 
 ```
-$ monopyly development --browser [--host HOST] [--port PORT]
+$ monopyly local --browser [--host HOST] [--port PORT]
 ```
+
+Local mode indicates that the app is just going to be run using a locally hosted server, accessible to just your machine.
+Other available modes are `development` and `production`, for those looking to either develop the application or host the application on a server.
+
+<div class="warning">
+  <h5>Use your brain when choosing a mode!</h5>
+  <small>
+    If you intend to be the only user of the app, served just from your PC, local mode is fine; you will be served well-enough by the built-in Python server, and you do not need to configure secret keys for the application.
+    If you plan to host the application, however, <b>DO NOT</b> use local mode (or development mode) and run the app in production mode instead.
+  </small>
+</div>
 
 By using the `--browser` option in development mode, this will open to an empty homepage with a welcome message.
 

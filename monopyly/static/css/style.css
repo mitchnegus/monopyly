@@ -193,7 +193,7 @@ aside.sidebar {
   height: 100%;
   width: 10%;
   min-width: 50px;
-  margin-top: 50px; /* Account for content header */
+  margin-top: 50px; /* account for content header */
 }
 
 #content-header h1 {
@@ -253,7 +253,7 @@ aside.sidebar {
 .screenshot {
   width: 100%; /* override the markdown default */
   margin: 20px 0;
-  border: 1px solid #f3f3f3;
+  border: 1px solid #bbbbbb;
   box-shadow: 3px 3px 5px #bbbbbb;
 }
 
@@ -1959,6 +1959,18 @@ form .autocomplete-box .item.active {
 
 #readme h2 {
   margin-top: 50px;
+}
+
+#readme .warning {
+  padding: 15px 25px;
+  border: 1px solid #cccccc;
+  border-radius: 10px;
+  box-shadow: 2px 2px 3px #cccccc;
+  background-color: #fff0c4;
+}
+
+#readme .warning h5 {
+  margin: 0 0 5px 0;
 }
 
 #story .signature {
