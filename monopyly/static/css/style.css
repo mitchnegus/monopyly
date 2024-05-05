@@ -643,7 +643,7 @@ form .autocomplete-box .item.active {
   position: relative;
   right: -100%;
   width: min-content;
-  transition: 0.4s;
+  transition: 0.4s 0.2s;
 }
 
 .slide-text-gadget:hover .sleeve {
@@ -653,7 +653,7 @@ form .autocomplete-box .item.active {
 .slide-text-gadget .sleeve .main {
   position: absolute;
   transform: translateX(-100%);
-  transition: 0.2s;
+  transition: 0.2s 0.2s;
 }
 
 .slide-text-gadget:hover .sleeve .main {
@@ -1612,13 +1612,12 @@ form .autocomplete-box .item.active {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   gap: 10px;
   width: 100%;
 }
 @media screen and (max-width: 1500px) {
   .details .primary-info {
-    display: flex;
     align-items: center;
   }
 }
@@ -1639,14 +1638,16 @@ form .autocomplete-box .item.active {
 .details .summary-container {
   display: flex;
   justify-content: center;
-  min-width: 45%;
+  width: 45%;
+  min-width: 500px;
   margin: 0 0 0 0;
 }
 
 .details .summary-box {
   display: flex;
   flex-direction: column;
-  width: min-content;
+  width: 500px;
+  box-sizing: border-box;
   padding: 40px 50px 60px;
   border-radius: 25px;
   box-shadow: 1px 1px 5px #dddddd;
@@ -1656,16 +1657,11 @@ form .autocomplete-box .item.active {
 .details .summary-box .balance {
   display: flex;
   justify-content: space-between;
-  min-width: 325px;
   margin: 20px 0;
   font-size: 72pt;
   font-weight: bold;
   letter-spacing: 1px;
   text-align: center;
-}
-
-.details .summary-box .balance .dollar-sign {
-  margin-right: 5px;
 }
 
 .details .summary-box .projected-balance .amount {
@@ -1698,12 +1694,13 @@ form .autocomplete-box .item.active {
 }
 
 .details .transactions-container {
-  width: 50%;
+  width: 52.5%;
   order: 2;
   min-width: 500px;
 }
 @media screen and (max-width: 1500px) {
   .details .transactions-container {
+    width: 50%;
     order: 1;
     margin-top: 50px;
   }

@@ -9,8 +9,13 @@
   </div>
 
   <div class="balance">
-    <div class="dollar-sign">$</div>
-    <div>{{ account.balance|currency }}</div>
+    {% with account_balance = account.balance|currency %}
+      {% set vbox_width = calculate_summary_balance_width(account_balance) %}
+      <svg viewBox="0 0 {{ vbox_width }} 100">
+        <text x="0" y="75" fill="currentColor">$</text>
+        <text x="75" y="75" fill="currentColor">{{ account_balance }}</text>
+      </svg>
+    {% endwith %}
   </div>
 
   {% if account.balance != account.projected_balance %}

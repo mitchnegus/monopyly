@@ -176,3 +176,4 @@
 ### 1.4.7 (in progress)
 
 - Refresh the table of transactions after making a payment on a credit card statement
+- Use SVG to handle long values in account/statement summary boxes; fixes bugs in page rendering (long value overflow) and hover actions not happening because of conflicting overlap with the sidebar

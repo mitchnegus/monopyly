@@ -9,8 +9,13 @@
   </div>
 
   <div class="balance">
-    <div class="dollar-sign">$</div>
-    <div>{{ statement.balance|currency }}</div>
+    {% with statement_balance = statement.balance|currency %}
+      {% set vbox_width = calculate_summary_balance_width(statement_balance) %}
+      <svg viewBox="0 0 {{ vbox_width }} 100">
+        <text x="0" y="75" fill="currentColor">$</text>
+        <text x="75" y="75" fill="currentColor">{{ statement_balance }}</text>
+      </svg>
+    {% endwith %}
   </div>
 
   <div id="payment">
