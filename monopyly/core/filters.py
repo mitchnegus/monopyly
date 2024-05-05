@@ -2,6 +2,8 @@
 Filters defined for the application.
 """
 
+from math import floor, log10
+
 from .blueprint import bp
 
 
@@ -32,8 +34,8 @@ def make_ordinal(integer):
 
     Notes
     -----
-    This function is an adaptation of the one proposed by Stack Overflow user
-    Florian Brucker (https://stackoverflow.com/a/50992575/8754471).
+    This function is an adaptation of the one proposed by Stack Overflow
+    user Florian Brucker (https://stackoverflow.com/a/50992575/8754471).
 
     Parameters
     ----------

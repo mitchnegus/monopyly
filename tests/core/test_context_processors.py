@@ -3,7 +3,11 @@ from unittest.mock import patch
 
 import pytest
 
-from monopyly.core.context_processors import inject_global_template_variables
+from monopyly.core.actions import determine_summary_balance_svg_viewbox_width
+from monopyly.core.context_processors import (
+    inject_global_template_variables,
+    inject_utility_functions,
+)
 
 
 @pytest.fixture
@@ -16,6 +20,12 @@ def template_globals():
         mock_version_func.return_value = "M.m.p.devX"
         mock_date_module.today.return_value = date(2000, 1, 1)
         return inject_global_template_variables()
+
+
+@pytest.fixture
+def utility_functions():
+    # NOTE: Context processors must return a dictionary
+    return inject_utility_functions()
 
 
 class TestContextProcessors:
@@ -34,3 +44,7 @@ class TestContextProcessors:
 
     def test_inject_copyright(self, template_globals):
         assert "2000" in template_globals["copyright_statement"]
+
+    def test_inject_utility(self, utility_functions):
+        expected_action = determine_summary_balance_svg_viewbox_width
+        assert utility_functions["calculate_summary_balance_width"] == expected_action

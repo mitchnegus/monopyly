@@ -5,6 +5,7 @@ Filters defined for the application.
 from datetime import date
 from importlib import import_module
 
+from .actions import determine_summary_balance_svg_viewbox_width
 from .blueprint import bp
 
 
@@ -17,6 +18,15 @@ def inject_global_template_variables():
         "date_today": date.today(),
     }
     return template_globals
+
+
+@bp.app_context_processor
+def inject_utility_functions():
+    """Inject utility functions globally into the template context."""
+    utility_functions = {
+        "calculate_summary_balance_width": determine_summary_balance_svg_viewbox_width,
+    }
+    return utility_functions
 
 
 def _display_version():

@@ -32,3 +32,31 @@ def format_readme_as_html_template(readme_text):
         "{% endblock %}"
     )
     return html_readme_template
+
+
+def determine_summary_balance_svg_viewbox_width(currency_value):
+    """
+    Determine the width of the SVG viewBox attribute displayed in summary boxes.
+
+    Parameters
+    ----------
+    currency_value : str
+        A currency value, displayed in the format output by the
+        `core.filters.make_currency` filter function.
+    """
+    # Set the per-character width contributions
+    digit_width = 55
+    punctuation_width = 25
+    spacing_width = 25
+    # Count the number of commas and non-comma characters in the non-decimal portion
+    nondecimal_value = currency_value.rsplit(".", maxsplit=1)[0]
+    comma_count = nondecimal_value.count(",")
+    digit_count = len(nondecimal_value) - comma_count
+    # Width is the total of the following subcomponents
+    svg_currency_width_subcomponents = [
+        digit_width * digit_count,  # ------------- total width of digits/sign
+        punctuation_width * comma_count,  # ------- total width of commas
+        punctuation_width + (2 * digit_width),  # - width of the decimal section
+        digit_width + spacing_width,  # ----------- width of the dollar sign and spacing
+    ]
+    return max(400, sum(svg_currency_width_subcomponents))
