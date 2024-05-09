@@ -70,9 +70,26 @@ class TestRoutes:
 
         return _wrapper
 
+    def page_title_includes_substring(self, substring):
+        """
+        Return `True` if the page title includes a matching substring.
+
+        Parameters
+        ----------
+        substring : str
+            A substring to find in the page title.
+
+        Returns
+        -------
+        result : bool
+            Whether or not the page title includes the substring.
+        """
+        title_tag = self.soup.find("title")
+        return any(substring in string for string in title_tag.strings)
+
     def page_header_includes_substring(self, substring, level="h1"):
         """
-        Return true if the page header includes a matching substring.
+        Return `True` if the page header includes a matching substring.
 
         Parameters
         ----------
@@ -80,9 +97,15 @@ class TestRoutes:
             A substring to find in the page header.
         level : str
             The tag type to treat as the page header. The default is
-            'h1'.
+            `h1`.
+
+        Returns
+        -------
+        result : bool
+            Whether or not the page header includes the substring.
         """
-        return bool(self.soup.find("h1", string=self.match_substring(substring)))
+        header_tags = self.soup.find_all(level)
+        return any(substring in string for tag in header_tags for string in tag.strings)
 
     def tag_count_is_equal(self, count, tag_type, **find_kwargs):
         """Return true if the count of some tag with some class is correct."""

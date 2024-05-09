@@ -207,6 +207,34 @@ aside.sidebar {
   letter-spacing: -2px;
 }
 
+#content-header h1.error {
+  text-align: left;
+}
+
+
+/*
+ * Provide styles for error pages
+ */
+.error span.code {
+  margin-left: 30px;
+  color: #cccccc;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+.custom-error-content p {
+  font-size: 18pt;
+}
+
+.standard-error-content {
+  margin-top: 50px;
+}
+
+.standard-error-content p.error-description {
+  font-size: 12pt;
+  font-style: oblique;
+}
+
 
 /*
  * General object characteristics
@@ -1975,6 +2003,14 @@ form .autocomplete-box .item.active {
   font-weight: bold;
   font-style: oblique;
   text-align: right;
+}
+
+
+/*
+ * Customization for the 'Credits' page
+ */
+.affiliation-disclaimer {
+  margin-top: 80px;
 }
 
 

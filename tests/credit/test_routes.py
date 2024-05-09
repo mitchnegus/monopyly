@@ -542,7 +542,7 @@ class TestCreditRoutes(TestRoutes):
                 "transaction_date": "2020-06-15",
             },
         )
-        assert "404 Not Found" in self.soup.text
+        assert "No dice!" in self.soup.text
 
     def test_infer_statement(self, authorization):
         self.post_route(

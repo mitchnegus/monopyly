@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  {{ exception.name }} ({{ exception.code }})
+{% endblock %}
+
+{% block header %}
+
+  <h1 class="error">
+    No dice!
+    <span class="code">
+      {{ exception.code }} Error: {{ exception.name }}
+    </span>
+  </h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+  <div class="custom-error-content">
+    {% block custom_error_content %}
+    {% endblock %}
+
+  </div>
+
+  <div class="standard-error-content">
+    <p class="error-description">{{ exception.description }}</p>
+  </div>
+
+{% endblock %}

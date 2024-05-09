@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 from authanor.testing.helpers import TestHandler
 from fuisce.testing import transaction_lifetime
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import Forbidden, NotFound
 
 from monopyly.banking.accounts import (
     BankAccountHandler,
@@ -162,9 +162,9 @@ class TestBankAccountTypeHandler(TestHandler):
     @pytest.mark.parametrize(
         "entry_id, exception",
         [
-            [1, NotFound],  # should not be able to delete common entries
-            [4, NotFound],  # should not be able to delete other user entries
-            [7, NotFound],  # should not be able to delete nonexistent entries
+            [1, Forbidden],  # - should not be able to delete common entries
+            [4, NotFound],  # -- should not be able to delete other user entries
+            [7, NotFound],  # -- should not be able to delete nonexistent entries
         ],
     )
     def test_delete_entry_invalid(self, account_type_handler, entry_id, exception):

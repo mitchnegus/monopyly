@@ -122,7 +122,7 @@ class BankAccountTypeHandler(
                 "The current user is not authorized to manipulate "
                 "this account type entry."
             )
-            abort(404, abort_msg)
+            abort(403, abort_msg)
 
 
 class BankAccountHandler(

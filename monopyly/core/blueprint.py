@@ -8,4 +8,4 @@ from flask import Blueprint
 bp = Blueprint("core", __name__)
 
 # Import routes after defining blueprint to avoid circular imports
-from . import context_processors, filters, routes
+from . import context_processors, errors, filters, routes
