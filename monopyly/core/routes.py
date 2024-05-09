@@ -40,7 +40,7 @@ def index():
         session["show_homepage_block"] = True
         bank_accounts, active_cards = None, None
     return render_template(
-        "index.html", bank_accounts=bank_accounts, cards=active_cards
+        "core/index.html", bank_accounts=bank_accounts, cards=active_cards
     )
 
 
@@ -63,12 +63,12 @@ def about():
 @bp.route("/story")
 @login_required
 def story():
-    return render_template("story.html")
+    return render_template("core/story.html")
 
 
 @bp.route("/credits")
 def credits():
-    return render_template("credits.html")
+    return render_template("core/credits.html")
 
 
 @bp.route("/profile")
@@ -76,4 +76,4 @@ def credits():
 def load_profile():
     banks = BankHandler.get_banks()
     # Return banks as a list to allow multiple reuse
-    return render_template("profile.html", banks=list(banks))
+    return render_template("core/profile.html", banks=list(banks))
