@@ -31,7 +31,7 @@ def test_get_card_statement_grouping(mock_statements_method):
         call(card_ids=(mock_card.id,), sort_order="DESC") for mock_card in mock_cards
     ]
     assert mock_statements_method.mock_calls == expected_calls
-    for key, mock_card in zip(card_statements, mock_cards):
+    for key, mock_card in zip(card_statements, mock_cards, strict=True):
         assert key == mock_card
         assert card_statements[mock_card] == mock_statements_method.return_value
 

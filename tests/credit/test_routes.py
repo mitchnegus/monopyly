@@ -210,6 +210,7 @@ class TestCreditRoutes(TestRoutes):
         for tag, (note, amount) in zip(
             self.soup.find_all("div", class_="subtransaction-details"),
             [("One for the park", "$30.00"), ("One for the place", "$35.00")],
+            strict=True,
         ):
             assert note in tag.find("div", class_="notes").find("span").text
             assert amount in tag.find("div", class_="subtotal").text

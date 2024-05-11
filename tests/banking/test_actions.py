@@ -23,7 +23,7 @@ def test_get_bank_account_type_grouping(mock_types_method, mock_accounts_method)
         for mock_account_type in mock_account_types
     ]
     assert mock_accounts_method.mock_calls == expected_calls
-    for key, mock_account_type in zip(type_accounts, mock_account_types):
+    for key, mock_account_type in zip(type_accounts, mock_account_types, strict=True):
         assert key == mock_account_type
         assert type_accounts[mock_account_type] == mock_accounts_method.return_value
 
