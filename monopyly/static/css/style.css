@@ -7,7 +7,10 @@
 :root {
   --moneytree: #5e8f40;
   --moneytree-leaves: #85bb65;
+  --silver-dollar: #cccccc;
   --masthead-height: 50px;
+  --masthead-color: #2b2b2b;
+  --border-gray: #dddddd;
 }
 
 html {
@@ -94,7 +97,7 @@ header#masthead {
   border-width: 0 0 4px 3px;
   border-style: solid;
   border-color: var(--moneytree-leaves);
-  background-color: #2b2b2b;
+  background-color: var(--masthead-color);
   opacity: 0.9;
 }
 
@@ -117,7 +120,7 @@ header#masthead {
 }
 
 .monopyly-logo:hover {
-  color: #f5f5f5;
+  filter: brightness(0.95);
 }
 
 
@@ -161,7 +164,7 @@ footer#site-info {
 }
 
 #site-info p {
-  color: #cccccc;
+  color: var(--silver-dollar);
   font-size: 9pt;
   text-align: center;
 }
@@ -201,7 +204,7 @@ aside.sidebar {
   box-sizing: border-box;
   margin: 0 0 30px 0;
   padding-bottom: 10px;
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid var(--border-gray);
   text-align: center;
   font-size: 2em;
   letter-spacing: -2px;
@@ -217,7 +220,7 @@ aside.sidebar {
  */
 .error span.code {
   margin-left: 30px;
-  color: #cccccc;
+  color: var(--silver-dollar);
   font-weight: 300;
   letter-spacing: 1px;
 }
@@ -261,7 +264,7 @@ aside.sidebar {
 }
 
 .button-block {
-  border: 1px solid #dddddd;
+  border: 1px solid var(--border-gray);
   border-radius: 10px;
   box-shadow: 1px 1px 3px #bbbbbb;
   background-color: #eeeeee;
@@ -519,7 +522,8 @@ form .autocomplete-box {
   z-index: 99;
   width: 100%;
   padding-right: 10px;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--silver-dollar);
+  box-sizing: border-box;
   background-color: white;
 }
 
@@ -530,7 +534,7 @@ form .autocomplete-box .item {
 }
 
 form .autocomplete-box .item:hover {
-  background-color: #cccccc;
+  background-color: var(--silver-dollar);
 }
 
 form .autocomplete-box .item.active {
@@ -774,8 +778,8 @@ form .autocomplete-box .item.active {
 .toggle-switch-gadget .option .slider .switch {
   position: relative;
   left: 0;
-  width: 50%;
   height: 100%;
+  width: 50%;
   box-sizing: border-box;
   border-radius: 50%;
   background-color: #eeeeee;
@@ -800,7 +804,7 @@ form .autocomplete-box .item.active {
  * Style generic box tables
  */
 .box-table {
-  border: 2px solid #dddddd;
+  border: 2px solid var(--border-gray);
 }
 
 .box-table .icon-button {
@@ -817,8 +821,8 @@ form .autocomplete-box .item.active {
 }
 
 .box-table .box-row {
-  border-top: 0.5px solid #dddddd;
-  border-bottom: 0.5px solid #dddddd;
+  border-top: 0.5px solid var(--border-gray);
+  border-bottom: 0.5px solid var(--border-gray);
   background-color: #f5f5f5;
 }
 
@@ -850,7 +854,7 @@ form .autocomplete-box .item.active {
 }
 
 #card-filter .card:hover {
-  background-color: #cccccc;
+  background-color: var(--silver-dollar);
   text-decoration: none;
 }
 
@@ -906,7 +910,7 @@ form .autocomplete-box .item.active {
   position: absolute;
   height: 100%;
   width: 100%;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--silver-dollar);
   border-radius: 20px;
   box-shadow: 1px 1px 3px #222222;
   text-align: center;
@@ -977,7 +981,7 @@ form .autocomplete-box .item.active {
 }
 
 .credit-card.inactive .card-face.front {
-  color: #cccccc;
+  color: var(--silver-dollar);
   filter: brightness(0.9);
 }
 
@@ -1116,7 +1120,7 @@ form .autocomplete-box .item.active {
 
 .transactions-table .titles,
 .transactions-table .transaction {
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid var(--border-gray);
 }
 
 .transactions-table .titles {
@@ -1845,10 +1849,10 @@ form .autocomplete-box .item.active {
 #homepage-block {
   margin-bottom: 20px;
   padding: 0 0 30px 0;
-  background-color: #dddddd;
-  border: 1px solid #d8d8d8;
+  background-color: gainsboro;
+  border: 1px solid lightgray;
   border-radius: 6px;
-  box-shadow: 2px 2px 5px #cccccc;
+  box-shadow: 2px 2px 5px var(--silver-dollar);
 }
 
 #homepage-block h2 {
@@ -1898,7 +1902,7 @@ form .autocomplete-box .item.active {
   margin: 20px;
   padding: 50px;
   border: 1px solid #f5f5f5;
-  box-shadow: 2px 2px 5px #cccccc;
+  box-shadow: 2px 2px 5px var(--silver-dollar);
   background-color: #fafafa;
 }
 
@@ -1988,10 +1992,10 @@ form .autocomplete-box .item.active {
 
 #readme .warning {
   padding: 15px 25px;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--silver-dollar);
   border-radius: 10px;
-  box-shadow: 2px 2px 3px #cccccc;
-  background-color: #fff0c4;
+  box-shadow: 2px 2px 3px var(--silver-dollar);
+  background-color: #f2d7a5;
 }
 
 #readme .warning h5 {
@@ -2047,7 +2051,7 @@ form .autocomplete-box .item.active {
   flex-basis: 100%;
   margin-right: 0;
   padding-bottom: 50px;
-  border-bottom: 0.5px solid #dddddd;
+  border-bottom: 0.5px solid var(--border-gray);
 }
 
 #profile .banking.profile-section .bank-list {
@@ -2113,7 +2117,7 @@ form .autocomplete-box .item.active {
 #account-type-container {
   width: 30%;
   min-width: 350px;
-  border: 2px solid #dddddd;
+  border: 2px solid var(--border-gray);
   background-color: #f5f5f5;
 }
 
@@ -2123,13 +2127,13 @@ form .autocomplete-box .item.active {
 }
 
 #account-type-container .account-types {
-  border-top: 2px solid #dddddd;
+  border-top: 2px solid var(--border-gray);
 }
 
 #account-type-container .account-type {
   padding: 10px;
-  border-top: 0.5px solid #dddddd;
-  border-bottom: 0.5px solid #dddddd;
+  border-top: 0.5px solid var(--border-gray);
+  border-bottom: 0.5px solid var(--border-gray);
 }
 
 
@@ -2556,7 +2560,7 @@ form#pay input {
 }
 
 form#pay .form-inputs {
-  border: 1px solid #cccccc;
+  border: 1px solid var(--silver-dollar);
   border-radius: inherit;
 }
 
@@ -2722,7 +2726,7 @@ form#credit-transaction .merchant-field {
   border-radius: 20px;
   text-align: center;
   outline: none;
-  caret-color: #cccccc;
+  caret-color: var(--silver-dollar);
   transition: border 0.1s ease;
 }
 
@@ -2778,6 +2782,6 @@ form#credit-transaction .merchant-field {
 #transaction-tags .subtags {
   margin: 0 0 0 10px;
   padding-left: 40px;
-  border-left: 1px solid #dddddd;
+  border-left: 1px solid var(--border-gray);
 }
 
