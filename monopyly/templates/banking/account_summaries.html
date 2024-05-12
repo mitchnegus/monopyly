@@ -8,6 +8,9 @@
 
         <h2 class="stack-title">
           {{ account_type.type_name }}
+          {% if accounts|length> 1 %}
+            <span class="stack-title-info">${{ accounts|sum(attribute='balance')|currency }}</span>
+          {% endif %}
         </h2>
 
         <div class="account-blocks">

@@ -176,6 +176,7 @@
 ### 1.4.7 (in progress)
 
 - Create custom error pages for error responses (400, 404, 500, etc.)
+- Display bank account type subtotals on the bank account summaries page
 - Set the current date as the default for transaction form inputs
 - Use the `strict` argument to the built-in `zip` function to strengthen tests
 - Refresh the table of transactions after making a payment on a credit card statement
