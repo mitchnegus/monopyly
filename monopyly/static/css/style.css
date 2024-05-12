@@ -264,12 +264,21 @@ aside.sidebar {
 }
 
 .button-block {
+  margin: 15px 0;
   border: 1px solid var(--border-gray);
   border-radius: 10px;
   box-shadow: 1px 1px 3px #bbbbbb;
   background-color: #eeeeee;
   background-image: linear-gradient(#eeeeee, #e6e6e6);
   color: inherit;
+}
+
+.button-block:first-of-type {
+  margin-top: 0;
+}
+
+.button-block:last-of-type {
+  margin-bottom: 0;
 }
 
 .button-block:hover {
@@ -288,10 +297,28 @@ aside.sidebar {
   box-shadow: 3px 3px 5px #bbbbbb;
 }
 
-.grouping {
+.group-stack {
+  margin: 15px 10px 25px;
+  padding: 20px 30px;
   border-radius: 15px;
   box-shadow: 0 0 20px #eeeeee;
   background-color: #eef5eb;
+}
+
+.group-stack .stack-title {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 15px 0;
+  padding: 0 15px;
+  font-size: 1.1em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.group-stack .stack-title-info {
+  margin-left: 15px;
+  color: #888888;
+  font-weight: 400;
 }
 
 .paid-notice {
@@ -2074,15 +2101,9 @@ form .autocomplete-box .item.active {
 /*
  * Customization for the 'Bank Accounts' page
  */
-#bank-container .bank-block {
-  margin: 25px 0;
-  padding: 30px;
-}
-
-#bank-container .bank-block h3 {
-  margin-top: 0;
+#bank-container .bank-stack .stack-title {
   padding: 0 30px;
-  /*text-align: center;*/
+  text-align: left;
 }
 
 #bank-container .account-block {
@@ -2154,10 +2175,22 @@ form#bank-account .hidden {
   align-items: center
 }
 
-#bank-account-summaries-container .bank {
-  margin: 0 0 10px;
-  text-align: center;
+#bank-account-summaries-container h2.bank {
+  margin: 0 0 5px;
+  font-size: 1.6em;
+  letter-spacing: 1px;
   text-transform: uppercase;
+  text-align: center;
+}
+
+#bank-account-summaries-container h3.balance {
+  margin: 0 0 10px;
+  color: gray;
+  font-size: 1em;
+  font-weight: 300;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 1px;
 }
 
 #bank-account-summaries {
@@ -2166,27 +2199,19 @@ form#bank-account .hidden {
   width: 100%;
 }
 
-#bank-account-summaries .account-type-block {
+#bank-account-summaries .account-type-stack {
   display: flex;
   flex-direction: column;
-  width: 50%;
+  width: 60%;
   min-width: 400px;
-  margin: 10px auto;
-  padding: 25px;
+  margin: 15px auto 25px;
 }
 
 #bank-account-summaries .account-block {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 15px;
   padding: 30px 10%;
-}
-
-#bank-account-summaries a.account-block:last-of-type {
-  margin-bottom: 0;
 }
 
 #bank-account-summaries .account-block .title {
@@ -2457,27 +2482,21 @@ form#card #statement-due-day-field  {
   justify-content: space-around;
 }
 
-#credit-statements .card-column {
+#credit-statements .card-stack {
   display: flex;
   flex-direction: column;
   height: min-content;
-  margin: 15px 10px;
-  padding: 20px;
-  text-transform: uppercase;
-  text-align: center;
-  font-size: 1.1em;
 }
 
-#credit-statements-container .card-column .digits {
-  color: #888888;
+#credit-statements .card-stack .stack-title {
+  justify-content: center;
 }
 
 #credit-statements .statement-block {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   width: 275px;
-  margin: 15px;
   padding: 45px 50px;
 }
 

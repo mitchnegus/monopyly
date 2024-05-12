@@ -145,7 +145,7 @@ class TestCreditRoutes(TestRoutes):
         self.get_route("/statements")
         assert self.page_header_includes_substring("Credit Card Statements")
         # 2 active cards with statements for the user
-        assert self.tag_count_is_equal(2, "div", class_="card-column")
+        assert self.tag_count_is_equal(2, "div", class_="card-stack")
         # 5 statements on those active cards
         assert self.tag_count_is_equal(5, "a", class_="statement-block")
 
@@ -155,7 +155,7 @@ class TestCreditRoutes(TestRoutes):
             json={"card_ids": ["3"]},
         )
         # 1 card shown with the filter applied
-        assert self.tag_count_is_equal(1, "div", class_="card-column")
+        assert self.tag_count_is_equal(1, "div", class_="card-stack")
         # 3 statements on that card
         assert self.tag_count_is_equal(3, "a", class_="statement-block")
 

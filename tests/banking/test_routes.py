@@ -16,7 +16,7 @@ class TestBankingRoutes(TestRoutes):
         self.get_route("/accounts")
         assert self.page_header_includes_substring("Bank Accounts")
         # 2 banks for the user, with 3 total accounts
-        assert self.tag_count_is_equal(2, "div", class_="bank-block")
+        assert self.tag_count_is_equal(2, "div", class_="bank-stack")
         assert self.tag_count_is_equal(3, "div", class_="account-block")
 
     def test_add_account_get(self, authorization):
@@ -44,7 +44,7 @@ class TestBankingRoutes(TestRoutes):
         )
         # Returns the "Bank Accounts" page with the new account added
         assert self.page_header_includes_substring("Bank Accounts")
-        assert self.tag_count_is_equal(2, "div", class_="bank-block")
+        assert self.tag_count_is_equal(2, "div", class_="bank-stack")
         assert self.tag_count_is_equal(4, "div", class_="account-block")
         digit_tags = self.soup.find_all("span", class_="digits")
         assert any(tag.text == "8888" for tag in digit_tags)
@@ -63,7 +63,7 @@ class TestBankingRoutes(TestRoutes):
         )
         # Returns the "Bank Accounts" page with the new account added
         assert self.page_header_includes_substring("Bank Accounts")
-        assert self.tag_count_is_equal(3, "div", class_="bank-block")
+        assert self.tag_count_is_equal(3, "div", class_="bank-stack")
         assert self.tag_count_is_equal(4, "div", class_="account-block")
         digit_tags = self.soup.find_all("span", class_="digits")
         assert any(tag.text == "8888" for tag in digit_tags)
@@ -73,7 +73,7 @@ class TestBankingRoutes(TestRoutes):
         self.get_route("/delete_account/3", follow_redirects=True)
         assert self.page_header_includes_substring("Bank Accounts")
         # 2 banks for the user, with 2 total accounts
-        assert self.tag_count_is_equal(2, "div", class_="bank-block")
+        assert self.tag_count_is_equal(2, "div", class_="bank-stack")
         assert self.tag_count_is_equal(2, "div", class_="account-block")
 
     def test_load_account_summaries(self, authorization):
@@ -81,11 +81,10 @@ class TestBankingRoutes(TestRoutes):
         assert self.page_header_includes_substring("Bank Account Summaries")
         # 2 accounts (1 checking, 1 savings)
         total_balance = 42.00 + 43.00 + 300 + 58.90 - 109.21 - 300
-        assert self.soup.find(
-            "h2", class_="bank", string=f"Jail (${total_balance:.2f})"
-        )
-        self.tag_count_is_equal(2, "div", class_="account-type-block")
-        self.tag_count_is_equal(2, "span", class_="digits", string="5556")
+        assert self.tag_exists("h2", class_="bank", string="Jail")
+        assert self.tag_exists("h3", class_="balance", string=f"${total_balance:,.2f}")
+        self.tag_count_is_equal(2, "div", class_="account-type-stack")
+        self.tag_count_is_equal(2, "span", class_="stack-title-info", string="5556")
         self.tag_count_is_equal(1, "b", string="Savings")
         self.tag_count_is_equal(1, "b", string="Checking")
 

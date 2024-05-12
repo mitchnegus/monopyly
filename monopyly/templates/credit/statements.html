@@ -1,15 +1,16 @@
 <div id="credit-statements">
 
-  {% for card in card_statements %}
+  {% for card, statements in card_statements|items %}
 
-    <div class="card-column grouping">
+    <div class="card-stack group-stack">
 
-      <div>
-        <b>{{ card.account.bank.bank_name }}</b> <span class="digits">{{ card.last_four_digits }}</span>
-      </div>
+      <h2 class="stack-title">
+        {{ card.account.bank.bank_name }}
+        <span class="stack-title-info">{{ card.last_four_digits }}</span>
+      </h2>
 
       <div class="statement-blocks">
-        {% for statement in card_statements[card] %}
+        {% for statement in statements %}
           {% if statement.balance is not none %}
 
             <a class="statement-block button-block" href="{{ url_for('credit.load_statement_details', statement_id=statement.id) }}">

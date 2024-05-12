@@ -19,8 +19,8 @@
       {% set bank_accounts = bank.bank_accounts %}
       {% if bank_accounts %}
 
-        <div class="bank-block grouping">
-          <h3>{{ bank.bank_name }}</h3>
+        <div class="bank-stack group-stack">
+          <h2 class="stack-title">{{ bank.bank_name }}</h2>
 
           <div class="account-blocks box-table">
             {% for account in bank_accounts %}
