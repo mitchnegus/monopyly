@@ -12,8 +12,10 @@ from ..banking.accounts import BankAccountHandler
 from ..banking.banks import BankHandler
 from ..credit.cards import CreditCardHandler
 from ..credit.statements import CreditStatementHandler
-from .actions import format_readme_as_html_template
+from .actions import convert_changelog_to_html_template, convert_readme_to_html_template
 from .blueprint import bp
+
+APP_ROOT_DIR = Path(__file__).parents[1]
 
 
 @bp.route("/")
@@ -54,11 +56,16 @@ def hide_homepage_block():
 
 @bp.route("/about")
 def about():
-    readme_path = Path(__file__).parents[1] / "README.md"
-    with readme_path.open(encoding="utf-8") as readme_file:
-        raw_readme_text = readme_file.read()
-    about_page_template = format_readme_as_html_template(raw_readme_text)
+    readme_path = APP_ROOT_DIR / "README.md"
+    about_page_template = convert_readme_to_html_template(readme_path)
     return render_template_string(about_page_template)
+
+
+@bp.route("/changelog")
+def changelog():
+    changelog_path = APP_ROOT_DIR / "CHANGELOG.md"
+    changelog_page_template = convert_changelog_to_html_template(changelog_path)
+    return render_template_string(changelog_page_template)
 
 
 @bp.route("/story")

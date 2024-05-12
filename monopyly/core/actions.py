@@ -10,28 +10,87 @@ def get_timestamp():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
-def format_readme_as_html_template(readme_text):
-    """Given the README text in Markdown, convert it to a renderable HTML template."""
-    # Convert Markdown to HTML
-    raw_html_readme = markdown.markdown(readme_text, extensions=["fenced_code"])
-    # Replace README relative links with app relevant links
-    html_readme = raw_html_readme.replace('src="monopyly/static', 'src="/static')
-    # Format the HTML as a valid Jinja template
-    html_readme_template = (
-        '{% extends "layout.html" %}'
-        "{% block title %}About{% endblock %}"
-        "{% block content %}"
-        '  <div id="readme" class="about">'
-        f"    {html_readme}"
-        '    <div class="resource-links">'
-        "      <h2>Links</h2>"
-        '      <p><a href="{{ url_for("core.story") }}">Story</a></p>'
-        '      <p><a href="{{ url_for("core.credits") }}">Credits</a></p>'
-        "    </div>"
-        "  </div>"
-        "{% endblock %}"
+class MarkdownConverter:
+
+    replacements = {
+        "src": [
+            ["monopyly/static", "/static"],
+        ],
+        "href": [
+            ["README.md", '{{ url_for("core.about") }}'],
+            ["CHANGELOG.md", '{{ url_for("core.changelog") }}'],
+        ],
+    }
+
+    @classmethod
+    def convert(cls, markdown_path, title, id_="", class_="", extra_content=""):
+        """Given a Markdown file, convert it to a renderable HTML template."""
+        raw_markdown = cls._read_markdown(markdown_path)
+        html_content = cls._convert_markdown_to_html(raw_markdown)
+        return cls._generate_html_template(
+            html_content, title, id_=id_, class_=class_, extra_content=extra_content
+        )
+
+    @staticmethod
+    def _read_markdown(markdown_path):
+        with markdown_path.open(encoding="utf-8") as markdown_file:
+            raw_markdown = markdown_file.read()
+        return raw_markdown
+
+    @classmethod
+    def _convert_markdown_to_html(cls, raw_markdown):
+        raw_html = markdown.markdown(raw_markdown, extensions=["fenced_code"])
+        return cls._replace_links(raw_html)
+
+    @classmethod
+    def _replace_links(cls, raw_html):
+        html = raw_html
+        for tag, pairs in cls.replacements.items():
+            for original, replacement in pairs:
+                html = html.replace(f'{tag}="{original}', f'{tag}="{replacement}')
+        return html
+
+    @staticmethod
+    def _generate_html_template(content, title, id_="", class_="", extra_content=""):
+        # Format the HTML as a valid Jinja template
+        html_template = (
+            '{% extends "layout.html" %}'
+            "{% block title %}"
+            f"  {title}"
+            "{% endblock %}"
+            "{% block content %}"
+            f'  <div id="{id_}" class="{class_}">'
+            f"    {content}"
+            f"    {extra_content}"
+            "{% endblock %}"
+        )
+        return html_template
+
+
+def convert_readme_to_html_template(readme_path):
+    """Given a README file in Markdown, convert it to a renderable HTML template."""
+    return MarkdownConverter.convert(
+        readme_path,
+        title="About",
+        id_="readme",
+        class_="about",
+        extra_content=(
+            '<div class="resource-links">'
+            "  <h2>Links</h2>"
+            '  <p><a href="{{ url_for("core.story") }}">Story</a></p>'
+            '  <p><a href="{{ url_for("core.credits") }}">Credits</a></p>'
+            "</div>"
+        ),
     )
-    return html_readme_template
+
+
+def convert_changelog_to_html_template(changelog_path):
+    """Given a CHANGELOG file in Markdown, convert it to a renderable HTML template."""
+    return MarkdownConverter.convert(
+        changelog_path,
+        title="Changes",
+        id_="changelog",
+    )
 
 
 def determine_summary_balance_svg_viewbox_width(currency_value):

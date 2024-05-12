@@ -6,8 +6,9 @@ from unittest.mock import patch
 import pytest
 
 from monopyly.core.actions import (
+    convert_changelog_to_html_template,
+    convert_readme_to_html_template,
     determine_summary_balance_svg_viewbox_width,
-    format_readme_as_html_template,
     get_timestamp,
 )
 
@@ -19,18 +20,36 @@ def test_get_timestamp(mock_datetime_module):
     assert timestamp == "20230401_000000"
 
 
-def test_format_readme_as_html_template():
-    test_readme = (
-        "# Header\n"
-        "This is text on the first line.\n"
-        "This is text on the second line, along with a [link](link_url).\n"
-        "![image](monopyly/static/image_url)\n"
-        "This is text after the image.\n"
-    )
-    html_readme_template = format_readme_as_html_template(test_readme)
+def test_convert_readme_to_html_template(tmp_path):
+    test_readme_path = tmp_path / "test_readme.md"
+    with test_readme_path.open("w") as test_file:
+        test_file.write(
+            "# Header\n"
+            "This is text on the first line.\n"
+            "This is text on the second line, along with a [link](link_url).\n"
+            "![image](monopyly/static/image_url)\n"
+            "This is text after the image.\n"
+        )
+    html_readme_template = convert_readme_to_html_template(test_readme_path)
     assert '{% extends "layout.html" %}' in html_readme_template
     assert "<h1>Header</h1>" in html_readme_template
     assert '<img alt="image" src="/static/image_url" />' in html_readme_template
+
+
+def test_convert_changelog_to_html_template(tmp_path):
+    test_changelog_path = tmp_path / "test_changelog.md"
+    with test_changelog_path.open("w") as test_file:
+        test_file.write(
+            "# Header\n"
+            "This is text on the first line.\n"
+            "This is text on the second line, along with a [link](link_url).\n"
+            'The third line also has a link to the <a href="README.md">README</a>.\n'
+            "This is text after the image.\n"
+        )
+    html_changelog_template = convert_changelog_to_html_template(test_changelog_path)
+    assert '{% extends "layout.html" %}' in html_changelog_template
+    assert "<h1>Header</h1>" in html_changelog_template
+    assert '<a href="{{ url_for("core.about") }}">' in html_changelog_template
 
 
 @pytest.mark.parametrize(

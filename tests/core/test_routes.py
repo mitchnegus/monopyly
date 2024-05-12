@@ -54,6 +54,12 @@ class TestCoreRoutes(TestRoutes):
         self.get_route("/about")
         assert self.tag_exists("h4", id="tagline", string="The Money Game")
 
+    def test_changelog(self):
+        self.get_route("/changelog")
+        assert self.tag_exists("h1", string="Changelog")
+        assert self.anchor_exists(string="Latest")
+        assert self.tag_exists("h2", string="1.0.0")
+
     def test_story(self, auth):
         auth.login()
         self.get_route("/story")

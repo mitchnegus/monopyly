@@ -2029,6 +2029,26 @@ form .autocomplete-box .item.active {
   margin: 0 0 5px 0;
 }
 
+#changelog {
+  width: 80%;
+  margin: 0 auto;
+}
+
+#changelog h1 {
+  font-size: 32pt;
+  text-align: center;
+}
+
+#changelog h2 {
+  border-bottom: 1px solid var(--border-gray);
+}
+
+#changelog a.latest-release {
+  display: block;
+  margin: 30px 0;
+  font-size: 1.5em;
+}
+
 #story .signature {
   margin-bottom: 100px;
   font-weight: bold;
