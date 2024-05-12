@@ -174,7 +174,7 @@
 - Add a convenience method to the statement handler for getting the preceding statement
 
 
-### 1.4.7 (in progress)
+### 1.4.7
 
 - Create custom error pages for error responses (400, 404, 500, etc.)
 - Render the changelog and show it via the app
