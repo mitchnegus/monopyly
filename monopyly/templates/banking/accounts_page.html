@@ -51,22 +51,18 @@
 
   <section id="bank-account-settings">
 
-    <div id="account-type-container">
-      <h2>Bank Account Types</h2>
+    <div id="account-type-container" class="box-table">
+      <h2 class="box-header">Bank Account Types</h2>
+      {% for account_type in account_types %}
 
-      <div class="account-types">
-        {% for account_type in account_types %}
+        <div class="account-type box-row">
+          {{ account_type.type_name }}
+          {% if account_type.type_abbreviation %}
+            ({{ account_type.type_abbreviation }})
+          {% endif %}
+        </div>
 
-          <div class="account-type">
-            {{ account_type.type_name }}
-            {% if account_type.type_abbreviation %}
-              ({{ account_type.type_abbreviation }})
-            {% endif %}
-          </div>
-
-        {% endfor %}
-      </div>
-
+      {% endfor %}
     </div>
 
   </section>
