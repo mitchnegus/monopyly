@@ -46,6 +46,12 @@ form {
   width: 50%;
   margin: auto;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form {
+    width: 90%;
+  }
+}
 
 input {
   color: inherit;
@@ -74,6 +80,7 @@ pre code {
   margin: 5px 0;
   padding: 10px 20px;
   border: 1px solid #eeeeee;
+  overflow: auto;
 }
 
 code {
@@ -98,7 +105,7 @@ header#masthead {
   border-style: solid;
   border-color: var(--moneytree-leaves);
   background-color: var(--masthead-color);
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 #masthead a {
@@ -110,6 +117,13 @@ header#masthead {
   align-items: center;
   width: 90%;
   margin: 0 auto;
+}
+
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #masthead .container a {
+    z-index: 2; /* ensure the logo is on top of the header menu */
+  }
 }
 
 .monopyly-logo {
@@ -132,32 +146,151 @@ header#masthead {
 /*
  * Display navigation links inline
  */
-#nav-menu {
+#header-menu {
+  display: flex;
+  flex-direction: column;
   margin-left: auto;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #header-menu {
+    position: fixed;
+    top: 0;
+    width: 90%;
+    align-items: flex-end;
+    z-index: 1;
+  }
+}
 
-#nav-menu li {
+#header-menu a.toggle-button {
+  display: none;
+  align-items: center;
+  height: var(--masthead-height);
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #header-menu a.toggle-button {
+    display: flex;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #header-menu ul.menu-links {
+    display: none;
+    flex-direction: column;
+    list-style-type: none;
+    width: min-content;
+    margin: 0;
+    padding: 0;
+    border-top: 3px solid var(--moneytree-leaves);
+  }
+}
+
+#header-menu li {
   display: inline;
 }
-
-#nav-menu li + li {
-  margin-left: 35px;
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #header-menu li {
+    padding: 15px 25px;
+    border-bottom: 1px solid gray;
+    border-right: 2px solid gray;
+    border-left: 1px solid gray;
+    background-color: var(--masthead-color);
+    font-weight: bold;
+    white-space: nowrap;
+    letter-spacing: 0.25px;
+  }
+  #header-menu li:last-of-type {
+    padding-bottom: 15px;
+    border-bottom: 2px solid gray;
+  }
 }
 
-#nav-menu li a {
+#header-menu li + li {
+  margin-left: 35px;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #header-menu li + li {
+    margin-left: 0;
+  }
+}
+
+#header-menu li a {
   color: #bbbbbb;
 }
 
-#nav-menu li a:hover {
+#header-menu li a:hover {
   color: #cdcdcd;
 }
 
-#nav-menu li .username {
+#header-menu li .username {
   color: #777777;
 }
 
-#nav-menu li .username:hover {
+#header-menu li .username:hover {
   color: var(--moneytree-leaves);
+}
+
+
+/*
+ * Style the mobile icon for toggling the mobile header navigation menu
+ */
+.mobile-menu {
+  display: none;
+  width: 50px;
+  user-select: none;
+  cursor: pointer;
+  transition: transform 300ms;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .mobile-menu {
+    display: block;
+  }
+}
+
+.mobile-menu-rotate.active {
+  transform: rotate(45deg);
+}
+
+.line {
+  fill: none;
+  transition: stroke-dasharray 300ms, stroke-dashoffset 300ms;
+  stroke: white;
+  stroke-width: 5.5;
+  stroke-linecap: round;
+}
+
+.mobile-menu .top {
+  stroke-dasharray: 40 160;
+}
+
+.mobile-menu .middle {
+  stroke-dasharray: 40 142;
+  transform-origin: 50%;
+  transition: transform 300ms;
+}
+
+.mobile-menu .bottom {
+  stroke-dasharray: 40 85;
+  transform-origin: 50%;
+  transition: transform 300ms, stroke-dashoffset 300ms;
+}
+
+.mobile-menu.active .top {
+  stroke-dashoffset: -64px;
+}
+
+.mobile-menu.active .middle {
+  //stroke-dashoffset: -20px;
+  transform: rotate(90deg);
+}
+
+.mobile-menu.active .bottom {
+  stroke-dashoffset: -64px;
 }
 
 
@@ -172,6 +305,12 @@ footer#site-info {
   color: var(--silver-dollar);
   font-size: 9pt;
   text-align: center;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #site-info p {
+    font-size: 8pt;
+  }
 }
 
 #site-info span {
@@ -193,6 +332,13 @@ footer#site-info {
 #page .container {
   width: 80%;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #page .container {
+    width: 90%;
+    margin: auto;
+  }
+}
 
 aside.sidebar {
   display: flex;
@@ -202,6 +348,12 @@ aside.sidebar {
   width: 10%;
   min-width: 50px;
   margin-top: 50px; /* account for content header */
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  aside.sidebar {
+    display: none;
+  }
 }
 
 #content-header h1 {
@@ -214,20 +366,43 @@ aside.sidebar {
   font-size: 2em;
   letter-spacing: -2px;
 }
-
-#content-header h1.error {
-  text-align: left;
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #content-header h1 {
+    font-size: 1.8em;
+  }
 }
 
 
 /*
  * Provide styles for error pages
  */
-.error span.code {
+#content-header h1.error {
+  text-align: left;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #content-header h1.error {
+    height: 100px;
+    font-size: 2em;
+  }
+}
+
+#content-header h1.error span.code {
   margin-left: 30px;
   color: var(--silver-dollar);
   font-weight: 300;
   letter-spacing: 1px;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #content-header h1.error span.code {
+    display: block;
+    height: 30px;
+    margin-top: 15px;
+    margin-left: 0;
+    font-size: 0.75em;
+  }
 }
 
 .custom-error-content p {
@@ -853,14 +1028,43 @@ form .autocomplete-box .item.active {
 }
 
 .box-table .box-row {
+  padding: 10px;
   border-top: 0.5px solid var(--border-gray);
   border-bottom: 0.5px solid var(--border-gray);
   background-color: #f5f5f5;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .box-table .box-row {
+    font-size: 0.8em;
+  }
+}
 
-.box-table .box-row:hover {
+.box-table .box-row.action:hover {
   cursor: pointer;
   filter: brightness(0.98);
+}
+
+.box-table .box-header {
+  margin: 0;
+  padding: 10px;
+  border-bottom: 2px solid var(--border-gray);
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .box-table .box-header {
+    font-size: 1.2em;
+  }
+}
+
+.group-stack .box-table .box-row {
+  padding: 25px 30px;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .group-stack .box-table .box-row {
+    padding: 15px 30px;
+  }
 }
 
 
@@ -1086,11 +1290,27 @@ form .autocomplete-box .item.active {
   box-sizing: border-box;
   margin: 0 10px;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .column {
+    margin: 0 5px;
+  }
+  .transactions-table .column:last-of-type {
+    margin-right: 20px;
+  }
+}
 
 .transactions-table .date.column {
   flex: 1;
   min-width: 100px;
   text-align: center;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .date.column {
+    width: min-content;
+    min-width: min-content;
+  }
 }
 
 .transactions-table .merchant.column {
@@ -1107,6 +1327,12 @@ form .autocomplete-box .item.active {
 
 .transactions-table .amount.column {
   min-width: 100px;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .amount.column {
+    min-width: 80px;
+  }
 }
 
 .transactions-table .balance.column {
@@ -1149,6 +1375,12 @@ form .autocomplete-box .item.active {
   margin: 0 0 0 20px;
   padding: 5px 10px;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .buttons.column {
+    display: none;
+  }
+}
 
 .transactions-table .titles,
 .transactions-table .transaction {
@@ -1186,6 +1418,12 @@ form .autocomplete-box .item.active {
   height: 25px;
   transition: background-color 0.1s ease;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .condensed {
+    height: 30px;
+  }
+}
 
 .transactions-table .transaction .condensed:hover {
   background-color: #fafafa;
@@ -1195,6 +1433,12 @@ form .autocomplete-box .item.active {
   display: flex;
   flex-direction: column;
   visibility: hidden;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .buttons {
+    display: none;
+  }
 }
 
 .transactions-table .transaction:hover .buttons {
@@ -1343,7 +1587,7 @@ form .autocomplete-box .item.active {
   }
 }
 @media screen and (max-width: 1050px) {
-  /* Disable transitions for mobile switch */
+  /* Disable transitions for reduced view */
   .transactions-table .transaction .expanded .setting .description-header {
     transition: all 0s;
   }
@@ -1706,6 +1950,13 @@ form .autocomplete-box .item.active {
   min-width: 500px;
   margin: 0 0 0 0;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .details .summary-container {
+    width: 100%;
+    min-width: 250px;
+  }
+}
 
 .details .summary-box {
   display: flex;
@@ -1717,15 +1968,27 @@ form .autocomplete-box .item.active {
   box-shadow: 1px 1px 5px #dddddd;
   background-color: #f8f8f8;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .details .summary-box {
+    width: 80%;
+    padding: 20px 25px 30px;
+  }
+}
 
 .details .summary-box .balance {
   display: flex;
   justify-content: space-between;
+  width: 100%;
   margin: 20px 0;
   font-size: 72pt;
   font-weight: bold;
   letter-spacing: 1px;
   text-align: center;
+}
+
+.details .summary-box .balance svg {
+  width: 100%;
 }
 
 .details .summary-box .projected-balance .amount {
@@ -1740,6 +2003,12 @@ form .autocomplete-box .item.active {
 .details .summary-box .title {
   font-size: 28pt;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .details .summary-box .title {
+    font-size: 20pt;
+  }
+}
 
 .details .summary-box .suptitle,
 .details .summary-box .subtitle {
@@ -1750,7 +2019,7 @@ form .autocomplete-box .item.active {
 
 .details .summary-box .suptitle {
   margin-bottom: 10px;
-  font-size: 14pt;
+  font-size: 12pt;
 }
 
 .details .summary-box .subtitle {
@@ -1767,6 +2036,13 @@ form .autocomplete-box .item.active {
     width: 50%;
     order: 1;
     margin-top: 50px;
+  }
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .details .transactions-container {
+    width: 90%;
+    min-width: 200px;
   }
 }
 
@@ -1880,7 +2156,7 @@ form .autocomplete-box .item.active {
  */
 #homepage-block {
   margin-bottom: 20px;
-  padding: 0 0 30px 0;
+  padding: 10px 10px 25px;
   background-color: gainsboro;
   border: 1px solid lightgray;
   border-radius: 6px;
@@ -1888,27 +2164,45 @@ form .autocomplete-box .item.active {
 }
 
 #homepage-block h2 {
-  margin: 0 0;
+  margin: 10px 0;
   font-size: 3em;
   letter-spacing: -2px;
   text-align: center;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #homepage-block h2 {
+    font-size: 2em;
+  }
+}
 
 #homepage-block h3 {
   margin: 25px 0;
+  padding: 0 20px;
   color: #777777;
   font-size: 1.7em;
   font-weight: 100;
   letter-spacing: 0.5px;
   text-align: center;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #homepage-block h3 {
+    font-size: 1em;
+  }
+}
 
 #homepage-block .buttons {
   display: flex;
   justify-content: flex-end;
   height: 30px;
-  padding: 10px;
   filter: brightness(0.90);
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #homepage-block .buttons {
+    filter: brightness(0.95);
+  }
 }
 
 #homepage-block .button {
@@ -1916,15 +2210,47 @@ form .autocomplete-box .item.active {
   opacity: 0;
   transition: opacity 0.5s ease;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #homepage-block .button {
+    opacity: 100%;
+  }
+}
 
 #homepage-block:hover .button {
   opacity: 100%;
+}
+
+#homepage-suggestion {
+  display: none;
+  padding: 20px;
+  color: gray;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #homepage-suggestion {
+    display: block;
+  }
+}
+
+#homepage-suggestion p {
+  margin: 25px 0;
+}
+
+#homepage-suggestion p.register {
+  font-size: 0.8em;
 }
 
 #homepage-panels {
   display: flex;
   justify-content: space-between;
   width: 100%;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #homepage-panels {
+    flex-direction: column;
+  }
 }
 
 #homepage-panels .panel {
@@ -1936,6 +2262,12 @@ form .autocomplete-box .item.active {
   border: 1px solid #f5f5f5;
   box-shadow: 2px 2px 5px var(--silver-dollar);
   background-color: #fafafa;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #homepage-panels .panel {
+    margin: 20px 0;
+  }
 }
 
 #homepage-panels div:first-of-type {
@@ -2000,9 +2332,31 @@ form .autocomplete-box .item.active {
   margin: auto;
   text-align: justify;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .about {
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .about p {
+    margin: 20px 0;
+    font-size: 10pt;
+    line-height: 1.5;
+  }
+}
+
 
 #readme #header {
   margin: 40px 0;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #readme #header {
+    margin: 20px 0 30px;
+  }
 }
 
 #readme #title {
@@ -2038,6 +2392,13 @@ form .autocomplete-box .item.active {
   width: 80%;
   margin: 0 auto;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #changelog {
+    width: 90%;
+    font-size: 10pt;
+  }
+}
 
 #changelog h1 {
   font-size: 32pt;
@@ -2053,6 +2414,12 @@ form .autocomplete-box .item.active {
   margin: 30px 0;
   font-size: 1.5em;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #changelog a.latest-release {
+    text-align: center;
+  }
+}
 
 #story .signature {
   margin-bottom: 100px;
@@ -2060,21 +2427,56 @@ form .autocomplete-box .item.active {
   font-style: oblique;
   text-align: right;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #story .signature {
+    margin-top: 30px;
+  }
+}
 
+#credits .affiliation-disclaimer {
+  margin-top: 200px;
+  padding: 10px 20px;
+  border: 1px solid var(--border-gray);
+  border-radius: 10px;
+  background-color: whitesmoke;
+  font-size: 8pt;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credits .affiliation-disclaimer {
+    padding: 10px 10px;
+  }
+}
 
-/*
- * Customization for the 'Credits' page
- */
-.affiliation-disclaimer {
-  margin-top: 80px;
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credits .affiliation-disclaimer p {
+    font-size: 8pt;
+    line-height: 1.25;
+  }
 }
 
 
 /*
  * Customization for the 'Profile' page
  */
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #profile {
+    width: 90%;
+    margin: auto;
+  }
+}
+
 #profile h2 {
   font-size: 24pt;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #profile h2 {
+    font-size: 20pt;
+  }
 }
 
 #profile .username-section {
@@ -2098,12 +2500,24 @@ form .autocomplete-box .item.active {
   margin-right: 10%;
   margin-bottom: 60px;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #profile .profile-section {
+    margin-bottom: 25px;
+  }
+}
 
 #profile .settings.profile-section {
   flex-basis: 100%;
   margin-right: 0;
   padding-bottom: 50px;
   border-bottom: 0.5px solid var(--border-gray);
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #profile .settings.profile-section {
+    padding-bottom: 25px;
+  }
 }
 
 #profile .banking.profile-section .bank-list {
@@ -2131,10 +2545,6 @@ form .autocomplete-box .item.active {
   text-align: left;
 }
 
-#bank-container .account-block {
-  padding: 25px 30px;
-}
-
 #bank-container .account-block .account-info {
   display: flex;
   align-items: center;
@@ -2156,30 +2566,21 @@ form .autocomplete-box .item.active {
 }
 
 #bank-account-settings {
-  margin: 50px 0 25px;
-  padding: 0 25px;
+  margin: 50px 25px 25px;
 }
 
 #account-type-container {
-  width: 30%;
+  width: 40%;
   min-width: 350px;
   border: 2px solid var(--border-gray);
   background-color: #f5f5f5;
 }
-
-#account-type-container h2 {
-  margin: 0;
-  padding: 10px;
-}
-
-#account-type-container .account-types {
-  border-top: 2px solid var(--border-gray);
-}
-
-#account-type-container .account-type {
-  padding: 10px;
-  border-top: 0.5px solid var(--border-gray);
-  border-bottom: 0.5px solid var(--border-gray);
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #account-type-container {
+    width: 100%;
+    min-width: 200px;
+  }
 }
 
 
@@ -2274,6 +2675,13 @@ form#bank-account .hidden {
     min-width: 450px;
   }
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #balance-chart-container {
+    width: 90%;
+    min-width: 200px;
+  }
+}
 
 #balance-chart .ct-chart-line {
   overflow: visible;
@@ -2285,6 +2693,13 @@ form#bank-account .hidden {
 
 #balance-chart .ct-line {
   stroke-width: 2px;
+}
+
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #balance-chart .ct-label {
+    font-size: 0.5rem;
+  }
 }
 
 
