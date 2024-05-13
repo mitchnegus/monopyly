@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
+
   {% if session["show_homepage_block"] %}
     <div id="homepage-block">
       <div class="buttons">
@@ -147,7 +148,16 @@
       </div>
 
     </div>
+  {% else %}
+    <div id="homepage-suggestion">
+      <p class="login">
+        <a href="{{ url_for('auth.login') }}">Login</a> to get started.
+      </p>
+      <p class="register">
+        Not yet registered? <a href="{{ url_for('auth.register') }}">Create an account</a> to begin using the app.
+      </p>
   {% endif %}
+
 {% endblock %}
 
 {% block javascript %}
