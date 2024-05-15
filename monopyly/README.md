@@ -22,7 +22,7 @@ To install the app, simply run
 $ pip install monopyly
 ```
 
-The package requires a recent version of Python (3.9+).
+The package requires a recent version of Python (3.10+).
 
 
 ## Getting started
