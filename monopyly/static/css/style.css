@@ -123,6 +123,11 @@ header#masthead {
   filter: brightness(0.95);
 }
 
+.monopyly-logo .development-mode {
+  font-weight: normal;
+  text-transform: none;
+}
+
 
 /*
  * Display navigation links inline
