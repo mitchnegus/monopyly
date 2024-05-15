@@ -43,7 +43,12 @@
       <div class="container">
 
         <a href="{{ url_for('core.index') }}">
-          <h1 class="monopyly-logo">Monopyly</h1>
+          <h1 class="monopyly-logo">
+            Monopyly
+            {%- if config['DEBUG'] -%}
+              <span class="development-mode">.dev</span>
+            {%- endif -%}
+          </h1>
         </a>
 
         <nav id="nav-menu">
@@ -52,7 +57,11 @@
             <li><a href="{{ url_for('core.index') }}">Home</a></li>
             <li><a href="{{ url_for('core.about') }}">About</a></li>
             {% if g.user %}
-              <li><a href="{{url_for('core.load_profile') }}" class="username">{{ g.user.username }}</a></li>
+              <li>
+                <a href="{{url_for('core.load_profile') }}" class="username">
+                  {{ g.user.username }}
+                </a>
+              </li>
               <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
             {% else %}
               <li><a href="{{ url_for('auth.register') }}">Register</a></li>
