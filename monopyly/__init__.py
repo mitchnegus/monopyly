@@ -1,5 +1,5 @@
 """
-Run a development server for the Monopyly app.
+Run the Monopyly app.
 """
 
 from flask import Flask

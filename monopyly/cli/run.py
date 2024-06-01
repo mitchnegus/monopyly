@@ -16,7 +16,7 @@ from rich.console import Console
 
 from .apps import DevelopmentApplication, LocalApplication, ProductionApplication
 
-# Set the Flask environment variable
+# Set the Flask environment variable (to specify the app to use)
 os.environ["FLASK_APP"] = "monopyly"
 
 
