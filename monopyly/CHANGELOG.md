@@ -188,6 +188,7 @@
 ### 1.4.8 (in progress)
 
 - Set username collection to be case insensitive
+- Fix bug in the ordering of balances in the bank account balance charts for transactions on duplicate dates
 
 
 <a name="bottom" id="bottom"></a>

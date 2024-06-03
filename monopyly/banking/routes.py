@@ -79,7 +79,8 @@ def load_account_details(account_id):
         "banking/account_page.html",
         account=account,
         account_transactions=transactions[:100],
-        chart_data=get_balance_chart_data(transactions),
+        # Reverse the chart transactions to be chronologically ascending
+        chart_data=get_balance_chart_data(reversed(transactions)),
     )
 
 
