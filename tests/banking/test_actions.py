@@ -1,6 +1,9 @@
 """Tests for the actions performed by the banking blueprint."""
 
+from datetime import date
 from unittest.mock import Mock, call, patch
+
+import pytest
 
 from monopyly.banking.actions import (
     get_balance_chart_data,
@@ -30,11 +33,49 @@ def test_get_bank_account_type_grouping(mock_types_method, mock_accounts_method)
 
 @patch("monopyly.banking.actions.convert_date_to_midnight_timestamp")
 def test_get_balance_chart_data(mock_timestamp_converter):
-    mock_timestamp = mock_timestamp_converter.return_value
+    mock_timestamps = [1577862000, 1577948400, 1578034800]
+    mock_timestamp_converter.side_effect = mock_timestamps
     mock_transactions = [Mock(balance=balance) for balance in [100, 200, 400]]
     data = get_balance_chart_data(mock_transactions)
-    assert data == [
-        (mock_timestamp_converter.return_value, 100),
-        (mock_timestamp_converter.return_value, 200),
-        (mock_timestamp_converter.return_value, 400),
+    for i, point in enumerate(data):
+        assert point[0] == mock_timestamps[i]
+        assert point[1] == mock_transactions[i].balance
+
+
+@pytest.mark.parametrize(
+    "mock_timestamps, mock_transaction_dates, offsets",
+    [
+        [
+            [1577862000, 1577948400, 1577948400, 1578034800],
+            [date(2020, 1, 1)] + 2 * [date(2020, 1, 2)] + [date(2020, 1, 3)],
+            {2: (86_400_000 / 2)},
+        ],
+        [
+            [1577862000, 1577948400, 1577948400, 1577948400, 1578034800],
+            [date(2020, 1, 1)] + 3 * [date(2020, 1, 2)] + [date(2020, 1, 3)],
+            {2: (86_400_000 / 3), 3: 2 * (86_400_000 / 3)},
+        ],
+        [
+            [1577862000, 1577948400, 1577948400, 1577948400, 1578034800, 1578034800],
+            [date(2020, 1, 1)] + 3 * [date(2020, 1, 2)] + 2 * [date(2020, 1, 3)],
+            {
+                2: 1 * (86_400_000 / 3),
+                3: 2 * (86_400_000 / 3),
+                5: 1 * (86_400_000 / 2),
+            },
+        ],
+    ],
+)
+@patch("monopyly.banking.actions.convert_date_to_midnight_timestamp")
+def test_get_balance_chart_data_duplicate_dates(
+    mock_timestamp_converter, mock_timestamps, mock_transaction_dates, offsets
+):
+    mock_timestamp_converter.side_effect = sorted(set(mock_timestamps))
+    mock_transactions = [
+        Mock(transaction_date=date_, balance=100 * i)
+        for i, date_ in enumerate(mock_transaction_dates, start=1)
     ]
+    data = get_balance_chart_data(mock_transactions)
+    for i, point in enumerate(data):
+        assert point[0] == mock_timestamps[i] + offsets.get(i, 0)
+        assert point[1] == mock_transactions[i].balance

@@ -184,4 +184,9 @@
 - Refresh the table of transactions after making a payment on a credit card statement
 - Use SVG to handle long values in account/statement summary boxes; fixes bugs in page rendering (long value overflow) and hover actions not happening because of conflicting overlap with the sidebar
 
+
+### 1.4.8
+
+- Fix bug in the ordering of balances in the bank account balance charts for transactions on duplicate dates
+
 <a name="bottom" id="bottom"></a>

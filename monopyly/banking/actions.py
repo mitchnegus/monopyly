@@ -1,5 +1,7 @@
 """Module describing logical banking actions (to be used in routes)."""
 
+from collections import UserList, namedtuple
+
 from ..common.utils import convert_date_to_midnight_timestamp
 from .accounts import BankAccountHandler, BankAccountTypeHandler
 
@@ -29,16 +31,55 @@ def get_balance_chart_data(transactions):
     Returns
     -------
     chart_data : list
-        A list of sorted (x, y) pairs consisting of the Unix timestamp
-        (in milliseconds) and the bank account balance.
+        A list containing (x, y) pairs, each consisting of the Unix
+        timestamp (in milliseconds) and the bank account balance.
     """
-    chart_data = sorted(map(_make_transaction_balance_ordered_pair, transactions))
-    return chart_data
+    return list(_BalanceChartData(transactions))
 
 
-def _make_transaction_balance_ordered_pair(transaction):
-    # Create an ordered pair of date (timestamp) and account balance
-    timestamp = convert_date_to_midnight_timestamp(
-        transaction.transaction_date, milliseconds=True
-    )
-    return timestamp, transaction.balance
+class _BalanceChartData(UserList):
+    """
+    A list of balances to be passed to a `chartist.js` chart constructor.
+
+    A special list-like object containing transaction data formatted for
+    use in a balance chart created by the `chartist.js` library. This
+    converts each transaction into an (x, y) pair consisting of a Unix
+    timestamp (in milleseconds) and a corresponding bank account
+    balance. For transactions occurring on the same day (the finest
+    granularity recorded by the Monopyly app), a slight offset is
+    added to each timestamp to guarantee a smooth representation in the
+    rendered chart.
+
+    Parameters
+    ----------
+    transactions : list
+        A list of transactions to be used for generating the chart data.
+    """
+
+    _DAILY_MILLISECONDS = 86_400_000
+    offset = 1
+    point = namedtuple("DataPoint", ["timestamp", "balance"])
+
+    def __init__(self, transactions):
+        super().__init__()
+        transaction_groups = self._group_transactions_by_date(transactions)
+        self._prepare_chart_data(transaction_groups)
+
+    @staticmethod
+    def _group_transactions_by_date(transactions):
+        date_groups = {}
+        for transaction in transactions:
+            group = date_groups.setdefault(transaction.transaction_date, [])
+            group.append(transaction)
+        return date_groups
+
+    def _prepare_chart_data(self, transaction_groups):
+        # Assign chart data to the list as tuples, adding offsets for duplicated dates
+        for transaction_date, transaction_group in transaction_groups.items():
+            base_timestamp = convert_date_to_midnight_timestamp(
+                transaction_date, milliseconds=True
+            )
+            offset = self._DAILY_MILLISECONDS / len(transaction_group)
+            for i, transaction in enumerate(transaction_group):
+                adjusted_timestamp = base_timestamp + (i * offset)
+                self.data.append((adjusted_timestamp, transaction.balance))
