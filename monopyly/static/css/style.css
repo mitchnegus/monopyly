@@ -132,6 +132,12 @@ header#masthead {
   font-size: 1.7em;
   text-transform: uppercase;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .monopyly-logo {
+    font-size: 1.2em;
+  }
+}
 
 .monopyly-logo:hover {
   filter: brightness(0.95);
@@ -140,6 +146,12 @@ header#masthead {
 .monopyly-logo .development-mode {
   font-weight: normal;
   text-transform: none;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .monopyly-logo .development-mode {
+    font-size: 0.6em;
+  }
 }
 
 
@@ -452,11 +464,9 @@ aside.sidebar {
   background-image: linear-gradient(#eeeeee, #e6e6e6);
   color: inherit;
 }
-
 .button-block:first-of-type {
   margin-top: 0;
 }
-
 .button-block:last-of-type {
   margin-bottom: 0;
 }
@@ -769,7 +779,6 @@ form .autocomplete-box .item.active {
 .sidebar-menu div:first-of-type {
   margin-top: 5px;
 }
-
 .sidebar-menu div:last-of-type {
   margin-bottom: 5px;
 }
@@ -1270,10 +1279,27 @@ form .autocomplete-box .item.active {
 
 .transactions-table .row {
   display: flex;
-  height: 100%;
-  width: 100%;
   align-items: center;
+  border-top: 0px solid var(--border-gray);
+  border-bottom: 1px solid var(--border-gray);;
 }
+
+.transactions-table .transaction.row {
+  flex-direction: column;
+  transition: border-bottom 0.2s ease,
+              border-top 0.2s ease;
+}
+
+.transactions-table .selected.transaction.row {
+  /*Make top & bottom borders approximately the same size */
+  border-top: 2px solid var(--border-gray);
+  border-bottom: 3px solid var(--border-gray);
+}
+
+.transactions-table .future.transaction.row {
+  color: #aaaaaa;
+}
+
 
 /* Define a region with row content (separate from actions/buttons) */
 .transactions-table .row-content {
@@ -1290,43 +1316,50 @@ form .autocomplete-box .item.active {
   box-sizing: border-box;
   margin: 0 10px;
 }
+.transactions-table .column:first-of-type {
+  margin-left: 30px;
+}
 @media screen and (max-width: 600px) {
   /* Mobile layout */
   .transactions-table .column {
     margin: 0 5px;
   }
-  .transactions-table .column:last-of-type {
-    margin-right: 20px;
+  .transactions-table .column:first-of-type {
+    margin-left: 20px;
   }
+}
+
+.transactions-table .text.column {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .transactions-table .date.column {
-  flex: 1;
-  min-width: 100px;
-  text-align: center;
-}
-@media screen and (max-width: 600px) {
-  /* Mobile layout */
-  .transactions-table .date.column {
-    width: min-content;
-    min-width: min-content;
-  }
+  width: 80px;
+  min-width: 80px;
 }
 
 .transactions-table .merchant.column {
-  flex: 3;
+  flex: 6;
   min-width: 180px;
 }
 
-.transactions-table .balance.column,
-.transactions-table .amount.column {
-  flex: 1;
-  text-align: right;
-  white-space: nowrap;
+.transactions-table .notes.column {
+  flex: 9;
+  min-width: 100px;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .notes.column {
+    display: none;
+  }
 }
 
+
 .transactions-table .amount.column {
-  min-width: 100px;
+  flex: 3;
+  min-width: 80px;
 }
 @media screen and (max-width: 600px) {
   /* Mobile layout */
@@ -1336,26 +1369,15 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .balance.column {
+  flex: 1;
   min-width: 80px;
 }
 
-.transactions-table .notes.column {
-  flex: 4;
-  min-width: 175px;
+.transactions-table .balance.column,
+.transactions-table .amount.column {
+  text-align: right;
   white-space: nowrap;
-  overflow: hidden;
 }
-@media screen and (max-width: 1000px) {
-  /* Mobile layout */
-  .transactions-table .notes.column {
-    display: none;
-  }
-}
-
-.transactions-table .notes.column:hover {
-  overflow: auto;
-}
-
 
 .transactions-table .card.column {
   flex: 1;
@@ -1371,20 +1393,13 @@ form .autocomplete-box .item.active {
 }
 
 .transactions-table .buttons.column {
-  min-width: 40px;
-  margin: 0 0 0 20px;
-  padding: 5px 10px;
+  width: 20px;
 }
 @media screen and (max-width: 600px) {
   /* Mobile layout */
   .transactions-table .buttons.column {
     display: none;
   }
-}
-
-.transactions-table .titles,
-.transactions-table .transaction {
-  border-bottom: 1px solid var(--border-gray);
 }
 
 .transactions-table .titles {
@@ -1403,47 +1418,20 @@ form .autocomplete-box .item.active {
   display: inline;
 }
 
-.transactions-table .transaction {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  transition: border 0.2s ease;
-}
-
-.transactions-table .transaction.future {
-  color: #aaaaaa;
-}
-
-.transactions-table .transaction .condensed {
-  height: 25px;
-  transition: background-color 0.1s ease;
-}
-@media screen and (max-width: 600px) {
-  /* Mobile layout */
-  .transactions-table .transaction .condensed {
-    height: 30px;
-  }
-}
-
-.transactions-table .transaction .condensed:hover {
-  background-color: #fafafa;
-}
-
 .transactions-table .transaction .buttons {
   display: flex;
   flex-direction: column;
   visibility: hidden;
+}
+.transactions-table .transaction:hover .buttons {
+  z-index: 99;
+  visibility: visible;
 }
 @media screen and (max-width: 600px) {
   /* Mobile layout */
   .transactions-table .transaction .buttons {
     display: none;
   }
-}
-
-.transactions-table .transaction:hover .buttons {
-  z-index: 99;
-  visibility: visible;
 }
 
 .transactions-table .transaction .button {
@@ -1469,138 +1457,169 @@ form .autocomplete-box .item.active {
   }
 }
 
-.transactions-table .selected.transaction {
-  /*Make top & bottom borders approximately the same size */
-  border-width: 3px;
-  border-top: 2px solid #eeeeee;
+.transactions-table .transaction .transaction-info {
+  display: flex;
+  flex-grow: 1;
+  min-width: 0;  /* allow the info (columns) to collapse */
+}
+
+.transactions-table .transaction .condensed {
+  height: 25px;
+  width: 100%;
+  transition: background-color 0.1s ease;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .condensed {
+    height: 30px;
+  }
+}
+
+.transactions-table .transaction .condensed:hover {
+  background-color: #fafafa;
 }
 
 .transactions-table .transaction .expanded {
   display: none;
+  width: 100%;
   opacity: 0;
 }
-
-.transactions-table .transaction .expanded .row {
-  align-items: flex-start;
-}
-
-.transactions-table .expanded .row-content {
-  align-items: flex-start;
-  margin: 20px 0;
-}
-@media screen and (max-width: 1000px) {
-  .transactions-table .expanded .row-content {
-    margin-left: 28px;
-  }
-}
-
-@media screen and (max-width: 1000px) {
-  .transactions-table .expanded .date.column {
-    margin: 0;
-  }
-}
-
-.transactions-table .expanded .setting {
-  display: flex;
-  flex: 3;
-}
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 600px) {
   /* Mobile layout */
-  .transactions-table .expanded .setting {
-    flex-direction: column;
-    align-items: flex-start;
-    flex: 9;
+  .transactions-table .transaction .expanded {
+    margin: 5px 0 5px 0;
   }
 }
 
-.transactions-table .expanded .setting .date {
+.transactions-table .transaction .expanded .row-content {
+  margin: 5px 0;
+}
+
+.transactions-table .transaction .expanded .transaction-info {
+  margin: 10px 0;
+}
+
+.transactions-table .transaction .expanded .setting {
+  display: flex;
+  flex: 15;
+}
+@media screen and (max-width: 1000px) {
+  .transactions-table .transaction .expanded .setting {
+    flex-direction: column
+  }
+}
+
+.transactions-table .transaction .expanded .setting.column {
+  margin: 0;
+}
+@media screen and (max-width: 1000px) {
+  .transactions-table .transaction .expanded .setting.column {
+    margin: 0 10px 0 30px;  /* revert to behaving like a normal column */
+  }
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .expanded .setting.column {
+    margin-left: 20px;  /* revert to behaving like a normal column */
+  }
+}
+
+.transactions-table .transaction .expanded .date.column {
+  font-weight: bold;
+}
+@media screen and (max-width: 1000px) {
+  .transactions-table .transaction .expanded .date.column {
+    margin-left: 0;
+    margin-bottom: 5px;
+  }
+}
+
+.transactions-table .transaction .expanded .stacked-date {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex: 2;
-  padding-top: 3px;
+  width: min-content;
+  margin-left: 5px;
   font-weight: bold;
 }
 @media screen and (max-width: 1000px) {
-  /* Mobile layout */
-  .transactions-table .expanded .setting .date {
-    align-items: flex-start;
+  .transactions-table .transaction .expanded .stacked-date {
+    margin-left: 0;
   }
 }
 
 @media screen and (max-width: 1000px) {
-  /* Mobile layout */
-  .transactions-table .expanded .setting .date .month,
-  .transactions-table .expanded .setting .date .day,
-  .transactions-table .expanded .setting .date .year {
+  .transactions-table .transaction .expanded .date .month,
+  .transactions-table .transaction .expanded .date .day,
+  .transactions-table .transaction .expanded .date .year {
     display: none;
   }
 }
 
-.transactions-table .expanded .setting .date .month {
+.transactions-table .transaction .expanded .date .month {
   margin-bottom: -10px;
   font-size: 18pt;
 }
 
-.transactions-table .expanded .setting .date .day {
+.transactions-table .transaction .expanded .date .day {
   font-size: 36pt;
 }
 
-.transactions-table .expanded .setting .date .year {
+.transactions-table .transaction .expanded .date .year {
   margin-top: -10px;
   font-size: 14pt;
   letter-spacing: 3px;
 }
 
-.transactions-table .expanded .setting .date .full {
+.transactions-table .transaction .expanded .date .full-date {
   display: none;
   color: #aaaaaa;
   font-size: 1.1em;
 }
 @media screen and (max-width: 1000px) {
-  /* Mobile layout */
-  .transactions-table .expanded .setting .date .full {
+  .transactions-table .transaction .expanded .date .full-date {
     display: block;
   }
 }
 
-.transactions-table .expanded .setting .description {
-  flex: 13;
-  min-width: 250px;
+.transactions-table .transaction .expanded .description {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 200px;
 }
+
 @media screen and (max-width: 1000px) {
-  /* Mobile layout */
-  .transactions-table .expanded .setting .description {
-    width: 95%;
-    margin-top: 5px;
+  .transactions-table .transaction .expanded .description.column {
+    margin: 0;
   }
 }
 
-.transactions-table .transaction .expanded .setting .description-header {
+.transactions-table .transaction .expanded .description .description-header {
   transition: font-size 0.3s;
 }
 @media screen and (max-width: 1200px) {
   /* Statement disappear */
-  .transactions-table .transaction .expanded .setting .description-header {
+  .transactions-table .transaction .expanded .description .description-header {
     font-size: 22pt;
   }
 }
 @media screen and (max-width: 1050px) {
   /* Disable transitions for reduced view */
-  .transactions-table .transaction .expanded .setting .description-header {
+  .transactions-table .transaction .expanded .description .description-header {
     transition: all 0s;
   }
 }
 @media screen and (max-width: 1000px) {
-  /* Mobile layout */
-  .transactions-table .transaction .expanded .setting .description-header {
+  /* Condensed layout */
+  .transactions-table .transaction .expanded .description .description-header {
     font-size: 20pt;
   }
 }
 
-.transactions-table .transaction .expanded .setting .description-header .merchant,
-.transactions-table .transaction .expanded .setting .description-header .brief {
+.transactions-table .transaction .expanded .description .description-header .merchant,
+.transactions-table .transaction .expanded .description .description-header .brief {
   flex: 4;
   box-sizing: border-box;
   padding-right: 10px;
@@ -1649,9 +1668,8 @@ form .autocomplete-box .item.active {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  flex: 1;
+  flex: 5;
   height: 100%;
-  padding-right: 10px;
 }
 @media screen and (max-width: 1200px) {
   /* Statement disappear */
@@ -1660,7 +1678,7 @@ form .autocomplete-box .item.active {
   }
 }
 @media screen and (max-width: 1000px) {
-  /* Mobile layout */
+  /* Condensed layout */
   .transactions-table .transaction .expanded .payment {
     flex-direction: column;
     justify-content: center;
@@ -1754,7 +1772,7 @@ form .autocomplete-box .item.active {
   }
 }
 @media screen and (max-width: 1000px) {
-  /* Mobile layout */
+  /* Condensed layout */
   .transactions-table .transaction .expanded .payment .card {
     height: 50px;
   }
@@ -1791,7 +1809,7 @@ form .autocomplete-box .item.active {
   }
 }
 @media screen and (max-width: 1000px) {
-  /* Mobile layout */
+  /* Condensed layout */
   .transactions-table .transaction .expanded .payment .card-number {
     font-size: 0.5em;
   }
@@ -1803,6 +1821,15 @@ form .autocomplete-box .item.active {
   justify-content: space-between;
   align-self: flex-start;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .expanded .buttons {
+    margin-left: 10px;
+    z-index: 99;
+    visibility: visible;
+  }
+}
+
 
 .transactions-table .transaction .expanded .buttons a.button {
   margin: 3px 0;
@@ -2051,10 +2078,6 @@ form .autocomplete-box .item.active {
   min-width: inherit;
 }
 
-.details .transactions-table .date.column {
-  flex: 1;
-}
-
 .details .transactions-table .merchant.column {
   flex: 4;
   min-width: 150px;
@@ -2065,91 +2088,92 @@ form .autocomplete-box .item.active {
   margin-left: auto;
 }
 
-.details .transactions-table .notes.column {
-  flex: 4;
-  min-width: 100px;
-}
-
-@media screen and (max-width: 1500px) {
-  .details .transactions-table .expanded .row-content {
-    margin-left: 28px;
-  }
-}
-
-@media screen and (max-width: 1500px) {
-  .details .transactions-table .expanded .date.column {
-    margin: 0;
-  }
-}
-
-.details .transactions-table .expanded .setting {
-  width: 100%;
+.details .transactions-table .transaction .expanded .setting {
+  flex: 1;
 }
 @media screen and (max-width: 1500px) {
-  /* Mobile layout */
-  .details .transactions-table .expanded .setting {
+  /* Condensed layout */
+  .details .transactions-table .transaction .expanded .setting {
     flex-direction: column;
     align-items: flex-start;
   }
 }
 
 @media screen and (max-width: 1500px) {
+  .details .transactions-table .transaction .expanded .setting.column {
+    margin: 0 10px 0 30px;  /* revert to behaving like a normal column */
+  }
+}
+@media screen and (max-width: 600px) {
   /* Mobile layout */
-  .details .transactions-table .expanded .setting .date {
+  .details .transactions-table .transaction .expanded .setting.column {
+    margin-left: 20px;  /* revert to behaving like a normal column */
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  /* Condensed layout */
+  .details .transactions-table .transaction .expanded .date {
     align-items: flex-start;
   }
 }
 
 @media screen and (max-width: 1500px) {
-  .details .transactions-table .expanded .setting .date .month,
-  .details .transactions-table .expanded .setting .date .day,
-  .details .transactions-table .expanded .setting .date .year {
+  /* Condensed layout */
+  .details .transactions-table .transaction .expanded .date.column {
+    margin-left: 0;
+    margin-bottom: 5px;
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  /* Condensed layout */
+  .details .transactions-table .transaction .expanded .setting .date .month,
+  .details .transactions-table .transaction .expanded .setting .date .day,
+  .details .transactions-table .transaction .expanded .setting .date .year {
     display: none;
   }
 }
 
 @media screen and (max-width: 1500px) {
-  /* Mobile layout */
-  .details .transactions-table .expanded .setting .date .full {
+  /* Condensed layout */
+  .details .transactions-table .transaction .expanded .date .full-date {
     display: block;
   }
 }
 
 @media screen and (max-width: 1500px) {
-  /* Mobile layout */
-  .details .transactions-table .expanded .setting .description {
+  /* Condensed layout */
+  .details .transactions-table .transaction .expanded .description.column {
     width: 100%;
-    margin-top: 5px;
+    margin: 0;
   }
 }
 
 @media screen and (max-width: 1800px) {
   /* Statement disappear */
-  .details .transactions-table .expanded .setting .description-header {
+  .details .transactions-table .transaction .expanded .description .description-header {
     font-size: 22pt;
   }
 }
 @media screen and (max-width: 1550px) {
   /* Disable transitions for mobile switch */
-  .details .transactions-table .expanded .setting .description-header {
+  .details .transactions-table .transaction .expanded .description .description-header {
     transition: all 0s;
   }
 }
 @media screen and (max-width: 1500px) {
-  /* Statement disappear */
-  .details .transactions-table .expanded .setting .description-header {
+  /* Condensed layout (statement disappear) */
+  .details .transactions-table .transaction .expanded .description .description-header {
     font-size: 20pt;
   }
 }
 
-.details .transactions-table .expanded .payment {
+.details .transactions-table .transaction .expanded .payment {
   flex: 0;
-  padding: 0;
+  margin: 0;
 }
 
-.details .transactions-table .expanded .buttons {
-  height: 60%;
-}
 
 /*
  * Customization for the 'Home' page
@@ -2273,7 +2297,6 @@ form .autocomplete-box .item.active {
 #homepage-panels div:first-of-type {
   margin-left: 0;
 }
-
 #homepage-panels div:last-of-type {
   margin-right: 0;
 }
@@ -2293,7 +2316,6 @@ form .autocomplete-box .item.active {
 #homepage-panels .panel ul {
   margin: 0 0 15px;
 }
-
 #homepage-panels .panel ul:last-of-type {
   margin: 0;
 }
@@ -2798,19 +2820,18 @@ form#bank-transaction .transfer-title {
   transition: margin-left 0.2s;
   perspective: 1200px;
 }
+#credit-account-info div.credit-card-block:first-of-type {
+  padding-right: 10px;
+}
+#credit-account-info div.credit-card-block:last-of-type {
+  margin-left: 0;
+  padding-left: 0;
+}
+
 
 #credit-account-info div.credit-card-block:hover {
   margin-left: 0;
   padding-left: 15px;
-}
-
-#credit-account-info div.credit-card-block:first-of-type {
-  padding-right: 10px;
-}
-
-#credit-account-info div.credit-card-block:last-of-type {
-  margin-left: 0;
-  padding-left: 0;
 }
 
 #credit-account-info .credit-card .card-face {
