@@ -37,19 +37,25 @@ class TransactionToggleManager {
 
   #registerClickExpand(callback) {
     const self = this;
-    this.$iconsMoreInfoButtons.on('click', function() {
+    this.$iconsMoreInfoButtons.on('click', function(event) {
       const $transaction = self.getButtonTransaction(this);
       const toggler = new TransactionToggler($transaction);
       toggler.expand(callback);
+      // Do not propagate any additional events up the DOM tree
+      // (this avoids recursion in mobile mode when parents are tapped)
+      event.stopPropagation();
     });
   }
 
   #registerClickCollapse() {
     const self = this;
-    this.$iconsLessInfoButtons.on('click', function() {
+    this.$iconsLessInfoButtons.on('click', function(event) {
       const $transaction = self.getButtonTransaction(this);
       const toggler = new TransactionToggler($transaction);
       toggler.collapse();
+      // Do not propagate any additional events up the DOM tree
+      // (this avoids recursion in mobile mode when parents are tapped)
+      event.stopPropagation();
     });
   }
 }
@@ -88,7 +94,10 @@ class TransactionToggler {
     this.$transaction.addClass('selected');
   }
 
-  collapse($transaction) {
+  /**
+   * Collapse the transaction
+   */
+  collapse() {
     this.#toggleTransaction(this.$extendedRow, this.$condensedRow);
     this.$transaction.removeClass('selected');
   }

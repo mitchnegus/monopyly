@@ -1,21 +1,23 @@
-<div class="setting">
+<div class="setting column">
 
   <div class="date column">
-    <div class="month">
-      {{ transaction.transaction_date.strftime('%b')|upper }}
+    <div class="stacked-date">
+      <div class="month">
+        {{ transaction.transaction_date.strftime('%b')|upper }}
+      </div>
+      <div class="day">
+        {{ transaction.transaction_date.strftime('%d')|upper }}
+      </div>
+      <div class="year">
+        {{ transaction.transaction_date.year }}
+      </div>
     </div>
-    <div class="day">
-      {{ transaction.transaction_date.strftime('%d')|upper }}
-    </div>
-    <div class="year">
-      {{ transaction.transaction_date.year }}
-    </div>
-    <div class="full">
+    <div class="full-date">
       {{ transaction.transaction_date }}
     </div>
   </div>
 
-  <div class="description">
+  <div class="description column">
 
     <div class="description-header">
       <div class="brief">
