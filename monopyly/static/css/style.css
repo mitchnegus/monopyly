@@ -494,6 +494,12 @@ aside.sidebar {
   box-shadow: 0 0 20px #eeeeee;
   background-color: #eef5eb;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .group-stack {
+    padding: 20px 20px;
+  }
+}
 
 .group-stack .stack-title {
   display: flex;
@@ -2684,6 +2690,14 @@ form#bank-account .hidden {
   min-width: 400px;
   margin: 15px auto 25px;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #bank-account-summaries .account-type-stack {
+    width: 80%;
+    min-width: 0;
+    margin-bottom: 20px;
+  }
+}
 
 #bank-account-summaries .account-block {
   display: flex;
@@ -2691,18 +2705,42 @@ form#bank-account .hidden {
   align-items: center;
   padding: 30px 10%;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #bank-account-summaries .account-block {
+    padding: 20px 20px;
+  }
+}
 
 #bank-account-summaries .account-block .title {
   font-size: 16pt;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #bank-account-summaries .account-block .title {
+    font-size: 12pt;
+  }
 }
 
 #bank-account-summaries .account-block .title .digits {
   margin-right: 10px;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #bank-account-summaries .account-block .title .digits {
+    display: block;
+  }
+}
 
 #bank-account-summaries .account-block .balance {
   font-size: 24pt;
   font-weight: bold;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #bank-account-summaries .account-block .balance {
+    font-size: 18pt;
+  }
 }
 
 
