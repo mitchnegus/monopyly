@@ -22,20 +22,16 @@
     <div class="description-header">
       <div class="brief">
         {% if transaction|is_single_bank_transfer %}
-            Transfer
+          <span class="transaction-type">Transfer</span>
         {% else %}
-          {% if transaction.merchant %}
-              {% set merchant_reference = ": " + transaction.merchant %}
-          {% else %}
-              {% set merchant_reference = "" %}
-          {% endif %}
           {% if transaction.total > 0 %}
-            Deposit{{ merchant_reference }}
+            {% set transaction_type = "Deposit" %}
           {% elif transaction.total < 0 %}
-            Withdrawal{{ merchant_reference }}
+            {% set transaction_type = "Withdrawal" %}
           {% else %}
-            Exchange
+            {% set transaction_type = "Exchange" %}
           {% endif %}
+          <span class="transaction-type">{{ transaction_type }}{{ ":" if transaction.merchant else "" }}</span> {{ transaction.merchant if transaction.merchant else "" }}
         {% endif %}
 
       </div>
