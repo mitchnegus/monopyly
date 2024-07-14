@@ -1247,6 +1247,12 @@ form .autocomplete-box .item.active {
   color: #666666;
   font-size: 12pt;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transaction .description {
+    font-size: 11pt;
+  }
+}
 
 .transaction .description-header {
   display: flex;
@@ -1299,7 +1305,6 @@ form .autocomplete-box .item.active {
 .transactions-table .future.transaction.row {
   color: #aaaaaa;
 }
-
 
 /* Define a region with row content (separate from actions/buttons) */
 .transactions-table .row-content {
@@ -1617,6 +1622,12 @@ form .autocomplete-box .item.active {
     font-size: 20pt;
   }
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .expanded .description .description-header {
+    font-size: 14pt;
+  }
+}
 
 .transactions-table .transaction .expanded .description .description-header .merchant,
 .transactions-table .transaction .expanded .description .description-header .brief {
@@ -1635,6 +1646,12 @@ form .autocomplete-box .item.active {
 .transactions-table .transaction .expanded .setting .subtransaction-details .notes {
   flex: 4;
   padding-right: 10px;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .expanded .setting .subtransaction-details .notes {
+    padding-right: 15px;
+  }
 }
 
 .transactions-table .transaction .expanded .setting .subtransaction-details .subtotal {
@@ -1830,10 +1847,10 @@ form .autocomplete-box .item.active {
   }
 }
 
-
 .transactions-table .transaction .expanded .buttons a.button {
   margin: 3px 0;
 }
+
 
 /*
  * Style linked transaction overlays
@@ -2166,6 +2183,19 @@ form .autocomplete-box .item.active {
   /* Condensed layout (statement disappear) */
   .details .transactions-table .transaction .expanded .description .description-header {
     font-size: 20pt;
+  }
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .details .transactions-table .transaction .expanded .description .description-header {
+    font-size: 14pt;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .details .transactions-table .transaction .expanded .description .description-header .transaction-type {
+    display: block;
   }
 }
 
