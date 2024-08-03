@@ -188,6 +188,7 @@
 ### 1.4.8 (in progress)
 
 - Set username collection to be case insensitive
+- Use Flask/Gunicorn APIs (rather than subprocess CLI calls) to launch the app
 - Fix bug in the ordering of balances in the bank account balance charts for transactions on duplicate dates
 
 

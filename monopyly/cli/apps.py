@@ -21,25 +21,25 @@ class LocalApplication:
 
     mode_name = "local"
     default_port = "5001"
-    command = ["flask"]
+    _debug = None
 
     def __init__(self, host=None, port=None, **options):
         """Initialize the application in development mode."""
         self._host = host
-        self._port = port
+        self._port = port or self.default_port
         if options:
             raise NotImplementedError(
                 f"Options besides `host` and `port` are not handled in {self.mode_name} mode."
             )
+        self.application = create_app()
 
     def run(self):
         """Run the Monopyly application in development mode."""
-        instruction = self.command + ["run"]
-        if self._host:
-            instruction += ["--host", self._host]
-        if self._port:
-            instruction += ["--port", self._port]
-        server = subprocess.Popen(instruction)
+        self.application.run(
+            host=self._host,
+            port=self._port,
+            debug=self._debug,
+        )
 
 
 class DevelopmentApplication(LocalApplication):
@@ -52,8 +52,8 @@ class DevelopmentApplication(LocalApplication):
     """
 
     mode_name = "development"
-    default_port = "5000"
-    command = LocalApplication.command + ["--debug"]
+    default_port = None  # traditionally 5000
+    _debug = True
 
 
 class ProductionApplication(BaseApplication):
@@ -64,31 +64,33 @@ class ProductionApplication(BaseApplication):
     Gunicorn server instead of the built-in Python server.
     """
 
-    default_port = "8000"
+    default_port = None  # traditionally 8000
     _default_worker_count = (multiprocessing.cpu_count() * 2) + 1
 
     def __init__(self, host=None, port=None, **options):
         """Initialize the application in production mode."""
-        options["bind"] = self._parse_binding(host, port, options.get("bind"))
-        options.setdefault("workers", self._default_worker_count)
+        if port and not host:
+            raise ValueError("A host must be specified when the port is given.")
+        self._host = host
+        self._port = port or self.default_port
         self.options = options
+        self.options["bind"] = self._determine_binding(options.get("bind"))
+        self.options.setdefault("workers", self._default_worker_count)
         self.application = create_app()
         super().__init__()
 
-    @staticmethod
-    def _parse_binding(host, port, bind_option):
+    def _determine_binding(self, bind_option):
         # Parse any socket binding options
-        if (host or port) and bind_option:
+        if self._host and bind_option:
             raise ValueError(
-                "Neither `host` nor `port` parameters can be specified if the "
-                "`bind` option is given."
+                "The `host` may not be specified directly if the `bind` option is used."
             )
-        bind_values = []
-        if host:
-            bind_values.append(host)
-        if port:
-            bind_values.append(port)
-        return bind if (bind := ":".join(bind_values)) else bind_option
+        if self._host:
+            bind_values = [self._host]
+            if self._port:
+                bind_values.append(self._port)
+            bind_option = ":".join(bind_values)
+        return bind_option
 
     def load_config(self):
         config = {
