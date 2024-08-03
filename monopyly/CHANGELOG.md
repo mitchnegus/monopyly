@@ -185,7 +185,7 @@
 - Use SVG to handle long values in account/statement summary boxes; fixes bugs in page rendering (long value overflow) and hover actions not happening because of conflicting overlap with the sidebar
 
 
-### 1.4.8 (in progress)
+### 1.4.8
 
 - Set username collection to be case insensitive
 - Use Flask/Gunicorn APIs (rather than subprocess CLI calls) to launch the app
