@@ -16,24 +16,32 @@ from rich.console import Console
 
 from .apps import DevelopmentApplication, LocalApplication, ProductionApplication
 
-# Set the Flask environment variable (to specify the app to use)
-os.environ["FLASK_APP"] = "monopyly"
 
-
-def main():
-    args = parse_arguments()
-    app_launcher = Launcher(args.mode, host=args.host, port=args.port)
+def main(mode, host=None, port=None, backup=False, browser=False):
+    app_launcher = Launcher(mode, host=host, port=port)
     # Initialize the database and run the app
     app_launcher.initialize_database()
-    if args.backup:
+    if backup:
         app_launcher.backup_database()
     app_launcher.launch()
-    if args.mode in ("development", "local"):
+    if mode in ("development", "local"):
         # Enable browser viewing in development mode
-        if args.browser:
+        if browser:
             app_launcher.open_browser(delay=1)
         # Wait for the exit command to stop
         app_launcher.wait_for_exit()
+
+
+def main_cli():
+    """Run the app as a command line program."""
+    args = parse_arguments()
+    main(
+        args.mode,
+        host=args.host,
+        port=args.port,
+        backup=args.backup,
+        browser=args.browser,
+    )
 
 
 def parse_arguments():
@@ -121,4 +129,4 @@ class Launcher:
 
 
 if __name__ == "__main__":
-    main()
+    main_cli()
