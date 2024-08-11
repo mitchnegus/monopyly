@@ -1,4 +1,4 @@
-"""Tests for user authentication."""
+"""Tests for applications launched from the command line."""
 
 import multiprocessing
 from abc import ABC, abstractmethod
