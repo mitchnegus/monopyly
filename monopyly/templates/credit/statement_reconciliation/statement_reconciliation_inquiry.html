@@ -1,9 +1,14 @@
 <div class="overlay">
   <div id="statement-reconciliation" class="modal">
+
     <div class="modal-box">
 
+      <div class="buttons">
+        <img class="close button" src="/static/img/icons/x-thick.png">
+      </div>
+
       <p class="instructions">
-      Load a CSV file containing credit activity for comparison against this statement. The CSV file must be located in the <code>Downloads</code> directory on the machine running the Monopyly app.
+        Load a CSV file containing credit activity for comparison against this statement. The CSV file must be located in the <code>Downloads</code> directory on the machine running the Monopyly app.
       </p>
 
       <form action="{{ url_for('credit.load_statement_reconciliation_details', statement_id=statement_id) }}" method="post" enctype="multipart/form-data">
@@ -13,5 +18,6 @@
       </form>
 
     </div>
+
   </div>
 </div>

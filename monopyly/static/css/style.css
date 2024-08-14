@@ -1910,7 +1910,7 @@ form .autocomplete-box .item.active {
 /*
  * Style linked transaction overlays
  */
-#linked-transaction-display {
+#linked-transaction-display.modal {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1918,13 +1918,13 @@ form .autocomplete-box .item.active {
   height: 80%;
 }
 
-#linked-transaction-display #link {
+#linked-transaction-display.modal #link {
   width: 50px;
   height: 50px;
   background-size: 50px 50px;
 }
 
-#linked-transaction-display .buttons {
+#linked-transaction-display.modal .buttons {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -1932,12 +1932,12 @@ form .autocomplete-box .item.active {
   width: 100%;
 }
 
-#linked-transaction-display .button {
+#linked-transaction-display.modal .buttons .button {
   height: 40px;
   width: 40px;
 }
 
-#linked-transaction-display .linked-transaction {
+#linked-transaction-display.modal .linked-transaction {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -1945,11 +1945,11 @@ form .autocomplete-box .item.active {
   padding: 20px 40px;
 }
 
-#linked-transaction-display .linked-transaction.selected {
+#linked-transaction-display.modal. linked-transaction.selected {
   border: 5px solid var(--moneytree-leaves);
 }
 
-#linked-transaction-display .linked-transaction .date {
+#linked-transaction-display.modal .linked-transaction .date {
   margin-bottom: 20px;
   color: #888888;
   font-size: 14pt;
@@ -1958,45 +1958,45 @@ form .autocomplete-box .item.active {
   text-align: right;
 }
 
-#linked-transaction-display .linked-transaction .description-header {
+#linked-transaction-display.modal .linked-transaction .description-header {
   display: flex;
 }
 
-#linked-transaction-display .linked-transaction .description-header .account {
+#linked-transaction-display.modal .linked-transaction .description-header .account {
   flex: 4;
   padding-right: 10px;
   font-size: 20pt;
 }
 
-#linked-transaction-display .linked-transaction .description-header .account-type {
+#linked-transaction-display.modal .linked-transaction .description-header .account-type {
   color: #888888;
   font-size: 16pt;
   font-weight: bold;
   text-transform: uppercase;
 }
 
-#linked-transaction-display .linked-transaction .description-header .total {
+#linked-transaction-display.modal .linked-transaction .description-header .total {
   flex: 1;
   margin-top: auto;
   font-size: 20pt;
   font-weight: bold;
 }
 
-#linked-transaction-display .linked-transaction .notes {
+#linked-transaction-display.modal .linked-transaction .notes {
   font-size: 12pt;
 }
 
-#linked-transaction-display .linked-transaction .buttons {
+#linked-transaction-display.modal .linked-transaction .buttons {
   display: flex;
   justify-content: flex-end;
   visibility: hidden;
 }
 
-#linked-transaction-display .linked-transaction:hover .buttons {
+#linked-transaction-display.modal .linked-transaction:hover .buttons {
   visibility: visible;
 }
 
-#linked-transaction-display .linked-transaction .button {
+#linked-transaction-display.modal .linked-transaction .button {
   height: 20px;
   width: 20px;
   margin: 0 5px;
@@ -3541,17 +3541,40 @@ form#pay #make-payment[type="submit"] #prompt {
   padding: 30px;
 }
 
+#statement-reconciliation.modal .buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 30px;
+  width: 100%;
+}
+
+#statement-reconciliation.modal .buttons .button {
+  height: 30px;
+  width: 30px;
+}
+
 #statement-reconciliation.modal p {
   width: 80%;
   margin: auto;
 }
 
 #statement-reconciliation.modal form {
-  margin-top: 20px;
+  margin: 30px auto;
+  padding: 20px 50px 30px;
+  border: 3px solid var(--moneytree-leaves);
+  border-radius: 15px;
+  background-color: #fefefe;
 }
 
 #statement-reconciliation.modal form input {
   margin: 3px 0;
+}
+
+#statement-reconciliation.modal form label {
+  text-transform: uppercase;
+  font-size: 10pt;
+  letter-spacing: 2px;
 }
 
 
