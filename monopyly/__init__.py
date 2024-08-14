@@ -9,7 +9,7 @@ from monopyly.core.errors import render_error_template
 from monopyly.database import SQLAlchemy, register_db_cli_commands
 
 
-def create_app(test_config=None):
+def create_app(test_config=None, debug=None):
     # Create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
@@ -18,7 +18,7 @@ def create_app(test_config=None):
         config = test_config
     else:
         # Load the development/production config when not testing
-        if app.debug:
+        if app.debug or debug:
             config = DevelopmentConfig.configure_for_instance(app.instance_path)
         else:
             config = ProductionConfig.configure_for_instance(app.instance_path)

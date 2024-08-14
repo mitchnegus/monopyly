@@ -16,6 +16,9 @@ from rich.console import Console
 
 from .apps import DevelopmentApplication, LocalApplication, ProductionApplication
 
+# Set the Flask environment variable (to specify the app to use)
+os.environ["FLASK_APP"] = "monopyly"
+
 
 def main(mode, host=None, port=None, backup=False, browser=False):
     app_launcher = Launcher(mode, host=host, port=port)

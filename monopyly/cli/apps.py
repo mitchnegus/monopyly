@@ -31,7 +31,7 @@ class LocalApplication:
             raise NotImplementedError(
                 f"Options besides `host` and `port` are not handled in {self.mode_name} mode."
             )
-        self.application = create_app()
+        self.application = create_app(debug=self._debug)
 
     def run(self):
         """Run the Monopyly application in development mode."""
