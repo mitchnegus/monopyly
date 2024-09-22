@@ -1357,6 +1357,12 @@ form .autocomplete-box .item.active {
   flex: 6;
   min-width: 180px;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .merchant.column {
+    min-width: 100px;
+  }
+}
 
 .transactions-table .notes.column {
   flex: 9;
@@ -1402,6 +1408,12 @@ form .autocomplete-box .item.active {
   .transactions-table .card.column {
     min-width: 60px;
     margin-left: auto;
+  }
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .card.column {
+    display: none;
   }
 }
 
@@ -1712,6 +1724,12 @@ form .autocomplete-box .item.active {
     margin-top: 15px;
   }
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .expanded .payment {
+    margin-top: 30px;
+  }
+}
 
 .transactions-table .transaction .expanded .payment .statement {
   position: relative;
@@ -1800,6 +1818,12 @@ form .autocomplete-box .item.active {
   /* Condensed layout */
   .transactions-table .transaction .expanded .payment .card {
     height: 50px;
+  }
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  .transactions-table .transaction .expanded .payment .card {
+    height: 30px;
   }
 }
 
@@ -2647,6 +2671,20 @@ form .autocomplete-box .item.active {
 /*
  * Customization for the 'New Bank Account' & 'Update Bank Account' pages
  */
+form#bank-account #last-four-digits-field {
+  flex-basis: 25%;
+  min-width: 150px;
+}
+
+form#bank-account #active-field {
+  flex-basis: 10%;
+  min-width: 60px;
+}
+
+form#bank-account #active-field label {
+  text-align: center;
+}
+
 form#bank-account .hidden {
   display: none;
 }
@@ -2927,10 +2965,6 @@ form#bank-transaction .transfer-title {
 /*
  * Customization for the 'New Card' & 'Update Card' pages
  */
-form#card {
-  min-width: 500px;
-}
-
 form#card #last-four-digits-field {
   flex-basis: 25%;
   min-width: 150px;
