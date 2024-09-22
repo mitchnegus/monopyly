@@ -576,16 +576,12 @@ form.transaction {
 form .form-line {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  column-gap: 5px;;
 }
 
 form .form-field {
-  margin-left: 0;
   flex-grow: 1;
-}
-
-form .form-line .form-field ~ .form-field {
-  /* Only set margin for fields other than the first on a line */
-  margin-left: 5px;
 }
 
 form .add-info.buttons {
@@ -606,8 +602,14 @@ form .add-info.button {
 
 form label {
   display: block;
-  padding: 10px 0;
+  margin: 15px 0 7.5px;
   font-size: 1.1em;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form label  {
+    font-size: 0.8em;
+  }
 }
 
 form button,
@@ -706,7 +708,7 @@ form .subform .close.button {
  */
 form .subtotal-field {
   flex: 1;
-  min-width: 100px;
+  min-width: 125px;
 }
 
 form .subtotal-field input.currency {
@@ -2799,6 +2801,12 @@ form#bank-account .hidden {
 form#bank-transaction .bank-field {
   flex: 3;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form#bank-transaction .bank-field {
+    min-width: 200px;
+  }
+}
 
 form#bank-transaction .account-type-field {
   flex: 1;
@@ -3119,6 +3127,7 @@ form#pay select optgroup {
 form#pay .form-line {
   position: relative;
   width: 80%;
+  flex-wrap: nowrap;
   border-radius: inherit;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
