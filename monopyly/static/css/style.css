@@ -668,6 +668,13 @@ form button .icon {
   margin: 0 10px;
   filter: brightness(0.8);
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form button .icon {
+    height: 30px;
+    width: 30px;
+  }
+}
 
 form button.dark-background .icon {
   filter: brightness(1.2);
@@ -2129,7 +2136,6 @@ form .autocomplete-box .item.active {
 
 .details .transactions-table .merchant.column {
   flex: 4;
-  min-width: 150px;
 }
 
 .details .transactions-table .amount.column {
@@ -3101,10 +3107,6 @@ form#card #statement-due-day-field  {
 /*
  * Customization for the (credit) 'Statement Details' page
  */
-#credit-statement-details #statement-summary {
-  min-width: 375px;
-}
-
 #credit-statement-details #statement-summary #payment {
   width: 100%;
   font-size: 12pt;
@@ -3113,7 +3115,8 @@ form#card #statement-due-day-field  {
 #credit-statement-details #statement-summary #due {
   float: left;
   display: flex;
-  width: 140px;
+  width: 40%;
+  min-width: 160px;
 }
 
 #credit-statement-details #statement-summary #due-date {
@@ -3123,15 +3126,44 @@ form#card #statement-due-day-field  {
 
 #credit-statement-details #statement-summary #paid {
   float: right;
+  width: 60%
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statement-details #statement-summary #paid {
+    width: 60px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statement-details #statement-summary #paid.slide-text-gadget:hover .sleeve {
+    transform: none;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statement-details #statement-summary #paid.slide-text-gadget:hover .sleeve .main {
+    padding-right: 0;
+  }
 }
 
 form#pay {
   clear: left;
   position: relative;
-  width: 300px;
+  width: 85%;
   margin: 50px auto 0;
   border-radius: 5px;
   box-sizing: border-box;
+  font-size: 0.9em;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form#pay {
+    width: 100%;
+    font-size: 0.75em;
+  }
 }
 
 form#pay button {
@@ -3161,11 +3193,16 @@ form#pay select optgroup {
 form#pay .form-line {
   position: relative;
   width: 80%;
-  flex-wrap: nowrap;
   border-radius: inherit;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   box-sizing: border-box;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form#pay .form-line {
+    width: 70%;
+  }
 }
 
 form#pay .form-line input,
@@ -3181,11 +3218,24 @@ form#pay .form-line .dollar-sign {
   height: 100%;
   color: #666666;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form#pay .form-line .dollar-sign {
+    top: -15px;
+  }
+}
 
 form#pay .form-line #pay-amount,
 form#pay .form-line #pay-date {
-  width: 50%;
+  width: 49%;
   border-bottom: 2px solid #eeeeee;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form#pay .form-line #pay-amount,
+  form#pay .form-line #pay-date {
+    width: 100%;
+  }
 }
 
 form#pay .form-line #pay-amount {
@@ -3196,6 +3246,12 @@ form#pay .form-line #pay-amount {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
   text-align: right;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form#pay .form-line #pay-amount {
+    padding-right: 5px;
+  }
 }
 
 form#pay .form-line #pay-date {
@@ -3230,6 +3286,13 @@ form#pay #make-payment[type="submit"] {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  form#pay #make-payment[type="submit"] {
+    left: 70%;
+    width: 30%;
+  }
+}
 
 form#pay #make-payment[type="submit"] #prompt {
   display: none;
@@ -3255,6 +3318,12 @@ form#pay #make-payment[type="submit"] #prompt {
     order: 2;
     width: 45%;
     min-width: 450px;
+  }
+}
+@media screen and (max-width: 600px) {
+  #category-chart-container {
+    width: 80%;
+    min-width: 100px;
   }
 }
 

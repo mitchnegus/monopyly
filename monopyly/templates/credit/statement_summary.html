@@ -52,8 +52,8 @@
 
           <div class="form-line">
             <div class="dollar-sign">$</div>
-            <input id="pay-amount" type="text" name="pay_amount" value="{{ statement.balance|currency }}" maxlength="8" />
-            <input id="pay-date" type="text" name="pay_date" value="{{ date_today }}" maxlength="10" />
+            <input id="pay-amount" type="number" name="pay_amount" value="{{ statement.balance }}" />
+            <input id="pay-date" type="date" name="pay_date" value="{{ date_today }}" />
           </div>
 
           <div class="form-line">
