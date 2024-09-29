@@ -196,6 +196,7 @@
 
 - Add categorical pie charts to credit card statement details
 - Provide mobile layouts for the application
+- Create a tool for reconciling credit card transactions with information collected from external resources (e.g., CSVs downloaded from a user's online credit card account)
 
 
 <a name="bottom" id="bottom"></a>
