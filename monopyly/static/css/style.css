@@ -2956,10 +2956,12 @@ form#bank-transaction .transfer-title {
   padding-left: 0;
 }
 
-
 #credit-account-info div.credit-card-block:hover {
   margin-left: 0;
   padding-left: 15px;
+}
+#credit-account-info div.credit-card-block:last-of-type:hover {
+  padding-left: 0;
 }
 
 #credit-account-info .credit-card .card-face {
