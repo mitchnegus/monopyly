@@ -456,19 +456,12 @@ aside.sidebar {
 }
 
 .button-block {
-  margin: 15px 0;
   border: 1px solid var(--border-gray);
   border-radius: 10px;
   box-shadow: 1px 1px 3px #bbbbbb;
   background-color: #eeeeee;
   background-image: linear-gradient(#eeeeee, #e6e6e6);
   color: inherit;
-}
-.button-block:first-of-type {
-  margin-top: 0;
-}
-.button-block:last-of-type {
-  margin-bottom: 0;
 }
 
 .button-block:hover {
@@ -488,17 +481,11 @@ aside.sidebar {
 }
 
 .group-stack {
-  margin: 15px 10px 25px;
   padding: 20px 30px;
   border-radius: 15px;
   box-shadow: 0 0 20px #eeeeee;
+  box-sizing: border-box;
   background-color: #eef5eb;
-}
-@media screen and (max-width: 600px) {
-  /* Mobile layout */
-  .group-stack {
-    padding: 20px 20px;
-  }
 }
 
 .group-stack .stack-title {
@@ -515,6 +502,12 @@ aside.sidebar {
   margin-left: 15px;
   color: #888888;
   font-weight: 400;
+}
+
+.group-stack .stack-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .paid-notice {
@@ -1098,12 +1091,13 @@ form .autocomplete-box .item.active {
 #card-filter {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 4px;
   margin-bottom: 20px;
 }
 
 #card-filter .card {
   position: relative;
-  margin: 0 3px;
   padding: 1px 10px;
   border-radius: 10px;
   background-color: #eeeeee;
@@ -2630,6 +2624,18 @@ form .autocomplete-box .item.active {
 /*
  * Customization for the 'Bank Accounts' page
  */
+#bank-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#bank-container .bank-stack {
+  max-width: 1000px;
+}
+
 #bank-container .bank-stack .stack-title {
   padding: 0 30px;
   text-align: left;
@@ -2702,7 +2708,7 @@ form#bank-account .hidden {
 #bank-account-summaries-container {
   display: flex;
   flex-direction: column;
-  align-items: center
+  align-items: center;
 }
 
 #bank-account-summaries-container h2.bank {
@@ -2726,7 +2732,11 @@ form#bank-account .hidden {
 #bank-account-summaries {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 25px;
   width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 #bank-account-summaries .account-type-stack {
@@ -2734,14 +2744,12 @@ form#bank-account .hidden {
   flex-direction: column;
   width: 60%;
   min-width: 400px;
-  margin: 15px auto 25px;
 }
 @media screen and (max-width: 600px) {
   /* Mobile layout */
   #bank-account-summaries .account-type-stack {
-    width: 80%;
+    width: 100%;
     min-width: 0;
-    margin-bottom: 20px;
   }
 }
 
@@ -3057,12 +3065,34 @@ form#card #statement-due-day-field  {
 #credit-statements {
   display: flex;
   justify-content: space-around;
+  gap: 25px;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statements {
+    justify-content: left;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 20px;
+    overflow-x: scroll;
+  }
 }
 
 #credit-statements .card-stack {
   display: flex;
   flex-direction: column;
   height: min-content;
+  box-sizing: border-box;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statements .card-stack {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
 }
 
 #credit-statements .card-stack .stack-title {
@@ -3076,6 +3106,13 @@ form#card #statement-due-day-field  {
   width: 275px;
   padding: 45px 50px;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statements .statement-block {
+    width: 200px;
+    padding: 30px 40px;
+  }
+}
 
 #credit-statements .statement-block .date,
 #credit-statements .statement-block .payment {
@@ -3088,16 +3125,35 @@ form#card #statement-due-day-field  {
   font-size: 22pt;
   letter-spacing: -1px;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statements .statement-block .date .month {
+    font-size: 16pt;
+  }
+}
 
 #credit-statements .statement-block .date .year {
   font-size: 16pt;
   letter-spacing: 1px;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statements .statement-block .date .year {
+    font-size: 12pt;
+  }
 }
 
 #credit-statements .statement-block .payment .balance {
   font-size: 30pt;
   font-weight: bold;
 }
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #credit-statements .statement-block .payment .balance {
+    font-size: 24pt;
+  }
+}
+
 
 #credit-statements .statement-block .payment .paid-notice {
   font-size: 10pt;
