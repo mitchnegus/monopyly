@@ -24,7 +24,7 @@ import {
     const $toggleSwitch = $(this);
     const $card = $toggleSwitch.closest(".credit-card");
     const $cardFront = $card.find(".card-face.front");
-    const $checkbox = $toggleSwitch.find("input[type="checkbox"]");
+    const $checkbox = $toggleSwitch.find('input[type="checkbox"]');
     const cardActive = $checkbox.is(":checked");
     const cardID = $checkbox.data("card-id");
     const rawData = {
