@@ -192,7 +192,7 @@
 - Fix bug in the ordering of balances in the bank account balance charts for transactions on duplicate dates
 
 
-## 1.5.0 (in progress)
+## 1.5.0
 
 - Add categorical pie charts to credit card statement details
 - Provide mobile layouts for the application
