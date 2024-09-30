@@ -201,6 +201,7 @@
 
 ### 1.5.1 (in progress)
 
+- Bump dependencies (including patching security vulnerability in NLTK)
 - Style credit transaction submissions as receipts
 - Style flash messages according to content
 - Return to statement details page after deleting a transaction (rather than returning to the general transactions page)
