@@ -202,6 +202,7 @@
 ### 1.5.1 (in progress)
 
 - Bump dependencies (including patching security vulnerability in NLTK)
+- Increase the flexibility of the credit activity parser
 - Fix issues with the app launcher not launching the browser
 
 

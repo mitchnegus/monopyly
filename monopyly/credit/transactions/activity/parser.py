@@ -4,11 +4,13 @@ import csv
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from flask import current_app
+from flask import abort, current_app
 from werkzeug.utils import secure_filename
 
 from ....common.utils import parse_date
 from .data import ActivityLoadingError, TransactionActivities, TransactionActivityLoader
+
+SUPPORTED_BANKS = ("Bank of America", "Chase", "Discover")
 
 
 def parse_transaction_activity_file(transaction_file):
@@ -91,7 +93,7 @@ class _TransactionDateColumnIdentifier(_ColumnIdentifier):
         elif "date" in standardized_title.split():
             if "trans." in standardized_title:
                 return True
-            elif standardized_title == "date":
+            elif standardized_title == "date" or standardized_title == "posted date":
                 return None
         return False
 
@@ -104,8 +106,8 @@ class _TransactionTotalColumnIdentifier(_ColumnIdentifier):
 
 class _TransactionDescriptionColumnIdentifier(_ColumnIdentifier):
     def check(self, standardized_title):
-        """Check if the title indicates this column contains a description."""
-        return standardized_title in ("description", "desc.")
+        """Check if the title indicates this column contains a description (payee)."""
+        return standardized_title in ("description", "desc.", "payee")
 
 
 class _TransactionCategoryColumnIdentifier(_ColumnIdentifier):
@@ -184,9 +186,15 @@ class _TransactionActivityParser:
         }
         for column_type in self.column_types:
             if raw_column_indices[column_type] is None:
-                raise RuntimeError(
-                    f"The '{column_type}' column could not be identified in the data."
+                current_app.logger.debug(
+                    f"The '{column_type}' column could not be identified in the data. "
                 )
+                msg = (
+                    "The data was unable to be parsed, most likely because it did not "
+                    "match a recognized format. Supported data formats include those "
+                    f"from the following banks: {', '.join(SUPPORTED_BANKS)}."
+                )
+                abort(400, msg)
         return raw_column_indices
 
     def _determine_expenditure_sign(self, raw_data):
