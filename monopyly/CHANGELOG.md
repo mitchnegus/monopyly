@@ -202,6 +202,7 @@
 ### 1.5.1 (in progress)
 
 - Bump dependencies (including patching security vulnerability in NLTK)
+- Fix issues with the app launcher not launching the browser
 
 
 <a name="bottom" id="bottom"></a>

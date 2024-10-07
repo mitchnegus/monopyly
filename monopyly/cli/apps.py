@@ -20,18 +20,28 @@ class LocalApplication:
     """
 
     mode_name = "local"
-    default_port = "5001"
+    default_port = 5001
     _debug = None
 
     def __init__(self, host=None, port=None, **options):
         """Initialize the application in development mode."""
-        self._host = host
-        self._port = port or self.default_port
+        self.application = create_app(debug=self._debug)
+        self._host, self._port = self._determine_server(host, port)
         if options:
             raise NotImplementedError(
-                f"Options besides `host` and `port` are not handled in {self.mode_name} mode."
+                "Options besides `host` and `port` are not handled in "
+                f"{self.mode_name} mode."
             )
-        self.application = create_app(debug=self._debug)
+
+    def _determine_server(self, host, port):
+        # Use the Flask application host/port if configured (and not explicitly set)
+        if server_name := self.application.config.get("SERVER_NAME"):
+            server_name_host, _, server_name_port = server_name.partition(":")
+            host = host or server_name_host
+            port = port or int(server_name_port)
+        # Use the default port if no other is specified
+        port = port or self.default_port
+        return host, port
 
     def run(self):
         """Run the Monopyly application in development mode."""
@@ -52,7 +62,7 @@ class DevelopmentApplication(LocalApplication):
     """
 
     mode_name = "development"
-    default_port = None  # traditionally 5000
+    default_port = 5000  # traditionally 5000 (set by Flask)
     _debug = True
 
 
@@ -64,7 +74,7 @@ class ProductionApplication(BaseApplication):
     Gunicorn server instead of the built-in Python server.
     """
 
-    default_port = None  # traditionally 8000
+    default_port = 8000  # traditionally 8000 (set by Gunicorn)
     _default_worker_count = (multiprocessing.cpu_count() * 2) + 1
 
     def __init__(self, host=None, port=None, **options):

@@ -26,13 +26,11 @@ def main(mode, host=None, port=None, backup=False, browser=False):
     app_launcher.initialize_database()
     if backup:
         app_launcher.backup_database()
-    app_launcher.launch()
     if mode in ("development", "local"):
         # Enable browser viewing in development mode
-        if browser:
-            app_launcher.open_browser(delay=1)
-        # Wait for the exit command to stop
-        app_launcher.wait_for_exit()
+        if browser and app_launcher.is_main_process():
+            app_launcher.open_browser()
+    app_launcher.launch()
 
 
 def main_cli():
@@ -109,26 +107,20 @@ class Launcher:
     def launch(self):
         """Launch the Monopyly application."""
         self._console.print("[deep_sky_blue1]Running the Monopyly application...\n")
-        self.app.run()
+        try:
+            self.app.run()
+        finally:
+            if self.is_main_process():
+                print("\nClosing the Monopyly app...")
 
     def open_browser(self, delay=0):
         """Open the default web browser."""
         time.sleep(delay)
-        webbrowser.open(f"http://{self.host}:{self.port}/")
+        webbrowser.open_new(f"http://{self.host}:{self.port}/")
 
-    @classmethod
-    def wait_for_exit(cls):
-        """Wait for the exit command (e.g., keyboard interrupt) to be issued."""
-        for sig in ("TERM", "HUP", "INT"):
-            signal.signal(getattr(signal, "SIG" + sig), cls._quit)
-        while not cls._exit.is_set():
-            cls._exit.wait(1)
-
-    @classmethod
-    def _quit(cls, signo, _frame):
-        """Send the signal to quit the app."""
-        print("\nClosing the Monopyly app...")
-        cls._exit.set()
+    @staticmethod
+    def is_main_process():
+        return bool(os.environ.get("WERKZEUG_RUN_MAIN"))
 
 
 if __name__ == "__main__":

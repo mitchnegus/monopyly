@@ -2,7 +2,7 @@
 
 import multiprocessing
 from abc import ABC, abstractmethod
-from unittest.mock import call, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 from flask import Flask
@@ -26,10 +26,16 @@ class _TestApplication(ABC):
     def app_default_port(self):
         raise NotImplementedError("Define the default port in a subclass.")
 
+    def mock_configuration(self, **parameters):
+        mock_config = MagicMock()
+        mock_config.get.side_effect = parameters.get
+        mock_config.__getitem__.side_effect = parameters.__getitem__
+        return mock_config
+
 
 class TestLocalApplication(_TestApplication):
     app_cls = LocalApplication
-    app_default_port = "5001"
+    app_default_port = 5001
     app_debugging = None
 
     def test_initialization(self):
@@ -42,31 +48,43 @@ class TestLocalApplication(_TestApplication):
     @patch("monopyly.cli.apps.create_app")
     def test_run(self, mock_app_creator):
         mock_flask_app = mock_app_creator.return_value
-        app = self.app_cls(host="test.host", port="0000")
+        mock_flask_app.config = self.mock_configuration()
+        app = self.app_cls(host="test.host", port=1111)
         app.run()
         mock_flask_app.run.assert_called_once_with(
-            host="test.host", port="0000", debug=self.app_debugging
+            host="test.host", port=1111, debug=self.app_debugging
         )
 
     @patch("monopyly.cli.apps.create_app")
     def test_run_defaults(self, mock_app_creator):
         mock_flask_app = mock_app_creator.return_value
+        mock_flask_app.config = self.mock_configuration()
         app = self.app_cls()
         app.run()
         mock_flask_app.run.assert_called_once_with(
             host=None, port=self.app_default_port, debug=self.app_debugging
         )
 
+    @patch("monopyly.cli.apps.create_app")
+    def test_run_from_configuration(self, mock_app_creator):
+        mock_flask_app = mock_app_creator.return_value
+        mock_flask_app.config = self.mock_configuration(SERVER_NAME="test.host:1111")
+        app = self.app_cls()
+        app.run()
+        mock_flask_app.run.assert_called_once_with(
+            host="test.host", port=1111, debug=self.app_debugging
+        )
+
 
 class TestDevelopmentApplication(TestLocalApplication):
     app_cls = DevelopmentApplication
-    app_default_port = None
+    app_default_port = 5000
     app_debugging = True
 
 
 class TestProductionApplication(_TestApplication):
     app_cls = ProductionApplication
-    app_default_port = "8000"
+    app_default_port = 8000
     expected_worker_count = (multiprocessing.cpu_count() * 2) + 1
 
     def test_initialization(self):
