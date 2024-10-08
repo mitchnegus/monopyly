@@ -203,6 +203,7 @@
 
 - Bump dependencies (including patching security vulnerability in NLTK)
 - Increase the flexibility of the credit activity parser
+- Style credit transaction submissions as receipts
 - Fix issues with the app launcher not launching the browser
 
 
