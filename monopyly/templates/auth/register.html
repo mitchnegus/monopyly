@@ -5,11 +5,22 @@
 {% endblock %}
 
 {% block content %}
-  <form method="post">
-    <label for="username">Username</label>
-    <input name="username" id="username" required>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
-    <input class="button" type="submit" value="Register" />
-  </form>
+
+  {% if not config['REGISTRATION'] %}
+    <div class="no-registration-notice">
+      <b>Notice:</b> The app is not currently accepting new registrations.
+    </div>
+  {% endif %}
+
+  {% with input_status = 'required' if config['REGISTRATION'] else 'disabled' %}
+    <form method="post">
+      <label for="username">Username</label>
+      <input name="username" id="username" {{ input_status }}>
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" {{ input_status }}>
+      <input class="button" type="submit" value="Register" />
+    </form>
+
+  {% endwith %}
+
 {% endblock %}
