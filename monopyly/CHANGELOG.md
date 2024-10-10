@@ -203,6 +203,7 @@
 
 - Bump dependencies (including patching security vulnerability in NLTK)
 - Increase the flexibility of the credit activity parser
+- Return to statement details page after deleting a transaction (rather than returning to the general transactions page)
 - Style credit transaction submissions as receipts
 - Fix issues with the app launcher not launching the browser
 
