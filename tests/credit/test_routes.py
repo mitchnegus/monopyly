@@ -303,36 +303,6 @@ class TestCreditRoutes(TestRoutes):
         assert self.div_exists(class_="transactions-table")
         assert self.tag_count_is_equal(6, "div", class_="transaction")
 
-    def test_expand_transaction(self, authorization):
-        self.post_route("/_expand_transaction", json="4")
-        # 2 subtransactions in this transaction
-        assert self.tag_count_is_equal(2, "div", class_="subtransaction-details")
-        for tag, (note, amount) in zip(
-            self.soup.find_all("div", class_="subtransaction-details"),
-            [("One for the park", "$30.00"), ("One for the place", "$35.00")],
-            strict=True,
-        ):
-            assert note in tag.find("div", class_="notes").find("span").text
-            assert amount in tag.find("div", class_="subtotal").text
-
-    def test_show_linked_bank_transaction(self, authorization):
-        self.post_route("/_show_linked_transaction", json={"transaction_id": 7})
-        # Show the overlay
-        assert self.div_exists(class_="overlay")
-        assert self.div_exists(id="linked-transaction-display")
-        # The current transaction is a credit transaction
-        selected_transaction_tag = self.soup.find(
-            "div", class_="linked-transaction selected modal-box"
-        )
-        assert "JP Morgan Chance" in selected_transaction_tag.text
-        assert "Credit Card" in selected_transaction_tag.text
-        # The linked transaction is a bank transaction
-        linked_transaction_tag = self.soup.find(
-            "div", class_="linked-transaction modal-box"
-        )
-        assert "Jail (5556)" in linked_transaction_tag.text
-        assert "Checking" in linked_transaction_tag.text
-
     def _get_displayed_card_digits(self):
         return [_.text for _ in self.soup.find_all("span", class_="digits")]
 
@@ -367,6 +337,36 @@ class TestCreditRoutes(TestRoutes):
         # Most recent transactions at the bottom
         dates = [_.text for _ in self.soup.find_all("span", "numeric-date")]
         assert sorted(dates, reverse=True) == dates
+
+    def test_expand_transaction(self, authorization):
+        self.post_route("/_expand_transaction", json="4")
+        # 2 subtransactions in this transaction
+        assert self.tag_count_is_equal(2, "div", class_="subtransaction-details")
+        for tag, (note, amount) in zip(
+            self.soup.find_all("div", class_="subtransaction-details"),
+            [("One for the park", "$30.00"), ("One for the place", "$35.00")],
+            strict=True,
+        ):
+            assert note in tag.find("div", class_="notes").find("span").text
+            assert amount in tag.find("div", class_="subtotal").text
+
+    def test_show_linked_bank_transaction(self, authorization):
+        self.post_route("/_show_linked_transaction", json={"transaction_id": 7})
+        # Show the overlay
+        assert self.div_exists(class_="overlay")
+        assert self.div_exists(id="linked-transaction-display")
+        # The current transaction is a credit transaction
+        selected_transaction_tag = self.soup.find(
+            "div", class_="linked-transaction selected modal-box"
+        )
+        assert "JP Morgan Chance" in selected_transaction_tag.text
+        assert "Credit Card" in selected_transaction_tag.text
+        # The linked transaction is a bank transaction
+        linked_transaction_tag = self.soup.find(
+            "div", class_="linked-transaction modal-box"
+        )
+        assert "Jail (5556)" in linked_transaction_tag.text
+        assert "Checking" in linked_transaction_tag.text
 
     def test_add_transaction_get(self, authorization):
         self.get_route("/add_transaction")

@@ -357,6 +357,26 @@ def load_transactions(card_id):
     )
 
 
+@bp.route("/_update_transactions_display", methods=("POST",))
+@login_required
+def update_transactions_display():
+    # Separate the arguments of the POST method
+    post_args = request.get_json()
+    card_ids = map(int, post_args["card_ids"])
+    sort_order = "ASC" if post_args["sort_order"] == "asc" else "DESC"
+    # Filter selected transactions from the database
+    transactions = CreditTransactionHandler.get_transactions(
+        card_ids=card_ids,
+        sort_order=sort_order,
+    )
+    return render_template(
+        "credit/transactions_table/transactions.html",
+        sort_order=sort_order,
+        transactions=islice(transactions, 100),
+        full_view=True,
+    )
+
+
 @bp.route("/_expand_transaction", methods=("POST",))
 @login_required
 def expand_transaction():
@@ -383,26 +403,6 @@ def show_linked_transaction():
         selected_transaction_type="credit",
         transaction=transaction,
         linked_transaction=linked_transaction,
-    )
-
-
-@bp.route("/_update_transactions_display", methods=("POST",))
-@login_required
-def update_transactions_display():
-    # Separate the arguments of the POST method
-    post_args = request.get_json()
-    card_ids = map(int, post_args["card_ids"])
-    sort_order = "ASC" if post_args["sort_order"] == "asc" else "DESC"
-    # Filter selected transactions from the database
-    transactions = CreditTransactionHandler.get_transactions(
-        card_ids=card_ids,
-        sort_order=sort_order,
-    )
-    return render_template(
-        "credit/transactions_table/transactions.html",
-        sort_order=sort_order,
-        transactions=islice(transactions, 100),
-        full_view=True,
     )
 
 
