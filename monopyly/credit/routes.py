@@ -51,6 +51,9 @@ from .transactions.activity import (
     parse_transaction_activity_file,
 )
 
+# Set a limit on the number of transactions loaded at one time for certain routes
+TRANSACTION_LIMIT = 100
+
 
 @bp.route("/cards")
 @login_required
@@ -345,14 +348,38 @@ def load_transactions(card_id):
     # Get all of the user's transactions for the selected cards
     sort_order = "DESC"
     transactions = CreditTransactionHandler.get_transactions(
-        card_ids=selected_card_ids, sort_order=sort_order, limit=100
-    )
+        card_ids=selected_card_ids, sort_order=sort_order
+    ).all()
     return render_template(
         "credit/transactions_page.html",
         filter_cards=cards,
         selected_card_ids=selected_card_ids,
         sort_order=sort_order,
-        transactions=transactions,
+        transactions=transactions[:TRANSACTION_LIMIT],
+        total_transactions=len(transactions),
+    )
+
+
+@bp.route("/_extra_transactions", methods=("POST",))
+@login_required
+def load_more_transactions():
+    # Get info about the transactions being displayed from the AJAX request
+    post_args = request.get_json()
+    selected_card_ids = map(int, post_args["selected_card_ids"])
+    sort_order = "ASC" if post_args["sort_order"] == "asc" else "DESC"
+    block_index = post_args["block_count"] - 1
+    full_view = post_args["full_view"]
+    # Get a subset of the remaining transactions to load
+    more_transactions = CreditTransactionHandler.get_transactions(
+        card_ids=selected_card_ids,
+        sort_order=sort_order,
+        offset=block_index * TRANSACTION_LIMIT,
+        limit=TRANSACTION_LIMIT,
+    )
+    return render_template(
+        "credit/transactions_table/transactions.html",
+        transactions=more_transactions,
+        full_view=full_view,
     )
 
 

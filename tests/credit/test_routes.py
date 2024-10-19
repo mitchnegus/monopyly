@@ -303,6 +303,24 @@ class TestCreditRoutes(TestRoutes):
         assert self.div_exists(class_="transactions-table")
         assert self.tag_count_is_equal(6, "div", class_="transaction")
 
+    def test_load_more_card_transactions(self, authorization):
+        transaction_limit = 2
+        with patch("monopyly.credit.routes.TRANSACTION_LIMIT", new=transaction_limit):
+            self.post_route(
+                "/_extra_transactions",
+                json={
+                    "selected_card_ids": [3, 4],
+                    "sort_order": "asc",
+                    "block_count": 2,
+                    "full_view": True,
+                },
+            )
+        transaction_notes = [_.text for _ in self.soup.find_all("div", class_="notes")]
+        expected_notes = ["Big house tour", "Electric bill"]
+        for expected_note in expected_notes:
+            assert any(expected_note in note for note in transaction_notes)
+        assert len(transaction_notes) == transaction_limit
+
     def _get_displayed_card_digits(self):
         return [_.text for _ in self.soup.find_all("span", class_="digits")]
 

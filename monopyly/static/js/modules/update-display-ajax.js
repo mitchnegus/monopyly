@@ -30,4 +30,23 @@ function replaceDisplayContentsAjaxRequest(
 }
 
 
-export { replaceDisplayContentsAjaxRequest };
+function replaceDisplayElementAjaxRequest(
+  endpoint, rawData, $display, callback = null
+) {
+
+  // The action is to replace the display element entirely
+  function action(response) {
+    $display.replaceWith(response);
+    // Execute the callback function, if given
+    if (callback != null) {
+      callback();
+    }
+  }
+
+  // Assign the response to the display object
+  executeAjaxRequest(endpoint, rawData, action);
+
+}
+
+
+export { replaceDisplayContentsAjaxRequest, replaceDisplayElementAjaxRequest};

@@ -1340,7 +1340,34 @@ form .autocomplete-box .item.active {
 /*
  * Style tables for presenting transaction details
  */
+.transactions-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.transactions-container #more-transactions.button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border-gray);
+  border-radius: 10px;
+  background-color: #fafafa;
+  color: #666666;
+  font-size: 9pt;
+}
+
+.transactions-container #more-transactions.button img {
+  height: 12px;
+  width: 12px;
+  margin-right: 10px;
+}
+
 .transactions-table {
+  width: 100%;
   font-size: 9pt;
 }
 

@@ -25,8 +25,9 @@ class TransactionToggleManager {
    */
   constructor(callback = null) {
     // Identify the plus/minus icons
-    this.$iconsMoreInfoButtons = $('.transaction .more.button');
-    this.$iconsLessInfoButtons = $('.transaction .less.button');
+    this.$table = $('.transactions-table');
+    this.iconsMoreInfoSelector = '.transaction .more.button';
+    this.iconsLessInfoSelector = '.transaction .less.button';
     this.#registerClickExpand(callback);
     this.#registerClickCollapse();
   }
@@ -37,8 +38,8 @@ class TransactionToggleManager {
 
   #registerClickExpand(callback) {
     const self = this;
-    this.$iconsMoreInfoButtons.on('click', function(event) {
-      const $transaction = self.getButtonTransaction(this);
+    self.$table.on('click', self.iConsMoreInfoSelector, function(event) {
+      const $transaction = self.getButtonTransaction(event.target);
       const toggler = new TransactionToggler($transaction);
       toggler.expand(callback);
       // Do not propagate any additional events up the DOM tree
@@ -49,8 +50,8 @@ class TransactionToggleManager {
 
   #registerClickCollapse() {
     const self = this;
-    this.$iconsLessInfoButtons.on('click', function(event) {
-      const $transaction = self.getButtonTransaction(this);
+    self.$table.on('click', self.iconsLessInfoSelector, function(event) {
+      const $transaction = self.getButtonTransaction(event.target);
       const toggler = new TransactionToggler($transaction);
       toggler.collapse();
       // Do not propagate any additional events up the DOM tree

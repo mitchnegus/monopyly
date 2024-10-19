@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% set full_view = True %}
 
 
 {% block left_sidebar %}
@@ -60,10 +61,16 @@
   </div>
 
   <div class="transactions-container">
-    {% with full_view = True %}
-      {% include 'credit/transactions_table/table.html' %}
-    {% endwith %}
+    {% include 'credit/transactions_table/table.html' %}
+
+    {% if transactions|length < total_transactions %}
+      <div id="more-transactions" class="button">
+        <img class="icon" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}">
+        <div>Load more transactions</div>
+      </div>
+    {% endif %}
   </div>
+
 
   <a name="bottom"></a>
 
@@ -78,8 +85,17 @@
     const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
     const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
     const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
+    const LOAD_TRANSACTIONS_ENDPOINT = "{{ url_for('credit.load_more_transactions') }}";
+    const LOAD_TRANSACTIONS_SELECTORS = {
+      "selected_card_ids": {{ selected_card_ids }},
+      "sort_order": "{{ sort_order }}",
+      "block_count": 1,
+      "full_view": {{ full_view|tojson }}
+    }
   </script>
   <script type="module" src="{{ url_for('static', filename='js/update-transactions-display.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/load-more-transactions.js') }}">
   </script>
   <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
   </script>

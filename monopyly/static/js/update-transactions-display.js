@@ -17,7 +17,7 @@ import {
   TransactionToggleManager, displaySubtransactions
 } from './modules/expand-transaction.js';
 import {
-  replaceDisplayContentsAjaxRequest
+  replaceDisplayElementAjaxRequest
 } from './modules/update-display-ajax.js';
 
 
@@ -27,6 +27,8 @@ import {
   const $filterContainer = $('#card-filter');
   // Identify the transactions container
   const $container = $('.transactions-container');
+  // Identify selectors used when loading additional transactions
+  const selectors = LOAD_TRANSACTIONS_SELECTORS;
 
   // Send the Ajax request on click
   const $filters = $filterContainer.find('.card');
@@ -58,6 +60,7 @@ import {
       sortOrder = 'desc';
     }
     // Update the table with the filters and ordering
+    const $table = $container.find('.transactions-table');
     const endpoint = FILTER_ENDPOINT;
     const rawData = {
       'card_ids': cardIDs,
@@ -67,7 +70,10 @@ import {
     function callback() {
       const toggleManager = new TransactionToggleManager(displaySubtransactions)
     }
-    replaceDisplayContentsAjaxRequest(endpoint, rawData, $container, callback)
+    replaceDisplayElementAjaxRequest(endpoint, rawData, $table, callback)
+    // Update the selectors with the new filters and ordering
+    selectors["selected_card_ids"] = cardIDs;
+    selectors["sort_order"] = sortOrder;
   }
 
 })();
