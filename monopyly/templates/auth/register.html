@@ -13,14 +13,13 @@
   {% endif %}
 
   {% with input_status = 'required' if config['REGISTRATION'] else 'disabled' %}
-    <form method="post">
+    <form id="register" method="post">
       <label for="username">Username</label>
       <input name="username" id="username" {{ input_status }}>
       <label for="password">Password</label>
       <input type="password" name="password" id="password" {{ input_status }}>
       <input class="button" type="submit" value="Register" />
     </form>
-
   {% endwith %}
 
 {% endblock %}
