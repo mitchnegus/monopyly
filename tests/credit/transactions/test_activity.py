@@ -350,8 +350,6 @@ class TestActivityMatchFinders:
         # Near match should be close (absolutely) for low values
         expected_matches = [mock_data[8]]
         matches = NearMatchFinder.find(self.mock_small_total_transaction, mock_data)
-        print(matches)
-        print(expected_matches)
         assert matches == expected_matches
 
     def test_near_match_finder_close_total_wrong_sign(self):
