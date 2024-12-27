@@ -529,6 +529,19 @@ class TestCreditRoutes(TestRoutes):
         # Ensure that the transaction was deleted
         assert self.div_exists(class_="merchant", string=re.compile(".*Water Works.*"))
 
+    @transaction_lifetime
+    def test_delete_transaction_with_statement_focus(self, client, client_context):
+        with client.session_transaction() as session:
+            session["statement_focus"] = 6
+        self.get_route("/delete_transaction/9", follow_redirects=True)
+        assert self.page_header_includes_substring("Statement Details")
+        assert self.div_exists(id="statement-summary")
+        # 1 transaction remaining in the table for the statement
+        assert self.div_exists(class_="transactions-table")
+        assert self.tag_count_is_equal(1, "div", class_="transaction")
+        # Ensure that the transaction was deleted
+        assert not self.div_exists(id=f"transaction-9")
+
     def test_load_tags(self, authorization):
         self.get_route("/tags")
         assert self.page_header_includes_substring("Transaction Tags")

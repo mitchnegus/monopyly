@@ -201,6 +201,8 @@ def load_statement_details(statement_id):
     categories = categorize(transactions)
     # Get bank accounts for potential payments
     bank_accounts = BankAccountHandler.get_accounts()
+    # Save a pointer to this statement to allow easy returns
+    session["statement_focus"] = statement_id
     return render_template(
         "credit/statement_page.html",
         statement=statement,
@@ -208,6 +210,18 @@ def load_statement_details(statement_id):
         bank_accounts=bank_accounts,
         chart_data=categories.assemble_chart_data(exclude=["Credit payments"]),
     )
+
+
+@bp.before_app_request
+def clear_statement_focus():
+    exempt_endpoints = (
+        "credit.expand_transaction",
+        "credit.delete_transaction",
+        "static",
+        None,
+    )
+    if request.endpoint not in exempt_endpoints:
+        session.pop("statement_focus", None)
 
 
 @bp.route("/_update_statement_due_date/<int:statement_id>", methods=("POST",))
@@ -307,7 +321,7 @@ def clear_reconciliation_info():
         "credit.update_transaction",
         "credit.infer_statement",
         "credit.suggest_transaction_autocomplete",
-        "credit.delete_transacton",
+        "credit.delete_transaction",
         "static",
         None,
     )
@@ -483,6 +497,10 @@ def add_subtransaction_fields():
 @db_transaction
 def delete_transaction(transaction_id):
     CreditTransactionHandler.delete_entry(transaction_id)
+    if statement_id := session.pop("statement_focus", None):
+        return redirect(
+            url_for("credit.load_statement_details", statement_id=statement_id)
+        )
     return redirect(url_for("credit.load_transactions"))
 
 
