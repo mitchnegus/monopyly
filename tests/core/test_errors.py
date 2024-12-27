@@ -48,6 +48,6 @@ class TestAppErrors(TestRoutes):
         self.get_route("/invalid")
         assert self.validate_error_page(404)
 
+    @pytest.mark.xfail
     def test_418(self):
-        self.get_route("/change_password")
-        assert self.validate_error_page(418)
+        raise NotImplementedError("No endpoints currently brew coffee or tea.")

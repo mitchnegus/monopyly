@@ -5,7 +5,6 @@ Routes for core functionality.
 from pathlib import Path
 
 from flask import g, render_template, render_template_string, session
-from werkzeug.exceptions import abort
 
 from ..auth.tools import login_required
 from ..banking.accounts import BankAccountHandler
@@ -85,8 +84,3 @@ def load_profile():
     banks = BankHandler.get_banks()
     # Return banks as a list to allow multiple reuse
     return render_template("core/profile.html", banks=list(banks))
-
-
-@bp.route("/change_password")
-def change_password():
-    abort(418)

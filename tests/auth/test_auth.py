@@ -4,6 +4,7 @@ import pytest
 from flask import g, session
 from fuisce.testing import transaction_lifetime
 from sqlalchemy import select
+from werkzeug.security import check_password_hash
 
 
 @transaction_lifetime
@@ -73,3 +74,23 @@ def test_logout(client, auth):
     with client:
         auth.logout()
         assert "user_id" not in session
+
+
+@transaction_lifetime
+@pytest.mark.parametrize("current_password", ["MONOPYLY", "invalid"])
+def test_change_password(app, client, authorization, current_password):
+    # Check that the 'change_password' route is successfully reached
+    assert client.get("/auth/change_password").status_code == 200
+    # Perform a test password update
+    new_password = "password123... jk don't be a fool"
+    with client:
+        response = client.post(
+            "/auth/change_password",
+            data={"current-password": current_password, "new-password": new_password},
+            follow_redirects=True,
+        )
+        # Check that the password was updated correctly
+        # (merging the user item since it expired after the transaction)
+        password = new_password if current_password == "MONOPYLY" else "MONOPYLY"
+        user = app.db.session.merge(g.user)
+        assert check_password_hash(user.password, password)

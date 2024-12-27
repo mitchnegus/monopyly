@@ -5,6 +5,7 @@ Routes for site authentication.
 from flask import (
     current_app,
     flash,
+    g,
     redirect,
     render_template,
     request,
@@ -16,7 +17,7 @@ from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..database.models import User
-from .actions import get_username_and_password
+from .actions import get_username_and_password, identify_user
 from .blueprint import bp
 
 
@@ -33,7 +34,7 @@ def register():
             error = "Username is required."
         elif not password:
             error = "Password is required."
-        elif user := _identify_user(username):
+        elif user := identify_user(username):
             error = f"User {username} is already registered."
         else:
             # Create a new user
@@ -54,7 +55,7 @@ def login():
         # Get username and passwords from the form
         username, password = get_username_and_password(request.form)
         # Check for errors in the accessed information
-        if (user := _identify_user(username)) is None:
+        if (user := identify_user(username)) is None:
             error = "That user is not yet registered."
         elif not check_password_hash(user.password, password):
             error = "Incorrect username and password combination."
@@ -75,8 +76,22 @@ def logout():
     return redirect(url_for("core.index"))
 
 
-def _identify_user(username):
-    """Identify the user in the database based on the username."""
-    user_query = select(User).where(User.username == username)
-    user = current_app.db.session.scalar(user_query)
-    return user
+@bp.route("/change_password", methods=("GET", "POST"))
+@db_transaction
+def change_password():
+    if request.method == "POST":
+        current_password = request.form["current-password"]
+        new_password = request.form["new-password"]
+        if check_password_hash(g.user.password, current_password):
+            # Merge the user item (dissociated from the current session) for updating
+            g.user = current_app.db.session.merge(g.user)
+            g.user.password = generate_password_hash(new_password)
+            flash("Password updated successfully.", category="success")
+            return redirect(url_for("core.load_profile"))
+        else:
+            flash(
+                "The provided value for the current password does not match the "
+                "value of the current password set on this account.",
+                category="error",
+            )
+    return render_template("auth/change_password.html")

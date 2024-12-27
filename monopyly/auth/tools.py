@@ -14,8 +14,7 @@ from .blueprint import bp
 @bp.before_app_request
 def load_logged_in_user():
     # Match the user's information with the session
-    user_id = session.get("user_id")
-    if user_id is None:
+    if (user_id := session.get("user_id")) is None:
         g.user = None
     else:
         query = select(User).where(User.id == user_id)
