@@ -12,83 +12,76 @@
 
 {% block content %}
 
-  <div id="receipt">
+  <div id="submission">
 
-    <p id="receipt-title">
+    <p id="submission-title">
       The transaction was saved successfully.
     </p>
-    <br>
 
-    <p>
-      <b>Card:</b>
-      {{ transaction.statement.card.account.bank.bank_name }} ****-{{ transaction.statement.card.last_four_digits }}
-    </p>
+    <div id="receipt">
 
-    <p>
-      <b>Date: </b>
-      {{ transaction.transaction_date }}
-    </p>
+      <div id="receipt-header">
+        <h2 id="receipt-title">Transaction Submission</h2>
+        <h3 id="receipt-merchant" class="receipt-item">{{ transaction.merchant }}</h3>
+        <h4 id="receipt-date" class="receipt-item">{{ transaction.transaction_date }}</h4>
+      </div>
 
-    <p>
-      <b>Merchant: </b>
-      {{ transaction.merchant }}
-    </p>
+      {% for subtransaction in subtransactions %}
+        <div class="receipt-subtransaction">
+          <div class="note">{{ subtransaction['note'] }}</div>
+          <div class="amount">${{ subtransaction['subtotal']|currency }}</div>
+        </div>
+      {% endfor %}
 
-    {% if subtransactions|length > 1 %}
-      <p>
-        <b>Total: </b>
-        ${{ transaction.total|currency }}
-      </p>
-    {% endif %}
+      {% if subtransactions|length > 1 %}
+        <div id="receipt-total" class="receipt-item">
+          <div class="total receipt-key">Total:</div>
+          <div class="amount">${{ transaction.total|currency }}</div>
+        </div>
+      {% endif %}
 
-    {% for subtransaction in subtransactions %}
+      <div id="receipt-card">
+        <div class="receipt-item">
+          <div class="receipt-key">Card:</div>
+          <div class="receipt-value">{{ transaction.statement.card.account.bank.bank_name }} ****-{{ transaction.statement.card.last_four_digits }}</div>
+        </div>
+        <div class="receipt-item">
+          <div class="receipt-key">Statement Date:</div>
+          <div class="receipt-value">{{ transaction.statement.issue_date }}</div>
+        </div>
+      </div>
 
-      <p>
-        <b>Amount: </b>
-        ${{ subtransaction['subtotal']|currency }}
-      </p>
 
-      <p>
-        <b>Note: </b>
-        {{ subtransaction['note'] }}
-      </p>
-
-    {% endfor %}
-
-    <p>
-      <b>Statement Date: </b>
-      {{ transaction.statement.issue_date }}
-    </p>
+    </div>
 
     {% if g.user %}
-      <br>
-      <a href="{{ url_for('credit.load_statement_details', statement_id=transaction.statement_id) }}">
-        See the statement for this transaction
-      </a>
-      <br>
-      <a href="{{ url_for('credit.load_transactions') }}">
-        See transaction history
-      </a>
-      <br>
-      <a href="{{ url_for('credit.update_transaction', transaction_id=transaction.id) }}">
-        Update this transaction
-      </a>
-      <br>
-      <a href="{{ url_for('credit.add_transaction') }}">
-        Create a new transaction
-      </a>
-      <br>
-      <a href="{{ url_for('credit.add_transaction', card_id=transaction.statement.card_id, statement_id=transaction.statement_id) }}">
-        Create a new transaction on this statement
-      </a>
-      {% with reconciliation_info = session.get('reconciliation_info', None) %}
-        {% if reconciliation_info %}
-          <br>
-          <a href="{{ url_for('credit.load_statement_reconciliation_details', statement_id=reconciliation_info[0]) }}">
-            Return to the in-progress statement reconciliation
-          </a>
-        {% endif %}
-      {% endwith %}
+      <div id="submission-actions">
+        <a class="submission button" href="{{ url_for('credit.update_transaction', transaction_id=transaction.id) }}">
+          Update this transaction
+        </a>
+        <a class="submission button" href="{{ url_for('credit.add_transaction') }}">
+          Create a new transaction
+        </a>
+        <a class="submission button" href="{{ url_for('credit.add_transaction', card_id=transaction.statement.card_id, statement_id=transaction.statement_id) }}">
+          Create a new transaction on this statement
+        </a>
+        <a class="submission button" href="{{ url_for('credit.load_statement_details', statement_id=transaction.statement_id) }}">
+          See the statement for this transaction
+        </a>
+        <a class="submission button" href="{{ url_for('credit.load_statements') }}">
+          See statement history
+        </a>
+        <a class="submission button" href="{{ url_for('credit.load_transactions') }}">
+          See transaction history
+        </a>
+        {% with reconciliation_info = session.get('reconciliation_info', None) %}
+          {% if reconciliation_info %}
+            <a class="submission button" href="{{ url_for('credit.load_statement_reconciliation_details', statement_id=reconciliation_info[0]) }}">
+              Return to the in-progress statement reconciliation
+            </a>
+          {% endif %}
+        {% endwith %}
+      </div>
     {% endif %}
 
   </div>

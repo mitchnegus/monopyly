@@ -3604,13 +3604,145 @@ form#credit-transaction .merchant-field {
 /*
  * Customization for the transaction submission page
  */
-#receipt {
-  width: 31%;
+#submission {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50%;
   margin: auto;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #submission {
+    width: 90%;
+  }
+}
+
+#submission-title {
+  text-align: center;
+}
+
+#receipt {
+  width: 60%;
+  min-width: 250px;
+  max-width: 300px;
+  margin: 40px auto;
+  padding: 10px 20px 30px;
+  box-shadow: 2px 2px 6px #bbbbbb;
+  background-color: #fafafa;
+  font-family: monospace;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #receipt {
+    margin: 10px auto 30px;
+  }
 }
 
 #receipt-title {
+  margin-bottom: 20px;
   text-align: center;
+  color: var(--silver-dollar);
+  font-size: 10pt;
+  font-weight: 400;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#receipt .receipt-item {
+  display: flex;
+  margin: 15px 0;
+}
+
+#receipt .receipt-item .receipt-key {
+  font-weight: bold;
+}
+
+#receipt #receipt-header {
+  margin-bottom: 40px;
+}
+
+#receipt #receipt-header #receipt-merchant {
+  font-size: 14pt;
+  justify-content: center;
+}
+
+#receipt #receipt-header #receipt-date {
+  font-size: 10pt;
+  font-weight: normal;
+  justify-content: center;
+}
+
+#receipt .receipt-subtransaction {
+  display: flex;
+  gap: 10px 20px;
+  margin: 10px 0;
+}
+
+#receipt .receipt-subtransaction .note,
+#receipt #receipt-total .total {
+  flex: 4;
+}
+
+#receipt .receipt-subtransaction .amount,
+#receipt #receipt-total .amount {
+  flex: 1;
+  text-align: right;
+}
+
+#receipt #receipt-card {
+  margin-top: 40px;
+}
+
+#receipt #receipt-card .receipt-item {
+  flex-direction: column;
+}
+
+#receipt #receipt-card .receipt-item .receipt-key {
+  margin-bottom: 5px;
+}
+
+#receipt #receipt-card .receipt-item .receipt-value {
+  margin-left: 0;
+}
+
+#submission-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #submission-actions {
+    gap: 5px;
+  }
+}
+
+#submission-actions .submission.button {
+  width: 100%;
+  padding: 3px 10px;
+  border: 1px solid var(--border-gray);
+  border-radius: 5px;
+  background-color: #fbfbfb;
+  background-image: linear-gradient(#fbfbfb, #efefef);
+  font-size: 12pt;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+@media screen and (max-width: 600px) {
+  /* Mobile layout */
+  #submission-actions .submission.button {
+    padding: 10px;
+    font-size: 10pt;
+  }
+}
+
+#submission-actions .submission.button:hover {
+  filter: brightness(0.98);
 }
 
 

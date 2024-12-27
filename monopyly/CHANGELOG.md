@@ -199,4 +199,9 @@
 - Create a tool for reconciling credit card transactions with information collected from external resources (e.g., CSVs downloaded from a user's online credit card account)
 
 
+### 1.5.1 (in progress)
+
+- Style credit transaction submissions as receipts
+
+
 <a name="bottom" id="bottom"></a>
