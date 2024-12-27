@@ -546,15 +546,16 @@ aside.sidebar {
   left: 0;
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   background-color: rgba(0, 0, 0, 0.75);
   z-index: 50;  /* in front of content, but behind the header */
 }
 
 .modal {
-  position: relative;
-  top: 0%;
-  left: 50%;
-  transform: translate(-50%, 15%);
+  min-width: 200px;
 }
 
 .modal-box {
@@ -3532,7 +3533,6 @@ form#pay #make-payment[type="submit"] #prompt {
 #statement-reconciliation.modal {
   width: 50%;
   min-width: 300px;
-  transform: translate(-50%, 100%);
 }
 
 #statement-reconciliation.modal .modal-box {
