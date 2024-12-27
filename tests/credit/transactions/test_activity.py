@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
+from werkzeug.exceptions import BadRequest
 
 from monopyly.credit.transactions.activity.data import (
     ActivityLoadingError,
@@ -220,7 +221,7 @@ class TestTransactionActivityParser:
         )
         mock_open_method = mock_open(read_data=invalid_content)
         with patch.object(Path, "open", new=mock_open_method):
-            with pytest.raises(RuntimeError):
+            with pytest.raises(BadRequest):
                 _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
 
     @pytest.mark.parametrize(

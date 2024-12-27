@@ -203,6 +203,7 @@
 
 - Style credit transaction submissions as receipts
 - Style flash messages according to content
+- Increase the flexibility of the credit activity parser
 
 
 <a name="bottom" id="bottom"></a>
