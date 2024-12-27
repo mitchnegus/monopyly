@@ -202,6 +202,7 @@
 ### 1.5.1 (in progress)
 
 - Style credit transaction submissions as receipts
+- Style flash messages according to content
 
 
 <a name="bottom" id="bottom"></a>

@@ -91,8 +91,8 @@
           {% block header %}{% endblock %}
         </header>
 
-        {% for message in get_flashed_messages() %}
-          <div class="flash">{{ message }}</div>
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+          <div class="flash {{ category }}">{{ message }}</div>
         {% endfor %}
 
         {% block content %}{% endblock %}

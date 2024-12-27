@@ -387,6 +387,35 @@ aside.sidebar {
 
 
 /*
+ * Provide styles for flashed messages
+ */
+.flash.success,
+.flash.warning,
+.flash.error {
+  margin: 20px 0;
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 1px 1px 4px #ddd;
+  font-size: 0.9em;
+}
+
+.flash.success {
+  border: 1px solid #6fda6f;
+  background: linear-gradient(45deg, #e6efe1, #f5fef1);
+}
+
+.flash.warning {
+  border: 1px solid #dac96f;
+  background: linear-gradient(45deg, #efede1, #fefbf1);
+}
+
+.flash.error {
+  border: 1px solid #da6f6f;
+  background: linear-gradient(45deg, #f3e8e8, #fef1f1);
+}
+
+
+/*
  * Provide styles for error pages
  */
 #content-header h1.error {
