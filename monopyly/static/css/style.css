@@ -11,6 +11,10 @@
   --masthead-height: 50px;
   --masthead-color: #2b2b2b;
   --border-gray: #dddddd;
+  --button-background-base: #fbfbfb;
+  --button-background: linear-gradient(#fbfbfb, #efefef);
+  --button-block-background-base: #eeeeee;
+  --button-block-background: linear-gradient(#eeeeee, #e6e6e6);
 }
 
 html {
@@ -488,8 +492,8 @@ aside.sidebar {
   border: 1px solid var(--border-gray);
   border-radius: 10px;
   box-shadow: 1px 1px 3px #bbbbbb;
-  background-color: #eeeeee;
-  background-image: linear-gradient(#eeeeee, #e6e6e6);
+  background-color: var(--button-block-background-base);
+  background-image: var(--button-block-background);
   color: inherit;
 }
 
@@ -668,8 +672,8 @@ form input.button {
   align-items: center;
   margin-top: 20px;
   padding: 10px;
-  background-color: #fbfbfb;
-  background-image: linear-gradient(#fbfbfb, #efefef);
+  background-color: var(--button-background-base);
+  background-image: var(--button-background);
   color: #333333;
   font-weight:bold;
   text-align: center;
@@ -2595,6 +2599,21 @@ form .autocomplete-box .item.active {
 
 
 /*
+ * Customization for the 'Registration' page
+ */
+.no-registration-notice {
+  width: 60%;
+  margin: 25px auto;
+  padding: 10px;
+  border: 1px solid var(--moneytree-leaves);
+  border-radius: 10px;
+  box-shadow: 0 0 10px var(--moneytree-leaves);
+  background-color: #f5f5f5;
+  text-align: center;
+}
+
+
+/*
  * Customization for the 'Profile' page
  */
 @media screen and (max-width: 600px) {
@@ -3756,8 +3775,8 @@ form#credit-transaction .merchant-field {
   padding: 3px 10px;
   border: 1px solid var(--border-gray);
   border-radius: 5px;
-  background-color: #fbfbfb;
-  background-image: linear-gradient(#fbfbfb, #efefef);
+  background-color: var(--button-background-base);
+  background-image: var(--button-background);;
   font-size: 12pt;
   text-decoration: none;
   box-sizing: border-box;

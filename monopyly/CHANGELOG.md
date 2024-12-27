@@ -204,6 +204,7 @@
 - Style credit transaction submissions as receipts
 - Style flash messages according to content
 - Return to statement details page after deleting a transaction (rather than returning to the general transactions page)
+- Warn users before form submission if the configuration currently disallows registration
 - Increase the flexibility of the credit activity parser
 
 
