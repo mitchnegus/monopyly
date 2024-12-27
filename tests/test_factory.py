@@ -6,10 +6,15 @@ from unittest.mock import patch
 
 import pytest
 
-# Rename testing config to avoid Pytest attempting to collect `TestingConfig`
-from monopyly import create_app
-from monopyly.config import ProductionConfig
-from monopyly.config import TestingConfig as _TestingConfig
+from monopyly import AppFactory, create_app
+from monopyly.cli.modes import DevelopmentAppMode, LocalAppMode, ProductionAppMode
+from monopyly.config import (
+    DevelopmentConfig,
+    ProductionConfig,
+)
+from monopyly.config import (
+    TestingConfig as _TestingConfig,  # rename to avoid pytest collection
+)
 
 
 @pytest.fixture
@@ -35,14 +40,31 @@ def instance_config_file(instance_path):
     return config_filepath
 
 
-@patch("monopyly.Flask.debug", new=True)
+def test_app_factory_development_mode():
+    app = AppFactory(DevelopmentAppMode).create_app()
+    assert app.config["SECRET_KEY"] == "development key"
+
+
+def test_app_factory_production_mode():
+    app = AppFactory(ProductionAppMode).create_app()
+    assert app.config["SECRET_KEY"] not in ["development key", "testing key"]
+
+
+def test_app_factory_local_mode():
+    app = AppFactory(LocalAppMode).create_app()
+    # The local app mode uses the production configuration
+    assert app.config["SECRET_KEY"] not in ["development key", "testing key"]
+
+
 def test_development_config():
+    # The default configuration is development
     app = create_app()
     assert app.config["SECRET_KEY"] == "development key"
 
 
-def test_production_config(default_config_file):
-    app = create_app()
+def test_production_config(instance_path):
+    config = ProductionConfig.configure_for_instance(instance_path)
+    app = create_app(config=config)
     assert app.config["SECRET_KEY"] not in ["development key", "testing key"]
 
 
@@ -55,7 +77,7 @@ def test_production_config_default_file(default_config_file):
         assert config.SECRET_KEY == "test secret key"
 
 
-def test_production_config_instance_file(
+def test_production_config_instance_file_supersedes(
     default_config_file, instance_path, instance_config_file
 ):
     with patch(

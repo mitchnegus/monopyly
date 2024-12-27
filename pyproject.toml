@@ -42,7 +42,7 @@ classifiers = [
 dynamic = ['readme', 'version']
 
 [project.scripts]
-monopyly = 'monopyly.cli.launch:main_cli'
+monopyly = 'monopyly.cli.interact:main'
 
 [project.urls]
 Download = 'https://pypi.org/project/monopyly'

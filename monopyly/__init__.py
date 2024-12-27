@@ -4,29 +4,57 @@ Run the Monopyly app.
 
 from flask import Flask
 
-from monopyly.config import DevelopmentConfig, ProductionConfig
-from monopyly.core.errors import render_error_template
-from monopyly.database import SQLAlchemy, register_db_cli_commands
+from .config import DevelopmentConfig, ProductionConfig, TestingConfig
+from .core.errors import render_error_template
+from .database import SQLAlchemy, register_db_cli_commands
 
 
-def create_app(test_config=None, debug=None):
-    # Create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+def create_app(config=None):
+    """Create the Monopyly application."""
+    return AppFactory().create_app(config)
 
-    # Prepare the app configuration
-    if test_config:
-        config = test_config
-    else:
-        # Load the development/production config when not testing
-        if app.debug or debug:
-            config = DevelopmentConfig.configure_for_instance(app.instance_path)
-        else:
-            config = ProductionConfig.configure_for_instance(app.instance_path)
-    app.config.from_object(config)
 
-    # Initialize the app, including CLI commands and blueprints
-    init_app(app)
-    return app
+class AppFactory:
+    """
+    An application factory for the Flask app.
+
+    Parameters
+    ----------
+    app_mode : monopyly.cli.modes.CustomCLIAppMode, None
+        The application mode to use when determining application
+        configurations beyond those specified in a configuration object
+        provided to the factory function.
+    """
+
+    def __init__(self, app_mode=None):
+        self._app_mode = app_mode
+
+    def create_app(self, config=None):
+        """
+        Create the Flask application.
+
+        Create the Flask app, including configurations as specified. This
+        will configure the app using the configuration objects made
+        available by the Monopyly application and initialize the app
+        by registering app blueprints, routes, and commands.
+        """
+        # Create and configure the app
+        app = Flask(__name__, instance_relative_config=True)
+        self._configure_app(app, config)
+        # Initialize the app, including CLI commands and blueprints
+        init_app(app)
+        return app
+
+    def _configure_app(self, app, config):
+        """Configure the application for the stated mode (and optional configuration)."""
+        # Load the default mode configuration when not otherwise specified
+        # (including testing)
+        if not config:
+            if self._app_mode:
+                config = self._app_mode.define_instance_configuration(app)
+            else:
+                config = DevelopmentConfig.configure_for_instance(app.instance_path)
+        app.config.from_object(config)
 
 
 @SQLAlchemy.interface_selector
