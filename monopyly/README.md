@@ -27,10 +27,10 @@ The package requires a recent version of Python (3.10+).
 
 ## Getting started
 
-Once the package is properly installed, run the app in local mode from the command line (the default options should be sensible, but you may customize the host and port if necessary):
+Once the package is properly installed, launch the app in local mode from the command line (the default options should be sensible, but you may customize the host and port if necessary):
 
 ```
-$ monopyly local --browser [--host HOST] [--port PORT]
+$ monopyly launch local --browser [--host HOST] [--port PORT]
 ```
 
 Local mode indicates that the app is just going to be run using a locally hosted server, accessible to just your machine.

@@ -2,24 +2,36 @@
 
 import multiprocessing
 from abc import ABC, abstractmethod
-from unittest.mock import call, patch
+from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 from flask import Flask
 
-from monopyly.cli.apps import (
-    DevelopmentApplication,
-    LocalApplication,
-    ProductionApplication,
-)
+from monopyly import create_app
+from monopyly.cli.modes import DevelopmentAppMode, LocalAppMode, ProductionAppMode
 
 
-class _TestApplication(ABC):
+@pytest.fixture
+def mock_context(app):
+    context = Mock()
+    context.obj.create_app.return_value = app
+    context.obj.load_app.return_value = app
+    return context
+
+
+def mock_configuration(**parameters):
+    config = MagicMock()
+    config.get.side_effect = parameters.get
+    config.__getitem__.side_effect = parameters.__getitem__
+    return config
+
+
+class _TestAppMode(ABC):
 
     @property
     @abstractmethod
-    def app_cls(self):
-        raise NotImplementedError("Define the application class in a subclass.")
+    def app_mode_cls(self):
+        raise NotImplementedError("Define the application mode in a subclass.")
 
     @property
     @abstractmethod
@@ -27,61 +39,93 @@ class _TestApplication(ABC):
         raise NotImplementedError("Define the default port in a subclass.")
 
 
-class TestLocalApplication(_TestApplication):
-    app_cls = LocalApplication
-    app_default_port = "5001"
-    app_debugging = None
+class TestLocalAppMode(_TestAppMode):
+    app_mode_cls = LocalAppMode
+    app_default_port = 5001
+    app_debugging = False
 
-    def test_initialization(self):
-        self.app_cls(host="test.host", port="0000")
+    def test_initialization(self, mock_context):
+        self.app_mode_cls(mock_context, host="test.host", port=1111)
 
-    def test_initialization_invalid(self):
+    def test_initialization_invalid(self, mock_context):
         with pytest.raises(NotImplementedError):
-            self.app_cls(host="test.host", port="0000", option="invalid option")
+            self.app_mode_cls(
+                mock_context, host="test.host", port=1111, option="invalid option"
+            )
 
-    @patch("monopyly.cli.apps.create_app")
-    def test_run(self, mock_app_creator):
-        mock_flask_app = mock_app_creator.return_value
-        app = self.app_cls(host="test.host", port="0000")
-        app.run()
-        mock_flask_app.run.assert_called_once_with(
-            host="test.host", port="0000", debug=self.app_debugging
-        )
+    @patch("monopyly.cli.modes.run_command")
+    @patch("os.environ")
+    def test_run(self, mock_environment, mock_run_command, mock_context):
+        mock_flask_app = mock_context.obj.create_app.return_value
+        with patch.object(mock_flask_app, "config", new=mock_configuration()):
+            app_mode = self.app_mode_cls(mock_context, host="test.host", port=1111)
+            app_mode.run()
+            mock_environment.setdefault.assert_called_once_with(
+                "FLASK_DEBUG", str(self.app_debugging)
+            )
+            mock_context.invoke.assert_called_once_with(
+                mock_run_command, host="test.host", port=1111
+            )
 
-    @patch("monopyly.cli.apps.create_app")
-    def test_run_defaults(self, mock_app_creator):
-        mock_flask_app = mock_app_creator.return_value
-        app = self.app_cls()
-        app.run()
-        mock_flask_app.run.assert_called_once_with(
-            host=None, port=self.app_default_port, debug=self.app_debugging
-        )
+    @patch("monopyly.cli.modes.run_command")
+    @patch("os.environ")
+    def test_run_defaults(self, mock_environment, mock_run_command, mock_context):
+        mock_flask_app = mock_context.obj.create_app.return_value
+        with patch.object(mock_flask_app, "config", new=mock_configuration()):
+            app_mode = self.app_mode_cls(mock_context)
+            app_mode.run()
+            mock_environment.setdefault.assert_called_once_with(
+                "FLASK_DEBUG", str(self.app_debugging)
+            )
+            mock_context.invoke.assert_called_once_with(
+                mock_run_command, host=None, port=self.app_default_port
+            )
+
+    @patch("monopyly.cli.modes.run_command")
+    @patch("os.environ")
+    def test_run_from_configuration(
+        self, mock_environment, mock_run_command, mock_context
+    ):
+        mock_flask_app = mock_context.obj.create_app.return_value
+        with patch.object(
+            mock_flask_app,
+            "config",
+            new=mock_configuration(SERVER_NAME="test.host:1111"),
+        ):
+            app_mode = self.app_mode_cls(mock_context)
+            app_mode.run()
+            mock_environment.setdefault.assert_called_once_with(
+                "FLASK_DEBUG", str(self.app_debugging)
+            )
+            mock_context.invoke.assert_called_once_with(
+                mock_run_command, host="test.host", port=1111
+            )
 
 
-class TestDevelopmentApplication(TestLocalApplication):
-    app_cls = DevelopmentApplication
-    app_default_port = None
+class TestDevelopmentAppMode(TestLocalAppMode):
+    app_mode_cls = DevelopmentAppMode
+    app_default_port = 5000
     app_debugging = True
 
 
-class TestProductionApplication(_TestApplication):
-    app_cls = ProductionApplication
-    app_default_port = "8000"
+class TestProductionAppMode(_TestAppMode):
+    app_mode_cls = ProductionAppMode
+    app_default_port = 8000
     expected_worker_count = (multiprocessing.cpu_count() * 2) + 1
 
-    def test_initialization(self):
-        app = self.app_cls(host="test.host", port="0000")
-        assert isinstance(app.application, Flask)
-        assert app.options == {
-            "bind": "test.host:0000",
+    def test_initialization(self, mock_context):
+        app_mode = self.app_mode_cls(mock_context, host="test.host", port=1111)
+        assert isinstance(app_mode.application, Flask)
+        assert app_mode.options == {
+            "bind": "test.host:1111",
             "workers": self.expected_worker_count,
         }
 
-    def test_initialization_via_bind(self):
-        app = self.app_cls(bind="test.host:0000")
-        assert isinstance(app.application, Flask)
-        assert app.options == {
-            "bind": "test.host:0000",
+    def test_initialization_via_bind(self, mock_context):
+        app_mode = self.app_mode_cls(mock_context, bind="test.host:1111")
+        assert isinstance(app_mode.application, Flask)
+        assert app_mode.options == {
+            "bind": "test.host:1111",
             "workers": self.expected_worker_count,
         }
 
@@ -95,27 +139,29 @@ class TestProductionApplication(_TestApplication):
             [{"port": "0000"}, ValueError],
         ],
     )
-    def test_initialization_invalid(self, invalid_kwargs, exception):
+    def test_initialization_invalid(self, mock_context, invalid_kwargs, exception):
         with pytest.raises(exception):
-            self.app_cls(**invalid_kwargs)
+            self.app_mode_cls(mock_context, **invalid_kwargs)
 
     @pytest.mark.xfail
     def test_load_config(self):
         assert False
 
-    def test_load(self):
-        app = self.app_cls(host="test.host", port="0000")
-        assert app.load() is app.application
+    def test_load(self, mock_context):
+        app_mode = self.app_mode_cls(mock_context, host="test.host", port=1111)
+        assert app_mode.load() is app_mode.application
 
     @patch("gunicorn.config.Config.set")
     @patch("gunicorn.app.base.BaseApplication.run")
-    def test_run(self, mock_gunicorn_run_method, mock_gunicorn_config_set_method):
-        app = self.app_cls(host="test.host", port="0000")
-        app.run()
+    def test_run(
+        self, mock_gunicorn_run_method, mock_gunicorn_config_set_method, mock_context
+    ):
+        app_mode = self.app_mode_cls(mock_context, host="test.host", port=1111)
+        app_mode.run()
         mock_gunicorn_run_method.assert_called_once()
         mock_gunicorn_config_set_method.assert_has_calls(
             [
-                call("bind", "test.host:0000"),
+                call("bind", "test.host:1111"),
                 call("workers", self.expected_worker_count),
             ]
         )
@@ -123,10 +169,10 @@ class TestProductionApplication(_TestApplication):
     @patch("gunicorn.config.Config.set")
     @patch("gunicorn.app.base.BaseApplication.run")
     def test_run_defaults(
-        self, mock_gunicorn_run_method, mock_gunicorn_config_set_method
+        self, mock_gunicorn_run_method, mock_gunicorn_config_set_method, mock_context
     ):
-        app = self.app_cls()
-        app.run()
+        app_mode = self.app_mode_cls(mock_context)
+        app_mode.run()
         mock_gunicorn_run_method.assert_called_once()
         mock_gunicorn_config_set_method.assert_has_calls(
             [call("workers", self.expected_worker_count)]

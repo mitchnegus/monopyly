@@ -19,7 +19,7 @@ class TestRoutes:
 
     @pytest.fixture(autouse=True)
     def _get_client(self, client):
-        # Use the client fixture in route tests
+        # Use the client fixture in all route tests (accessed via a property)
         self._client = client
 
     def route_loader(method):

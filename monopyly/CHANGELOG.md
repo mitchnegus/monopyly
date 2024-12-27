@@ -207,6 +207,7 @@
 - Return to statement details page after deleting a transaction (rather than returning to the general transactions page)
 - Allow users to change their password
 - Warn users before form submission if the configuration currently disallows registration
+- Fix issues with the application launcher not launching the browser; couple application launch process more tightly with click
 - Increase the flexibility of the credit activity parser
 
 
