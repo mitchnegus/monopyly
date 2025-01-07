@@ -301,7 +301,7 @@ class CreditTransactionForm(TransactionForm):
 
     def _extract_merchant_suggestion(self, data):
         # Use the merchant transaction data as a suggestion source
-        if merchant := self._extract_suggestion(data, "merchant"):
+        if merchant := data.get("merchant"):
             merchant_tokens = ActivityMatchmaker.tokenize(merchant)
             # Suggest a known merchant with the closest distance to the activity merchant
             score_records = []
