@@ -145,7 +145,6 @@ def execute_on_form_validation(func):
         else:
             # Show an error to the user and print the errors for the admin
             flash(form_err_msg)
-            print(form.errors)
-            raise ValidationError("The form did not validate properly.")
+            raise ValidationError(f"The form did not validate properly: {form.errors}")
 
     return wrapper
