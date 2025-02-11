@@ -67,7 +67,7 @@ package : env
 .PHONY: upload
 upload : env
 	@. $(ENV_ACTIVATE); \
-	hatch publish
+	hatch publish --user __token__ --auth $$(cat .TOKEN)
 
 
 ## clean		: Clean all automatically generated files
