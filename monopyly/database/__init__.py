@@ -6,11 +6,11 @@ import sqlite3
 from pathlib import Path
 
 import click
+from dry_foundation.cli.console import echo_text
 from flask import current_app
 from flask.cli import with_appcontext
 from fuisce.database import SQLAlchemy as _SQLAlchemy
 
-from ..cli.console import echo_text
 from ..core.actions import get_timestamp
 
 BASE_DB_NAME = f"monopyly.sqlite"

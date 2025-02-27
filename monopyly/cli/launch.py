@@ -8,10 +8,10 @@ import webbrowser
 from functools import partial
 
 import click
+from dry_foundation.cli.console import echo_text
 from werkzeug.serving import is_running_from_reloader
 
 from ..database import back_up_db, init_db
-from .console import echo_text
 from .modes import DevelopmentAppMode, LocalAppMode, ProductionAppMode
 
 APP_TYPES = [DevelopmentAppMode, LocalAppMode, ProductionAppMode]
