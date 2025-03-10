@@ -62,7 +62,7 @@ class CustomCLIAppMode(ABC):
 
     @classmethod
     def define_instance_configuration(cls, app):
-        return cls.config_type.configure_for_instance(app.instance_path)
+        return cls.config_type(app.instance_path)
 
 
 class LocalAppMode(CustomCLIAppMode):

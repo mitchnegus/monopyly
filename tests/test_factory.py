@@ -63,28 +63,27 @@ def test_development_config():
 
 
 def test_production_config(instance_path):
-    config = ProductionConfig.configure_for_instance(instance_path)
+    config = ProductionConfig(instance_path)
     app = create_app(config=config)
     assert app.config["SECRET_KEY"] not in ["development key", "testing key"]
 
 
-def test_production_config_default_file(default_config_file):
+def test_production_config_default_file(instance_path, default_config_file):
     with patch(
-        "monopyly.config.settings.ProductionConfig.config_filepaths",
+        "monopyly.config.ProductionConfig.default_config_filepaths",
         new=[default_config_file],
     ):
-        config = ProductionConfig()
+        config = ProductionConfig(instance_path)
         assert config.SECRET_KEY == "test secret key"
 
 
 def test_production_config_instance_file_supersedes(
-    default_config_file, instance_path, instance_config_file
+    instance_path, default_config_file, instance_config_file
 ):
-    with patch(
-        "monopyly.config.default_settings.Config.config_filepaths",
-        new=[default_config_file],
+    with patch.object(
+        ProductionConfig, "default_global_config_filepath", new=default_config_file
     ):
-        config = ProductionConfig.configure_for_instance(instance_path)
+        config = ProductionConfig(instance_path)
         assert config.SECRET_KEY == "test secret key"
         assert config.OTHER == "test supersede"
 

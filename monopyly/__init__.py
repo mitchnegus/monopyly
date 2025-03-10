@@ -53,7 +53,7 @@ class AppFactory:
             if self._app_mode:
                 config = self._app_mode.define_instance_configuration(app)
             else:
-                config = DevelopmentConfig.configure_for_instance(app.instance_path)
+                config = DevelopmentConfig(app.instance_path)
         app.config.from_object(config)
 
 

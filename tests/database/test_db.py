@@ -16,13 +16,17 @@ def test_get_close_db(app):
     assert session is not app.db.session
 
 
-@patch("monopyly.config.default_settings.Path.is_file", new=Mock(return_value=True))
+@patch(
+    "dry_foundation.config.default_settings.Path.is_file", new=Mock(return_value=True)
+)
 def test_init_db_command_db_exists(runner):
     result = runner.invoke(args=["init-db"])
     assert "Database exists" in result.output
 
 
-@patch("monopyly.config.default_settings.Path.is_file", new=Mock(return_value=False))
+@patch(
+    "dry_foundation.config.default_settings.Path.is_file", new=Mock(return_value=False)
+)
 @patch("monopyly.database.SQLAlchemy.initialize")
 def test_init_db_command(mock_init_db, app, runner):
     result = runner.invoke(args=["init-db"])
