@@ -9,15 +9,7 @@ from monopyly.core.actions import (
     convert_changelog_to_html_template,
     convert_readme_to_html_template,
     determine_summary_balance_svg_viewbox_width,
-    get_timestamp,
 )
-
-
-@patch("monopyly.core.actions.datetime")
-def test_get_timestamp(mock_datetime_module):
-    mock_datetime_module.now.return_value = datetime(2023, 4, 1, 0, 0, 0)
-    timestamp = get_timestamp()
-    assert timestamp == "20230401_000000"
 
 
 def test_convert_readme_to_html_template(tmp_path):

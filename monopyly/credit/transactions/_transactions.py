@@ -2,7 +2,7 @@
 Tools for interacting with the credit transactions in the database.
 """
 
-from authanor.database.handler import DatabaseHandler, DatabaseViewHandler
+from dry_foundation.database.handler import DatabaseHandler, DatabaseViewHandler
 
 from ...common.forms.utils import execute_on_form_validation
 from ...common.transactions import TransactionHandler, TransactionTagHandler

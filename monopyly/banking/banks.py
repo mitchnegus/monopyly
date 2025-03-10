@@ -2,7 +2,7 @@
 Tools for interacting with banks in the database.
 """
 
-from authanor.database.handler import DatabaseHandler
+from dry_foundation.database.handler import DatabaseHandler
 
 from ..database.models import Bank
 

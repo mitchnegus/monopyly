@@ -1,8 +1,8 @@
-authanor>=1.1.0
 beautifulsoup4>=4.12.3
 black>=24.4.0
 colorama>=0.4.6
 coverage>=7.4.4
+dry-foundation>=1.0.0
 hatch>=1.9.4
 isort>=5.13.2
 pip>=24.0

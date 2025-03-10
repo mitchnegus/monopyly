@@ -2,6 +2,7 @@
 Routes for site authentication.
 """
 
+from dry_foundation.database import db_transaction
 from flask import (
     current_app,
     flash,
@@ -12,7 +13,6 @@ from flask import (
     session,
     url_for,
 )
-from fuisce.database import db_transaction
 from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 

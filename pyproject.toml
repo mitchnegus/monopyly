@@ -11,10 +11,9 @@ description = 'A homemade personal finance manager.'
 license = { text = 'GNU GPLv3' }
 requires-python = '>=3.10,<3.11'
 dependencies = [
-  'authanor==1.1.1',
+  'dry-foundation==1.0.2',
   'Flask==3.0.3',
   'Flask-WTF==1.2.1',
-  'fuisce==1.0.2',
   'gunicorn==23.0.0',
   'Markdown==3.7',
   'nltk==3.9.1',
@@ -42,7 +41,7 @@ classifiers = [
 dynamic = ['readme', 'version']
 
 [project.scripts]
-monopyly = 'monopyly.cli.interact:main'
+monopyly = 'monopyly:main'
 
 [project.urls]
 Download = 'https://pypi.org/project/monopyly'
@@ -107,3 +106,4 @@ force-exclude = 'monopyly/_version.py'
 profile = 'black'
 src_paths = ['monopyly', 'tests']
 known_local_folder = ['test_helpers', 'test_tag_helpers']
+skip = ['monopyly/_version.py']

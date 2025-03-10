@@ -1,7 +1,7 @@
 """Tests for the banking module managing banks."""
 
 import pytest
-from authanor.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestHandler
 from werkzeug.exceptions import NotFound
 
 from monopyly.banking.banks import BankHandler

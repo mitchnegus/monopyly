@@ -1,8 +1,8 @@
 """Tests for user authentication."""
 
 import pytest
+from dry_foundation.testing import transaction_lifetime
 from flask import g, session
-from fuisce.testing import transaction_lifetime
 from sqlalchemy import select
 from werkzeug.security import check_password_hash
 

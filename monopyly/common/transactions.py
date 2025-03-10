@@ -4,7 +4,7 @@ Tools for building a common transaction interface.
 
 from abc import abstractmethod
 
-from authanor.database.handler import DatabaseHandler, DatabaseViewHandler
+from dry_foundation.database.handler import DatabaseHandler, DatabaseViewHandler
 from flask import current_app
 
 from ..database.models import (

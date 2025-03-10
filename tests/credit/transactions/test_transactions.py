@@ -4,7 +4,7 @@ from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
-from authanor.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestHandler
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 

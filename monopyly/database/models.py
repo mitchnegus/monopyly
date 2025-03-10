@@ -1,4 +1,4 @@
-from authanor.database.models import AuthorizedAccessMixin, Model
+from dry_foundation.database.models import AuthorizedAccessMixin, Model
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import mapped_column, relationship

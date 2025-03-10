@@ -2,7 +2,7 @@
 Tools for interacting with credit cards in the database.
 """
 
-from authanor.database.handler import DatabaseHandler
+from dry_foundation.database.handler import DatabaseHandler
 
 from ..common.forms.utils import execute_on_form_validation
 from ..database.models import Bank, CreditAccount, CreditCard

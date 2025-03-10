@@ -2,7 +2,7 @@
 Tools for interacting with credit accounts in the database.
 """
 
-from authanor.database.handler import DatabaseHandler
+from dry_foundation.database.handler import DatabaseHandler
 
 from ..database.models import CreditAccount
 

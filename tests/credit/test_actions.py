@@ -4,7 +4,7 @@ from datetime import date
 from unittest.mock import Mock, call, patch
 
 import pytest
-from fuisce.testing import transaction_lifetime
+from dry_foundation.testing import transaction_lifetime
 
 from monopyly.banking.transactions import BankTransactionHandler
 from monopyly.credit.actions import (

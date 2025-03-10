@@ -6,8 +6,8 @@ from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
+from dry_foundation.testing import transaction_lifetime
 from flask import url_for
-from fuisce.testing import transaction_lifetime
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.transactions.activity.data import TransactionActivities

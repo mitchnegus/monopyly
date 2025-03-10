@@ -1,10 +1,10 @@
 from pathlib import Path
 
 import pytest
-from fuisce.testing import AppTestManager
+from dry_foundation.config.settings import TestingConfig
+from dry_foundation.testing import AppTestManager
 
-from monopyly import create_app
-from monopyly.config import TestingConfig
+import monopyly
 
 TEST_DIR = Path(__file__).parent
 PRELOAD_DATA_PATH = TEST_DIR / "data.sql"
@@ -27,7 +27,10 @@ class AuthActions:
 
 # Instantiate the app manager to determine the correct app (persistent/ephemeral)
 app_manager = AppTestManager(
-    factory=create_app, config=TestingConfig, preload_data_path=PRELOAD_DATA_PATH
+    import_name=monopyly.__name__,
+    factory=monopyly.create_app,
+    config=TestingConfig,
+    preload_data_path=PRELOAD_DATA_PATH,
 )
 
 
@@ -39,11 +42,6 @@ def app():
 @pytest.fixture
 def client(app):
     yield app.test_client()
-
-
-@pytest.fixture
-def runner(app):
-    return app.test_cli_runner()
 
 
 @pytest.fixture

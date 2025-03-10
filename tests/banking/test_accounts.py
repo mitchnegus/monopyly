@@ -4,8 +4,8 @@ from datetime import date, timedelta
 from unittest.mock import patch
 
 import pytest
-from authanor.testing.helpers import TestHandler
-from fuisce.testing import transaction_lifetime
+from dry_foundation.testing import transaction_lifetime
+from dry_foundation.testing.helpers import TestHandler
 from werkzeug.exceptions import Forbidden, NotFound
 
 from monopyly.banking.accounts import (

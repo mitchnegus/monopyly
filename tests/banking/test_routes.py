@@ -4,7 +4,7 @@ import json
 from datetime import date
 
 import pytest
-from fuisce.testing import transaction_lifetime
+from dry_foundation.testing import transaction_lifetime
 
 from test_helpers import TestRoutes
 

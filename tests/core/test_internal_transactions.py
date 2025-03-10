@@ -1,6 +1,6 @@
 """Tests for internal transactions."""
 
-from fuisce.testing import transaction_lifetime
+from dry_foundation.testing import transaction_lifetime
 from sqlalchemy import select
 from sqlalchemy.sql.expression import func
 

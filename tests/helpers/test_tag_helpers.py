@@ -1,6 +1,6 @@
 """Common helper objects to improve modularity of tests."""
 
-from authanor.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestHandler
 
 from monopyly.database.models import TransactionTag
 
