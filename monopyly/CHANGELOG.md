@@ -212,4 +212,7 @@
 - Increase the flexibility of the credit activity parser
 
 
+### 1.5.2 (in-progress)
+
+- Use smoothing on charts for up to 100 transactions
 <a name="bottom" id="bottom"></a>

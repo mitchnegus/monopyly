@@ -50,7 +50,7 @@ function createBalanceChart(data) {
   const yLimit = Math.ceil(1.25*maxBalance/magnitudeOrder)*magnitudeOrder;
 
   let smoothLine = true;
-  if (timestamps.length > 50) {
+  if (timestamps.length > 100) {
     smoothLine = false;
   }
 
