@@ -222,7 +222,26 @@ class _Matchmaker(ABC):
         field : str
             The string of text to be tokenized.
         """
-        return set(wordpunct_tokenize(field.replace("'", "").casefold()))
+        replacements = [
+            # Remove disruptive punctuation
+            ("1-800", "1800"),
+            ("-", " "),
+            (".", " "),
+            (",", " "),
+            ("(", " "),
+            (")", " "),
+            ("'", ""),
+            # Standardize characters
+            ("&", "and"),
+            ("é", "e"),
+        ]
+        for original, replacement in replacements:
+            field = field.replace(original, replacement)
+        tokens = set(wordpunct_tokenize(field.replace("'", "").casefold()))
+        removals = ["and", "the", "of"]
+        for word in removals:
+            tokens.discard(word)
+        return tokens
 
     def _compute_transaction_activity_similarity_score(
         self, merchant_tokens, notes_tokens, activity_tokens

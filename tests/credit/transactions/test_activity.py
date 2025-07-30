@@ -536,6 +536,9 @@ class TestActivityMatchmakers:
             ("Life is a Game", 4),
             ("life is a game", 4),
             ("Monopyly is a game", 4),
+            ("Life. It's a game", 4),  # -------  remove punctuation/apostrophes
+            ("Life is a (tough) game", 5),  # -- remove parentheses
+            ("Monopyly and Life", 2),  # ------- exclude "and"
             ("Game", 1),
         ],
     )

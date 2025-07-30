@@ -215,4 +215,7 @@
 ### 1.5.2 (in-progress)
 
 - Use smoothing on charts for up to 100 transactions
+- Improve tokenization normalization for credit reconciliation
+
+
 <a name="bottom" id="bottom"></a>
