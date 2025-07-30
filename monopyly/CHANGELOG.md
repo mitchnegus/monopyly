@@ -216,6 +216,7 @@
 
 - Use smoothing on charts for up to 100 transactions
 - Improve tokenization normalization for credit reconciliation
+- Remove statement requiring activity files be located in the `Downloads` directory
 
 
 <a name="bottom" id="bottom"></a>
