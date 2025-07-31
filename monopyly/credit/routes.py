@@ -497,10 +497,14 @@ def add_subtransaction_fields():
 @db_transaction
 def delete_transaction(transaction_id):
     CreditTransactionHandler.delete_entry(transaction_id)
-    if statement_id := session.pop("statement_focus", None):
-        return redirect(
-            url_for("credit.load_statement_details", statement_id=statement_id)
-        )
+    if (statement_id := session.pop("statement_focus", None)) is not None:
+        statement = CreditStatementHandler.get_entry(statement_id)
+        # Delete the statement if it has no more transactions
+        if statement.balance is not None:
+            return redirect(
+                url_for("credit.load_statement_details", statement_id=statement.id)
+            )
+        CreditStatementHandler.delete_entry(statement.id)
     return redirect(url_for("credit.load_transactions"))
 
 

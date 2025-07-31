@@ -527,7 +527,22 @@ class TestCreditRoutes(TestRoutes):
         assert self.div_exists(class_="transactions-table")
         assert self.tag_count_is_equal(9, "div", class_="transaction")
         # Ensure that the transaction was deleted
-        assert self.div_exists(class_="merchant", string=re.compile(".*Water Works.*"))
+        assert not self.div_exists(
+            class_="merchant", string=re.compile(".*Pennsylvania Avenue.*")
+        )
+
+    @transaction_lifetime
+    def test_delete_last_statement_transaction(self, client, client_context):
+        with client.session_transaction() as session:
+            session["statement_focus"] = 6
+        self.get_route("/delete_transaction/9", follow_redirects=True)
+        with patch(
+            "monopyly.credit.routes.CreditStatementHandler.delete_entry"
+        ) as mock_deletion_method:
+            self.get_route("/delete_transaction/10", follow_redirects=True)
+        assert self.page_header_includes_substring("Credit Transactions")
+        # Ensure that the statement handler triggered a deletion for statement 6
+        mock_deletion_method.assert_called_once_with(6)
 
     @transaction_lifetime
     def test_delete_transaction_with_statement_focus(self, client, client_context):
