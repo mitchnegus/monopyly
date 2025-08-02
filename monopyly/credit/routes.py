@@ -321,6 +321,7 @@ def clear_reconciliation_info():
         "credit.update_transaction",
         "credit.infer_statement",
         "credit.suggest_transaction_autocomplete",
+        "credit.add_subtransaction_fields",
         "credit.delete_transaction",
         "static",
         None,

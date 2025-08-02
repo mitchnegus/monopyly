@@ -217,6 +217,7 @@
 - Use smoothing on charts for up to 100 transactions
 - Improve tokenization normalization for credit reconciliation
 - Remove statement requiring activity files be located in the `Downloads` directory
+- Do not clear the reconciliation info when adding subtransaction fields via POST request
 
 
 <a name="bottom" id="bottom"></a>
