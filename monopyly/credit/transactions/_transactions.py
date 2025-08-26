@@ -38,7 +38,13 @@ class CreditTransactionHandler(
     @classmethod
     @DatabaseViewHandler.view_query
     def get_transactions(
-        cls, statement_ids=None, card_ids=None, active=None, sort_order="DESC"
+        cls,
+        statement_ids=None,
+        card_ids=None,
+        active=None,
+        sort_order="DESC",
+        offset=None,
+        limit=None,
     ):
         """
         Get credit card transactions from the database.
@@ -66,6 +72,13 @@ class CreditTransactionHandler(
             An indicator of whether the transactions should be ordered
             in ascending (oldest at top) or descending (newest at top)
             order.
+        offset : int, optional
+            The number of transactions by which to offset the results
+            returned by this query. The default is `None`, in which case
+            no offset will be added.
+        limit : int, optional
+            A limit on the number of transactions retrieved from the
+            database.
 
         Returns
         -------
@@ -77,7 +90,7 @@ class CreditTransactionHandler(
         criteria.add_match_filter(CreditCard, "id", card_ids)
         criteria.add_match_filter(CreditCard, "active", active)
         transactions = super()._get_transactions(
-            criteria=criteria, sort_order=sort_order
+            criteria=criteria, sort_order=sort_order, offset=offset, limit=limit
         )
         return transactions
 
@@ -196,7 +209,7 @@ class CreditTagHandler(TransactionTagHandler, model=TransactionTagHandler.model)
         return tags
 
     @classmethod
-    def _filter_entries(cls, query, criteria):
+    def _filter_entries(cls, query, criteria, offset, limit):
         # Add a join to enable filtering by transaction ID or subtransaction ID
         join_transaction = CreditTransactionView in criteria.discriminators
         join_subtransaction = (
@@ -206,7 +219,7 @@ class CreditTagHandler(TransactionTagHandler, model=TransactionTagHandler.model)
             query = query.join(credit_tag_link_table).join(CreditSubtransaction)
             if join_transaction:
                 query = query.join(CreditTransactionView)
-        return super()._filter_entries(query, criteria)
+        return super()._filter_entries(query, criteria, offset, limit)
 
 
 @execute_on_form_validation

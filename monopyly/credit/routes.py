@@ -345,15 +345,14 @@ def load_transactions(card_id):
     # Get all of the user's transactions for the selected cards
     sort_order = "DESC"
     transactions = CreditTransactionHandler.get_transactions(
-        card_ids=selected_card_ids,
-        sort_order=sort_order,
+        card_ids=selected_card_ids, sort_order=sort_order, limit=100
     )
     return render_template(
         "credit/transactions_page.html",
         filter_cards=cards,
         selected_card_ids=selected_card_ids,
         sort_order=sort_order,
-        transactions=islice(transactions, 100),
+        transactions=transactions,
     )
 
 
@@ -366,13 +365,12 @@ def update_transactions_display():
     sort_order = "ASC" if post_args["sort_order"] == "asc" else "DESC"
     # Filter selected transactions from the database
     transactions = CreditTransactionHandler.get_transactions(
-        card_ids=card_ids,
-        sort_order=sort_order,
+        card_ids=card_ids, sort_order=sort_order, limit=100
     )
     return render_template(
         "credit/transactions_table/transactions.html",
         sort_order=sort_order,
-        transactions=islice(transactions, 100),
+        transactions=transactions,
         full_view=True,
     )
 

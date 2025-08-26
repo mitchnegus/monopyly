@@ -229,10 +229,10 @@ class BankAccountHandler(
         return account
 
     @classmethod
-    def _filter_entries(cls, query, criteria):
+    def _filter_entries(cls, query, criteria, offset, limit):
         # Add a join to enable filtering by bank account type
         query = query.join(BankAccountTypeView)
-        return super()._filter_entries(query, criteria)
+        return super()._filter_entries(query, criteria, offset, limit)
 
     @classmethod
     def delete_entry(cls, entry_id):

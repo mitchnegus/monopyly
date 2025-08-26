@@ -31,17 +31,27 @@ class TransactionHandler(DatabaseViewHandler):
     """
 
     @classmethod
-    def _customize_entries_query(cls, query, criteria, column_orders):
+    def _customize_entries_query(
+        cls, query, criteria, column_orders, offset=None, limit=None
+    ):
         # Group transactions and order by transaction date
         query = query.group_by(cls.model.id)
-        return super()._customize_entries_query(query, criteria, column_orders)
+        return super()._customize_entries_query(
+            query, criteria, column_orders, offset=offset, limit=limit
+        )
 
     @classmethod
-    def _get_transactions(cls, criteria=None, sort_order="DESC"):
+    def _get_transactions(
+        cls, criteria=None, sort_order="DESC", offset=None, limit=None
+    ):
         # Specify transaction order
         column_orders = {cls.model.transaction_date: sort_order}
         entries = cls.get_entries(
-            entry_ids=None, criteria=criteria, column_orders=column_orders
+            entry_ids=None,
+            criteria=criteria,
+            column_orders=column_orders,
+            offset=offset,
+            limit=limit,
         )
         return entries
 
@@ -232,10 +242,10 @@ class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
         return tags
 
     @classmethod
-    def _filter_entries(cls, query, criteria):
+    def _filter_entries(cls, query, criteria, offset, limit):
         # Only get distinct tag entries
         query = query.distinct()
-        return super()._filter_entries(query, criteria)
+        return super()._filter_entries(query, criteria, offset, limit)
 
     @classmethod
     def get_subtags(cls, tag):

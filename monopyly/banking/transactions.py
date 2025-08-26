@@ -36,7 +36,9 @@ class BankTransactionHandler(
 
     @classmethod
     @DatabaseViewHandler.view_query
-    def get_transactions(cls, account_ids=None, active=None, sort_order="DESC"):
+    def get_transactions(
+        cls, account_ids=None, active=None, sort_order="DESC", offset=None, limit=None
+    ):
         """
         Get bank transactions from the database.
 
@@ -61,6 +63,13 @@ class BankTransactionHandler(
             An indicator of whether the transactions should be ordered
             in ascending (oldest at top) or descending (newest at top)
             order. The default is descending order.
+        offset : int, optional
+            The number of transactions by which to offset the results
+            returned by this query. The default is `None`, in which case
+            no offset will be added.
+        limit : int, optional
+            A limit on the number of transactions retrieved from the
+            database.
 
         Returns
         -------
@@ -71,7 +80,7 @@ class BankTransactionHandler(
         criteria.add_match_filter(cls.model, "account_id", account_ids)
         criteria.add_match_filter(BankAccountView, "active", active)
         transactions = super()._get_transactions(
-            criteria=criteria, sort_order=sort_order
+            criteria=criteria, sort_order=sort_order, offset=None, limit=None
         )
         return transactions
 
@@ -150,7 +159,7 @@ class BankTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):
         return tags
 
     @classmethod
-    def _filter_entries(cls, query, criteria):
+    def _filter_entries(cls, query, criteria, offset, limit):
         # Add a join to enable filtering by transaction ID or subtransaction ID
         join_transaction = BankTransactionView in criteria.discriminators
         join_subtransaction = (
@@ -160,7 +169,7 @@ class BankTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):
             query = query.join(bank_tag_link_table).join(BankSubtransaction)
             if join_transaction:
                 query = query.join(BankTransactionView)
-        return super()._filter_entries(query, criteria)
+        return super()._filter_entries(query, criteria, offset, limit)
 
 
 @execute_on_form_validation

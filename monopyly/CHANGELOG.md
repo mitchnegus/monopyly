@@ -218,6 +218,7 @@
 - Improve tokenization normalization for credit reconciliation
 - Remove statement requiring activity files be located in the `Downloads` directory
 - Do not clear the reconciliation info when adding subtransaction fields via POST request
+- Incorporate support for enhanced database handler selection subsets
 - Bump dependencies (including support for recent SQLAlchemy versions)
 
 

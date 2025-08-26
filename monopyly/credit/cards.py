@@ -99,8 +99,12 @@ class CreditCardHandler(DatabaseHandler, model=CreditCard):
         return card
 
     @classmethod
-    def _customize_entries_query(cls, query, filters, sort_order):
-        query = super()._customize_entries_query(query, filters, sort_order)
+    def _customize_entries_query(
+        cls, query, filters, sort_order, offset=None, limit=None
+    ):
+        query = super()._customize_entries_query(
+            query, filters, sort_order, offset=offset, limit=limit
+        )
         # Order cards by active status (active cards first)
         query = query.order_by(cls.model.active.desc())
         return query
