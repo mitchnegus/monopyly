@@ -212,7 +212,7 @@
 - Increase the flexibility of the credit activity parser
 
 
-### 1.5.2 (in-progress)
+### 1.5.2
 
 - Use smoothing on charts for up to 100 transactions
 - Improve tokenization normalization for credit reconciliation
