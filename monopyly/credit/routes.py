@@ -261,7 +261,7 @@ def pay_credit_card(card_id, statement_id):
         bank_accounts=bank_accounts,
     )
     transactions_table_template = render_template(
-        "credit/transactions_table/transactions.html",
+        "credit/transactions_table/table.html",
         transactions=transactions,
     )
     return jsonify((summary_template, transactions_table_template))
@@ -368,7 +368,7 @@ def update_transactions_display():
         card_ids=card_ids, sort_order=sort_order, limit=100
     )
     return render_template(
-        "credit/transactions_table/transactions.html",
+        "credit/transactions_table/table.html",
         sort_order=sort_order,
         transactions=transactions,
         full_view=True,

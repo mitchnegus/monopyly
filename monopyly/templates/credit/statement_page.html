@@ -24,7 +24,7 @@
 
       <div id="statement-transactions-container" class="transactions-container">
         {% with transactions = statement_transactions, full_view = False %}
-          {% include 'credit/transactions_table/transactions.html' %}
+          {% include 'credit/transactions_table/table.html' %}
         {% endwith %}
       </div>
 

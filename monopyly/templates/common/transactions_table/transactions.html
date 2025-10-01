@@ -1,18 +1,12 @@
-<div class="transactions-table">
+{% for transaction in transactions %}
 
-  {% include field_title_template %}
+  {% if transaction.transaction_date > date_today %}
+    {% set future = ' future' %}
+  {% endif %}
 
-  {% for transaction in transactions %}
+  <div id="transaction-{{ transaction.id }}" class="transaction{{ future }} row" data-transaction-id="{{ transaction.id }}">
+    {% include 'common/transactions_table/transaction_condensed.html' %}
+    {% include 'common/transactions_table/transaction_expanded.html' %}
+  </div>
 
-    {% if transaction.transaction_date > date_today %}
-      {% set future = ' future' %}
-    {% endif %}
-
-    <div id="transaction-{{ transaction.id }}" class="transaction{{ future }} row" data-transaction-id="{{ transaction.id }}">
-      {% include 'common/transactions_table/transaction_condensed.html' %}
-      {% include 'common/transactions_table/transaction_expanded.html' %}
-    </div>
-
-  {% endfor %}
-
-</div>
+{% endfor %}
