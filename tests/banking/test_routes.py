@@ -2,6 +2,7 @@
 
 import json
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 from dry_foundation.testing import transaction_lifetime
@@ -98,6 +99,19 @@ class TestBankingRoutes(TestRoutes):
         for id_ in (2, 3, 4):
             assert self.div_exists(id=f"transaction-{id_}")
         assert self.div_exists(id="balance-chart")
+
+    def test_load_more_card_transactions(self, authorization):
+        transaction_limit = 2
+        with patch("monopyly.banking.routes.TRANSACTION_LIMIT", new=transaction_limit):
+            self.post_route(
+                "/_extra_transactions",
+                json={"account_id": 2, "block_count": 2},
+            )
+        transaction_notes = [_.text for _ in self.soup.find_all("div", class_="notes")]
+        expected_notes = ["Jail subtransaction 1", "Jail subtransaction 2"]
+        for expected_note in expected_notes:
+            assert any(expected_note in note for note in transaction_notes)
+        assert len(transaction_notes) == 1  # only 1 extra transaction left
 
     def test_expand_transaction(self, authorization):
         self.post_route("/_expand_transaction", json="5")

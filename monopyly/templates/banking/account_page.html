@@ -27,9 +27,14 @@
       </div>
 
       <div id="account-transactions-container" class="transactions-container">
-        {% with transactions = account_transactions %}
-          {% include 'banking/transactions_table/table.html' %}
-        {% endwith %}
+        {% include 'banking/transactions_table/table.html' %}
+
+        {% if transactions|length < total_transactions %}
+          <div id="more-transactions" class="button">
+            <img class="icon" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}">
+            <div>Load more transactions</div>
+          </div>
+        {% endif %}
       </div>
 
     </div>
@@ -59,6 +64,11 @@
   <script>
     const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('banking.expand_transaction') }}";
     const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('banking.show_linked_transaction') }}";
+    const LOAD_TRANSACTIONS_ENDPOINT = "{{ url_for('banking.load_more_transactions') }}";
+    const LOAD_TRANSACTIONS_SELECTORS = {
+      "account_id": {{ account.id }},
+      "block_count": 1
+    }
   </script>
   <script>
     const BALANCE_CHART_DATA = {
@@ -73,6 +83,8 @@
         },
       ],
     };
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/load-more-transactions.js') }}">
   </script>
   <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
   </script>

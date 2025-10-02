@@ -13,7 +13,7 @@
 
 
 {% block content %}
-  {% set highlighted_transactions = statement_transactions|selectattr("highlight")|first %}
+  {% set highlighted_transactions = transactions|selectattr("highlight")|first %}
 
   <div id="credit-statement-reconciliation-details" class="details">
 
@@ -30,7 +30,7 @@
           </p>
         {% endif %}
 
-        {% with transactions = statement_transactions, full_view = False %}
+        {% with full_view = False %}
           {% include 'credit/transactions_table/table.html' %}
         {% endwith %}
       </div>

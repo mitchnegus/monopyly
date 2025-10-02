@@ -80,7 +80,7 @@ class BankTransactionHandler(
         criteria.add_match_filter(cls.model, "account_id", account_ids)
         criteria.add_match_filter(BankAccountView, "active", active)
         transactions = super()._get_transactions(
-            criteria=criteria, sort_order=sort_order, offset=None, limit=None
+            criteria=criteria, sort_order=sort_order, offset=offset, limit=limit
         )
         return transactions
 

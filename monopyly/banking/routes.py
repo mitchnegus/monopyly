@@ -15,6 +15,9 @@ from .blueprint import bp
 from .forms import BankAccountForm, BankTransactionForm
 from .transactions import BankTransactionHandler, save_transaction
 
+# Set a limit on the number of transactions loaded at one time for certain routes
+TRANSACTION_LIMIT = 100
+
 
 @bp.route("/accounts")
 @login_required
@@ -69,18 +72,36 @@ def load_account_summaries(bank_id):
 @login_required
 def load_account_details(account_id):
     account = BankAccountHandler.get_entry(account_id)
-    transactions = list(
-        BankTransactionHandler.get_transactions(
-            account_ids=(account_id,), sort_order="DESC"
-        )
-    )
+    transactions = BankTransactionHandler.get_transactions(
+        account_ids=(account_id,), sort_order="DESC"
+    ).all()
     # Only display the first 100 transactions
     return render_template(
         "banking/account_page.html",
         account=account,
-        account_transactions=transactions[:100],
+        transactions=transactions[:100],
+        total_transactions=len(transactions),
         # Reverse the chart transactions to be chronologically ascending
         chart_data=get_balance_chart_data(reversed(transactions)),
+    )
+
+
+@bp.route("/_extra_transactions", methods=("POST",))
+@login_required
+def load_more_transactions():
+    # Get info about the transactions being displayed from the AJAX request
+    post_args = request.get_json()
+    account_id = post_args["account_id"]
+    block_index = post_args["block_count"] - 1
+    # Get a subset of the remaining transactions to load
+    more_transactions = BankTransactionHandler.get_transactions(
+        account_ids=(account_id,),
+        offset=block_index * TRANSACTION_LIMIT,
+        limit=TRANSACTION_LIMIT,
+    )
+    return render_template(
+        "banking/transactions_table/transactions.html",
+        transactions=more_transactions,
     )
 
 

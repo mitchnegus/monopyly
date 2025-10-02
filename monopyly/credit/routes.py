@@ -209,7 +209,7 @@ def load_statement_details(statement_id):
     return render_template(
         "credit/statement_page.html",
         statement=statement,
-        statement_transactions=transactions,
+        transactions=transactions,
         bank_accounts=bank_accounts,
         chart_data=categories.assemble_chart_data(exclude=["Credit payments"]),
     )
@@ -302,7 +302,7 @@ def load_statement_reconciliation_details(statement_id):
         return render_template(
             "credit/statement_reconciliation/statement_reconciliation_page.html",
             statement=statement,
-            statement_transactions=transactions,
+            transactions=transactions,
             discrepant_records=matchmaker.match_discrepancies,
             discrepant_amount=abs(statement_transaction_balance - activities.total),
             unrecorded_activities=matchmaker.unmatched_activities,
