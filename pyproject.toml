@@ -42,6 +42,7 @@ dynamic = ['readme', 'version']
 
 [project.scripts]
 monopyly = 'monopyly:main'
+monopyly-screenshot = "monopyly.scripts.screenshot_application:main"
 
 [project.urls]
 Download = 'https://pypi.org/project/monopyly'
