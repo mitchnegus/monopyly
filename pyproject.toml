@@ -80,9 +80,7 @@ pattern = '\[(.+?)\]\(((?!https?://)\S+?)\)'
 replacement = '[\1](https://github.com/mitchnegus/monopyly/blob/main/\g<2>)'
 
 [tool.pytest.ini_options]
-addopts = [
-  '--import-mode=importlib',
-]
+addopts = '--import-mode=importlib --cov=. --cov-report=html --cov-report=term'
 pythonpath = ["tests/helpers"]
 norecursedirs = ["tests/helpers"]
 filterwarnings = [

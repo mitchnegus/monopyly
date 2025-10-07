@@ -6,8 +6,7 @@ include config.mk
 .PHONY: install
 install :
 	@if [ ! -d "$(PRODUCTION_ENV)" ]; then $(PYTHON) -m venv $(PRODUCTION_ENV); fi
-	@. $(PRODUCTION_ENV)/bin/activate; \
-	pip install .
+	@$(PRODUCTION_ENV)/bin/pip install .
 
 
 ## develop 	: Install the package in development mode
@@ -26,48 +25,40 @@ env : $(ENV)/.touchfile
 $(ENV)/.touchfile : $(REQS) pyproject.toml
 	@echo "Installing/updating the environment ($(ENV))."
 	@if [ ! -d "$(ENV)" ]; then $(PYTHON) -m venv $(ENV); fi
-	@. $(ENV_ACTIVATE); \
-	pip install -r $(REQS) -e .
+	@$(ENV_BIN)/pip install -r $(REQS) -e .
 	@touch $(ENV)/.touchfile
 
 
 ## test		: Run tests
 .PHONY: test
 test : env
-	@. $(ENV_ACTIVATE); \
-	pytest $(COVERAGE_OPTIONS) \
-		--cov-report term \
-		--cov-report html
+	@$(ENV_BIN)/pytest
 
 
 ## format		: Format the package source code
 .PHONY: format
 format : env
-	@. $(ENV_ACTIVATE); \
-	ruff check --select I --fix $(PYTHON_FORMAT_DIRS); \
-	ruff format $(PYTHON_FORMAT_DIRS)
+	@$(ENV_BIN)/ruff check --select I --fix $(PYTHON_FORMAT_DIRS)
+	@$(ENV_BIN)/ruff format $(PYTHON_FORMAT_DIRS)
 
 
 ## format-diff	: See the differences that will be produced by formatting
 .PHONY: format-diff
 format-diff : env
-	@. $(ENV_ACTIVATE); \
-	ruff check --diff --select I $(PYTHON_FORMAT_DIRS); \
-	ruff format --diff $(PYTHON_FORMAT_DIRS)
+	@$(ENV_BIN)/ruff check --diff --select I $(PYTHON_FORMAT_DIRS)
+	@$(ENV_BIN)/ruff format --diff $(PYTHON_FORMAT_DIRS)
 
 
 ## package	: Bundle the package for distribution
 .PHONY: package
 package : env
-	@. $(ENV_ACTIVATE); \
-	hatch build
+	@$(ENV_BIN)/hatch build
 
 
 ## upload		: Upload the package to PyPI
 .PHONY: upload
 upload : env
-	@. $(ENV_ACTIVATE); \
-	hatch publish --user __token__ --auth $$(cat .TOKEN)
+	@$(ENV_BIN)/hatch publish --user __token__ --auth $$(cat .TOKEN)
 
 
 ## clean		: Clean all automatically generated files
