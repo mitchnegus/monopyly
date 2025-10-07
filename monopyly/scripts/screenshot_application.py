@@ -24,7 +24,7 @@ from selenium.webdriver.firefox.options import Options
 SCRIPTS_DIR = Path(__file__).parent
 PACKAGE_DIR = SCRIPTS_DIR.parent
 SCREENSHOTS_DIR = PACKAGE_DIR / "static/img/about"
-MONOPYLY_URL = "http://localhost:5000"
+MONOPYLY_URL = "http://localhost:5001"
 
 
 def main():

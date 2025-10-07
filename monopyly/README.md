@@ -123,7 +123,7 @@ Card balances are also visible by visiting the pages for individual statements.
 A full history of statements for each card is available off the homepage.
 Each statement's page gives the statement's balance, transactions, and due date.
 
-<img class="screenshot" src="monopyly/static/img/about/statement-details.png" alt="statement details" width="800px" />
+<img class="screenshot" src="monopyly/static/img/about/credit-statement-details.png" alt="statement details" width="800px" />
 
 Payments can be made directly from a statement's page and can be linked to a bank account in the _Monopyly_ system for simplified tracking.
 (Note that even linked transactions must be edited independently, as there are times when a user may wish to have separate values for linked transactions. For example, a credit card payment may be processed on a given date while it is only registered as a bank account transaction several days later.)
