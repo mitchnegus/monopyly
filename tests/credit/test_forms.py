@@ -85,7 +85,7 @@ def mock_subtransaction(mock_transaction):
     mock_subtransaction = Mock(spec=CreditSubtransaction)
     mock_subtransaction.transaction = mock_transaction
     mock_subtransaction.tags = [
-        Mock(spec=TransactionTag, tag_name=f"Tag{i+1}") for i in range(3)
+        Mock(spec=TransactionTag, tag_name=f"Tag{i + 1}") for i in range(3)
     ]
     return mock_subtransaction
 
@@ -436,8 +436,7 @@ class TestCreditTransactionForm:
         mock_method.assert_called_with(transaction_form.transaction_date.data)
 
     @patch(
-        "monopyly.credit.forms.CreditTransactionForm.StatementSubform"
-        ".gather_entry_data"
+        "monopyly.credit.forms.CreditTransactionForm.StatementSubform.gather_entry_data"
     )
     @patch(
         "monopyly.credit.forms.CreditTransactionForm.SubtransactionSubform"
@@ -465,8 +464,7 @@ class TestCreditTransactionForm:
         assert data == expected_data
 
     @patch(
-        "monopyly.credit.forms.CreditTransactionForm.StatementSubform"
-        ".gather_entry_data"
+        "monopyly.credit.forms.CreditTransactionForm.StatementSubform.gather_entry_data"
     )
     def test_gather_statement_data(
         self, mock_statement_method, transaction_form, mock_statement
@@ -476,8 +474,7 @@ class TestCreditTransactionForm:
         assert data == expected_data
 
     @patch(
-        "monopyly.credit.forms.CreditTransactionForm.StatementSubform"
-        ".gather_entry_data"
+        "monopyly.credit.forms.CreditTransactionForm.StatementSubform.gather_entry_data"
     )
     def test_gather_card_data(self, mock_statement_method, transaction_form, mock_card):
         data = transaction_form.gather_entry_data(mock_card)

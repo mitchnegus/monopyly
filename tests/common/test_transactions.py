@@ -32,6 +32,8 @@ def test_unmatched_transaction_highlighter():
 
 
 class TestTransactionTagHandler(TestTagHandler):
+    """Tests for the tag handler."""
+
     # Redefine references here to allow them to be used by parametrization
     db_reference = TestTagHandler.db_reference
     db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
@@ -153,6 +155,7 @@ def test_get_subtransactions():
 
 
 class TestCategoryTree:
+    """Tests for the ``CategoryTree`` object."""
 
     def test_initialization(self):
         mock_tag = Mock()
@@ -215,6 +218,7 @@ def root_category_tree_chart_data():
 
 
 class TestRootCategoryTree:
+    """Tests for the ``RootCategoryTree`` object."""
 
     def test_initialization(self):
         tree = RootCategoryTree()

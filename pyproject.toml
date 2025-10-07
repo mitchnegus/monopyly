@@ -100,11 +100,10 @@ exclude_lines = [
   'raise NotImplementedError',
 ]
 
-[tool.black]
-force-exclude = 'monopyly/_version.py'
+[tool.ruff]
+exclude = [
+  'monopyly/_version.py',
+]
 
-[tool.isort]
-profile = 'black'
-src_paths = ['monopyly', 'tests']
-known_local_folder = ['test_helpers', 'test_tag_helpers']
-skip = ['monopyly/_version.py']
+[tool.ruff.lint.isort]
+known-local-folder = ["test_helpers", "test_tag_helpers"]

@@ -115,7 +115,7 @@ def mock_subtransaction(mock_transaction):
     mock_subtransaction = Mock(spec=BankSubtransaction)
     mock_subtransaction.transaction = mock_transaction
     mock_subtransaction.tags = [
-        Mock(spec=TransactionTag, tag_name=f"Tag{i+1}") for i in range(3)
+        Mock(spec=TransactionTag, tag_name=f"Tag{i + 1}") for i in range(3)
     ]
     return mock_subtransaction
 

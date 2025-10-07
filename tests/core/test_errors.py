@@ -17,7 +17,6 @@ def abort_factory(error_code):
 
 
 class TestAppErrors(TestRoutes):
-
     handled_error_codes = [
         400,
         401,

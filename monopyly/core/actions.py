@@ -4,6 +4,7 @@ import markdown
 
 
 class MarkdownConverter:
+    """An object to convert Markdown to HTML."""
 
     replacements = {
         "src": [

@@ -44,16 +44,16 @@ test : env
 .PHONY: format
 format : env
 	@. $(ENV_ACTIVATE); \
-	isort $(PYTHON_FORMAT_DIRS); \
-	black $(PYTHON_FORMAT_DIRS)
+	ruff check --select I --fix $(PYTHON_FORMAT_DIRS); \
+	ruff format $(PYTHON_FORMAT_DIRS)
 
 
 ## format-diff	: See the differences that will be produced by formatting
 .PHONY: format-diff
 format-diff : env
 	@. $(ENV_ACTIVATE); \
-	isort --diff --color $(PYTHON_FORMAT_DIRS); \
-	black --diff --color $(PYTHON_FORMAT_DIRS)
+	ruff check --diff --select I $(PYTHON_FORMAT_DIRS); \
+	ruff format --diff $(PYTHON_FORMAT_DIRS)
 
 
 ## package	: Bundle the package for distribution

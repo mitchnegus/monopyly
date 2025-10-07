@@ -226,7 +226,7 @@
 
 - Enable additional transactions to be loaded on bank/credit transactions tables
 - Create a script to take application screenshots (e.g., for the 'About' page)
-- Update dependencies
+- Update dependencies (including using ruff in place of _Black_ and _isort_)
 
 
 <a name="bottom" id="bottom"></a>
