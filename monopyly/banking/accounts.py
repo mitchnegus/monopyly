@@ -114,15 +114,15 @@ class BankAccountTypeHandler(
         super().delete_entry(entry_id)
 
     @classmethod
-    def _validate_authorization(cls, entry_id):
-        account_type = super()._validate_authorization(entry_id)
-        # Limit manipulation to only the user (excluding common entries)
+    def _retrieve_authorized_manipulable_entry(cls, entry_id):
+        account_type = super()._retrieve_authorized_manipulable_entry(entry_id)
         if account_type.user_id != cls.user_id:
             abort_msg = (
                 "The current user is not authorized to manipulate "
                 "this account type entry."
             )
             abort(403, abort_msg)
+        return account_type
 
 
 class BankAccountHandler(

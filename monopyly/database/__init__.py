@@ -41,6 +41,3 @@ class SQLAlchemy(_SQLAlchemy):
             raw_conn.close()
         # Top level initialization does not overwrite tables, so it goes at the end
         super().initialize(app)
-
-
-SQLAlchemy.create_default_interface(echo_engine=False)

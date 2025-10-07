@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-from dry_foundation.config.settings import TestingConfig
 from dry_foundation.testing import AppTestManager
 
 import monopyly
@@ -29,7 +28,6 @@ class AuthActions:
 app_manager = AppTestManager(
     import_name=monopyly.__name__,
     factory=monopyly.create_app,
-    config=TestingConfig,
     preload_data_path=PRELOAD_DATA_PATH,
 )
 

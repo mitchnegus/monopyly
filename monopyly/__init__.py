@@ -8,7 +8,7 @@ from .core.errors import render_error_template
 from .database import SQLAlchemy
 
 
-@Factory(db_interface=SQLAlchemy)
+@Factory(db_interface=SQLAlchemy, echo_engine=False)
 def create_app(config=None):
     """
     Create the Flask application.
