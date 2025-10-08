@@ -226,6 +226,7 @@
 
 - Enable additional transactions to be loaded on bank/credit transactions tables
 - Create a script to take application screenshots (e.g., for the 'About' page)
+- Remove Python version requirement (allow Python versions after 3.10)
 - Update dependencies (including using ruff in place of _Black_ and _isort_)
 
 

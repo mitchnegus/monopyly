@@ -9,7 +9,7 @@ authors = [
 ]
 description = 'A homemade personal finance manager.'
 license = { text = 'GNU GPLv3' }
-requires-python = '>=3.10,<3.11'
+requires-python = '>=3.10'
 dependencies = [
   'dry-foundation==1.4.1',
   'Flask==3.1.2',
