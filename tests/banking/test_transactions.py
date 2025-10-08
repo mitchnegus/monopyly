@@ -129,18 +129,18 @@ class TestBankTransactionHandler(TestHandler):
     ]
 
     @pytest.mark.parametrize(
-        "account_ids, active, sort_order, reference_entries",
+        ("account_ids", "active", "sort_order", "reference_entries"),
         [
-            [None, None, "DESC", db_reference],  # defaults
-            [(2, 3), None, "DESC", db_reference[1:]],
-            [  # account 3 inactive
+            (None, None, "DESC", db_reference),  # defaults
+            ((2, 3), None, "DESC", db_reference[1:]),
+            (  # account 3 inactive
                 None,
                 True,
                 "DESC",
                 (row for row in db_reference if row.account_id != 3),
-            ],
-            [None, False, "DESC", (row for row in db_reference if row.account_id == 3)],
-            [None, None, "ASC", db_reference[::-1]],
+            ),
+            (None, False, "DESC", (row for row in db_reference if row.account_id == 3)),
+            (None, None, "ASC", db_reference[::-1]),
         ],
     )
     def test_get_transactions(
@@ -187,9 +187,9 @@ class TestBankTransactionHandler(TestHandler):
         )
 
     @pytest.mark.parametrize(
-        "mapping, exception",
+        ("mapping", "exception"),
         [
-            [
+            (
                 {
                     "internal_transaction_id": None,
                     "invalid_field": "Test",
@@ -197,23 +197,23 @@ class TestBankTransactionHandler(TestHandler):
                     "subtransactions": _mock_subtransaction_mappings(),
                 },
                 TypeError,
-            ],
-            [
+            ),
+            (
                 {
                     "internal_transaction_id": 2,
                     "account_id": 3,
                     "subtransactions": _mock_subtransaction_mappings(),
                 },
                 IntegrityError,
-            ],
-            [
+            ),
+            (
                 {
                     "internal_transaction_id": 2,
                     "account_id": 3,
                     "transaction_date": date(2022, 5, 8),
                 },
                 KeyError,
-            ],
+            ),
         ],
     )
     def test_add_entry_invalid(self, transaction_handler, mapping, exception):
@@ -260,14 +260,14 @@ class TestBankTransactionHandler(TestHandler):
         )
 
     @pytest.mark.parametrize(
-        "transaction_id, mapping, exception",
+        ("transaction_id", "mapping", "exception"),
         [
             # Wrong transaction user
-            [1, {"account_id": 1, "transaction_date": date(2022, 5, 8)}, NotFound],
+            (1, {"account_id": 1, "transaction_date": date(2022, 5, 8)}, NotFound),
             # Invalid field
-            [5, {"account_id": 3, "invalid_field": "Test"}, ValueError],
+            (5, {"account_id": 3, "invalid_field": "Test"}, ValueError),
             # Nonexistent ID
-            [8, {"account_id": 3, "transaction_date": date(2022, 5, 8)}, NotFound],
+            (8, {"account_id": 3, "transaction_date": date(2022, 5, 8)}, NotFound),
         ],
     )
     def test_update_entry_invalid(
@@ -288,12 +288,18 @@ class TestBankTagHandler(TestTagHandler):
     db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
 
     @pytest.mark.parametrize(
-        "tag_names, transaction_ids, subtransaction_ids, ancestors, reference_entries",
+        (
+            "tag_names",
+            "transaction_ids",
+            "subtransaction_ids",
+            "ancestors",
+            "reference_entries",
+        ),
         [
-            [None, None, None, None, db_reference],  # defaults
-            [("Credit payments",), None, None, None, db_reference[5:6]],
-            [None, (4, 5, 6), None, None, db_reference[5:6]],
-            [None, None, (2, 3, 4), None, []],
+            (None, None, None, None, db_reference),  # defaults
+            (("Credit payments",), None, None, None, db_reference[5:6]),
+            (None, (4, 5, 6), None, None, db_reference[5:6]),
+            (None, None, (2, 3, 4), None, []),
         ],
     )
     def test_get_tags(

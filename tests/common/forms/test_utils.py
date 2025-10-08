@@ -8,7 +8,10 @@ from flask_wtf import FlaskForm
 from wtforms.fields import FieldList, StringField
 from wtforms.validators import ValidationError
 
-from monopyly.common.forms.utils import *
+from monopyly.common.forms.utils import (
+    execute_on_form_validation,
+    extend_field_list_for_ajax,
+)
 
 
 class MockForm(FlaskForm):
@@ -21,8 +24,8 @@ def test_extend_field_list_for_ajax(client_context):
 
 
 @pytest.mark.parametrize(
-    "validated, expectation",
-    [[True, does_not_raise()], [False, pytest.raises(ValidationError)]],
+    ("validated", "expectation"),
+    [(True, does_not_raise()), (False, pytest.raises(ValidationError))],
 )
 @patch("monopyly.common.forms.utils.flash", new=lambda x: None)
 def test_execute_on_form_validation(validated, expectation):

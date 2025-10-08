@@ -6,11 +6,10 @@ from abc import ABC, abstractmethod
 from datetime import date
 
 from flask_wtf import FlaskForm
-from wtforms.fields import FieldList, FormField, SelectField, StringField, SubmitField
+from wtforms.fields import StringField, SubmitField
 from wtforms.validators import DataRequired
 
 from .fields import CurrencyField, DateField
-from .validators import SelectionNotBlank
 
 # Define a custom form error messaage
 form_err_msg = "There was an improper value in your form. Please try again."

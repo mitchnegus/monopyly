@@ -1,14 +1,12 @@
 """Tests for the banking module forms."""
 
 from datetime import date
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from flask_wtf import FlaskForm
 from wtforms.fields import FormField
 
-from monopyly.banking.accounts import BankAccountTypeHandler
-from monopyly.banking.banks import BankHandler
 from monopyly.banking.forms import (
     BankAccountForm,
     BankAccountTypeSelectField,
@@ -144,7 +142,7 @@ class TestBankSubform:
 
     def test_bank_subform_prepare_mapping_invalid(self, client_context):
         subform = self.SampleForm().bank_info
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="A bank name must be provided."):
             subform._prepare_mapping()
 
     @patch("monopyly.banking.forms.BankSubform._db_handler")
@@ -330,7 +328,7 @@ def filled_transaction_form_with_transfer(filled_transaction_form):
     account_info.bank_name.data = "TheBank"
     account_info.last_four_digtis = "5557"
     account_info.type_name.data = "Certificate of Deposit"
-    yield filled_transaction_form
+    return filled_transaction_form
 
 
 class TestBankTransactionForm:
@@ -522,9 +520,9 @@ class TestBankTransactionForm:
         mock_meta_call.assert_called_once()
 
     @pytest.mark.parametrize(
-        "field, sort_fields, top_expected_suggestions, expected_suggestions",
+        ("field", "sort_fields", "top_expected_suggestions", "expected_suggestions"),
         [
-            [
+            (
                 "merchant",
                 {},
                 (),
@@ -533,8 +531,8 @@ class TestBankTransactionForm:
                     "JP Morgan Chance",
                     "Canteen",
                 ),
-            ],
-            [
+            ),
+            (
                 "note",
                 {},
                 (),
@@ -547,8 +545,8 @@ class TestBankTransactionForm:
                     "Transfer out",
                     "'Go' Corner ATM deposit",
                 ),
-            ],
-            [
+            ),
+            (
                 "note",
                 {
                     "bank_name": "Jail",
@@ -570,7 +568,7 @@ class TestBankTransactionForm:
                     "Transfer out",
                     "'Go' Corner ATM deposit",
                 ),
-            ],
+            ),
         ],
     )
     def test_autocomplete(

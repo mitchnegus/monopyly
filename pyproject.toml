@@ -103,5 +103,20 @@ exclude = [
   'monopyly/_version.py',
 ]
 
+[tool.ruff.lint]
+select = ['A', 'C4', 'E', 'F', 'I', 'PIE', 'PT', 'UP', 'SIM']
+ignore = [
+  'E501',  # Line-length errors handled by ruff
+  'SIM300',  # Yoda condition detection is poor in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+'blueprint.py' = [
+  'E402',  # routes imported intentionally after blueprint definition
+]
+'test_forms.py' = [
+  'PT009',  # pytest does not natively compare unsorted sequences
+]
+
 [tool.ruff.lint.isort]
 known-local-folder = ["test_helpers", "test_tag_helpers"]

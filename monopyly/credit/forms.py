@@ -9,13 +9,11 @@ from wtforms.fields import (
     FormField,
     IntegerField,
     RadioField,
-    StringField,
     SubmitField,
 )
 from wtforms.validators import DataRequired, Optional
 
-from ..banking.banks import BankHandler
-from ..banking.forms import BankSelectField, BankSubform
+from ..banking.forms import BankSubform
 from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 from ..common.forms.fields import (
     CustomChoiceSelectField,

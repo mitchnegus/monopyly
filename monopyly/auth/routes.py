@@ -13,7 +13,6 @@ from flask import (
     session,
     url_for,
 )
-from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..database.models import User
@@ -34,7 +33,7 @@ def register():
             error = "Username is required."
         elif not password:
             error = "Password is required."
-        elif user := identify_user(username):
+        elif identify_user(username):
             error = f"User {username} is already registered."
         else:
             # Create a new user

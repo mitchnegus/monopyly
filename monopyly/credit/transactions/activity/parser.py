@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from flask import abort, current_app
-from werkzeug.utils import secure_filename
 
 from ....common.utils import parse_date
 from .data import ActivityLoadingError, TransactionActivities, TransactionActivityLoader

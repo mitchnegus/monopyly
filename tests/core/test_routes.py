@@ -22,7 +22,6 @@ class TestCoreRoutes(TestRoutes):
         # Mock the statement handler to return no statements
         mock_statements = mock_handler.get_statements.return_value
         mock_statements.first.return_value = None
-        mock_last_statement = mock_statements.first.return_value
         # Test that statement information is not shown if none exists
         auth.login()
         self.get_route("/")

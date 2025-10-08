@@ -228,6 +228,7 @@
 - Create a script to take application screenshots (e.g., for the 'About' page)
 - Remove Python version requirement (allow Python versions after 3.10)
 - Update dependencies (including using ruff in place of _Black_ and _isort_)
+- Refactor to include ruff-based linting checks
 
 
 <a name="bottom" id="bottom"></a>

@@ -4,12 +4,10 @@ General form constructions.
 
 from abc import ABC, abstractmethod
 
-from flask_wtf import FlaskForm
 from wtforms import fields as wtforms_fields
 from wtforms.validators import Length
 from wtforms.widgets import NumberInput
 
-from ...banking.banks import BankHandler
 from ..utils import parse_date
 from .validators import NumeralsOnly, SelectionNotBlank
 

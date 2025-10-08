@@ -78,8 +78,8 @@ class TestTransactionActivities:
             assert activity.description == row_data[2]
 
     def test_initialization_invalid_date(self):
-        with pytest.raises(ValueError):
-            activities = TransactionActivities([["invalid", 100, "description0"]])
+        with pytest.raises(ValueError, match="The given date .* is not recognized."):
+            TransactionActivities([["invalid", 100, "description0"]])
 
     def test_data_total(self):
         activities = TransactionActivities(self.test_data)
@@ -104,12 +104,12 @@ class TestTransactionActivityGroup:
         assert grouping.description == "description"
 
     @pytest.mark.parametrize(
-        "transaction_activities, exception",
+        ("transaction_activities", "exception"),
         [
             # Wrong date
-            [activities[1:4], ValueError],
+            (activities[1:4], ValueError),
             # Wrong description
-            [[activities[1], activities[2], activities[4]], ValueError],
+            ([activities[1], activities[2], activities[4]], ValueError),
         ],
     )
     def test_initialization_invalid(self, transaction_activities, exception):
@@ -120,7 +120,7 @@ class TestTransactionActivityGroup:
 @pytest.fixture
 def activity_dir(tmp_path):
     _activity_dir = tmp_path / ".credit_activity"
-    yield _activity_dir
+    return _activity_dir
 
 
 class TestTransactionActivityLoader:
@@ -184,7 +184,7 @@ class TestTransactionActivityParser:
     }
 
     # Pass the CSV format to the test for facilitating debugging
-    @pytest.mark.parametrize("csv_format, csv_content", mock_csv_content.items())
+    @pytest.mark.parametrize(("csv_format", "csv_content"), mock_csv_content.items())
     @patch("monopyly.credit.transactions.activity.parser.TransactionActivityLoader")
     def test_initialization(
         self,
@@ -206,9 +206,11 @@ class TestTransactionActivityParser:
     def test_initialization_no_data(self, client_context, mock_csv_file, activity_dir):
         missing_content = "Transaction, Total, Description\n"
         mock_open_method = mock_open(read_data=missing_content)
-        with patch.object(Path, "open", new=mock_open_method):
-            with pytest.raises(ActivityLoadingError):
-                _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
+        with (
+            patch.object(Path, "open", new=mock_open_method),
+            pytest.raises(ActivityLoadingError),
+        ):
+            _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
 
     def test_initialization_missing_column(
         self, client_context, mock_csv_file, activity_dir
@@ -220,12 +222,14 @@ class TestTransactionActivityParser:
             "1/2/2000, -100, Payment"
         )
         mock_open_method = mock_open(read_data=invalid_content)
-        with patch.object(Path, "open", new=mock_open_method):
-            with pytest.raises(BadRequest):
-                _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
+        with (
+            patch.object(Path, "open", new=mock_open_method),
+            pytest.raises(BadRequest),
+        ):
+            _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
 
     @pytest.mark.parametrize(
-        "csv_format, csv_content",
+        ("csv_format", "csv_content"),
         [
             *mock_csv_content.items(),
             (
@@ -289,9 +293,11 @@ class TestTransactionActivityParser:
             "1/4/2000, 100, Payment\n"
         )
         mock_open_method = mock_open(read_data=ambiguous_charge_sign_content)
-        with patch.object(Path, "open", new=mock_open_method):
-            with pytest.raises(RuntimeError):
-                _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
+        with (
+            patch.object(Path, "open", new=mock_open_method),
+            pytest.raises(RuntimeError),
+        ):
+            _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
 
     def test_initialization_no_payments_charge_sign_unknown(
         self, client_context, mock_csv_file, activity_dir
@@ -302,9 +308,11 @@ class TestTransactionActivityParser:
             "1/2/2000, -200, Supermarket\n"
         )
         mock_open_method = mock_open(read_data=ambiguous_charge_sign_content)
-        with patch.object(Path, "open", new=mock_open_method):
-            with pytest.raises(RuntimeError):
-                _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
+        with (
+            patch.object(Path, "open", new=mock_open_method),
+            pytest.raises(RuntimeError),
+        ):
+            _TransactionActivityParser(mock_csv_file, activity_dir=activity_dir)
 
 
 class TestActivityMatchFinders:
@@ -531,7 +539,7 @@ class TestActivityMatchmakers:
         assert matchmaker.match_discrepancies == expected_match_discrepancies
 
     @pytest.mark.parametrize(
-        "field, token_count",
+        ("field", "token_count"),
         [
             ("Life is a Game", 4),
             ("life is a game", 4),
@@ -549,7 +557,7 @@ class TestActivityMatchmakers:
             assert token.lower() == token
 
     @pytest.mark.parametrize(
-        "reference, test, score",
+        ("reference", "test", "score"),
         [
             ("Life is a Game", "Life is a Game", 0),  # --- identical
             ("Life is a Game", "life is a game", 0),  # --- identical

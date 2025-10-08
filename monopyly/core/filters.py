@@ -2,8 +2,6 @@
 Filters defined for the application.
 """
 
-from math import floor, log10
-
 from .blueprint import bp
 
 

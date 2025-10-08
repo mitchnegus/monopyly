@@ -177,38 +177,38 @@ class TestCreditTransactionHandler(TestHandler):
     ]
 
     @pytest.mark.parametrize(
-        "statement_ids, card_ids, active, sort_order, reference_entries",
+        ("statement_ids", "card_ids", "active", "sort_order", "reference_entries"),
         [
-            [None, None, None, "DESC", db_reference],  # defaults
-            [
+            (None, None, None, "DESC", db_reference),  # defaults
+            (
                 (3,),
                 None,
                 None,
                 "DESC",
                 (row for row in db_reference if row.statement_id == 3),
-            ],
-            [
+            ),
+            (
                 None,
                 (2, 3),
                 None,
                 "DESC",
                 (row for row in db_reference if row.statement_id in (2, 3, 4, 5)),
-            ],
-            [  # card 2 (statement 2) inactive
+            ),
+            (  # card 2 (statement 2) inactive
                 None,
                 None,
                 True,
                 "DESC",
                 (row for row in db_reference if row.statement_id != 2),
-            ],
-            [
+            ),
+            (
                 None,
                 None,
                 False,
                 "DESC",
                 (row for row in db_reference if row.statement_id == 2),
-            ],
-            [None, None, None, "ASC", db_reference[::-1]],
+            ),
+            (None, None, None, "ASC", db_reference[::-1]),
         ],
     )
     def test_get_transactions(
@@ -227,7 +227,7 @@ class TestCreditTransactionHandler(TestHandler):
 
     def test_get_merchants(self, transaction_handler):
         merchants = transaction_handler.get_merchants()
-        assert sorted(merchants) == sorted(set(_.merchant for _ in self.db_reference))
+        assert sorted(merchants) == sorted({_.merchant for _ in self.db_reference})
 
     @pytest.mark.parametrize(
         "mapping",
@@ -267,9 +267,9 @@ class TestCreditTransactionHandler(TestHandler):
         )
 
     @pytest.mark.parametrize(
-        "mapping, exception",
+        ("mapping", "exception"),
         [
-            [
+            (
                 {
                     "internal_transaction_id": None,
                     "invalid_field": "Test",
@@ -278,8 +278,8 @@ class TestCreditTransactionHandler(TestHandler):
                     "subtransactions": _mock_subtransaction_mappings(),
                 },
                 TypeError,
-            ],
-            [
+            ),
+            (
                 {
                     "internal_transaction_id": 2,
                     "statement_id": 4,
@@ -287,8 +287,8 @@ class TestCreditTransactionHandler(TestHandler):
                     "subtransactions": _mock_subtransaction_mappings(),
                 },
                 IntegrityError,
-            ],
-            [
+            ),
+            (
                 {
                     "internal_transaction_id": 2,
                     "statement_id": 4,
@@ -296,7 +296,7 @@ class TestCreditTransactionHandler(TestHandler):
                     "merchant": "Baltic Avenue",
                 },
                 KeyError,
-            ],
+            ),
         ],
     )
     def test_add_entry_invalid(self, transaction_handler, mapping, exception):
@@ -339,14 +339,14 @@ class TestCreditTransactionHandler(TestHandler):
         )
 
     @pytest.mark.parametrize(
-        "transaction_id, mapping, exception",
+        ("transaction_id", "mapping", "exception"),
         [
             # Wrong transaction user
-            [1, {"statement_id": 1, "transaction_date": date(2022, 5, 3)}, NotFound],
+            (1, {"statement_id": 1, "transaction_date": date(2022, 5, 3)}, NotFound),
             # Invalid field
-            [5, {"statement_id": 4, "invalid_field": "Test"}, ValueError],
+            (5, {"statement_id": 4, "invalid_field": "Test"}, ValueError),
             # Nonexistent ID
-            [14, {"statement_id": 4, "transaction_date": date(2022, 5, 3)}, NotFound],
+            (14, {"statement_id": 4, "transaction_date": date(2022, 5, 3)}, NotFound),
         ],
     )
     def test_update_entry_invalid(
@@ -367,14 +367,20 @@ class TestCreditTagHandler(TestTagHandler):
     db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
 
     @pytest.mark.parametrize(
-        "tag_names, transaction_ids, subtransaction_ids, ancestors, reference_entries",
+        (
+            "tag_names",
+            "transaction_ids",
+            "subtransaction_ids",
+            "ancestors",
+            "reference_entries",
+        ),
         [
-            [None, None, None, None, db_reference],  # defaults
-            [("Railroad", "Utilities"), None, None, None, db_reference[2:4]],
-            [None, (10, 11, 12), None, None, [db_reference[0], db_reference[2]]],
-            [None, None, (5, 6, 7), None, db_reference[3:5]],
-            [("Parking",), None, None, True, db_reference[0:2]],
-            [("Parking", "Transportation"), None, None, False, [db_reference[1]]],
+            (None, None, None, None, db_reference),  # defaults
+            (("Railroad", "Utilities"), None, None, None, db_reference[2:4]),
+            (None, (10, 11, 12), None, None, [db_reference[0], db_reference[2]]),
+            (None, None, (5, 6, 7), None, db_reference[3:5]),
+            (("Parking",), None, None, True, db_reference[0:2]),
+            (("Parking", "Transportation"), None, None, False, [db_reference[1]]),
         ],
     )
     def test_get_tags(

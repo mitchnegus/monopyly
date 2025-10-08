@@ -31,11 +31,11 @@ def test_registration_deactivated(app, client):
 
 @transaction_lifetime
 @pytest.mark.parametrize(
-    "username, password, message",
+    ("username", "password", "message"),
     [
-        ["", "", b"Username is required."],
-        ["a", "", b"Password is required."],
-        ["test", "test", b"User test is already registered."],
+        ("", "", b"Username is required."),
+        ("a", "", b"Password is required."),
+        ("test", "test", b"User test is already registered."),
     ],
 )
 def test_register_validate_input(client, username, password, message, user_table):
@@ -58,10 +58,10 @@ def test_login(client, auth):
 
 
 @pytest.mark.parametrize(
-    "username, password, message",
+    ("username", "password", "message"),
     [
-        ["a", "test", b"That user is not yet registered."],
-        ["test", "a", b"Incorrect username and password combination."],
+        ("a", "test", b"That user is not yet registered."),
+        ("test", "a", b"Incorrect username and password combination."),
     ],
 )
 def test_login_validate_input(auth, username, password, message):
@@ -84,7 +84,7 @@ def test_change_password(app, client, authorization, current_password):
     # Perform a test password update
     new_password = "password123... jk don't be a fool"
     with client:
-        response = client.post(
+        client.post(
             "/auth/change_password",
             data={"current-password": current_password, "new-password": new_password},
             follow_redirects=True,

@@ -1,8 +1,5 @@
 """Tests for the actions performed by the credit blueprint."""
 
-from datetime import datetime
-from unittest.mock import patch
-
 import pytest
 
 from monopyly.core.actions import (
@@ -45,18 +42,18 @@ def test_convert_changelog_to_html_template(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "number, width",
+    ("number", "width"),
     [
-        ["1.00", 400],
-        ["0.99", 400],
-        ["100.00", 400],
-        ["2,000.00", 460],
-        ["2,000.20", 460],
-        ["3,030.33", 460],
-        ["-3,030.33", 515],
-        ["33,030.33", 515],
-        ["333,030.33", 570],
-        ["3,303,030.33", 650],
+        ("1.00", 400),
+        ("0.99", 400),
+        ("100.00", 400),
+        ("2,000.00", 460),
+        ("2,000.20", 460),
+        ("3,030.33", 460),
+        ("-3,030.33", 515),
+        ("33,030.33", 515),
+        ("333,030.33", 570),
+        ("3,303,030.33", 650),
     ],
 )
 def test_summary_balance_viewbox_width_calculation(number, width):

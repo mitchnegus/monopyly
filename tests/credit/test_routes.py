@@ -8,7 +8,6 @@ from unittest.mock import Mock, patch
 import pytest
 from dry_foundation.testing import transaction_lifetime
 from flask import url_for
-from werkzeug.exceptions import NotFound
 
 from monopyly.credit.transactions.activity.data import TransactionActivities
 
@@ -489,13 +488,15 @@ class TestCreditRoutes(TestRoutes):
 
     @patch(
         "monopyly.credit.routes.parse_request_transaction_data",
-        return_value={
-            "transaction_date": date(2020, 5, 31),
-            "subtransactions": [{"subtotal": 123}],
-            "merchant": "The Water Works",
-        },
+        new=Mock(
+            return_value={
+                "transaction_date": date(2020, 5, 31),
+                "subtransactions": [{"subtotal": 123}],
+                "merchant": "The Water Works",
+            },
+        ),
     )
-    def test_update_transaction_suggested_amount_get(self, _, authorization):
+    def test_update_transaction_suggested_amount_get(self, authorization):
         self.get_route("/update_transaction/8")
         assert self.page_header_includes_substring("Update Credit Transaction")
         assert self.form_exists(id="credit-transaction")
@@ -573,7 +574,7 @@ class TestCreditRoutes(TestRoutes):
         assert self.div_exists(class_="transactions-table")
         assert self.tag_count_is_equal(1, "div", class_="transaction")
         # Ensure that the transaction was deleted
-        assert not self.div_exists(id=f"transaction-9")
+        assert not self.div_exists(id="transaction-9")
 
     def test_load_tags(self, authorization):
         self.get_route("/tags")
@@ -605,7 +606,7 @@ class TestCreditRoutes(TestRoutes):
 
     @transaction_lifetime
     def test_add_conflicting_tag(self, authorization):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="The given tag name already exists."):
             self.post_route(
                 "/_add_tag",
                 json={"tag_name": "Railroad", "parent": None},
@@ -618,11 +619,11 @@ class TestCreditRoutes(TestRoutes):
         assert self.response.data == b""
 
     @pytest.mark.parametrize(
-        "field, suggestions",
+        ("field", "suggestions"),
         [
-            ["bank_name", ["TheBank", "Jail"]],
-            ["last_four_digits", ["3334", "3335", "3336"]],
-            [
+            ("bank_name", ["TheBank", "Jail"]),
+            ("last_four_digits", ["3334", "3335", "3336"]),
+            (
                 "merchant",
                 [
                     "Top Left Corner",
@@ -637,8 +638,8 @@ class TestCreditRoutes(TestRoutes):
                     "Reading Railroad",
                     "Community Chest",
                 ],
-            ],
-            [
+            ),
+            (
                 "tags",
                 [
                     "Transportation",
@@ -649,7 +650,7 @@ class TestCreditRoutes(TestRoutes):
                     "Credit payments",
                     "Gifts",
                 ],
-            ],
+            ),
         ],
     )
     def test_suggest_transaction_autocomplete(self, authorization, field, suggestions):

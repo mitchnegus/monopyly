@@ -8,7 +8,6 @@ from ..common.forms.utils import execute_on_form_validation
 from ..common.transactions import TransactionHandler, TransactionTagHandler
 from ..core.internal_transactions import add_internal_transaction
 from ..database.models import (
-    Bank,
     BankAccountView,
     BankSubtransaction,
     BankTransaction,

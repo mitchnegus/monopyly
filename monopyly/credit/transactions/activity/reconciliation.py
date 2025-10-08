@@ -113,9 +113,11 @@ class _Matchmaker(ABC):
 
         def includes_activity(self, activity):
             for value in self.values():
-                if activity == value:
-                    return True
-                elif isinstance(value, TransactionActivityGroup) and activity in value:
+                same_activity = activity == value
+                same_group = (
+                    isinstance(value, TransactionActivityGroup) and activity in value
+                )
+                if same_activity or same_group:
                     return True
             return False
 

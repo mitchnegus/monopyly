@@ -295,11 +295,11 @@ class TestBankingRoutes(TestRoutes):
         assert not self.input_has_value("What else is there to do in Jail?")
 
     @pytest.mark.parametrize(
-        "field, suggestions",
+        ("field", "suggestions"),
         [
-            ["bank_name", ("TheBank", "Jail")],
-            ["last_four_digits", ("5556", "5557")],
-            [
+            ("bank_name", ("TheBank", "Jail")),
+            ("last_four_digits", ("5556", "5557")),
+            (
                 "tags",
                 [
                     "Transportation",
@@ -310,7 +310,7 @@ class TestBankingRoutes(TestRoutes):
                     "Credit payments",
                     "Gifts",
                 ],
-            ],
+            ),
         ],
     )
     def test_suggest_transaction_autocomplete(self, authorization, field, suggestions):

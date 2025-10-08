@@ -6,7 +6,6 @@ from unittest.mock import Mock
 import pytest
 from dry_foundation.testing.helpers import TestHandler
 from sqlalchemy.exc import StatementError
-from werkzeug.exceptions import NotFound
 
 from monopyly.credit.statements import CreditStatementHandler
 from monopyly.database.models import (
@@ -82,14 +81,14 @@ class TestCreditStatementHandler(TestHandler):
     ]
 
     @pytest.mark.parametrize(
-        "card_ids, bank_ids, active, sort_order, reference_entries",
+        ("card_ids", "bank_ids", "active", "sort_order", "reference_entries"),
         [
-            [None, None, None, "DESC", db_reference],  # defaults
-            [(3,), None, None, "DESC", db_reference[0:5:2]],
-            [None, (2,), None, "DESC", (*db_reference[0:5:2], db_reference[5])],
-            [None, None, False, "DESC", db_reference[5:]],  # card 2 inactive
-            [None, None, True, "DESC", db_reference[:5]],
-            [None, None, None, "ASC", db_reference[::-1]],
+            (None, None, None, "DESC", db_reference),  # defaults
+            ((3,), None, None, "DESC", db_reference[0:5:2]),
+            (None, (2,), None, "DESC", (*db_reference[0:5:2], db_reference[5])),
+            (None, None, False, "DESC", db_reference[5:]),  # card 2 inactive
+            (None, None, True, "DESC", db_reference[:5]),
+            (None, None, None, "ASC", db_reference[::-1]),
         ],
     )
     def test_get_statements(
@@ -107,11 +106,11 @@ class TestCreditStatementHandler(TestHandler):
         self.assert_entries_match(statements, reference_entries, order=True)
 
     @pytest.mark.parametrize(
-        "card_id, issue_date, reference_entry",
+        ("card_id", "issue_date", "reference_entry"),
         [
-            [3, date(2020, 5, 10), db_reference[2]],
-            [4, date(2020, 5, 6), db_reference[3]],
-            [3, None, db_reference[0]],
+            (3, date(2020, 5, 10), db_reference[2]),
+            (4, date(2020, 5, 6), db_reference[3]),
+            (3, None, db_reference[0]),
         ],
     )
     def test_find_statement(
@@ -121,21 +120,27 @@ class TestCreditStatementHandler(TestHandler):
         self.assert_entry_matches(statement, reference_entry)
 
     @pytest.mark.parametrize(
-        "card_id, issue_date", [[3, date(2020, 12, 1)], [None, None]]
+        ("card_id", "issue_date"), [(3, date(2020, 12, 1)), (None, None)]
     )
     def test_find_statement_none_exist(self, statement_handler, card_id, issue_date):
         statement = statement_handler.find_statement(card_id, issue_date)
         assert statement is None
 
     @pytest.mark.parametrize(
-        "card_id, statement_issue_day, statement_due_day, transaction_date, "
-        "creation, inferred_statement_id",
+        (
+            "card_id",
+            "statement_issue_day",
+            "statement_due_day",
+            "transaction_date",
+            "creation",
+            "inferred_statement_id",
+        ),
         [
-            [1, 1, 20, date(2020, 5, 5), False, None],  # -- should fail, invalid user
-            [3, 10, 5, date(2020, 5, 1), False, 4],
-            [3, 10, 5, date(2020, 6, 5), False, 5],
-            [3, 10, 5, date(2020, 6, 20), True, 8],  # ----- create new statement
-            [3, 10, 5, date(2020, 6, 20), False, None],  # - do not create new statement
+            (1, 1, 20, date(2020, 5, 5), False, None),  # -- should fail, invalid user
+            (3, 10, 5, date(2020, 5, 1), False, 4),
+            (3, 10, 5, date(2020, 6, 5), False, 5),
+            (3, 10, 5, date(2020, 6, 20), True, 8),  # ----- create new statement
+            (3, 10, 5, date(2020, 6, 20), False, None),  # - do not create new statement
         ],
     )
     def test_infer_statement(
@@ -162,7 +167,7 @@ class TestCreditStatementHandler(TestHandler):
         else:
             assert statement.id == inferred_statement_id
 
-    @pytest.mark.parametrize("statement_id, prior_statement_id", [[5, 4], [7, 6]])
+    @pytest.mark.parametrize(("statement_id", "prior_statement_id"), [(5, 4), (7, 6)])
     def test_get_prior_statement(
         self, statement_handler, statement_id, prior_statement_id
     ):
@@ -171,11 +176,11 @@ class TestCreditStatementHandler(TestHandler):
         assert prior_statement.id == prior_statement_id
 
     @pytest.mark.parametrize(
-        "card_id, statement_due_day, issue_date, due_date, expected_due_date",
+        ("card_id", "statement_due_day", "issue_date", "due_date", "expected_due_date"),
         [
-            [3, 5, date(2020, 7, 15), None, date(2020, 8, 5)],
-            [3, 5, date(2020, 7, 15), date(2020, 8, 6), date(2020, 8, 6)],
-            [4, 3, date(2020, 7, 15), None, date(2020, 8, 3)],
+            (3, 5, date(2020, 7, 15), None, date(2020, 8, 5)),
+            (3, 5, date(2020, 7, 15), date(2020, 8, 6), date(2020, 8, 6)),
+            (4, 3, date(2020, 7, 15), None, date(2020, 8, 3)),
         ],
     )
     def test_add_statement(
@@ -199,11 +204,11 @@ class TestCreditStatementHandler(TestHandler):
         )
 
     @pytest.mark.parametrize(
-        "card_id, statement_due_day, issue_date, due_date, exception",
+        ("card_id", "statement_due_day", "issue_date", "due_date", "exception"),
         [
-            [None, None, date(2020, 7, 15), None, AttributeError],
-            [3, 5, None, None, AttributeError],
-            [3, 5, None, "test", StatementError],
+            (None, None, date(2020, 7, 15), None, AttributeError),
+            (3, 5, None, None, AttributeError),
+            (3, 5, None, "test", StatementError),
         ],
     )
     def test_add_entry_invalid(

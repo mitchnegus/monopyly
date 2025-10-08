@@ -2,7 +2,6 @@
 
 import pytest
 from dry_foundation.testing.helpers import TestHandler
-from werkzeug.exceptions import NotFound
 
 from monopyly.banking.banks import BankHandler
 from monopyly.database.models import Bank, BankAccount
@@ -21,11 +20,11 @@ class TestBankHandler(TestHandler):
     ]
 
     @pytest.mark.parametrize(
-        "bank_names, reference_entries",
+        ("bank_names", "reference_entries"),
         [
-            [None, db_reference],
-            [("Jail",), db_reference[0:1]],
-            [("Jail", "TheBank"), db_reference],
+            (None, db_reference),
+            (("Jail",), db_reference[0:1]),
+            (("Jail", "TheBank"), db_reference),
         ],
     )
     def test_get_banks(self, bank_handler, bank_names, reference_entries):

@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 import pytest
 from dry_foundation.testing.helpers import TestHandler
-from werkzeug.exceptions import NotFound
 
 from monopyly.credit.cards import CreditCardHandler, save_card
 from monopyly.database.models import CreditCard, CreditStatement
@@ -25,13 +24,13 @@ class TestCreditCardHandler(TestHandler):
     ]
 
     @pytest.mark.parametrize(
-        "bank_ids, account_ids, last_four_digits, active, reference_entries",
+        ("bank_ids", "account_ids", "last_four_digits", "active", "reference_entries"),
         [
-            [None, None, None, None, db_reference],
-            [(2,), None, None, None, (db_reference[0], db_reference[2])],
-            [None, (2,), None, None, (db_reference[0], db_reference[2])],
-            [None, None, ("3335",), None, db_reference[:1]],
-            [None, None, None, 1, db_reference[:2]],
+            (None, None, None, None, db_reference),
+            ((2,), None, None, None, (db_reference[0], db_reference[2])),
+            (None, (2,), None, None, (db_reference[0], db_reference[2])),
+            (None, None, ("3335",), None, db_reference[:1]),
+            (None, None, None, 1, db_reference[:2]),
         ],
     )
     def test_get_cards(
@@ -47,11 +46,11 @@ class TestCreditCardHandler(TestHandler):
         self.assert_entries_match(cards, reference_entries)
 
     @pytest.mark.parametrize(
-        "bank_name, last_four_digits, reference_entry",
+        ("bank_name", "last_four_digits", "reference_entry"),
         [
-            ["Jail", "3334", db_reference[2]],
-            [None, "3335", db_reference[0]],
-            ["TheBank", "3336", db_reference[1]],
+            ("Jail", "3334", db_reference[2]),
+            (None, "3335", db_reference[0]),
+            ("TheBank", "3336", db_reference[1]),
         ],
     )
     def test_find_card(
@@ -61,7 +60,7 @@ class TestCreditCardHandler(TestHandler):
         self.assert_entry_matches(card, reference_entry)
 
     @pytest.mark.parametrize(
-        "bank_name, last_four_digits", [["Jail", "6666"], [None, None]]
+        ("bank_name", "last_four_digits"), [("Jail", "6666"), (None, None)]
     )
     def test_find_card_none_exist(self, card_handler, bank_name, last_four_digits):
         card = card_handler.find_card(bank_name, last_four_digits)

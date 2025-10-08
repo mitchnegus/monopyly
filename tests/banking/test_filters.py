@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from monopyly.banking.filters import *
+from monopyly.banking.filters import check_transfer_is_within_bank
 
 
 # Allows indirect parameters to identify mock transactions by name
@@ -53,12 +53,12 @@ def single_bank_internal_transaction():
 
 
 @pytest.mark.parametrize(
-    "mock_transaction, expected_within_bank",
+    ("mock_transaction", "expected_within_bank"),
     [
-        ["non_internal_transaction", False],
-        ["bank_credit_internal_transaction", False],
-        ["multi_bank_internal_transaction", False],
-        ["single_bank_internal_transaction", True],
+        ("non_internal_transaction", False),
+        ("bank_credit_internal_transaction", False),
+        ("multi_bank_internal_transaction", False),
+        ("single_bank_internal_transaction", True),
     ],
     indirect=["mock_transaction"],
 )

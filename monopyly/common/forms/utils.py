@@ -75,7 +75,7 @@ class Autocompleter:
         # Get information from the database to use for autocompletion
         query = model.select_for_user(getattr(model, field))
         values = current_app.db.session.scalars(query)
-        suggestions = sort_by_frequency([value for value in values])
+        suggestions = sort_by_frequency(list(values))
         return suggestions
 
     def _sort_suggestions_by_field(

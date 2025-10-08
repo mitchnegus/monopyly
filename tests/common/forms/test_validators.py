@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from wtforms.validators import ValidationError
 
-from monopyly.common.forms.validators import *
+from monopyly.common.forms.validators import NumeralsOnly, SelectionNotBlank
 
 
 @pytest.fixture

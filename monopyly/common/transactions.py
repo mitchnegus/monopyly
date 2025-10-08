@@ -2,8 +2,6 @@
 Tools for building a common transaction interface.
 """
 
-from abc import abstractmethod
-
 from dry_foundation.database.handler import DatabaseHandler, DatabaseViewHandler
 from flask import current_app
 

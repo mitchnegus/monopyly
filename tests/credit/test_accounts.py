@@ -2,7 +2,6 @@
 
 import pytest
 from dry_foundation.testing.helpers import TestHandler
-from werkzeug.exceptions import NotFound
 
 from monopyly.credit.accounts import CreditAccountHandler
 from monopyly.database.models import CreditAccount, CreditCard
@@ -21,7 +20,8 @@ class TestCreditAccountHandler(TestHandler):
     ]
 
     @pytest.mark.parametrize(
-        "bank_ids, reference_entries", [[None, db_reference], [(2,), db_reference[:1]]]
+        ("bank_ids", "reference_entries"),
+        [(None, db_reference), ((2,), db_reference[:1])],
     )
     def test_get_accounts(self, account_handler, bank_ids, reference_entries):
         accounts = account_handler.get_accounts(bank_ids)

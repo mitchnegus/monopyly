@@ -497,7 +497,7 @@ class TestCreditTransactionForm:
         mock_meta_call.assert_called_once()
 
     @pytest.mark.parametrize(
-        "data_merchant, suggested_merchant",
+        ("data_merchant", "suggested_merchant"),
         [
             ("The Gardens", "Marvin Gardens"),
             ("Chance", "JP Morgan Chance"),
@@ -545,9 +545,9 @@ class TestCreditTransactionForm:
         assert transaction_form.suggestions == {"amount": 1, "test-key": "TEST_VALUE"}
 
     @pytest.mark.parametrize(
-        "field, sort_fields, top_expected_suggestions, expected_suggestions",
+        ("field", "sort_fields", "top_expected_suggestions", "expected_suggestions"),
         [
-            [
+            (
                 "merchant",
                 {},
                 # sorted by (only) frequency
@@ -565,8 +565,8 @@ class TestCreditTransactionForm:
                     "Marvin Gardens",
                     "Boardwalk",
                 ),
-            ],
-            [
+            ),
+            (
                 "note",
                 {"merchant": "Park Place"},
                 # sorted by merchant key, then note frequency
@@ -585,7 +585,7 @@ class TestCreditTransactionForm:
                     "Expensive real estate",
                     "Back for more...",
                 ),
-            ],
+            ),
         ],
     )
     def test_autocomplete(

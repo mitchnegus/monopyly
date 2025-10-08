@@ -37,7 +37,7 @@ def add_account(bank_id):
     form = BankAccountForm()
     # Check if an account was submitted and add it to the database
     if request.method == "POST":
-        account = save_account(form)
+        save_account(form)
         return redirect(url_for("banking.load_accounts"))
     else:
         if bank_id:

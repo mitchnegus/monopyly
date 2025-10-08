@@ -72,7 +72,7 @@ def convert_readme_to_html_template(readme_path):
             '<div class="resource-links">'
             "  <h2>Links</h2>"
             '  <p><a href="{{ url_for("core.story") }}">Story</a></p>'
-            '  <p><a href="{{ url_for("core.credits") }}">Credits</a></p>'
+            '  <p><a href="{{ url_for("core.application_credits") }}">Credits</a></p>'
             "</div>"
         ),
     )

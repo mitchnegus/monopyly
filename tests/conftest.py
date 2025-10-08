@@ -34,12 +34,12 @@ app_manager = AppTestManager(
 
 @pytest.fixture
 def app():
-    yield app_manager.get_app()
+    return app_manager.get_app()
 
 
 @pytest.fixture
 def client(app):
-    yield app.test_client()
+    return app.test_client()
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def auth(client):
 @pytest.fixture
 def authorization(auth):
     auth.login(username="mr.monopyly", password="MONOPYLY")
-    yield
+    return
 
 
 @pytest.fixture

@@ -2,8 +2,6 @@
 Routes for credit card financials.
 """
 
-from itertools import islice
-
 from dry_foundation.database import db_transaction
 from flask import (
     flash,
@@ -17,20 +15,17 @@ from flask import (
 )
 from sqlalchemy.exc import MultipleResultsFound
 from werkzeug.exceptions import abort
-from wtforms.validators import ValidationError
 
 from ..auth.tools import login_required
 from ..banking.accounts import BankAccountHandler
 from ..banking.banks import BankHandler
-from ..banking.transactions import BankTransactionHandler
-from ..common.forms import form_err_msg
 from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import (
     categorize,
     get_linked_transaction,
     highlight_unmatched_transactions,
 )
-from ..common.utils import dedelimit_float, parse_date, sort_by_frequency
+from ..common.utils import dedelimit_float, parse_date
 from .accounts import CreditAccountHandler
 from .actions import (
     get_card_statement_grouping,
@@ -553,10 +548,7 @@ def add_tag():
     # Check that the tag name does not already exist
     if CreditTagHandler.get_tags(tag_names=(tag_name,)):
         raise ValueError("The given tag name already exists. Tag names must be unique.")
-    if parent_name:
-        parent_id = CreditTagHandler.find_tag(parent_name).id
-    else:
-        parent_id = None
+    parent_id = CreditTagHandler.find_tag(parent_name).id if parent_name else None
     tag = CreditTagHandler.add_entry(
         parent_id=parent_id,
         user_id=g.user.id,

@@ -51,43 +51,41 @@ def test_get_potential_preceding_card_inactive_card(client_context):
     assert preceding_card is None
 
 
+def _add_extra_active_card():
+    # Add another active card to have multiple active cards in the database
+    # (the new active card will not have any statements by default)
+    return CreditCardHandler.add_entry(
+        account_id=3,
+        last_four_digits="3337",
+        active=1,
+    )
+
+
+@transaction_lifetime
 def test_get_potential_preceding_card_multiple_active_cards(client_context):
-    # Add an active card to have multiple active cards
-    other_active_card = CreditCardHandler.add_entry(
-        account_id=3,
-        last_four_digits="3337",
-        active=1,
-    )
+    _add_extra_active_card()
     # Mock the card to be tested for a preceding card
     card = Mock(id=6, active=1, account_id=3)
     preceding_card = get_potential_preceding_card(card)
     assert preceding_card is None
 
 
+@transaction_lifetime
 def test_get_potential_preceding_card_no_statements(client_context):
+    _add_extra_active_card()
     # Deactivate the original active card with statements
     CreditCardHandler.update_entry(4, active=0)
-    # Add a card (without statements)
-    other_active_card = CreditCardHandler.add_entry(
-        account_id=3,
-        last_four_digits="3337",
-        active=1,
-    )
     # Mock the card to be tested for a preceding card
     card = Mock(id=6, active=1, account_id=3)
     preceding_card = get_potential_preceding_card(card)
     assert preceding_card is None
 
 
+@transaction_lifetime
 def test_get_potential_preceding_card_no_balance(app, client_context):
+    other_active_card = _add_extra_active_card()
     # Deactivate the original active card with statements
     CreditCardHandler.update_entry(4, active=0)
-    # Add a card (without statements)
-    other_active_card = CreditCardHandler.add_entry(
-        account_id=3,
-        last_four_digits="3337",
-        active=1,
-    )
     # Add a statement to the new card (and a transaction zeroing the balance)
     statement = CreditStatementHandler.add_statement(
         other_active_card, date(2020, 7, 10), due_date=date(2020, 8, 3)

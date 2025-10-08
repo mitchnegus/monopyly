@@ -43,19 +43,19 @@ def test_get_balance_chart_data(mock_timestamp_converter):
 
 
 @pytest.mark.parametrize(
-    "mock_timestamps, mock_transaction_dates, offsets",
+    ("mock_timestamps", "mock_transaction_dates", "offsets"),
     [
-        [
+        (
             [1577862000, 1577948400, 1577948400, 1578034800],
             [date(2020, 1, 1)] + 2 * [date(2020, 1, 2)] + [date(2020, 1, 3)],
             {2: (86_400_000 / 2)},
-        ],
-        [
+        ),
+        (
             [1577862000, 1577948400, 1577948400, 1577948400, 1578034800],
             [date(2020, 1, 1)] + 3 * [date(2020, 1, 2)] + [date(2020, 1, 3)],
             {2: (86_400_000 / 3), 3: 2 * (86_400_000 / 3)},
-        ],
-        [
+        ),
+        (
             [1577862000, 1577948400, 1577948400, 1577948400, 1578034800, 1578034800],
             [date(2020, 1, 1)] + 3 * [date(2020, 1, 2)] + 2 * [date(2020, 1, 3)],
             {
@@ -63,7 +63,7 @@ def test_get_balance_chart_data(mock_timestamp_converter):
                 3: 2 * (86_400_000 / 3),
                 5: 1 * (86_400_000 / 2),
             },
-        ],
+        ),
     ],
 )
 @patch("monopyly.banking.actions.convert_date_to_midnight_timestamp")

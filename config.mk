@@ -14,5 +14,6 @@ PRODUCTION_ENV = $(PACKAGE)-production-env
 # Testing
 TEST_DIR = tests
 
-# Format files
+# Lint/format files
+PYTHON_LINT_DIRS = $(PACKAGE_DIR) $(TEST_DIR)
 PYTHON_FORMAT_DIRS = $(PACKAGE_DIR) $(TEST_DIR)

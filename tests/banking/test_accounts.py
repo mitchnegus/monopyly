@@ -14,12 +14,10 @@ from monopyly.banking.accounts import (
     save_account,
 )
 from monopyly.database.models import (
-    BankAccount,
     BankAccountType,
     BankAccountTypeView,
     BankAccountView,
     BankTransaction,
-    BankTransactionView,
 )
 
 
@@ -73,20 +71,21 @@ class TestBankAccountTypeHandler(TestHandler):
         self.assert_entries_match(account_types, self.db_reference)
 
     @pytest.mark.parametrize(
-        "bank_id, reference_entries", [[2, db_reference[:2]], [3, db_reference[2:3]]]
+        ("bank_id", "reference_entries"),
+        [(2, db_reference[:2]), (3, db_reference[2:3])],
     )
     def test_get_types_for_bank(self, account_type_handler, bank_id, reference_entries):
         account_types = account_type_handler.get_types_for_bank(bank_id)
         self.assert_entries_match(account_types, reference_entries)
 
     @pytest.mark.parametrize(
-        "type_name, type_abbreviation, reference_entry",
+        ("type_name", "type_abbreviation", "reference_entry"),
         [
-            ["Checking", None, db_reference[1]],
-            ["Certificate of Deposit", None, db_reference[2]],
-            [None, "CD", db_reference[2]],
-            [None, "Trust", db_reference[3]],
-            ["Certificate of Deposit", "CD", db_reference[2]],
+            ("Checking", None, db_reference[1]),
+            ("Certificate of Deposit", None, db_reference[2]),
+            (None, "CD", db_reference[2]),
+            (None, "Trust", db_reference[3]),
+            ("Certificate of Deposit", "CD", db_reference[2]),
         ],
     )
     def test_find_account_type(
@@ -98,8 +97,8 @@ class TestBankAccountTypeHandler(TestHandler):
         self.assert_entry_matches(account_type, reference_entry)
 
     @pytest.mark.parametrize(
-        "type_name, type_abbreviation",
-        [["Certificate of Deposit", "CoD"], [None, None]],
+        ("type_name", "type_abbreviation"),
+        [("Certificate of Deposit", "CoD"), (None, None)],
     )
     def test_find_account_type_none_exist(
         self, account_type_handler, type_name, type_abbreviation
@@ -160,11 +159,11 @@ class TestBankAccountTypeHandler(TestHandler):
         )
 
     @pytest.mark.parametrize(
-        "entry_id, exception",
+        ("entry_id", "exception"),
         [
-            [1, Forbidden],  # - should not be able to delete common entries
-            [4, NotFound],  # -- should not be able to delete other user entries
-            [7, NotFound],  # -- should not be able to delete nonexistent entries
+            (1, Forbidden),  # - should not be able to delete common entries
+            (4, NotFound),  # -- should not be able to delete other user entries
+            (7, NotFound),  # -- should not be able to delete nonexistent entries
         ],
     )
     def test_delete_entry_invalid(self, account_type_handler, entry_id, exception):
@@ -222,11 +221,11 @@ class TestBankAccountHandler(TestHandler):
         assert account.projected_balance == account.balance + expected_difference
 
     @pytest.mark.parametrize(
-        "bank_ids, account_type_ids, reference_entries",
+        ("bank_ids", "account_type_ids", "reference_entries"),
         [
-            [None, None, db_reference],
-            [(2,), None, db_reference[:2]],
-            [None, (2, 3), db_reference[1:]],
+            (None, None, db_reference),
+            ((2,), None, db_reference[:2]),
+            (None, (2, 3), db_reference[1:]),
         ],
     )
     def test_get_accounts(
@@ -236,30 +235,30 @@ class TestBankAccountHandler(TestHandler):
         self.assert_entries_match(accounts, reference_entries)
 
     @pytest.mark.parametrize(
-        "bank_id, expected_balance", [[2, (443.90 - 409.21)], [3, 200.00]]
+        ("bank_id", "expected_balance"), [(2, (443.90 - 409.21)), (3, 200.00)]
     )
     def test_get_bank_balance(self, account_handler, bank_id, expected_balance):
         balance = account_handler.get_bank_balance(bank_id)
         assert balance == expected_balance
 
     @pytest.mark.parametrize(
-        "bank_id, exception",
+        ("bank_id", "exception"),
         [
-            [1, NotFound],  # the bank user is not the logged in user
-            [4, NotFound],  # the bank is not in the database
+            (1, NotFound),  # the bank user is not the logged in user
+            (4, NotFound),  # the bank is not in the database
         ],
     )
     def test_get_bank_balance_invalid(self, account_handler, bank_id, exception):
         with pytest.raises(exception):
-            balance = account_handler.get_bank_balance(bank_id)
+            account_handler.get_bank_balance(bank_id)
 
     @pytest.mark.parametrize(
-        "bank_name, account_type_name, last_four_digits, reference_entry",
+        ("bank_name", "account_type_name", "last_four_digits", "reference_entry"),
         [
-            ["Jail", "Savings", "5556", db_reference[0]],
-            ["Jail", "Checking", "5556", db_reference[1]],
-            ["TheBank", "Certificate of Deposit", None, db_reference[2]],
-            [None, "Certificate of Deposit", "5557", db_reference[2]],
+            ("Jail", "Savings", "5556", db_reference[0]),
+            ("Jail", "Checking", "5556", db_reference[1]),
+            ("TheBank", "Certificate of Deposit", None, db_reference[2]),
+            (None, "Certificate of Deposit", "5557", db_reference[2]),
         ],
     )
     def test_find_account(
@@ -276,8 +275,8 @@ class TestBankAccountHandler(TestHandler):
         self.assert_entry_matches(account, reference_entry)
 
     @pytest.mark.parametrize(
-        "bank_name, account_type_name, last_four_digits",
-        [["Jail", "6666", None], [None, None, None]],
+        ("bank_name", "account_type_name", "last_four_digits"),
+        [("Jail", "6666", None), (None, None, None)],
     )
     def test_find_account_none_exist(
         self, account_handler, bank_name, last_four_digits, account_type_name

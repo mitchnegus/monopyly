@@ -74,7 +74,7 @@ def story():
 
 
 @bp.route("/credits")
-def credits():
+def application_credits():
     return render_template("core/credits.html")
 
 

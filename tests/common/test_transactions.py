@@ -12,7 +12,7 @@ from monopyly.common.transactions import (
     get_subtransactions,
     highlight_unmatched_transactions,
 )
-from monopyly.database.models import CreditSubtransaction, TransactionTag
+from monopyly.database.models import CreditSubtransaction
 
 from test_tag_helpers import TestTagHandler
 
@@ -52,19 +52,19 @@ class TestTransactionTagHandler(TestTagHandler):
             self._check_subtag_depths(child_tag)
 
     @pytest.mark.parametrize(
-        "tag, expected_subtags",
-        [[db_reference[0], db_reference[1:3]], [db_reference[3], db_reference[4:5]]],
+        ("tag", "expected_subtags"),
+        [(db_reference[0], db_reference[1:3]), (db_reference[3], db_reference[4:5])],
     )
     def test_get_subtags(self, tag_handler, tag, expected_subtags):
         subtags = tag_handler.get_subtags(tag)
         self.assert_entries_match(subtags, expected_subtags)
 
     @pytest.mark.parametrize(
-        "tag, expected_supertag",
+        ("tag", "expected_supertag"),
         [
-            [db_reference[1], db_reference[0]],
-            [db_reference[2], db_reference[0]],
-            [db_reference[4], db_reference[3]],
+            (db_reference[1], db_reference[0]),
+            (db_reference[2], db_reference[0]),
+            (db_reference[4], db_reference[3]),
         ],
     )
     def test_get_supertag(self, tag_handler, tag, expected_supertag):
@@ -72,10 +72,10 @@ class TestTransactionTagHandler(TestTagHandler):
         self.assert_entry_matches(supertag, expected_supertag)
 
     @pytest.mark.parametrize(
-        "root_tag, expected_hierarchy",
+        ("root_tag", "expected_hierarchy"),
         [
-            [None, db_reference_hierarchy],
-            [db_reference[0], db_reference_hierarchy[db_reference[0]]],
+            (None, db_reference_hierarchy),
+            (db_reference[0], db_reference_hierarchy[db_reference[0]]),
         ],
     )
     def test_get_hierarchy(self, tag_handler, root_tag, expected_hierarchy):
@@ -83,12 +83,12 @@ class TestTransactionTagHandler(TestTagHandler):
         self._compare_hierarchies(hierarchy, expected_hierarchy)
 
     @pytest.mark.parametrize(
-        "tag, expected_ancestors",
+        ("tag", "expected_ancestors"),
         [
-            [db_reference[1], (db_reference[0],)],
-            [db_reference[2], (db_reference[0],)],
-            [db_reference[0], ()],
-            [db_reference[4], (db_reference[3],)],
+            (db_reference[1], (db_reference[0],)),
+            (db_reference[2], (db_reference[0],)),
+            (db_reference[0], ()),
+            (db_reference[4], (db_reference[3],)),
         ],
     )
     def test_get_ancestors(self, tag_handler, tag, expected_ancestors):
@@ -96,8 +96,8 @@ class TestTransactionTagHandler(TestTagHandler):
         self.assert_entries_match(ancestors, expected_ancestors)
 
     @pytest.mark.parametrize(
-        "tag_name, reference_entry",
-        [["Transportation", db_reference[0]], ["Electricity", db_reference[4]]],
+        ("tag_name", "reference_entry"),
+        [("Transportation", db_reference[0]), ("Electricity", db_reference[4])],
     )
     def test_find_tag(self, tag_handler, tag_name, reference_entry):
         tag = tag_handler.find_tag(tag_name)
@@ -117,13 +117,17 @@ def mock_transaction():
 
 class TestLinkedTransactionSearch:
     @pytest.mark.parametrize(
-        "mock_transaction_id, mock_internal_transaction_id, expected_subtype, "
-        "expected_transaction_id",
+        (
+            "mock_transaction_id",
+            "mock_internal_transaction_id",
+            "expected_subtype",
+            "expected_transaction_id",
+        ),
         [
-            [3, 1, "bank", 6],  # --- bank-bank linked transaction
-            [6, 1, "bank", 3],
-            [5, 2, "credit", 7],  # - credit-bank linked transaction
-            [7, 2, "bank", 5],
+            (3, 1, "bank", 6),  # --- bank-bank linked transaction
+            (6, 1, "bank", 3),
+            (5, 2, "credit", 7),  # - credit-bank linked transaction
+            (7, 2, "bank", 5),
         ],
     )
     def test_get_linked_transaction(

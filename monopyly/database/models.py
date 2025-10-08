@@ -1,9 +1,7 @@
 import datetime
-from typing import List, Optional
 
 from dry_foundation.database.models import AuthorizedAccessMixin, Model
-from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Table
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import Column, ForeignKey, Integer, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
@@ -25,10 +23,10 @@ class InternalTransaction(Model):
     # Columns
     id: Mapped[int] = mapped_column(primary_key=True)
     # Relationships
-    bank_transactions: Mapped[List["BankTransactionView"]] = relationship(
+    bank_transactions: Mapped[list["BankTransactionView"]] = relationship(
         back_populates="internal_transaction"
     )
-    credit_transactions: Mapped[List["CreditTransactionView"]] = relationship(
+    credit_transactions: Mapped[list["CreditTransactionView"]] = relationship(
         back_populates="internal_transaction"
     )
 
@@ -65,17 +63,17 @@ class TransactionTag(AuthorizedAccessMixin, Model):
     # Columns
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("transaction_tags.id"))
+    parent_id: Mapped[int | None] = mapped_column(ForeignKey("transaction_tags.id"))
     tag_name: Mapped[str]
     # Relationships
     parent: Mapped["TransactionTag"] = relationship(
         back_populates="children", remote_side=[id]
     )
-    children: Mapped[List["TransactionTag"]] = relationship(back_populates="parent")
-    bank_subtransactions: Mapped[List["BankSubtransaction"]] = relationship(
+    children: Mapped[list["TransactionTag"]] = relationship(back_populates="parent")
+    bank_subtransactions: Mapped[list["BankSubtransaction"]] = relationship(
         back_populates="tags", secondary=bank_tag_link_table
     )
-    credit_subtransactions: Mapped[List["CreditSubtransaction"]] = relationship(
+    credit_subtransactions: Mapped[list["CreditSubtransaction"]] = relationship(
         back_populates="tags", secondary=credit_tag_link_table
     )
 
@@ -95,10 +93,10 @@ class Bank(AuthorizedAccessMixin, Model):
     bank_name: Mapped[str]
     # Relationships
     user: Mapped["User"] = relationship(back_populates="banks")
-    bank_accounts: Mapped[List["BankAccountView"]] = relationship(
+    bank_accounts: Mapped[list["BankAccountView"]] = relationship(
         back_populates="bank", cascade="all, delete", viewonly=True
     )
-    credit_accounts: Mapped[List["CreditAccount"]] = relationship(
+    credit_accounts: Mapped[list["CreditAccount"]] = relationship(
         back_populates="bank", cascade="all, delete"
     )
 
@@ -110,7 +108,7 @@ class BankAccountType(AuthorizedAccessMixin, Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     type_name: Mapped[str]
-    type_abbreviation: Mapped[Optional[str]]
+    type_abbreviation: Mapped[str | None]
     # Relationships
     view: Mapped["BankAccountTypeView"] = relationship(
         back_populates="account_type", uselist=False, viewonly=True
@@ -124,12 +122,12 @@ class BankAccountTypeView(AuthorizedAccessMixin, Model):
     id = mapped_column(Integer, ForeignKey("bank_account_types.id"), primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     type_name: Mapped[str]
-    type_abbreviation: Mapped[Optional[str]]
+    type_abbreviation: Mapped[str | None]
     type_common_name: Mapped[str]
     # Relationships
     account_type: Mapped["BankAccountType"] = relationship(back_populates="view")
     user: Mapped["User"] = relationship(back_populates="bank_account_types")
-    accounts: Mapped[List["BankAccountView"]] = relationship(
+    accounts: Mapped[list["BankAccountView"]] = relationship(
         back_populates="account_type", viewonly=True
     )
 
@@ -170,7 +168,7 @@ class BankAccountView(AuthorizedAccessMixin, Model):
     account_type: Mapped["BankAccountTypeView"] = relationship(
         back_populates="accounts", viewonly=True
     )
-    transactions: Mapped[List["BankTransactionView"]] = relationship(
+    transactions: Mapped[list["BankTransactionView"]] = relationship(
         back_populates="account", viewonly=True
     )
 
@@ -182,12 +180,12 @@ class BankTransaction(AuthorizedAccessMixin, Model):
     subtype = "bank"
     # Columns
     id: Mapped[int] = mapped_column(primary_key=True)
-    internal_transaction_id: Mapped[Optional[int]] = mapped_column(
+    internal_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("internal_transactions.id")
     )
     account_id: Mapped[int] = mapped_column(ForeignKey("bank_accounts_view.id"))
     transaction_date: Mapped[datetime.date]
-    merchant: Mapped[Optional[str]]
+    merchant: Mapped[str | None]
     #  Relationships
     view: Mapped["BankTransactionView"] = relationship(
         back_populates="transaction", uselist=False, viewonly=True
@@ -203,14 +201,14 @@ class BankTransactionView(AuthorizedAccessMixin, Model):
     id: Mapped[int] = mapped_column(
         ForeignKey("bank_transactions.id"), primary_key=True
     )
-    internal_transaction_id: Mapped[Optional[int]] = mapped_column(
+    internal_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("internal_transactions.id")
     )
     account_id: Mapped[int] = mapped_column(ForeignKey("bank_accounts_view.id"))
     transaction_date: Mapped[datetime.date]
-    merchant: Mapped[Optional[str]]
+    merchant: Mapped[str | None]
     total: Mapped[float]
-    notes: Mapped[Optional[str]]
+    notes: Mapped[str | None]
     balance: Mapped[float]
     # Relationships
     transaction: Mapped["BankTransaction"] = relationship(back_populates="view")
@@ -218,7 +216,7 @@ class BankTransactionView(AuthorizedAccessMixin, Model):
         back_populates="bank_transactions"
     )
     account: Mapped["BankAccountView"] = relationship(back_populates="transactions")
-    subtransactions: Mapped[List["BankSubtransaction"]] = relationship(
+    subtransactions: Mapped[list["BankSubtransaction"]] = relationship(
         back_populates="transaction", lazy="selectin"
     )
 
@@ -235,7 +233,7 @@ class BankSubtransaction(AuthorizedAccessMixin, Model):
     transaction: Mapped["BankTransactionView"] = relationship(
         back_populates="subtransactions", viewonly=True
     )
-    tags: Mapped[List["TransactionTag"]] = relationship(
+    tags: Mapped[list["TransactionTag"]] = relationship(
         back_populates="bank_subtransactions",
         secondary=bank_tag_link_table,
         lazy="selectin",
@@ -253,7 +251,7 @@ class CreditAccount(AuthorizedAccessMixin, Model):
     # ((Should probably have an 'active' field))
     # Relationships
     bank: Mapped["Bank"] = relationship(back_populates="credit_accounts")
-    cards: Mapped[List["CreditCard"]] = relationship(
+    cards: Mapped[list["CreditCard"]] = relationship(
         back_populates="account", cascade="all, delete"
     )
 
@@ -268,7 +266,7 @@ class CreditCard(AuthorizedAccessMixin, Model):
     active: Mapped[int]
     # Relationships
     account: Mapped["CreditAccount"] = relationship(back_populates="cards")
-    statements: Mapped[List["CreditStatementView"]] = relationship(
+    statements: Mapped[list["CreditStatementView"]] = relationship(
         back_populates="card", viewonly=True
     )
 
@@ -302,7 +300,7 @@ class CreditStatementView(AuthorizedAccessMixin, Model):
     # Relationships
     statement: Mapped["CreditStatement"] = relationship(back_populates="view")
     card: Mapped["CreditCard"] = relationship(back_populates="statements")
-    transactions: Mapped[List["CreditTransactionView"]] = relationship(
+    transactions: Mapped[list["CreditTransactionView"]] = relationship(
         back_populates="statement", viewonly=True
     )
 
@@ -314,7 +312,7 @@ class CreditTransaction(AuthorizedAccessMixin, Model):
     subtype = "credit"
     # Columns
     id: Mapped[int] = mapped_column(primary_key=True)
-    internal_transaction_id: Mapped[Optional[int]] = mapped_column(
+    internal_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("internal_transactions.id")
     )
     statement_id: Mapped[int] = mapped_column(ForeignKey("credit_statements_view.id"))
@@ -335,7 +333,7 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
     id: Mapped[int] = mapped_column(
         ForeignKey("credit_transactions.id"), primary_key=True
     )
-    internal_transaction_id: Mapped[Optional[int]] = mapped_column(
+    internal_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("internal_transactions.id")
     )
     statement_id: Mapped[int] = mapped_column(ForeignKey("credit_statements_view.id"))
@@ -353,7 +351,7 @@ class CreditTransactionView(AuthorizedAccessMixin, Model):
     statement: Mapped["CreditStatementView"] = relationship(
         back_populates="transactions", viewonly=True
     )
-    subtransactions: Mapped[List["CreditSubtransaction"]] = relationship(
+    subtransactions: Mapped[list["CreditSubtransaction"]] = relationship(
         back_populates="transaction", lazy="selectin"
     )
 
@@ -378,7 +376,7 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
     transaction: Mapped["CreditTransactionView"] = relationship(
         back_populates="subtransactions", viewonly=True
     )
-    tags: Mapped[List["TransactionTag"]] = relationship(
+    tags: Mapped[list["TransactionTag"]] = relationship(
         back_populates="credit_subtransactions",
         secondary=credit_tag_link_table,
         lazy="selectin",

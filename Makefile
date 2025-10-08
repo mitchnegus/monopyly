@@ -35,6 +35,12 @@ test : env
 	@$(ENV_BIN)/pytest
 
 
+## lint		: Lint the package source code
+.PHONY: lint
+lint : env
+	@$(ENV_BIN)/ruff check $(PYTHON_LINT_DIRS)
+
+
 ## format		: Format the package source code
 .PHONY: format
 format : env

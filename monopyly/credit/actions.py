@@ -94,9 +94,8 @@ def get_potential_preceding_card(card):
                 card_ids=(other_card.id,),
             )
             latest_statement = statements.first()
-            if latest_statement:
-                if latest_statement.balance > 0:
-                    return other_card
+            if latest_statement and latest_statement.balance > 0:
+                return other_card
     # Card does not meet all of these conditions
     return None
 
@@ -110,8 +109,8 @@ def transfer_credit_card_statement(form, card_id, prior_card_id):
         statements = CreditStatementHandler.get_statements(card_ids=(prior_card_id,))
         latest_statement = statements.first()
         CreditStatementHandler.update_entry(latest_statement.id, card_id=card_id)
-        # Deactivate the old card
-        prior_card = CreditCardHandler.get_entry(prior_card_id)
+        # Deactivate the old card (after ensuring it exists and is accessible)
+        CreditCardHandler.get_entry(prior_card_id)
         CreditCardHandler.update_entry(prior_card_id, active=0)
 
 
