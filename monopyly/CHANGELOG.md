@@ -230,6 +230,7 @@
 - Update dependencies (including using ruff in place of _Black_ and _isort_)
 - Refactor to include ruff-based linting checks
 - Set 'Credit payments' to be a default tag for all users
+- Protect globally defined tags from user deletion
 
 
 <a name="bottom" id="bottom"></a>

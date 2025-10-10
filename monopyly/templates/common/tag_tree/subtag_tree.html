@@ -3,7 +3,9 @@
     <div class="tag">{{ tag.tag_name }}</div>
     <div class="buttons">
       <img class="new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
-      <a class="action button delete">
+      {% if tag.user_id != 0 %}
+        <a class="action button delete">
+      {% endif %}
       </a>
     </div>
   </div>
