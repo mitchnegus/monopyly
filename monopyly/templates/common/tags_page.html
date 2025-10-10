@@ -32,8 +32,8 @@
 {% block javascript %}
 
   <script>
-    const ADD_TAG_ENDPOINT = "{{ url_for('credit.add_tag') }}";
-    const REMOVE_TAG_ENDPOINT = "{{ url_for('credit.delete_tag') }}";
+    const ADD_TAG_ENDPOINT = "{{ url_for('banking.add_tag') }}";
+    const REMOVE_TAG_ENDPOINT = "{{ url_for('banking.delete_tag') }}";
   </script>
   <script type="module" src="{{ url_for('static', filename='js/bind-tag-actions.js') }}">
   </script>

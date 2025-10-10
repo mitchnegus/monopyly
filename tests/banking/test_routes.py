@@ -294,6 +294,48 @@ class TestBankingRoutes(TestRoutes):
         # Ensure that the transaction was deleted
         assert not self.input_has_value("What else is there to do in Jail?")
 
+    def test_load_tags(self, authorization):
+        self.get_route("/tags")
+        assert self.page_header_includes_substring("Transaction Tags")
+        # 7 tags for the user
+        assert self.tag_count_is_equal(7, "div", class_="tag")
+
+    @transaction_lifetime
+    def test_add_tag(self, authorization):
+        self.post_route(
+            "/_add_tag",
+            json={"tag_name": "Games", "parent": None},
+        )
+        # Returns the subtag tree with the new tag added
+        tags = self.soup.find_all("div", "tag")
+        assert len(tags) == 1
+        assert tags[0].text == "Games"
+
+    @transaction_lifetime
+    def test_add_tag_with_parent(self, authorization):
+        self.post_route(
+            "/_add_tag",
+            json={"tag_name": "Gas", "parent": "Transportation"},
+        )
+        # Returns the subtag tree with the new tag added
+        tags = self.soup.find_all("div", "tag")
+        assert len(tags) == 1
+        assert tags[0].text == "Gas"
+
+    @transaction_lifetime
+    def test_add_conflicting_tag(self, authorization):
+        with pytest.raises(ValueError, match="The given tag name already exists."):
+            self.post_route(
+                "/_add_tag",
+                json={"tag_name": "Railroad", "parent": None},
+            )
+
+    @transaction_lifetime
+    def test_delete_tag(self, authorization):
+        self.post_route("/_delete_tag", json={"tag_name": "Railroad"})
+        # Returns an empty string
+        assert self.response.data == b""
+
     @pytest.mark.parametrize(
         ("field", "suggestions"),
         [

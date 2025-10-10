@@ -5,7 +5,6 @@ Routes for credit card financials.
 from dry_foundation.database import db_transaction
 from flask import (
     flash,
-    g,
     jsonify,
     redirect,
     render_template,
@@ -39,7 +38,7 @@ from .blueprint import bp
 from .cards import CreditCardHandler, save_card
 from .forms import CardStatementTransferForm, CreditCardForm, CreditTransactionForm
 from .statements import CreditStatementHandler
-from .transactions import CreditTagHandler, CreditTransactionHandler, save_transaction
+from .transactions import CreditTransactionHandler, save_transaction
 from .transactions.activity import (
     ActivityMatchmaker,
     TransactionActivities,
@@ -527,49 +526,6 @@ def delete_transaction(transaction_id):
             )
         CreditStatementHandler.delete_entry(statement.id)
     return redirect(url_for("credit.load_transactions"))
-
-
-@bp.route("/tags")
-@login_required
-def load_tags():
-    # Get the tag hierarchy from the database
-    hierarchy = CreditTagHandler.get_hierarchy()
-    return render_template("common/tags_page.html", tags_hierarchy=hierarchy)
-
-
-@bp.route("/_add_tag", methods=("POST",))
-@login_required
-@db_transaction
-def add_tag():
-    # Get the new tag (and potentially parent category) from the AJAX request
-    post_args = request.get_json()
-    tag_name = post_args["tag_name"]
-    parent_name = post_args.get("parent")
-    # Check that the tag name does not already exist
-    if CreditTagHandler.get_tags(tag_names=(tag_name,)):
-        raise ValueError("The given tag name already exists. Tag names must be unique.")
-    parent_id = CreditTagHandler.find_tag(parent_name).id if parent_name else None
-    tag = CreditTagHandler.add_entry(
-        parent_id=parent_id,
-        user_id=g.user.id,
-        tag_name=tag_name,
-    )
-    return render_template(
-        "common/tag_tree/subtag_tree.html", tag=tag, tags_hierarchy={}
-    )
-
-
-@bp.route("/_delete_tag", methods=("POST",))
-@login_required
-@db_transaction
-def delete_tag():
-    # Get the tag to be deleted from the AJAX request
-    post_args = request.get_json()
-    tag_name = post_args["tag_name"]
-    tag = CreditTagHandler.find_tag(tag_name)
-    # Remove the tag from the database
-    CreditTagHandler.delete_entry(tag.id)
-    return ""
 
 
 @bp.route("/_suggest_transaction_autocomplete", methods=("POST",))
