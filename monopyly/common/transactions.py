@@ -410,6 +410,11 @@ class CategoryTree:
     """
     Store a tree of categories.
 
+    The category tree is a tree of categorized subtransactions. Each
+    leaf of the tree represents a transaction tag and the
+    subtransactions that have been categorized according to that tag
+    (the category).
+
     Parameters
     ----------
     category : database.models.TransactionTag, str
@@ -478,9 +483,9 @@ class RootCategoryTree(CategoryTree):
         Given a subtransaction, add that subtransaction to the category
         tree according to its tags. If multiple tags exist at the same
         level of the tree (i.e., a subtransaction with tags in diverging
-        branches), the tag is determined to be "uncategorizable" and the
-        tag is listed only as a member of the root tree and not as a
-        member of any other subcategory tree.
+        branches), the subtransaction is determined to be "uncategorizable"
+        and the tag is listed only as a member of the root tree and not
+        as a member of any other subcategory tree.
 
         Parameters
         ----------

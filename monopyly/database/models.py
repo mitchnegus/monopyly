@@ -60,6 +60,7 @@ credit_tag_link_table = Table(
 
 class TransactionTag(AuthorizedAccessMixin, Model):
     __tablename__ = "transaction_tags"
+    _alt_authorized_ids = (0,)
     # Columns
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

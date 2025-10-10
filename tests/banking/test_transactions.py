@@ -297,8 +297,8 @@ class TestBankTagHandler(TestTagHandler):
         ),
         [
             (None, None, None, None, db_reference),  # defaults
-            (("Credit payments",), None, None, None, db_reference[5:6]),
-            (None, (4, 5, 6), None, None, db_reference[5:6]),
+            (("Credit payments",), None, None, None, db_reference[0:1]),
+            (None, (4, 5, 6), None, None, db_reference[0:1]),
             (None, None, (2, 3, 4), None, []),
         ],
     )

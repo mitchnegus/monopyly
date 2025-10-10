@@ -376,11 +376,11 @@ class TestCreditTagHandler(TestTagHandler):
         ),
         [
             (None, None, None, None, db_reference),  # defaults
-            (("Railroad", "Utilities"), None, None, None, db_reference[2:4]),
-            (None, (10, 11, 12), None, None, [db_reference[0], db_reference[2]]),
-            (None, None, (5, 6, 7), None, db_reference[3:5]),
-            (("Parking",), None, None, True, db_reference[0:2]),
-            (("Parking", "Transportation"), None, None, False, [db_reference[1]]),
+            (("Railroad", "Utilities"), None, None, None, db_reference[3:5]),
+            (None, (10, 11, 12), None, None, [db_reference[1], db_reference[3]]),
+            (None, None, (5, 6, 7), None, db_reference[4:6]),
+            (("Parking",), None, None, True, db_reference[1:3]),
+            (("Parking", "Transportation"), None, None, False, [db_reference[2]]),
         ],
     )
     def test_get_tags(

@@ -53,7 +53,7 @@ class TestTransactionTagHandler(TestTagHandler):
 
     @pytest.mark.parametrize(
         ("tag", "expected_subtags"),
-        [(db_reference[0], db_reference[1:3]), (db_reference[3], db_reference[4:5])],
+        [(db_reference[1], db_reference[2:4]), (db_reference[4], db_reference[5:6])],
     )
     def test_get_subtags(self, tag_handler, tag, expected_subtags):
         subtags = tag_handler.get_subtags(tag)
@@ -62,9 +62,9 @@ class TestTransactionTagHandler(TestTagHandler):
     @pytest.mark.parametrize(
         ("tag", "expected_supertag"),
         [
-            (db_reference[1], db_reference[0]),
-            (db_reference[2], db_reference[0]),
-            (db_reference[4], db_reference[3]),
+            (db_reference[2], db_reference[1]),
+            (db_reference[3], db_reference[1]),
+            (db_reference[5], db_reference[4]),
         ],
     )
     def test_get_supertag(self, tag_handler, tag, expected_supertag):
@@ -85,10 +85,10 @@ class TestTransactionTagHandler(TestTagHandler):
     @pytest.mark.parametrize(
         ("tag", "expected_ancestors"),
         [
-            (db_reference[1], (db_reference[0],)),
-            (db_reference[2], (db_reference[0],)),
-            (db_reference[0], ()),
-            (db_reference[4], (db_reference[3],)),
+            (db_reference[2], (db_reference[1],)),
+            (db_reference[3], (db_reference[1],)),
+            (db_reference[1], ()),
+            (db_reference[5], (db_reference[4],)),
         ],
     )
     def test_get_ancestors(self, tag_handler, tag, expected_ancestors):
@@ -97,7 +97,7 @@ class TestTransactionTagHandler(TestTagHandler):
 
     @pytest.mark.parametrize(
         ("tag_name", "reference_entry"),
-        [("Transportation", db_reference[0]), ("Electricity", db_reference[4])],
+        [("Transportation", db_reference[1]), ("Electricity", db_reference[5])],
     )
     def test_find_tag(self, tag_handler, tag_name, reference_entry):
         tag = tag_handler.find_tag(tag_name)
@@ -191,8 +191,8 @@ class TestCategoryTree:
 @pytest.fixture
 def root_category_tree():
     # Define the tags
-    tag = TestTagHandler.db_reference[0]
-    child_tag = TestTagHandler.db_reference[1]
+    tag = TestTagHandler.db_reference[1]
+    child_tag = TestTagHandler.db_reference[2]
     # Build the testable category tree by hand
     tree = RootCategoryTree()
     tree.subtransactions = [
@@ -250,8 +250,9 @@ class TestRootCategoryTree:
         assert "tag2" in tree.subcategories["tag0"].subcategories["tag1"].subcategories
 
     def test_uncategorizable_subtransaction(self):
-        # 'Transportation', 'Transportation/Railroad', and 'Gifts' are not categorizable
-        uncategorizable_tags = [TestTagHandler.db_reference[_] for _ in [0, 2, 6]]
+        # The set of tags 'Transportation', 'Transportation/Railroad', and 'Gifts'
+        # is not categorizable
+        uncategorizable_tags = [TestTagHandler.db_reference[_] for _ in [1, 3, 6]]
         subtransaction = CreditSubtransaction(subtotal=10, tags=uncategorizable_tags)
         tree = RootCategoryTree()
         tree.categorize_subtransaction(subtransaction)

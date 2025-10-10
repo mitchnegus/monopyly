@@ -15,11 +15,10 @@ INSERT INTO transaction_tags
        (user_id, parent_id, tag_name)
 VALUES (1, NULL, 'Test tag'),
        (3, NULL, 'Transportation'),
-       (3, 2, 'Parking'),
-       (3, 2, 'Railroad'),
+       (3, 3, 'Parking'),
+       (3, 3, 'Railroad'),
        (3, NULL, 'Utilities'),
-       (3, 5, 'Electricity'),
-       (3, NULL, 'Credit payments'),
+       (3, 6, 'Electricity'),
        (3, NULL, 'Gifts');
 
 INSERT INTO banks
@@ -65,8 +64,8 @@ VALUES
 
 INSERT INTO bank_tag_links
        (subtransaction_id, tag_id)
-VALUES (1, 1),   -- 'Test bank transaction' --> 'Test tag'
-       (6, 7);   -- 'Credit card payment' --> 'Credit payment'
+VALUES (1, 2),   -- 'Test bank transaction' --> 'Test tag'
+       (6, 1);   -- 'Credit card payment' --> 'Credit payment'
 
 INSERT INTO credit_accounts
        (bank_id, statement_issue_day, statement_due_day)
@@ -127,12 +126,12 @@ VALUES (1, 100.00, 'Test credit transaction'),
 
 INSERT INTO credit_tag_links
        (subtransaction_id, tag_id)
-VALUES (1, 1),   -- 'Test credit transaction' --> 'Test tag'
-       (2, 2),   -- 'Parking (...)' --> 'Transportation'
-       (2, 3),   -- 'Parking (...)' --> 'Transportation'/'Parking'
-       (6, 5),   -- 'Electric bill' --> 'Utilities'
-       (6, 6),   -- 'Electric bill' --> 'Utilities'/'Electricity'
-       (8, 7),   -- 'Credit card payment' --> 'Credit payment'
-       (12, 2),  -- 'Conducting business' --> 'Transportation'
-       (12, 4);  -- 'Conducting business' --> 'Transportation'/'Railroad'
+VALUES (1, 2),   -- 'Test credit transaction' --> 'Test tag'
+       (2, 3),   -- 'Parking (...)' --> 'Transportation'
+       (2, 4),   -- 'Parking (...)' --> 'Transportation'/'Parking'
+       (6, 6),   -- 'Electric bill' --> 'Utilities'
+       (6, 7),   -- 'Electric bill' --> 'Utilities'/'Electricity'
+       (8, 1),   -- 'Credit card payment' --> 'Credit payment'
+       (12, 3),  -- 'Conducting business' --> 'Transportation'
+       (12, 5);  -- 'Conducting business' --> 'Transportation'/'Railroad'
 

@@ -4,7 +4,12 @@ INSERT INTO users
 VALUES
   (0, 'global', 'n/a');
 
-/* Set some default account types (user_id=0 indicates the "global" user) */
+/* Set a default transaction tag for credit payments */
+INSERT INTO transaction_tags
+       (user_id, parent_id, tag_name)
+VALUES (0, NULL, 'Credit payments');
+
+/* Set some default account types */
 INSERT INTO bank_account_types
   (user_id, type_name, type_abbreviation)
 VALUES
