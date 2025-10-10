@@ -534,7 +534,7 @@ def delete_transaction(transaction_id):
 def load_tags():
     # Get the tag hierarchy from the database
     hierarchy = CreditTagHandler.get_hierarchy()
-    return render_template("credit/tags_page.html", tags_hierarchy=hierarchy)
+    return render_template("common/tags_page.html", tags_hierarchy=hierarchy)
 
 
 @bp.route("/_add_tag", methods=("POST",))
@@ -555,7 +555,7 @@ def add_tag():
         tag_name=tag_name,
     )
     return render_template(
-        "credit/tag_tree/subtag_tree.html", tag=tag, tags_hierarchy={}
+        "common/tag_tree/subtag_tree.html", tag=tag, tags_hierarchy={}
     )
 
 

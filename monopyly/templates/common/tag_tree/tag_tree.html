@@ -2,7 +2,7 @@
 
   {% for tag in tags_hierarchy %}
     {% with tags_hierarchy = tags_hierarchy[tag] %}
-      {% include 'credit/tag_tree/subtag_tree.html' %}
+      {% include 'common/tag_tree/subtag_tree.html' %}
     {% endwith %}
   {% endfor %}
 
