@@ -3,7 +3,7 @@ Tools for building a common transaction interface.
 """
 
 from dry_foundation.database.handler import DatabaseHandler, DatabaseViewHandler
-from flask import current_app
+from flask import abort, current_app
 
 from ..database.models import (
     BankAccountTypeView,
@@ -365,6 +365,25 @@ class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
         criteria = [cls.model.tag_name == tag_name]
         query = cls.model.select_for_user().where(*criteria)
         tag = cls._db.session.execute(query).scalar_one_or_none()
+        return tag
+
+    @classmethod
+    def delete_entry(cls, entry_id):
+        """
+        Delete the tag in the database given its ID.
+
+        Parameters
+        ----------
+        entry_id : int
+            The ID of the tag to be deleted.
+        """
+        super().delete_entry(entry_id)
+
+    @classmethod
+    def _retrieve_authorized_manipulable_entry(cls, entry_id):
+        tag = super()._retrieve_authorized_manipulable_entry(entry_id)
+        if tag.user_id != cls.user_id:
+            abort(403, "The current user is not authorized to manipulate this tag.")
         return tag
 
 

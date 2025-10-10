@@ -2,7 +2,7 @@
 Generate credit card forms for the user to complete.
 """
 
-from werkzeug.exceptions import abort
+from flask import abort
 from wtforms.fields import (
     BooleanField,
     FieldList,

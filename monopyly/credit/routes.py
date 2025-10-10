@@ -4,6 +4,7 @@ Routes for credit card financials.
 
 from dry_foundation.database import db_transaction
 from flask import (
+    abort,
     flash,
     jsonify,
     redirect,
@@ -13,7 +14,6 @@ from flask import (
     url_for,
 )
 from sqlalchemy.exc import MultipleResultsFound
-from werkzeug.exceptions import abort
 
 from ..auth.tools import login_required
 from ..banking.accounts import BankAccountHandler

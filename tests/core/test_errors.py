@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 import pytest
-from werkzeug.exceptions import abort
+from flask import abort
 
 from test_helpers import TestRoutes
 

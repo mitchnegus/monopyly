@@ -336,6 +336,11 @@ class TestBankingRoutes(TestRoutes):
         # Returns an empty string
         assert self.response.data == b""
 
+    @transaction_lifetime
+    def test_delete_tag_invalid(self, authorization):
+        self.post_route("/_delete_tag", json={"tag_name": "Credit payments"})
+        assert all(_ in self.soup.text for _ in ("No dice!", "403", "Forbidden"))
+
     @pytest.mark.parametrize(
         ("field", "suggestions"),
         [
