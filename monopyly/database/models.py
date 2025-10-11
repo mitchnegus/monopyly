@@ -86,6 +86,10 @@ class TransactionTag(AuthorizedAccessMixin, Model):
     )
 
     @property
+    def subtransactions(self):
+        return self.bank_subtransactions + self.credit_subtransactions
+
+    @property
     def depth(self):
         tag, depth = self, 0
         while (tag := tag.parent) is not None:

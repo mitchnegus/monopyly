@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+
+
+{% block javascript %}
+
+  <script>
+    const UPDATE_STATISTICS_ENDPOINT = "{{ url_for('analytics.update_tag_statistics_chart') }}";
+  </script>
+  <script>
+    let TAG_STATISTICS_CHART_DATA = {{ chart_data.data|tojson }};
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/update-tag-statistics.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/create-tag-stats-chart.js') }}">
+  </script>
+
+{% endblock %}
+
+
+{% block header %}
+
+  <h1>
+    {% block title %}
+      Tag Statistics
+    {% endblock %}
+  </h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+  {% include 'analytics/tag_statistics/tag_selection.html' %}
+
+  <div id="tag-statistics-container">
+    {% include 'analytics/tag_statistics/tag_statistics.html' %}
+  </div>
+
+
+{% endblock %}

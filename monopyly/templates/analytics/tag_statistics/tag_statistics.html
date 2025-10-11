@@ -1,0 +1,46 @@
+<div id="tag-statistics-chart-container">
+
+  <div class="chart-header">
+
+    <h2>{{ chart_data.title }}</h2>
+  </div>
+
+  <script>
+    TAG_STATISTICS_CHART_DATA = {{ chart_data.data|tojson }};
+  </script>
+  <div id="tag-statistics-chart" class="ct-chart ct-octave"></div>
+
+  <div id="chart-legend">
+    {% if chart_data.tag_names|length > 1 %}
+      {% for item_label, tag_name in zip("abcde", chart_data.tag_names) %}
+        <div class="legend-item">
+          <div class="item-color item-color-{{ item_label }}"></div>
+          <div class="item-name">{{ tag_name }}</div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+</div>
+
+{% if chart_data.notable_statistics %}
+  <div class="notable-statistics">
+
+    <div class="statistic">
+      <h3>Average Monthly Expenditure</h3>
+      <div class="value">
+        <span>$</span>
+        <span>{{ chart_data.notable_statistics['monthly_average']|currency }}</span>
+      </div>
+    </div>
+
+    <div class="statistic">
+      <h3>Lifetime Expenditure</h3>
+      <div class="value">
+        <span>$</span>
+        <span>{{ chart_data.notable_statistics['lifetime_total']|currency }}</span>
+      </div>
+    </div>
+
+  </div>
+{% endif %}

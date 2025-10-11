@@ -65,7 +65,7 @@ VALUES
 INSERT INTO bank_tag_links
        (subtransaction_id, tag_id)
 VALUES (1, 2),   -- 'Test bank transaction' --> 'Test tag'
-       (6, 1);   -- 'Credit card payment' --> 'Credit payment'
+       (6, 1);   -- 'Credit card payment' --> 'Credit payments'
 
 INSERT INTO credit_accounts
        (bank_id, statement_issue_day, statement_due_day)
@@ -131,7 +131,7 @@ VALUES (1, 2),   -- 'Test credit transaction' --> 'Test tag'
        (2, 4),   -- 'Parking (...)' --> 'Transportation'/'Parking'
        (6, 6),   -- 'Electric bill' --> 'Utilities'
        (6, 7),   -- 'Electric bill' --> 'Utilities'/'Electricity'
-       (8, 1),   -- 'Credit card payment' --> 'Credit payment'
+       (8, 1),   -- 'Credit card payment' --> 'Credit payments'
        (12, 3),  -- 'Conducting business' --> 'Transportation'
        (12, 5);  -- 'Conducting business' --> 'Transportation'/'Railroad'
 

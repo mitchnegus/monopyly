@@ -15,6 +15,11 @@
   --button-background: linear-gradient(#fbfbfb, #efefef);
   --button-block-background-base: #eeeeee;
   --button-block-background: linear-gradient(#eeeeee, #e6e6e6);
+  --chart-color-a: var(--moneytree-leaves);
+  --chart-color-b: #41493b;
+  --chart-color-c: #a4ae9d;
+  --chart-color-d: #00bdfb;
+  --chart-color-e: #0087c3;
 }
 
 html {
@@ -597,6 +602,43 @@ aside.sidebar {
   border-radius: 10px;
   background-color: white;
   box-shadow: 1px 1px 5px black;
+}
+
+
+/*
+ * Style charts
+ */
+.ct-series-a {
+  stroke: var(--chart-color-a);
+}
+
+.ct-series-b {
+  stroke: var(--chart-color-b);
+}
+
+.ct-series-c {
+  stroke: var(--chart-color-c);
+}
+
+.ct-series-d {
+  stroke: var(--chart-color-d);
+}
+
+.ct-series-e {
+  stroke: var(--chart-color-e);
+}
+
+.ct-series-a .ct-slice-donut,
+.ct-series-b .ct-slice-donut,
+.ct-series-c .ct-slice-donut,
+.ct-series-d .ct-slice-donut,
+.ct-series-e .ct-slice-donut,
+.ct-series-a .ct-bar,
+.ct-series-b .ct-bar,
+.ct-series-c .ct-bar,
+.ct-series-d .ct-bar,
+.ct-series-e .ct-bar {
+  stroke: inherit;
 }
 
 
@@ -3510,26 +3552,6 @@ form#pay #make-payment[type="submit"] #prompt {
   fill: rgba(0, 0, 0, 0.8);
 }
 
-#category-chart .ct-series-a .ct-slice-donut {
-  stroke: var(--moneytree-leaves);
-}
-
-#category-chart .ct-series-b .ct-slice-donut {
-  stroke: #41493b;
-}
-
-#category-chart .ct-series-c .ct-slice-donut {
-  stroke: #a4ae9d;
-}
-
-#category-chart .ct-series-d .ct-slice-donut {
-  stroke: #00bdfb;
-}
-
-#category-chart .ct-series-e .ct-slice-donut {
-  stroke: #0087c3;
-}
-
 
 /*
  * Customization for the (credit) 'Statement Reconciliation' details page
@@ -3929,3 +3951,109 @@ form#credit-transaction .merchant-field {
   border-left: 1px solid var(--border-gray);
 }
 
+
+/*
+ * Customization for the 'Credit Tag Statistics' page
+ */
+#tag-selection {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  height: 25px;
+}
+
+#tag-statistics-chart-container .chart-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#tag-statistics-chart-container .chart-header h2 {
+  font-size: 18pt;
+}
+
+#tag-statistics-chart {
+  --bar-width: 10px; /* set a default for bar widths */
+}
+
+#tag-statistics-chart .ct-bar {
+  stroke-width: var(--bar-width);
+}
+
+#chart-legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  min-height: 40px;
+  gap: 40px;
+  padding: 10px 30px;
+}
+
+#chart-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#chart-legend .item-color {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+}
+
+#chart-legend .item-color-a {
+  background-color: var(--chart-color-a);
+}
+
+#chart-legend .item-color-b {
+  background-color: var(--chart-color-b);
+}
+
+#chart-legend .item-color-c {
+  background-color: var(--chart-color-c);
+}
+
+#chart-legend .item-color-d {
+  background-color: var(--chart-color-d);
+}
+
+#chart-legend .item-color-e {
+  background-color: var(--chart-color-e);
+}
+
+#chart-legend .item-name {
+  font-size: 10pt;
+}
+
+#tag-statistics-container .notable-statistics {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+  width: 80%;
+  margin: 30px auto 0;
+  padding: 40px 20px;
+  border-radius: 25px;
+  box-shadow: 1px 1px 2px #dddddd;
+  background-color: #f8f8f8;
+}
+
+#tag-statistics-container .notable-statistics .statistic {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  align-items: center;
+}
+
+#tag-statistics-container .notable-statistics .statistic h3 {
+  margin: 0 0 5px;
+  font-weight: 300;
+  text-align: center;
+}
+
+#tag-statistics-container .notable-statistics .statistic .value{
+  font-size: 36pt;
+}

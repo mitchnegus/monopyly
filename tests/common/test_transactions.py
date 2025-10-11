@@ -81,6 +81,17 @@ class TestTransactionTagHandler(TestTagHandler):
     db_reference = TestTagHandler.db_reference
     db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
 
+    @pytest.mark.parametrize(
+        ("tag_names", "ancestors", "reference_entries"),
+        [
+            (None, None, db_reference),  # defaults
+            (("Credit payments",), None, db_reference[0:1]),
+        ],
+    )
+    def test_get_tags(self, tag_handler, tag_names, ancestors, reference_entries):
+        tags = tag_handler.get_tags(tag_names, ancestors)
+        self.assert_entries_match(tags, reference_entries)
+
     def test_tag_depth(self, tag_handler):
         # Top level tags should have a depth of 0
         top_level_tags = tag_handler.get_subtags(None).all()

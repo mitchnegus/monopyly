@@ -239,6 +239,7 @@
 
 ### 1.6.1
 
+- Display historical statistics for transaction tags (including a new analytics blueprint)
 - Allow pie chart labels to overflow the SVG container
 - Define JavaScript elements in header (deferring execution when logical)
 - Bump dependencies

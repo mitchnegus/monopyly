@@ -30,15 +30,15 @@ def get_balance_chart_data(transactions):
 
     Returns
     -------
-    chart_data : dict
-        A dictionary containing a Chartist compatible data structure,
-        including (x, y) pairs that each represent the Unix
+    chart_data : BalanceChartData
+        A dictionary-like object containing a Chartist compatible data
+        structure, including (x, y) pairs that each represent the Unix
         timestamp (in milliseconds) and the bank account balance.
     """
-    return _BalanceChartData(transactions).data
+    return BalanceChartData(transactions)
 
 
-class _BalanceChartData(UserDict):
+class BalanceChartData(UserDict):
     """
     A mapping of balances to be passed to a `chartist.js` chart constructor.
 

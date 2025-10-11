@@ -22,7 +22,7 @@ function buildLabelInterpolationFunction(dateOptions) {
 
 function createBalanceChart(data) {
 
-  const dataPoints = data.series[0].data
+  const dataPoints = data.series[0].data;
   // Set the number of labels per axis
   const xAxisDivisor = 5;
   const yAxisDivisor = 5;
@@ -31,10 +31,12 @@ function createBalanceChart(data) {
   const earliestTimestamp = Math.min(...timestamps);
   const latestTimestamp = Math.max(...timestamps);
   const millisecondsPerDay = 1000*60*60*24;
-  const timestampRange = latestTimestamp - earliestTimestamp;
-  const timestampDayRange =  timestampRange/millisecondsPerDay;
-  // Show the day when timestamp range is (approx.) less than divisor months
-  const showDay = (timestampDayRange < xAxisDivisor*30);
+  const timestampWindowSize = latestTimestamp - earliestTimestamp;
+  const timestampDayCount =  timestampWindowSize/millisecondsPerDay;
+  // Small window adjustment: use day-level granularity when there are
+  // (approximately) fewer days in the window than in the months shown
+  // according to the divsor
+  const showDay = (timestampDayCount < xAxisDivisor*30);
   let dateOptions = {
     year: "numeric",
     month: "short",
