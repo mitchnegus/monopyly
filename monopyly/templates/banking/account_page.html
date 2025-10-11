@@ -11,7 +11,7 @@
       "account_id": {{ account.id }},
       "block_count": 1
     };
-    const BALANCE_CHART_DATA = {{ chart_data|tojson }};
+    const BALANCE_CHART_DATA = {{ chart_data.data|tojson }};
   </script>
   <script type="module" src="{{ url_for('static', filename='js/load-more-transactions.js') }}">
   </script>

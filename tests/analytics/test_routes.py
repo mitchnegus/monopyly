@@ -1,5 +1,8 @@
 """Tests for routes in the analytics blueprint."""
 
+from datetime import date
+from unittest.mock import patch
+
 import pytest
 from dry_foundation.testing import transaction_lifetime
 from dry_foundation.testing.helpers import TestRoutes
@@ -54,3 +57,23 @@ class TestAnalyticsRoutes(TestRoutes):
     def test_delete_tag_invalid(self, authorization):
         self.post_route("/_delete_tag", json={"tag_name": "Credit payments"})
         assert all(_ in self.soup.text for _ in ("No dice!", "403", "Forbidden"))
+
+    def test_show_tag_statistics(self, authorization):
+        self.get_route("/tag_statistics")
+        assert self.page_heading_includes_substring("Tag Statistics")
+        # The page should include a chart
+        assert self.div_exists(id="tag-statistics-chart")
+
+    def test_update_tag_statistics_chart(self, authorization):
+        with patch("monopyly.analytics.actions.date") as mock_date:
+            mock_date.today.return_value = date(2020, 6, 30)
+            mock_date.side_effect = lambda *args, **kwargs: date(*args, **kwargs)
+            self.post_route("/_update_tag_statistics_chart", json=3)
+        # Returns chart data with a $1.00 tag subtotal in April 2020 and
+        # a $253.99 subtotal in June 2020
+        tag_statistics_data_json = (
+            "TAG_STATISTICS_CHART_DATA = {"
+            '"labels": [1585720800000, 1588312800000, 1590991200000], '
+            '"series": [[1.0, 0, 253.99]]}'
+        )
+        assert tag_statistics_data_json in self.soup.find("script").string

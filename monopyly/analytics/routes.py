@@ -8,6 +8,7 @@ from flask import g, render_template, request
 
 from ..auth.tools import login_required
 from ..common.transactions import TransactionTagRepository
+from .actions import get_tag_statistics_chart_data
 from .blueprint import bp
 
 
@@ -53,3 +54,31 @@ def delete_tag():
     # Remove the tag from the database
     TransactionTagRepository.delete_entry(tag.id)
     return ""
+
+
+@bp.route("/tag_statistics")
+@login_required
+def show_tag_statistics():
+    hierarchy = TransactionTagRepository.get_hierarchy()
+    return render_template(
+        "analytics/tag_statistics/tag_statistics_page.html",
+        tags_hierarchy=hierarchy,
+        chart_data=get_tag_statistics_chart_data(hierarchy.keys()),
+    )
+
+
+@bp.route("/_update_tag_statistics_chart", methods=("POST",))
+@login_required
+@fetch_json_envelope
+def update_tag_statistics_chart():
+    # Get the field from the AJAX request
+    tag_id = int(request.get_json())
+    tags = (
+        [TransactionTagRepository.get_entry(tag_id)]
+        if tag_id
+        else TransactionTagRepository.get_hierarchy()
+    )
+    return render_template(
+        "analytics/tag_statistics/tag_statistics.html",
+        chart_data=get_tag_statistics_chart_data(tags),
+    )

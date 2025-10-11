@@ -1,0 +1,18 @@
+<div id="tag-selection">
+
+  <div>Tag choice:</div>
+
+  <select id="tag-options">
+
+    <option value="0">-</option>
+
+    {% for tag in tags_hierarchy recursive %}
+      <option value="{{ tag.id }}">
+        {{ '&nbsp;'|safe * 3 * (loop.depth - 1) }} {{ tag.tag_name }}
+      </option>
+      {{ loop(tags_hierarchy[tag]) }}
+    {% endfor %}
+
+  </select>
+
+</div>

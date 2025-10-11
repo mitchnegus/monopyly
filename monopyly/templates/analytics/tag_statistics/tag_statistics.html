@@ -1,0 +1,64 @@
+<div id="tag-statistics-chart-container">
+
+  <div class="chart-header">
+
+    <h2>{{ chart_data.title }}</h2>
+  </div>
+
+  <script>
+    TAG_STATISTICS_CHART_DATA = {{ chart_data.data|tojson }};
+  </script>
+  <div id="tag-statistics-chart" class="ct-chart ct-octave"></div>
+
+  <div id="chart-legend">
+    {% if chart_data.statistics|length > 1 %}
+      {% for item_label, statistics in zip("abcde", chart_data.statistics) %}
+        <div class="legend-item">
+          <div class="item-color item-color-{{ item_label }}"></div>
+          <div class="item-name">{{ statistics.tag.tag_name }}</div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+</div>
+
+<div class="notable-statistics-container">
+  {% for tag_stats in chart_data.statistics %}
+    {% if tag_stats.all_time_total > 0 %}
+
+      <div class="notable-statistics">
+
+        <div class="tag-name">{{ tag_stats.tag.tag_name }}</div>
+
+        <div class="statistics">
+
+          <div class="statistic">
+            <h3>Average Monthly Expenditure</h3>
+            <div class="all-time-value">
+              <span class="dollar-sign">$</span><span>{{ tag_stats.all_time_average|currency }}</span>
+            </div>
+            <div class="past-year-value">
+              <span>Past year:</span>
+              <span class="dollar-sign">$</span><span class="amount">{{ tag_stats.past_year_average|currency }}</span>
+            </div>
+          </div>
+
+          <div class="statistic">
+            <h3>Lifetime Expenditure</h3>
+            <div class="all-time-value">
+              <span class="dollar-sign">$</span><span>{{ tag_stats.all_time_total|currency }}</span>
+            </div>
+            <div class="past-year-value">
+              <span>Past year:</span>
+              <span class="dollar-sign">$</span><span class="amount">{{ tag_stats.past_year_total|currency }}</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    {% endif %}
+  {% endfor %}
+</div>

@@ -260,6 +260,7 @@
 
 ## 1.7.0 (in progress)
 
+- Display historical statistics for transaction tags (including a new analytics blueprint)
 - Fix minor bug in JavaScript string replacement
 - Bump dependencies (including substantial source code naming changes)
 - Use pre-bundled JavaScript modules

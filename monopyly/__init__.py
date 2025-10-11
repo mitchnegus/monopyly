@@ -23,6 +23,7 @@ def create_app(config=None):
     app.configure(config)
     # Register blueprints and error handlers specific to this app
     register_blueprints(app)
+    register_jinja_globals(app)
     register_errorhandlers(app)
     return app
 
@@ -51,6 +52,11 @@ def register_blueprints(app):
     app.register_blueprint(banking_bp)
     app.register_blueprint(credit_bp)
     app.register_blueprint(analytics_bp)
+
+
+def register_jinja_globals(app):
+    """Register variables and functions in the Jinja global namespace."""
+    app.jinja_env.globals.update(zip=zip)
 
 
 def register_errorhandlers(app):
