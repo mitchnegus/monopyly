@@ -227,6 +227,7 @@
 - Enable additional transactions to be loaded on bank/credit transactions tables
 - Create a script to take application screenshots (e.g., for the 'About' page)
 - Remove Python version requirement (allow Python versions after 3.10)
+- Use Jinja recursive loops for transaction tag tree structures in templates
 - Update dependencies (including using ruff in place of _Black_ and _isort_)
 - Refactor to include ruff-based linting checks
 - Set 'Credit payments' to be a default tag for all users

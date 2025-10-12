@@ -262,9 +262,7 @@ def add_tag():
         user_id=g.user.id,
         tag_name=tag_name,
     )
-    return render_template(
-        "common/tag_tree/subtag_tree.html", tag=tag, tags_hierarchy={}
-    )
+    return render_template("common/tag_tree.html", tags_hierarchy={tag: []})
 
 
 @bp.route("/_delete_tag", methods=("POST",))

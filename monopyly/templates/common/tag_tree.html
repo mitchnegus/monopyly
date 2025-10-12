@@ -1,0 +1,25 @@
+{% for tag in tags_hierarchy recursive %}
+  <li class="tag-container">
+    <div class="tag-area">
+      <div class="tag">{{ tag.tag_name }}</div>
+      <div class="buttons">
+        <img class="new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
+        {% if tag.user_id != 0 %}
+          <a class="action button delete">
+        {% endif %}
+        </a>
+      </div>
+    </div>
+
+    <ul class="tags subtags">
+      {{ loop(tags_hierarchy[tag]) }}
+    </ul>
+
+  </li>
+
+  {% if loop.last %}
+    <input class="new-tag" type="text" />
+  {% endif %}
+{% else %}
+  <input class="new-tag" type="text" />
+{% endfor %}

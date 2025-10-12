@@ -20,7 +20,11 @@
 
     <div id="tags-container" class="tag-container">
 
-      {% include 'common/tag_tree/tag_tree.html' %}
+      <ul class="tags">
+        {% include 'common/tag_tree.html' %}
+      </ul>
+
+      <img class="root new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />
 
     </div>
 
