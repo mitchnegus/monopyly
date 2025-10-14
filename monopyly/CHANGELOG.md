@@ -232,6 +232,7 @@
 - Refactor to include ruff-based linting checks
 - Set 'Credit payments' to be a default tag for all users
 - Protect globally defined tags from user deletion
+- Hide transaction tags when the Escape key is pressed
 
 
 <a name="bottom" id="bottom"></a>

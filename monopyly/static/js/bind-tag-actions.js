@@ -41,6 +41,12 @@ import { executeAjaxRequest } from './modules/ajax.js';
         }
         clearInput($input);
       });
+      $input.on('keydown', function() {
+        if (event.which == 27) {
+          clearInput($input);
+          hideEmptyInput($input);
+        }
+      });
     });
     // Bind remove tag buttons
     $buttonsDelete.on('click', function() {
