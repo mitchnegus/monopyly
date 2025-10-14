@@ -233,6 +233,7 @@
 - Set 'Credit payments' to be a default tag for all users
 - Protect globally defined tags from user deletion
 - Hide transaction tags when the Escape key is pressed
+- Ensure that the 'Record Transfer' functionality only ever adds one input box
 
 
 <a name="bottom" id="bottom"></a>
