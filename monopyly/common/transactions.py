@@ -84,7 +84,26 @@ class TransactionHandler(DatabaseViewHandler):
 
     @classmethod
     def update_entry(cls, entry_id, **field_values):
-        """Update a transaction in the database."""
+        """
+        Update a transaction in the database.
+
+        Accept a mapping relating given inputs to database fields. This
+        mapping is used to update an existing transaction in the
+        database. All fields are sanitized prior to updating, and any
+        subtransactions are identified for individual processing.
+
+        Parameters
+        ----------
+        entry_id : int
+            The ID of the transaction to be updated.
+        **field_values :
+            Values for the fields to update in the transaction.
+
+        Returns
+        -------
+        transaction : database.models.BankTransaction
+            The saved transaction.
+        """
         # Extend the default method to account for subtransactions
         subtransactions_data = field_values.pop("subtransactions", None)
         transaction = super().update_entry(entry_id, **field_values)
