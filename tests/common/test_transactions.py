@@ -18,8 +18,46 @@ from test_tag_helpers import TestTagHandler
 
 
 @pytest.fixture
-def tag_handler(client_context):
-    return TransactionTagHandler
+def mock_transaction():
+    mock_transaction = MagicMock()
+    return mock_transaction
+
+
+class TestLinkedTransactionSearch:
+    @pytest.mark.parametrize(
+        (
+            "mock_transaction_id",
+            "mock_internal_transaction_id",
+            "expected_subtype",
+            "expected_transaction_id",
+        ),
+        [
+            (3, 1, "bank", 6),  # --- bank-bank linked transaction
+            (6, 1, "bank", 3),
+            (5, 2, "credit", 7),  # - credit-bank linked transaction
+            (7, 2, "bank", 5),
+        ],
+    )
+    def test_get_linked_transaction(
+        self,
+        client_context,
+        mock_transaction_id,
+        mock_internal_transaction_id,
+        expected_subtype,
+        expected_transaction_id,
+    ):
+        mock_transaction = MagicMock()
+        mock_transaction.id = mock_transaction_id
+        mock_transaction.internal_transaction_id = mock_internal_transaction_id
+        linked_transaction = get_linked_transaction(mock_transaction)
+        assert linked_transaction.subtype == expected_subtype
+        assert linked_transaction.id == expected_transaction_id
+
+    def test_get_linked_transaction_none(self, client_context):
+        mock_transaction = MagicMock()
+        mock_transaction.internal_transaction_id = None
+        linked_transaction = get_linked_transaction(mock_transaction)
+        assert linked_transaction is None
 
 
 def test_unmatched_transaction_highlighter():
@@ -29,6 +67,11 @@ def test_unmatched_transaction_highlighter():
         highlight_unmatched_transactions(transactions, unmatched_transactions)
     )
     assert all(transaction.highlighted for transaction in highlighted_transactions[1:])
+
+
+@pytest.fixture
+def tag_handler(client_context):
+    return TransactionTagHandler
 
 
 class TestTransactionTagHandler(TestTagHandler):
@@ -107,49 +150,6 @@ class TestTransactionTagHandler(TestTagHandler):
     def test_find_tag_none_exist(self, tag_handler, tag_name):
         tag = tag_handler.find_tag(tag_name)
         assert tag is None
-
-
-@pytest.fixture
-def mock_transaction():
-    mock_transaction = MagicMock()
-    return mock_transaction
-
-
-class TestLinkedTransactionSearch:
-    @pytest.mark.parametrize(
-        (
-            "mock_transaction_id",
-            "mock_internal_transaction_id",
-            "expected_subtype",
-            "expected_transaction_id",
-        ),
-        [
-            (3, 1, "bank", 6),  # --- bank-bank linked transaction
-            (6, 1, "bank", 3),
-            (5, 2, "credit", 7),  # - credit-bank linked transaction
-            (7, 2, "bank", 5),
-        ],
-    )
-    def test_get_linked_transaction(
-        self,
-        client_context,
-        mock_transaction_id,
-        mock_internal_transaction_id,
-        expected_subtype,
-        expected_transaction_id,
-    ):
-        mock_transaction = MagicMock()
-        mock_transaction.id = mock_transaction_id
-        mock_transaction.internal_transaction_id = mock_internal_transaction_id
-        linked_transaction = get_linked_transaction(mock_transaction)
-        assert linked_transaction.subtype == expected_subtype
-        assert linked_transaction.id == expected_transaction_id
-
-    def test_get_linked_transaction_none(self, client_context):
-        mock_transaction = MagicMock()
-        mock_transaction.internal_transaction_id = None
-        linked_transaction = get_linked_transaction(mock_transaction)
-        assert linked_transaction is None
 
 
 def test_get_subtransactions():

@@ -355,6 +355,25 @@ class TestCreditTransactionHandler(TestHandler):
         with pytest.raises(exception):
             transaction_handler.update_entry(transaction_id, **mapping)
 
+    def test_delete_linked_transaction(self, app, transaction_handler):
+        transaction_id = 7
+        transaction = transaction_handler.get_entry(transaction_id)
+        linked_transactions = transaction.internal_transaction.transaction_views
+        assert len(linked_transactions) == 2
+        # Save the linked transaction
+        if linked_transactions[0] == transaction:
+            linked_transaction = linked_transactions[1]
+        elif linked_transactions[1] == transaction:
+            linked_transaction = linked_transactions[0]
+        else:
+            pytest.fail(
+                "This transaction was not listed among its own pair of linked "
+                "transactions."
+            )
+        # Delete the transaction and confirm that the link is broken
+        transaction_handler.delete_entry(transaction_id)
+        assert linked_transaction.internal_transaction is None
+
 
 @pytest.fixture
 def tag_handler(client_context):

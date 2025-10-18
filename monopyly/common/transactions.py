@@ -127,6 +127,30 @@ class TransactionHandler(DatabaseViewHandler):
         # Flush to the database after all subtransactions have been added
         cls._db.session.flush()
 
+    @classmethod
+    def delete_entry(cls, entry_id):
+        """
+        Delete a transaction in the database given its ID.
+
+        Parameters
+        ----------
+        entry_id : int
+            The ID of the transaction to be deleted.
+
+        Notes
+        -----
+        This will also delete any internal transactions associated with
+        this transaction, since the internal transaction link no longer
+        exists.
+        """
+        internal_transaction = cls.get_entry(entry_id).internal_transaction
+        super().delete_entry(entry_id)
+        if internal_transaction:
+            cls._db.session.refresh(internal_transaction)
+            if len(internal_transaction.transaction_views) <= 1:
+                cls._db.session.delete(internal_transaction)
+                cls._db.session.flush()
+
 
 def get_linked_transaction(transaction):
     """
