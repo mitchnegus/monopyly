@@ -40,6 +40,9 @@
     <!-- Use Chartist via CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chartist@1.5.0/dist/index.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chartist@1.5.0/dist/index.umd.min.js"></script>
+    <script>
+      window.Chartist || document.write('<script src="{{ url_for('static', filename='chartist-1.5.0.min.js') }}"><\/script>')
+    </script>
   </head>
   <body>
 
