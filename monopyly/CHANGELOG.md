@@ -228,12 +228,13 @@
 - Create a script to take application screenshots (e.g., for the 'About' page)
 - Remove Python version requirement (allow Python versions after 3.10)
 - Use Jinja recursive loops for transaction tag tree structures in templates
-- Update dependencies (including using ruff in place of _Black_ and _isort_)
 - Refactor to include ruff-based linting checks
 - Set 'Credit payments' to be a default tag for all users
 - Protect globally defined tags from user deletion
 - Hide transaction tags when the Escape key is pressed
 - Ensure that the 'Record Transfer' functionality only ever adds one input box
+- Update dependencies (including using ruff in place of _Black_ and _isort_)
+- Update jQuery
 
 
 <a name="bottom" id="bottom"></a>
