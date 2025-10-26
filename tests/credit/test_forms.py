@@ -62,28 +62,28 @@ def mock_card(mock_account):
 
 
 @pytest.fixture
-def mock_statement(mock_card):
-    mock_statement = Mock(spec=CreditStatementView)
-    mock_statement.card = mock_card
-    return mock_statement
+def mock_statement_view(mock_card):
+    mock_statement_view = Mock(spec=CreditStatementView)
+    mock_statement_view.card = mock_card
+    return mock_statement_view
 
 
 @pytest.fixture
-def mock_transaction(mock_statement):
-    mock_transaction = Mock(spec=CreditTransactionView)
-    mock_transaction.statement = mock_statement
-    mock_transaction.subtransactions = [
+def mock_transaction_view(mock_statement_view):
+    mock_transaction_view = Mock(spec=CreditTransactionView)
+    mock_transaction_view.statement_view = mock_statement_view
+    mock_transaction_view.subtransactions = [
         Mock(spec=CreditSubtransaction),
         Mock(spec=CreditSubtransaction),
         Mock(spec=CreditSubtransaction),
     ]
-    return mock_transaction
+    return mock_transaction_view
 
 
 @pytest.fixture
-def mock_subtransaction(mock_transaction):
+def mock_subtransaction(mock_transaction_view):
     mock_subtransaction = Mock(spec=CreditSubtransaction)
-    mock_subtransaction.transaction = mock_transaction
+    mock_subtransaction.transaction_view = mock_transaction_view
     mock_subtransaction.tags = [
         Mock(spec=TransactionTag, tag_name=f"Tag{i + 1}") for i in range(3)
     ]
@@ -385,12 +385,12 @@ class TestCreditTransactionForm:
         ".CardSubform.gather_entry_data"
     )
     def test_statement_subform_gather_statement_data(
-        self, mock_method, transaction_form, mock_statement
+        self, mock_method, transaction_form, mock_statement_view
     ):
         statement_subform = transaction_form.statement_info
-        data = statement_subform.gather_entry_data(mock_statement)
+        data = statement_subform.gather_entry_data(mock_statement_view)
         expected_data = {
-            "issue_date": mock_statement.issue_date,
+            "issue_date": mock_statement_view.issue_date,
             "card_info": mock_method.return_value,
         }
         assert data == expected_data
@@ -447,17 +447,17 @@ class TestCreditTransactionForm:
         mock_subtransaction_method,
         mock_statement_method,
         transaction_form,
-        mock_transaction,
+        mock_transaction_view,
     ):
         # NOTE: We must delete the "_formfield" attribute of the
         # `SubtransactionForm.gather_entry_data` MagicMock object or else
         # WTForms will think that it is an unbound field; perhaps WTForms
         # should use a better method for determining unbound fields
         del mock_subtransaction_method._formfield
-        data = transaction_form.gather_entry_data(mock_transaction)
+        data = transaction_form.gather_entry_data(mock_transaction_view)
         expected_data = {
-            "transaction_date": mock_transaction.transaction_date,
-            "merchant": mock_transaction.merchant,
+            "transaction_date": mock_transaction_view.transaction_date,
+            "merchant": mock_transaction_view.merchant,
             "subtransactions": 3 * [mock_subtransaction_method.return_value],
             "statement_info": mock_statement_method.return_value,
         }
@@ -467,9 +467,9 @@ class TestCreditTransactionForm:
         "monopyly.credit.forms.CreditTransactionForm.StatementSubform.gather_entry_data"
     )
     def test_gather_statement_data(
-        self, mock_statement_method, transaction_form, mock_statement
+        self, mock_statement_method, transaction_form, mock_statement_view
     ):
-        data = transaction_form.gather_entry_data(mock_statement)
+        data = transaction_form.gather_entry_data(mock_statement_view)
         expected_data = {"statement_info": mock_statement_method.return_value}
         assert data == expected_data
 
@@ -488,10 +488,14 @@ class TestCreditTransactionForm:
     @patch("wtforms.form.FormMeta.__call__")
     @patch("monopyly.credit.forms.CreditTransactionForm.gather_entry_data")
     def test_prepopulate(
-        self, mock_gather_method, mock_meta_call, transaction_form, mock_transaction
+        self,
+        mock_gather_method,
+        mock_meta_call,
+        transaction_form,
+        mock_transaction_view,
     ):
         mock_data = Mock()
-        transaction_form.prepopulate(mock_transaction, mock_data)
+        transaction_form.prepopulate(mock_transaction_view, mock_data)
         # Forms are instantiated via the `FormMeta` metaclass, so mock that
         mock_gather_method.return_value.__or__.assert_called_with(mock_data)
         mock_meta_call.assert_called_once()
@@ -509,11 +513,11 @@ class TestCreditTransactionForm:
         "monopyly.credit.forms.CreditTransactionForm.gather_entry_data", new=MagicMock()
     )
     def test_prepopulate_with_suggested_merchant(
-        self, transaction_form, mock_transaction, data_merchant, suggested_merchant
+        self, transaction_form, mock_transaction_view, data_merchant, suggested_merchant
     ):
         mock_data = {"merchant": data_merchant}
         transaction_form.prepopulate(
-            mock_transaction, mock_data, suggestion_fields=["merchant"]
+            mock_transaction_view, mock_data, suggestion_fields=["merchant"]
         )
         assert transaction_form.suggestions == {"merchant": suggested_merchant}
 
@@ -522,11 +526,11 @@ class TestCreditTransactionForm:
         "monopyly.credit.forms.CreditTransactionForm.gather_entry_data", new=MagicMock()
     )
     def test_prepopulate_with_suggested_amount(
-        self, transaction_form, mock_transaction
+        self, transaction_form, mock_transaction_view
     ):
         mock_data = {"subtransactions": [{"subtotal": 1}, {"subtotal": 2}]}
         transaction_form.prepopulate(
-            mock_transaction, mock_data, suggestion_fields=["amount"]
+            mock_transaction_view, mock_data, suggestion_fields=["amount"]
         )
         assert transaction_form.suggestions == {"amount": 1}
 
@@ -535,12 +539,12 @@ class TestCreditTransactionForm:
         "monopyly.credit.forms.CreditTransactionForm.gather_entry_data", new=MagicMock()
     )
     def test_prepopulate_with_manual_suggestion(
-        self, transaction_form, mock_transaction
+        self, transaction_form, mock_transaction_view
     ):
         mock_data = {"subtransactions": [{"subtotal": 1}, {"subtotal": 2}]}
         transaction_form.suggestions["test-key"] = "TEST_VALUE"
         transaction_form.prepopulate(
-            mock_transaction, mock_data, suggestion_fields=["amount"]
+            mock_transaction_view, mock_data, suggestion_fields=["amount"]
         )
         assert transaction_form.suggestions == {"amount": 1, "test-key": "TEST_VALUE"}
 

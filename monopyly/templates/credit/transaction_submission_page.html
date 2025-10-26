@@ -43,11 +43,11 @@
       <div id="receipt-card">
         <div class="receipt-item">
           <div class="receipt-key">Card:</div>
-          <div class="receipt-value">{{ transaction.statement.card.account.bank.bank_name }} ****-{{ transaction.statement.card.last_four_digits }}</div>
+          <div class="receipt-value">{{ transaction.statement_view.card.account.bank.bank_name }} ****-{{ transaction.statement_view.card.last_four_digits }}</div>
         </div>
         <div class="receipt-item">
           <div class="receipt-key">Statement Date:</div>
-          <div class="receipt-value">{{ transaction.statement.issue_date }}</div>
+          <div class="receipt-value">{{ transaction.statement_view.issue_date }}</div>
         </div>
       </div>
 
@@ -62,7 +62,7 @@
         <a class="submission button" href="{{ url_for('credit.add_transaction') }}">
           Create a new transaction
         </a>
-        <a class="submission button" href="{{ url_for('credit.add_transaction', card_id=transaction.statement.card_id, statement_id=transaction.statement_id) }}">
+        <a class="submission button" href="{{ url_for('credit.add_transaction', card_id=transaction.statement_view.card_id, statement_id=transaction.statement_id) }}">
           Create a new transaction on this statement
         </a>
         <a class="submission button" href="{{ url_for('credit.load_statement_details', statement_id=transaction.statement_id) }}">

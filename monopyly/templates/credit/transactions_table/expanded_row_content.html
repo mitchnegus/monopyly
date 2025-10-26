@@ -46,21 +46,21 @@
       <a href="{{ url_for('credit.load_statement_details', statement_id=transaction.statement_id) }}">
         <img src="{{ url_for('static', filename='img/statement.png') }}" />
         <div class="date">
-          <div class="month">{{ transaction.statement.issue_date.strftime('%b')|upper }}</div>
-          <div class="year">{{ transaction.statement.issue_date.year }}</div>
+          <div class="month">{{ transaction.statement_view.issue_date.strftime('%b')|upper }}</div>
+          <div class="year">{{ transaction.statement_view.issue_date.year }}</div>
         </div>
       </a>
     </div>
 
     <div class="card">
-      <a href="{{ url_for('credit.load_account', account_id=transaction.statement.card.account_id) }}">
+      <a href="{{ url_for('credit.load_account', account_id=transaction.statement_view.card.account_id) }}">
         {% with %}
           {% set img_base = url_for('static', filename='img/cards/') %}
-          {% set card_url =  img_base + transaction.statement.card.account.bank.bank_name.lower() + '-card.png' %}
+          {% set card_url =  img_base + transaction.statement_view.card.account.bank.bank_name.lower() + '-card.png' %}
           {% set template_url = img_base + 'template-card.png' %}
           <img class="card-background" src="{{ card_url }}" onerror="if (this.src != '{{ template_url }}') this.src = '{{ template_url }}'" />
           <div class="card-number">
-            {{ transaction.statement.card.last_four_digits }}
+            {{ transaction.statement_view.card.last_four_digits }}
           </div>
         {% endwith %}
       </a>

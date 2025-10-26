@@ -19,7 +19,7 @@
 
 {% if full_view %}
   <div class="card column">
-    <span class="bank">{{ transaction.statement.card.account.bank.bank_name }}</span>
-    -<span class="digits">{{ transaction.statement.card.last_four_digits }}</span>
+    <span class="bank">{{ transaction.statement_view.card.account.bank.bank_name }}</span>
+    -<span class="digits">{{ transaction.statement_view.card.last_four_digits }}</span>
   </div>
 {% endif %}

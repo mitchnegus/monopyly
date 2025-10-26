@@ -4,9 +4,9 @@
 
 <div class="description-header">
   <div class="account">
-    {{ transaction.account.bank.bank_name }} ({{ transaction.account.last_four_digits }})
+    {{ transaction.account_view.bank.bank_name }} ({{ transaction.account_view.last_four_digits }})
     <div class="account-type">
-      {{ transaction.account.account_type.type_common_name }}
+      {{ transaction.account_view.account_type_view.type_common_name }}
     </div>
   </div>
   <div class="total">

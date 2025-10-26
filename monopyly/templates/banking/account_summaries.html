@@ -19,7 +19,7 @@
             <a class="account-block button-block" href="{{ url_for('banking.load_account_details', account_id=account.id) }}">
               <div class="title">
                 <span class="digits">{{ account.last_four_digits }}</span>
-                <b>{{ account.account_type.type_name }}</b>
+                <b>{{ account.account_type_view.type_name }}</b>
               </div>
               <div class="balance">${{ account.balance|currency }}</div>
             </a>

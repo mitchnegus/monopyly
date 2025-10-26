@@ -51,10 +51,10 @@
                 See account summaries
               </a>
               <ul>
-                {% for account in bank_accounts[bank]|sort(attribute='account_type.type_common_name,last_four_digits') %}
+                {% for account in bank_accounts[bank]|sort(attribute='account_type_view.type_common_name,last_four_digits') %}
                   <li>
                     <a href="{{ url_for('banking.load_account_details', account_id=account.id) }}">
-                      {{ account.account_type.type_common_name }} {{ account.last_four_digits }}
+                      {{ account.account_type_view.type_common_name }} {{ account.last_four_digits }}
                     </a>
                   </li>
                 {% endfor %}

@@ -62,7 +62,7 @@
                 <option value="0">Select a bank</option>
                 {% for account in bank_accounts %}
                   <option value="{{ account.id }}">
-                    {{ account.bank.bank_name }} {{ account.account_type.type_name }} ({{ account.last_four_digits }})
+                    {{ account.bank.bank_name }} {{ account.account_type_view.type_name }} ({{ account.last_four_digits }})
                   </option>
                 {% endfor %}
               </optgroup>

@@ -23,8 +23,8 @@ def non_internal_transaction():
 def bank_credit_internal_transaction():
     transaction = Mock()
     linked_transaction = Mock()
-    transaction.internal_transaction.bank_transactions = [transaction]
-    transaction.internal_transaction.credit_transactions = [linked_transaction]
+    transaction.internal_transaction.bank_transaction_views = [transaction]
+    transaction.internal_transaction.credit_transaction_views = [linked_transaction]
     return transaction
 
 
@@ -32,7 +32,7 @@ def bank_credit_internal_transaction():
 def multi_bank_internal_transaction():
     transaction = Mock()
     linked_transaction = Mock()
-    transaction.internal_transaction.bank_transactions = [
+    transaction.internal_transaction.bank_transaction_views = [
         transaction,
         linked_transaction,
     ]
@@ -42,10 +42,10 @@ def multi_bank_internal_transaction():
 @pytest.fixture
 def single_bank_internal_transaction():
     transaction = Mock()
-    transaction.account.bank_id = 123
+    transaction.account_view.bank_id = 123
     linked_transaction = Mock()
-    linked_transaction.account.bank_id = 123
-    transaction.internal_transaction.bank_transactions = [
+    linked_transaction.account_view.bank_id = 123
+    transaction.internal_transaction.bank_transaction_views = [
         transaction,
         linked_transaction,
     ]

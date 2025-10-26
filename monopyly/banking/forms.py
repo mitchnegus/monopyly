@@ -177,7 +177,7 @@ class BankTransactionForm(TransactionForm):
                 data = {
                     "bank_name": entry.bank.bank_name,
                     "last_four_digits": entry.last_four_digits,
-                    "type_name": entry.account_type.type_name,
+                    "type_name": entry.account_type_view.type_name,
                 }
             elif isinstance(entry, Bank):
                 data = {"bank_name": entry.bank_name}
@@ -276,7 +276,7 @@ class BankTransactionForm(TransactionForm):
         """Gather data for the form from the given database entry."""
         if isinstance(entry, BankTransactionView):
             data = self._gather_transaction_data(entry)
-            account_info = entry.account
+            account_info = entry.account_view
             # Do not prepopulate any transfer information
         elif isinstance(entry, (BankAccountView, Bank)):
             data = {}

@@ -333,7 +333,7 @@ class CreditTransactionForm(TransactionForm):
         """Gather data for the form from the given database entry."""
         if isinstance(entry, CreditTransactionView):
             data = self._gather_transaction_data(entry)
-            statement_info = entry.statement
+            statement_info = entry.statement_view
         elif isinstance(entry, (CreditCard, CreditStatementView)):
             data = {}
             statement_info = entry

@@ -344,7 +344,7 @@ class TestSaveFormFunctions:
         # Mock the expected final set of transaction data
         mock_transaction_data = {
             "internal_transaction_id": mock_transfer.internal_transaction_id,
-            "merchant": mock_transfer.account.bank.bank_name,
+            "merchant": mock_transfer.account_view.bank.bank_name,
             **mock_form.transaction_data,
         }
         # Call the function and check for proper call signatures

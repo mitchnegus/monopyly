@@ -16,7 +16,7 @@
 
   <div id="bank-container">
     {% for bank in banks %}
-      {% set bank_accounts = bank.bank_accounts %}
+      {% set bank_accounts = bank.bank_account_views %}
       {% if bank_accounts %}
 
         <div class="bank-stack group-stack">
@@ -28,7 +28,7 @@
               <div class="account-block box-row">
 
                 <div class="account-info">
-                  <span class="digits">{{ account.last_four_digits }}</span> <b>{{ account.account_type.type_name }}</b>
+                  <span class="digits">{{ account.last_four_digits }}</span> <b>{{ account.account_type_view.type_name }}</b>
                </div>
 
                 <div class="expanded">

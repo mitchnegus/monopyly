@@ -83,35 +83,35 @@ def mock_bank(client_context):
 
 
 @pytest.fixture
-def mock_account_type(client_context):
-    mock_account_type = Mock(spec=BankAccountTypeView)
-    return mock_account_type
+def mock_account_type_view(client_context):
+    mock_account_type_view = Mock(spec=BankAccountTypeView)
+    return mock_account_type_view
 
 
 @pytest.fixture
-def mock_account(mock_bank, mock_account_type):
-    mock_account = Mock(spec=BankAccountView)
-    mock_account.bank = mock_bank
-    mock_account.account_type = mock_account_type
-    return mock_account
+def mock_account_view(mock_bank, mock_account_type_view):
+    mock_account_view = Mock(spec=BankAccountView)
+    mock_account_view.bank = mock_bank
+    mock_account_view.account_type_view = mock_account_type_view
+    return mock_account_view
 
 
 @pytest.fixture
-def mock_transaction(mock_account):
-    mock_transaction = Mock(spec=BankTransactionView)
-    mock_transaction.account = mock_account
-    mock_transaction.subtransactions = [
+def mock_transaction_view(mock_account_view):
+    mock_transaction_view = Mock(spec=BankTransactionView)
+    mock_transaction_view.account_view = mock_account_view
+    mock_transaction_view.subtransactions = [
         Mock(spec=BankSubtransaction),
         Mock(spec=BankSubtransaction),
         Mock(spec=BankSubtransaction),
     ]
-    return mock_transaction
+    return mock_transaction_view
 
 
 @pytest.fixture
-def mock_subtransaction(mock_transaction):
+def mock_subtransaction(mock_transaction_view):
     mock_subtransaction = Mock(spec=BankSubtransaction)
-    mock_subtransaction.transaction = mock_transaction
+    mock_subtransaction.transaction_view = mock_transaction_view
     mock_subtransaction.tags = [
         Mock(spec=TransactionTag, tag_name=f"Tag{i + 1}") for i in range(3)
     ]
@@ -282,10 +282,10 @@ class TestBankAccountForm:
     @patch("wtforms.form.FormMeta.__call__")
     @patch("monopyly.banking.forms.BankAccountForm.gather_entry_data")
     def test_prepopulate(
-        self, mock_gather_method, mock_meta_call, account_form, mock_account
+        self, mock_gather_method, mock_meta_call, account_form, mock_account_view
     ):
         mock_data = Mock()
-        account_form.prepopulate(mock_account, mock_data)
+        account_form.prepopulate(mock_account_view, mock_data)
         # Forms are instantiated via the `FormMeta` metaclass, so mock that
         mock_gather_method.return_value.__or__.assert_called_with(mock_data)
         mock_meta_call.assert_called_once()
@@ -410,13 +410,15 @@ class TestBankTransactionForm:
             last_four_digits=account_subform.last_four_digits.data,
         )
 
-    def test_account_subform_gather_account_data(self, transaction_form, mock_account):
+    def test_account_subform_gather_account_data(
+        self, transaction_form, mock_account_view
+    ):
         account_subform = transaction_form.account_info
-        data = account_subform.gather_entry_data(mock_account)
+        data = account_subform.gather_entry_data(mock_account_view)
         expected_data = {
-            "bank_name": mock_account.bank.bank_name,
-            "last_four_digits": mock_account.last_four_digits,
-            "type_name": mock_account.account_type.type_name,
+            "bank_name": mock_account_view.bank.bank_name,
+            "last_four_digits": mock_account_view.last_four_digits,
+            "type_name": mock_account_view.account_type_view.type_name,
         }
         assert data == expected_data
 
@@ -426,7 +428,9 @@ class TestBankTransactionForm:
         expected_data = {"bank_name": mock_bank.bank_name}
         assert data == expected_data
 
-    def test_account_subform_gather_data_invalid(self, transaction_form, mock_account):
+    def test_account_subform_gather_data_invalid(
+        self, transaction_form, mock_account_view
+    ):
         account_subform = transaction_form.account_info
         with pytest.raises(TypeError):
             account_subform.gather_entry_data(None)
@@ -470,17 +474,17 @@ class TestBankTransactionForm:
         mock_subtransaction_method,
         mock_account_method,
         transaction_form,
-        mock_transaction,
+        mock_transaction_view,
     ):
         # NOTE: We must delete the "_formfield" attribute of the
         # `SubtransactionForm.gather_entry_data` MagicMock object or else
         # WTForms will think that it is an unbound field; perhaps WTForms
         # should use a better method for determining unbound fields
         del mock_subtransaction_method._formfield
-        data = transaction_form.gather_entry_data(mock_transaction)
+        data = transaction_form.gather_entry_data(mock_transaction_view)
         expected_data = {
-            "transaction_date": mock_transaction.transaction_date,
-            "merchant": mock_transaction.merchant,
+            "transaction_date": mock_transaction_view.transaction_date,
+            "merchant": mock_transaction_view.merchant,
             "subtransactions": 3 * [mock_subtransaction_method.return_value],
             "account_info": mock_account_method.return_value,
         }
@@ -490,9 +494,9 @@ class TestBankTransactionForm:
         "monopyly.banking.forms.BankTransactionForm.AccountSubform.gather_entry_data"
     )
     def test_gather_account_data(
-        self, mock_account_method, transaction_form, mock_account
+        self, mock_account_method, transaction_form, mock_account_view
     ):
-        data = transaction_form.gather_entry_data(mock_account)
+        data = transaction_form.gather_entry_data(mock_account_view)
         expected_data = {"account_info": mock_account_method.return_value}
         assert data == expected_data
 
@@ -511,10 +515,14 @@ class TestBankTransactionForm:
     @patch("wtforms.form.FormMeta.__call__")
     @patch("monopyly.banking.forms.BankTransactionForm.gather_entry_data")
     def test_prepopulate(
-        self, mock_gather_method, mock_meta_call, transaction_form, mock_transaction
+        self,
+        mock_gather_method,
+        mock_meta_call,
+        transaction_form,
+        mock_transaction_view,
     ):
         mock_data = Mock()
-        transaction_form.prepopulate(mock_transaction, mock_data)
+        transaction_form.prepopulate(mock_transaction_view, mock_data)
         # Forms are instantiated via the `FormMeta` metaclass, so mock that
         mock_gather_method.return_value.__or__.assert_called_with(mock_data)
         mock_meta_call.assert_called_once()

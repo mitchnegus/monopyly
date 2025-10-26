@@ -213,7 +213,7 @@ def save_transaction(form, transaction_id=None):
             transfer = record_new_transfer(transfer_data)
             transaction_data.update(
                 internal_transaction_id=transfer.internal_transaction_id,
-                merchant=transfer.account.bank.bank_name,
+                merchant=transfer.account_view.bank.bank_name,
             )
         transaction = BankTransactionHandler.add_entry(**transaction_data)
     return transaction
