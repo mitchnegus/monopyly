@@ -234,7 +234,7 @@
 - Hide transaction tags when the Escape key is pressed
 - Ensure that the 'Record Transfer' functionality only ever adds one input box
 - Update dependencies (including using ruff in place of _Black_ and _isort_)
-- Update jQuery
+- Update JavaScript libraries (jQuery, Chartist)
 
 
 <a name="bottom" id="bottom"></a>

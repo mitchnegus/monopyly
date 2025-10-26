@@ -15,7 +15,7 @@ function createCategoryChart(data) {
     labelOffset: 50,
     labelDirection: "explode"
   };
-  new Chartist.Pie("#category-chart", data, options);
+  new Chartist.PieChart("#category-chart", data, options);
 
 }
 

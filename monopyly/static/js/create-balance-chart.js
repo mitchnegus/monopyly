@@ -72,7 +72,7 @@ function createBalanceChart(data) {
       },
     },
   };
-  new Chartist.Line("#balance-chart", data, options);
+  new Chartist.LineChart("#balance-chart", data, options);
 
 }
 
