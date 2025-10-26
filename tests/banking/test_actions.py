@@ -37,9 +37,9 @@ def test_get_balance_chart_data(mock_timestamp_converter):
     mock_timestamp_converter.side_effect = mock_timestamps
     mock_transactions = [Mock(balance=balance) for balance in [100, 200, 400]]
     data = get_balance_chart_data(mock_transactions)
-    for i, point in enumerate(data):
-        assert point[0] == mock_timestamps[i]
-        assert point[1] == mock_transactions[i].balance
+    for i, point in enumerate(data["series"][0]["data"]):
+        assert point["x"] == mock_timestamps[i]
+        assert point["y"] == mock_transactions[i].balance
 
 
 @pytest.mark.parametrize(
@@ -76,6 +76,6 @@ def test_get_balance_chart_data_duplicate_dates(
         for i, date_ in enumerate(mock_transaction_dates, start=1)
     ]
     data = get_balance_chart_data(mock_transactions)
-    for i, point in enumerate(data):
-        assert point[0] == mock_timestamps[i] + offsets.get(i, 0)
-        assert point[1] == mock_transactions[i].balance
+    for i, point in enumerate(data["series"][0]["data"]):
+        assert point["x"] == mock_timestamps[i] + offsets.get(i, 0)
+        assert point["y"] == mock_transactions[i].balance

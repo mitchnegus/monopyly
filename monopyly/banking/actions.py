@@ -1,6 +1,6 @@
 """Module describing logical banking actions (to be used in routes)."""
 
-from collections import UserList, namedtuple
+from collections import UserDict, namedtuple
 
 from ..common.utils import convert_date_to_midnight_timestamp
 from .accounts import BankAccountHandler, BankAccountTypeHandler
@@ -30,25 +30,26 @@ def get_balance_chart_data(transactions):
 
     Returns
     -------
-    chart_data : list
-        A list containing (x, y) pairs, each consisting of the Unix
+    chart_data : dict
+        A dictionary containing a Chartist compatible data structure,
+        including (x, y) pairs that each represent the Unix
         timestamp (in milliseconds) and the bank account balance.
     """
-    return list(_BalanceChartData(transactions))
+    return _BalanceChartData(transactions).data
 
 
-class _BalanceChartData(UserList):
+class _BalanceChartData(UserDict):
     """
-    A list of balances to be passed to a `chartist.js` chart constructor.
+    A mapping of balances to be passed to a `chartist.js` chart constructor.
 
-    A special list-like object containing transaction data formatted for
-    use in a balance chart created by the `chartist.js` library. This
-    converts each transaction into an (x, y) pair consisting of a Unix
-    timestamp (in milleseconds) and a corresponding bank account
-    balance. For transactions occurring on the same day (the finest
-    granularity recorded by the Monopyly app), a slight offset is
-    added to each timestamp to guarantee a smooth representation in the
-    rendered chart.
+    A special dictionary-like object containing transaction data
+    formatted for use in a balance chart created by the `chartist.js`
+    library. This converts each transaction into an (x, y) pair
+    consisting of a Unix timestamp (in milleseconds) and a corresponding
+    bank account balance. For transactions occurring on the same day
+    (the finest granularity recorded by the Monopyly app), a slight
+    offset is added to each timestamp to guarantee a smooth
+    representation in the rendered chart.
 
     Parameters
     ----------
@@ -61,9 +62,9 @@ class _BalanceChartData(UserList):
     point = namedtuple("DataPoint", ["timestamp", "balance"])
 
     def __init__(self, transactions):
-        super().__init__()
         transaction_groups = self._group_transactions_by_date(transactions)
-        self._prepare_chart_data(transaction_groups)
+        chart_data = self._prepare_chart_data(transaction_groups)
+        super().__init__({"series": [{"name": "balances", "data": chart_data}]})
 
     @staticmethod
     def _group_transactions_by_date(transactions):
@@ -75,6 +76,7 @@ class _BalanceChartData(UserList):
 
     def _prepare_chart_data(self, transaction_groups):
         # Assign chart data to the list as tuples, adding offsets for duplicated dates
+        chart_data = []
         for transaction_date, transaction_group in transaction_groups.items():
             base_timestamp = convert_date_to_midnight_timestamp(
                 transaction_date, milliseconds=True
@@ -82,4 +84,5 @@ class _BalanceChartData(UserList):
             offset = self._DAILY_MILLISECONDS / len(transaction_group)
             for i, transaction in enumerate(transaction_group):
                 adjusted_timestamp = base_timestamp + (i * offset)
-                self.data.append((adjusted_timestamp, transaction.balance))
+                chart_data.append({"x": adjusted_timestamp, "y": transaction.balance})
+        return chart_data

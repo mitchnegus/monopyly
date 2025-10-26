@@ -68,21 +68,8 @@
     const LOAD_TRANSACTIONS_SELECTORS = {
       "account_id": {{ account.id }},
       "block_count": 1
-    }
-  </script>
-  <script>
-    const BALANCE_CHART_DATA = {
-      series: [
-        {
-          name: 'balances',
-          data: [
-            {% for x, y in chart_data %}
-              {x: {{ x }}, y: {{ y }}},
-            {% endfor %}
-          ],
-        },
-      ],
     };
+    const BALANCE_CHART_DATA = {{ chart_data|tojson }};
   </script>
   <script type="module" src="{{ url_for('static', filename='js/load-more-transactions.js') }}">
   </script>
