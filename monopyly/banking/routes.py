@@ -4,7 +4,7 @@ Routes for banking financials.
 
 from dry_foundation.database import db_transaction
 from dry_foundation.web import fetch_json_envelope
-from flask import g, jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, url_for
 
 from ..auth.tools import login_required
 from ..common.forms.utils import extend_field_list_for_ajax
@@ -14,7 +14,7 @@ from .actions import get_balance_chart_data, get_bank_account_type_grouping
 from .banks import BankRepository
 from .blueprint import bp
 from .forms import BankAccountForm, BankTransactionForm
-from .transactions import BankTagRepository, BankTransactionRepository, save_transaction
+from .transactions import BankTransactionRepository, save_transaction
 
 # Set a limit on the number of transactions loaded at one time for certain routes
 TRANSACTION_LIMIT = 100
@@ -241,47 +241,6 @@ def delete_transaction(transaction_id):
     account_id = BankTransactionRepository.get_entry(transaction_id).account_id
     BankTransactionRepository.delete_entry(transaction_id)
     return redirect(url_for("banking.load_account_details", account_id=account_id))
-
-
-@bp.route("/tags")
-@login_required
-def load_tags():
-    # Get the tag hierarchy from the database
-    hierarchy = BankTagRepository.get_hierarchy()
-    return render_template("common/tags_page.html", tags_hierarchy=hierarchy)
-
-
-@bp.route("/_add_tag", methods=("POST",))
-@login_required
-@db_transaction
-def add_tag():
-    # Get the new tag (and potentially parent category) from the AJAX request
-    post_args = request.get_json()
-    tag_name = post_args["tag_name"]
-    parent_name = post_args.get("parent")
-    # Check that the tag name does not already exist
-    if BankTagRepository.get_tags(tag_names=(tag_name,)):
-        raise ValueError("The given tag name already exists. Tag names must be unique.")
-    parent_id = BankTagRepository.find_tag(parent_name).id if parent_name else None
-    tag = BankTagRepository.add_entry(
-        parent_id=parent_id,
-        user_id=g.user.id,
-        tag_name=tag_name,
-    )
-    return render_template("common/tag_tree.html", tags_hierarchy={tag: []})
-
-
-@bp.route("/_delete_tag", methods=("POST",))
-@login_required
-@db_transaction
-def delete_tag():
-    # Get the tag to be deleted from the AJAX request
-    post_args = request.get_json()
-    tag_name = post_args["tag_name"]
-    tag = BankTagRepository.find_tag(tag_name)
-    # Remove the tag from the database
-    BankTagRepository.delete_entry(tag.id)
-    return ""
 
 
 @bp.route("/_suggest_transaction_autocomplete", methods=("POST",))

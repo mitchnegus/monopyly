@@ -39,6 +39,7 @@ def register_blueprints(app):
     to keep blueprint imports grouped.)
     """
     # Import blueprints
+    from monopyly.analytics.blueprint import bp as analytics_bp
     from monopyly.auth.blueprint import bp as auth_bp
     from monopyly.banking.blueprint import bp as banking_bp
     from monopyly.core.blueprint import bp as core_bp
@@ -49,6 +50,7 @@ def register_blueprints(app):
     app.register_blueprint(auth_bp)
     app.register_blueprint(banking_bp)
     app.register_blueprint(credit_bp)
+    app.register_blueprint(analytics_bp)
 
 
 def register_errorhandlers(app):
