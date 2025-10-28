@@ -47,11 +47,6 @@
                 Add a new account
               </a>
             </li>
-            <li>
-              <a href="{{ url_for('banking.load_tags') }}">
-                Manage transaction tags
-              </a>
-            </li>
           </ul>
 
           <h3>Banks</h3>
@@ -103,11 +98,6 @@
             <li>
               <a href="{{ url_for('credit.add_card') }}">
                 Add a new card
-              </a>
-            </li>
-            <li>
-              <a href="{{ url_for('banking.load_tags') }}">
-                Manage transaction tags
               </a>
             </li>
           </ul>
@@ -163,6 +153,20 @@
       </div>
 
       <div class="panel-column">
+
+        <div id="analytics" class="panel">
+
+          <h2>Analytics</h2>
+
+          <ul class="category">
+            <li>
+              <a href="{{ url_for('analytics.load_tags') }}">
+                Manage transaction tags
+              </a>
+            </li>
+          </ul>
+
+        </div>
 
         <div id="investments" class="panel">
           <h2>Coming soon!</h2>
