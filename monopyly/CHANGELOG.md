@@ -222,7 +222,7 @@
 - Bump dependencies (including support for recent SQLAlchemy versions)
 
 
-### 1.6.0 (in progress)
+### 1.6.0
 
 - Enable additional transactions to be loaded on bank/credit transactions tables
 - Create a script to take application screenshots (e.g., for the 'About' page)
