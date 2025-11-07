@@ -3481,6 +3481,10 @@ form#pay #make-payment[type="submit"] #prompt {
   min-height: 400px;
 }
 
+#category-chart.ct-chart svg {
+  overflow: visible;
+}
+
 #category-chart text.ct-label {
   transition: fill 0.1s ease;
 }

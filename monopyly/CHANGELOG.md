@@ -237,4 +237,9 @@
 - Update JavaScript libraries (jQuery, Chartist)
 
 
+### 1.6.1 (in progress)
+
+- Allow pie chart labels to overflow the SVG container
+
+
 <a name="bottom" id="bottom"></a>
