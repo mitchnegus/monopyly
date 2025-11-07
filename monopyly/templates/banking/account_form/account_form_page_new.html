@@ -1,6 +1,16 @@
 {% extends "common/form_page.html" %}
 
 
+{% block javascript %}
+
+  <script type="module" src="{{ url_for('static', filename='js/display-new-bank-inputs.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/display-new-account-type-inputs.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block title %}
   New Bank Account
 {% endblock %}
@@ -12,12 +22,4 @@
     {% include 'banking/account_form/account_form.html' %}
   {% endwith %}
 
-{% endblock %}
-
-
-{% block javascript %}
-  <script type="module" src="{{ url_for('static', filename='js/display-new-bank-inputs.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/display-new-account-type-inputs.js') }}">
-  </script>
 {% endblock %}

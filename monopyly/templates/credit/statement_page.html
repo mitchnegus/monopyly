@@ -1,6 +1,49 @@
 {% extends 'layout.html' %}
 
 
+{% block javascript %}
+
+  <script>
+    const CREDIT_ACTIVITY_RECONCILIATION_ENDPOINT = "{{ url_for('credit.reconcile_activity', statement_id=statement.id) }}";
+    const UPDATE_STATEMENT_DUE_DATE_ENDPOINT = "{{ url_for('credit.update_statement_due_date', statement_id=statement.id) }}";
+    const MAKE_PAYMENT_ENDPOINT = "{{ url_for('credit.pay_credit_card', card_id=statement.card_id, statement_id=statement.id) }}";
+    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
+  </script>
+  <script>
+    const CATEGORY_CHART_DATA = {
+      labels: [
+        {% for label in chart_data['labels'] %}
+          {% if label == '' %}
+            "Other",
+          {% else %}
+            "{{ label }}",
+          {% endif %}
+        {% endfor %}
+      ],
+      series: [
+        {% for subtotal in chart_data['subtotals'] %}
+          {{ subtotal }},
+        {% endfor %}
+      ],
+    };
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show-credit-activity-loader.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/update-statement-parameters.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/make-payment.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/create-category-chart.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block header %}
 
   <h1>
@@ -58,47 +101,3 @@
     </div>
 
 {% endblock %}
-
-
-{% block javascript %}
-
-  <script>
-    const CREDIT_ACTIVITY_RECONCILIATION_ENDPOINT = "{{ url_for('credit.reconcile_activity', statement_id=statement.id) }}";
-    const UPDATE_STATEMENT_DUE_DATE_ENDPOINT = "{{ url_for('credit.update_statement_due_date', statement_id=statement.id) }}";
-    const MAKE_PAYMENT_ENDPOINT = "{{ url_for('credit.pay_credit_card', card_id=statement.card_id, statement_id=statement.id) }}";
-    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
-    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
-  </script>
-  <script>
-    const CATEGORY_CHART_DATA = {
-      labels: [
-        {% for label in chart_data['labels'] %}
-          {% if label == '' %}
-            "Other",
-          {% else %}
-            "{{ label }}",
-          {% endif %}
-        {% endfor %}
-      ],
-      series: [
-        {% for subtotal in chart_data['subtotals'] %}
-          {{ subtotal }},
-        {% endfor %}
-      ],
-    };
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/show-credit-activity-loader.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/update-statement-parameters.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/make-payment.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/create-category-chart.js') }}">
-  </script>
-
-{% endblock %}
-

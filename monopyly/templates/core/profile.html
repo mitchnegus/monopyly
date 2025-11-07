@@ -1,12 +1,27 @@
 {% extends "layout.html" %}
 
-{% block title %}
-  Profile
+
+{% block javascript %}
+
+  <script>
+    const UPDATE_BANK_NAME_ENDPOINTS = {
+      {% for bank in banks %}
+        {{ bank.id }}: "{{ url_for('banking.update_bank_name', bank_id=bank.id) }}",
+      {% endfor %}
+    };
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand-bank.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/update-bank-name.js') }}">
+  </script>
+
 {% endblock %}
 
+
 {% block header %}
-  <h1>Profile</h1>
+  <h1>{% block title %}Profile{% endblock %}</h1>
 {% endblock %}
+
 
 {% block content %}
 
@@ -75,20 +90,4 @@
 
   </div>
 
-{% endblock %}
-
-
-{% block javascript %}
-  <script>
-
-    const UPDATE_BANK_NAME_ENDPOINTS = {
-      {% for bank in banks %}
-        {{ bank.id }}: "{{ url_for('banking.update_bank_name', bank_id=bank.id) }}",
-      {% endfor %}
-    };
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/expand-bank.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/update-bank-name.js') }}">
-  </script>
 {% endblock %}

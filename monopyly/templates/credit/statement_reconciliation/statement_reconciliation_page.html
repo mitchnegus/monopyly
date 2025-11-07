@@ -1,6 +1,25 @@
 {% extends 'layout.html' %}
 
 
+{% block javascript %}
+
+  <script>
+    const CREDIT_ACTIVITY_RECONCILIATION_ENDPOINT = "{{ url_for('credit.reconcile_activity', statement_id=statement.id) }}";
+    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show-credit-activity-loader.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/highlight-discrepant-transactions.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block header %}
 
   <h1>
@@ -63,24 +82,5 @@
       </div>
 
     </div>
-
-{% endblock %}
-
-
-{% block javascript %}
-
-  <script>
-    const CREDIT_ACTIVITY_RECONCILIATION_ENDPOINT = "{{ url_for('credit.reconcile_activity', statement_id=statement.id) }}";
-    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
-    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/show-credit-activity-loader.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/highlight-discrepant-transactions.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
-  </script>
 
 {% endblock %}

@@ -1,6 +1,14 @@
 {% extends "common/form_page.html" %}
 
 
+{% block javascript %}
+
+  <script type="module" src="{{ url_for('static', filename='js/display-new-credit-account-inputs.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block title %}
   New Card
 {% endblock %}
@@ -16,9 +24,4 @@
     {% include 'credit/card_form/transfer_statement_inquiry.html' %}
   {% endif %}
 
-{% endblock %}
-
-{% block javascript %}
-  <script type="module" src="{{ url_for('static', filename='js/display-new-credit-account-inputs.js') }}">
-  </script>
 {% endblock %}

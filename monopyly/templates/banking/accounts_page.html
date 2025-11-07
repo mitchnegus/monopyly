@@ -1,6 +1,14 @@
 {% extends 'layout.html' %}
 
 
+{% block javascript %}
+
+  <script type="module" src="{{ url_for('static', filename='js/expand-bank-account.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block header %}
 
   <h1>
@@ -82,10 +90,4 @@
 
     </div>
 
-{% endblock %}
-
-
-{% block javascript %}
-  <script type="module" src="{{ url_for('static', filename='js/expand-bank-account.js') }}">
-  </script>
 {% endblock %}

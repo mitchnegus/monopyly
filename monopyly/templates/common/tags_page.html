@@ -1,6 +1,18 @@
 {% extends 'layout.html' %}
 
 
+{% block javascript %}
+
+  <script>
+    const ADD_TAG_ENDPOINT = "{{ url_for('banking.add_tag') }}";
+    const REMOVE_TAG_ENDPOINT = "{{ url_for('banking.delete_tag') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/bind-tag-actions.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block header %}
 
   <h1>
@@ -29,17 +41,5 @@
     </div>
 
   </div>
-
-{% endblock %}
-
-
-{% block javascript %}
-
-  <script>
-    const ADD_TAG_ENDPOINT = "{{ url_for('banking.add_tag') }}";
-    const REMOVE_TAG_ENDPOINT = "{{ url_for('banking.delete_tag') }}";
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/bind-tag-actions.js') }}">
-  </script>
 
 {% endblock %}

@@ -1,5 +1,17 @@
 {% extends "layout.html" %}
 
+
+{% block javascript %}
+
+  <script>
+    const HIDE_HOMEPAGE_BLOCK_ENDPOINT = "{{ url_for('core.hide_homepage_block') }}";
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/hide-homepage-block.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block content %}
 
   {% if session["show_homepage_block"] %}
@@ -169,12 +181,4 @@
       </p>
   {% endif %}
 
-{% endblock %}
-
-{% block javascript %}
-  <script>
-    const HIDE_HOMEPAGE_BLOCK_ENDPOINT = "{{ url_for('core.hide_homepage_block') }}";
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/hide-homepage-block.js') }}">
-  </script>
 {% endblock %}

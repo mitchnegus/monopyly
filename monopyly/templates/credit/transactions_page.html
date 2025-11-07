@@ -2,6 +2,34 @@
 {% set full_view = True %}
 
 
+{% block javascript %}
+
+  <script src="{{ url_for('static', filename='js/define-filter.js') }}" defer>
+  </script>
+  <script>
+    const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
+    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
+    const LOAD_TRANSACTIONS_ENDPOINT = "{{ url_for('credit.load_more_transactions') }}";
+    const LOAD_TRANSACTIONS_SELECTORS = {
+      "selected_card_ids": {{ selected_card_ids }},
+      "sort_order": "{{ sort_order }}",
+      "block_count": 1,
+      "full_view": {{ full_view|tojson }}
+    }
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/update-transactions-display.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/load-more-transactions.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block left_sidebar %}
 
   <nav id="sidebar-nav-menu">
@@ -73,33 +101,5 @@
 
 
   <a name="bottom"></a>
-
-{% endblock %}
-
-
-{% block javascript %}
-
-  <script src="{{ url_for('static', filename='js/define-filter.js') }}">
-  </script>
-  <script>
-    const FILTER_ENDPOINT = "{{ url_for('credit.update_transactions_display') }}";
-    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('credit.expand_transaction') }}";
-    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('credit.show_linked_transaction') }}";
-    const LOAD_TRANSACTIONS_ENDPOINT = "{{ url_for('credit.load_more_transactions') }}";
-    const LOAD_TRANSACTIONS_SELECTORS = {
-      "selected_card_ids": {{ selected_card_ids }},
-      "sort_order": "{{ sort_order }}",
-      "block_count": 1,
-      "full_view": {{ full_view|tojson }}
-    }
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/update-transactions-display.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/load-more-transactions.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
-  </script>
 
 {% endblock %}

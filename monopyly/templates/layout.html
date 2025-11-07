@@ -43,7 +43,14 @@
     <script>
       window.Chartist || document.write('<script src="{{ url_for('static', filename='chartist-1.5.0.min.js') }}"><\/script>')
     </script>
+    <!-- Custom application JavaScript -->
+    <script type="module" src="{{ url_for('static', filename='js/toggle-navigation.js') }}">
+    </script>
+    {% block javascript %}
+    {% endblock %}
+
   </head>
+
   <body>
 
     <header id="masthead">
@@ -116,11 +123,6 @@
         <span id="copyright">{{ copyright_statement }}, Mitch Negus</span>
         </p>
     </footer>
-
-    <script type="module" src="{{ url_for('static', filename='js/toggle-navigation.js') }}">
-    </script>
-    {% block javascript %}
-    {% endblock %}
 
   </body>
 </html>

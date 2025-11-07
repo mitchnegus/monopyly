@@ -1,6 +1,15 @@
 {% extends "credit/transaction_form/transaction_form_page.html" %}
 
 
+{% block javascript %}
+
+  {{ super() }}
+  <script type="module" src="{{ url_for('static', filename='js/use-suggested-amount.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block title %}
   Update Credit Transaction
 {% endblock %}
@@ -11,14 +20,5 @@
   {% with submission_url = url_for('credit.update_transaction', transaction_id=transaction_id) %}
     {% include 'credit/transaction_form/transaction_form.html' %}
   {% endwith %}
-
-{% endblock %}
-
-
-{% block javascript %}
-
-  {{ super() }}
-  <script type="module" src="{{ url_for('static', filename='js/use-suggested-amount.js') }}">
-  </script>
 
 {% endblock %}

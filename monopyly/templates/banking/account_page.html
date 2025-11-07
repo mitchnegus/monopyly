@@ -1,6 +1,30 @@
 {% extends 'layout.html' %}
 
 
+{% block javascript %}
+
+  <script>
+    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('banking.expand_transaction') }}";
+    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('banking.show_linked_transaction') }}";
+    const LOAD_TRANSACTIONS_ENDPOINT = "{{ url_for('banking.load_more_transactions') }}";
+    const LOAD_TRANSACTIONS_SELECTORS = {
+      "account_id": {{ account.id }},
+      "block_count": 1
+    };
+    const BALANCE_CHART_DATA = {{ chart_data|tojson }};
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/load-more-transactions.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/create-balance-chart.js') }}">
+  </script>
+
+{% endblock %}
+
+
 {% block header %}
 
   <h1>
@@ -55,29 +79,5 @@
       </div>
 
     </div>
-
-{% endblock %}
-
-
-{% block javascript %}
-
-  <script>
-    const EXPAND_TRANSACTION_ENDPOINT = "{{ url_for('banking.expand_transaction') }}";
-    const LINKED_TRANSACTION_ENDPOINT = "{{ url_for('banking.show_linked_transaction') }}";
-    const LOAD_TRANSACTIONS_ENDPOINT = "{{ url_for('banking.load_more_transactions') }}";
-    const LOAD_TRANSACTIONS_SELECTORS = {
-      "account_id": {{ account.id }},
-      "block_count": 1
-    };
-    const BALANCE_CHART_DATA = {{ chart_data|tojson }};
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/load-more-transactions.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/expand-transaction.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/show-linked-transaction.js') }}">
-  </script>
-  <script type="module" src="{{ url_for('static', filename='js/create-balance-chart.js') }}">
-  </script>
 
 {% endblock %}
