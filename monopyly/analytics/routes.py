@@ -6,7 +6,7 @@ from dry_foundation.database import db_transaction
 from flask import g, render_template, request
 
 from ..auth.tools import login_required
-from ..banking.transactions import BankTagHandler
+from ..common.transactions import TransactionTagHandler
 from .blueprint import bp
 
 
@@ -14,7 +14,7 @@ from .blueprint import bp
 @login_required
 def load_tags():
     # Get the tag hierarchy from the database
-    hierarchy = BankTagHandler.get_hierarchy()
+    hierarchy = TransactionTagHandler.get_hierarchy()
     return render_template("common/tags_page.html", tags_hierarchy=hierarchy)
 
 
@@ -27,10 +27,10 @@ def add_tag():
     tag_name = post_args["tag_name"]
     parent_name = post_args.get("parent")
     # Check that the tag name does not already exist
-    if BankTagHandler.get_tags(tag_names=(tag_name,)):
+    if TransactionTagHandler.get_tags(tag_names=(tag_name,)):
         raise ValueError("The given tag name already exists. Tag names must be unique.")
-    parent_id = BankTagHandler.find_tag(parent_name).id if parent_name else None
-    tag = BankTagHandler.add_entry(
+    parent_id = TransactionTagHandler.find_tag(parent_name).id if parent_name else None
+    tag = TransactionTagHandler.add_entry(
         parent_id=parent_id,
         user_id=g.user.id,
         tag_name=tag_name,
@@ -45,7 +45,7 @@ def delete_tag():
     # Get the tag to be deleted from the AJAX request
     post_args = request.get_json()
     tag_name = post_args["tag_name"]
-    tag = BankTagHandler.find_tag(tag_name)
+    tag = TransactionTagHandler.find_tag(tag_name)
     # Remove the tag from the database
-    BankTagHandler.delete_entry(tag.id)
+    TransactionTagHandler.delete_entry(tag.id)
     return ""

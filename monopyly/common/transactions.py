@@ -234,6 +234,39 @@ class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
     """
 
     @classmethod
+    def get_tags(cls, tag_names=None, ancestors=None):
+        """
+        Get transaction tags from the database.
+
+        Query the database to select transaction tag fields. Tags can be
+        filtered by tag name.
+
+        Parameters
+        ----------
+        tag_names : tuple of str, optional
+            A sequence of names of tags to be selected (if `None`, all
+            tag names will be selected).
+        ancestors : bool, optional
+            A flag indicating whether the query should include tags
+            that are the ancestor tags of other explictly selected tags
+            returned from the database based on selection criteria. If
+            `True`, all tags matching the criteria will be returned
+            along with their ancestor tags. If `False`, any tag that is
+            an ancestor of another tag in the list will be removed from
+            the list. The default is `None`, in which case all tags
+            matching the criteria will be returned, and no others.
+
+        Returns
+        -------
+        tags : list of database.models.TransactionTag
+            Returns transaction tags matching the criteria.
+        """
+        criteria = cls._initialize_criteria_list()
+        criteria.add_match_filter(cls.model, "tag_name", tag_names)
+        tags = cls._get_tags(criteria, ancestors=ancestors)
+        return tags
+
+    @classmethod
     def _get_tags(
         cls,
         criteria,
