@@ -11,7 +11,7 @@ from .blueprint import bp
 
 @bp.app_context_processor
 def inject_global_template_variables():
-    """Inject template variablees globally into the template context."""
+    """Inject template variables globally into the template context."""
     template_globals = {
         "app_version": _display_version(),
         "copyright_statement": f"© {date.today().year}",
