@@ -2,8 +2,7 @@
 Filters defined for the application.
 """
 
-from datetime import date
-from importlib import import_module
+from dry_foundation.utils import define_basic_template_global_variables
 
 from .actions import determine_summary_balance_svg_viewbox_width
 from .blueprint import bp
@@ -12,12 +11,7 @@ from .blueprint import bp
 @bp.app_context_processor
 def inject_global_template_variables():
     """Inject template variables globally into the template context."""
-    template_globals = {
-        "app_version": _display_version(),
-        "copyright_statement": f"© {date.today().year}",
-        "date_today": date.today(),
-    }
-    return template_globals
+    return define_basic_template_global_variables("monopyly._version")
 
 
 @bp.app_context_processor
@@ -27,15 +21,3 @@ def inject_utility_functions():
         "calculate_summary_balance_width": determine_summary_balance_svg_viewbox_width,
     }
     return utility_functions
-
-
-def _display_version():
-    """Show the version (without commit information)."""
-    try:
-        version = import_module("monopyly._version").version
-    except ModuleNotFoundError:
-        # Fallback action in case Hatch VCS fails
-        display_version = ""
-    else:
-        display_version = version.split("+")[0]
-    return display_version

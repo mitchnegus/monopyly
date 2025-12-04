@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from dry_foundation.testing import AppTestManager
+from dry_foundation.testing import AuthActions as _AuthActions
 
 import monopyly
 
@@ -9,19 +10,11 @@ TEST_DIR = Path(__file__).parent
 PRELOAD_DATA_PATH = TEST_DIR / "data.sql"
 
 
-class AuthActions:
+class AuthActions(_AuthActions):
     """An object for performing authorized actions on behalf of a client."""
 
-    def __init__(self, client):
-        self._client = client
-
     def login(self, username="test", password="test"):
-        return self._client.post(
-            "/auth/login", data={"username": username, "password": password}
-        )
-
-    def logout(self):
-        return self._client.get("/auth/logout")
+        return super().login(username, password)
 
 
 # Instantiate the app manager to determine the correct app (persistent/ephemeral)

@@ -113,9 +113,9 @@ def extend_field_list_for_ajax(form_class, field_list_name, field_list_count):
 
     Parameters
     ----------
-    form_class : flask_wtf.FlaskForm
-        The class (not class instance) containing the field list to be
-        extended.
+    form_class : type
+        The form class (not class instance) containing the field list to
+        be extended.
     field_list_name : str
         The name of the field list to be extended.
     field_list_count : int

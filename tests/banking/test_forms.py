@@ -4,6 +4,7 @@ from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
+from dry_foundation.testing.helpers import unit_test_case
 from flask_wtf import FlaskForm
 from wtforms.fields import FormField
 
@@ -22,8 +23,6 @@ from monopyly.database.models import (
     BankTransactionView,
     TransactionTag,
 )
-
-from test_helpers import helper
 
 
 class TestBankSelectField:
@@ -589,4 +588,4 @@ class TestBankTransactionForm:
     ):
         suggestions = transaction_form.autocomplete(field, **sort_fields)
         top_suggestions = suggestions[: len(top_expected_suggestions)]
-        helper.assertCountEqual(top_suggestions, top_expected_suggestions)
+        unit_test_case.assertCountEqual(top_suggestions, top_expected_suggestions)

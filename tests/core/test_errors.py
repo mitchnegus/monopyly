@@ -3,9 +3,8 @@
 from unittest.mock import patch
 
 import pytest
+from dry_foundation.testing.helpers import TestRoutes
 from flask import abort
-
-from test_helpers import TestRoutes
 
 
 def abort_factory(error_code):
@@ -32,7 +31,7 @@ class TestAppErrors(TestRoutes):
     def validate_error_page(self, error_code):
         criteria = [
             self.page_title_includes_substring(f"{error_code}"),
-            self.page_header_includes_substring("No dice!"),
+            self.page_heading_includes_substring("No dice!"),
         ]
         return all(criteria)
 

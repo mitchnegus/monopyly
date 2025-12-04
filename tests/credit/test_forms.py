@@ -4,6 +4,7 @@ from datetime import date
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from dry_foundation.testing.helpers import unit_test_case
 from flask_wtf import FlaskForm
 from werkzeug.exceptions import NotFound
 
@@ -21,8 +22,6 @@ from monopyly.database.models import (
     CreditTransactionView,
     TransactionTag,
 )
-
-from test_helpers import helper
 
 
 class TestCreditAccountSelectField:
@@ -602,8 +601,8 @@ class TestCreditTransactionForm:
     ):
         suggestions = transaction_form.autocomplete(field, **sort_fields)
         top_suggestions = suggestions[: len(top_expected_suggestions)]
-        helper.assertCountEqual(top_suggestions, top_expected_suggestions)
-        helper.assertCountEqual(suggestions, expected_suggestions)
+        unit_test_case.assertCountEqual(top_suggestions, top_expected_suggestions)
+        unit_test_case.assertCountEqual(suggestions, expected_suggestions)
 
     def test_autocomplete_invalid(self, transaction_form):
         with pytest.raises(KeyError):

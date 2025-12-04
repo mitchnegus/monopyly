@@ -7,11 +7,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 from dry_foundation.testing import transaction_lifetime
+from dry_foundation.testing.helpers import TestRoutes
 from flask import url_for
 
 from monopyly.credit.transactions.activity.data import TransactionActivities
-
-from test_helpers import TestRoutes
 
 
 class TestCreditRoutes(TestRoutes):
@@ -19,13 +18,13 @@ class TestCreditRoutes(TestRoutes):
 
     def test_load_cards(self, authorization):
         self.get_route("/cards")
-        assert self.page_header_includes_substring("Credit Cards")
+        assert self.page_heading_includes_substring("Credit Cards")
         # 3 credit cards for the user; 1 for the 'Add card' button
         assert self.tag_count_is_equal(3 + 1, "a", class_="credit-card-block")
 
     def test_add_card_get(self, authorization):
         self.get_route("/add_card")
-        assert self.page_header_includes_substring("New Card")
+        assert self.page_heading_includes_substring("New Card")
         assert self.form_exists(id="card")
 
     @transaction_lifetime
@@ -61,7 +60,7 @@ class TestCreditRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns the "Credit Account" page for the new account with the card
-        assert self.page_header_includes_substring("Credit Account Details")
+        assert self.page_heading_includes_substring("Credit Account Details")
         # 4 rows with information
         assert self.tag_count_is_equal(4, "div", class_="info-row")
         # 1 credit card for the account (only the new card)
@@ -78,7 +77,7 @@ class TestCreditRoutes(TestRoutes):
         mock_account_id = 100
         mock_card_id = 201
         mock_prior_card_id = 200
-        self.post_route(
+        response = self.post_route(
             "/_transfer_card_statement"
             f"/{mock_account_id}/{mock_card_id}/{mock_prior_card_id}",
             follow_redirects=True,
@@ -86,13 +85,13 @@ class TestCreditRoutes(TestRoutes):
         mock_function.assert_called_once_with(
             mock_form, mock_card_id, mock_prior_card_id
         )
-        assert self.response.request.path == url_for(
+        assert response.request.path == url_for(
             "credit.load_account", account_id=mock_account_id
         )
 
     def test_load_account(self, authorization):
         self.get_route("/account/2")
-        assert self.page_header_includes_substring("Credit Account Details")
+        assert self.page_heading_includes_substring("Credit Account Details")
         # 4 rows with information
         assert self.tag_count_is_equal(4, "div", class_="info-row")
         # 2 credit cards for the account
@@ -113,7 +112,7 @@ class TestCreditRoutes(TestRoutes):
     @transaction_lifetime
     def test_delete_card(self, authorization):
         self.get_route("/delete_card/3", follow_redirects=True)
-        assert self.page_header_includes_substring("Credit Account Details")
+        assert self.page_heading_includes_substring("Credit Account Details")
         # 4 rows with information
         assert self.tag_count_is_equal(4, "div", class_="info-row")
         # 1 credit card for the account
@@ -124,18 +123,18 @@ class TestCreditRoutes(TestRoutes):
 
     @transaction_lifetime
     def test_update_account_statement_issue_day(self, authorization):
-        self.post_route("/_update_account_statement_issue_day/3", json="19")
-        assert self.response.data == b"19"
+        response = self.post_route("/_update_account_statement_issue_day/3", json="19")
+        assert response.data == b"19"
 
     @transaction_lifetime
     def test_update_account_statement_due_day(self, authorization):
-        self.post_route("/_update_account_statement_due_day/3", json="11")
-        assert self.response.data == b"11"
+        response = self.post_route("/_update_account_statement_due_day/3", json="11")
+        assert response.data == b"11"
 
     @transaction_lifetime
     def test_delete_account(self, authorization):
         self.get_route("/delete_account/2", follow_redirects=True)
-        assert self.page_header_includes_substring("Credit Cards")
+        assert self.page_heading_includes_substring("Credit Cards")
         # 1 credit card for the user; 1 for the 'Add card' button
         assert self.tag_count_is_equal(1 + 1, "a", class_="credit-card-block")
         # Ensure that the cards associated with the credit account were deleted
@@ -144,7 +143,7 @@ class TestCreditRoutes(TestRoutes):
 
     def test_load_statements(self, authorization):
         self.get_route("/statements")
-        assert self.page_header_includes_substring("Credit Card Statements")
+        assert self.page_heading_includes_substring("Credit Card Statements")
         # 2 active cards with statements for the user
         assert self.tag_count_is_equal(2, "div", class_="card-stack")
         # 5 statements on those active cards
@@ -162,7 +161,7 @@ class TestCreditRoutes(TestRoutes):
 
     def test_load_statement_details(self, authorization):
         self.get_route("/statement/4")
-        assert self.page_header_includes_substring("Statement Details")
+        assert self.page_heading_includes_substring("Statement Details")
         assert self.div_exists(id="statement-summary")
         # 3 transactions in the table on the statement
         assert self.div_exists(class_="transactions-table")
@@ -172,8 +171,8 @@ class TestCreditRoutes(TestRoutes):
 
     @transaction_lifetime
     def test_update_statement_due_date(self, authorization):
-        self.post_route("/_update_statement_due_date/5", json="07/06/2020")
-        assert self.response.data == b"2020-07-06"
+        response = self.post_route("/_update_statement_due_date/5", json="07/06/2020")
+        assert response.data == b"2020-07-06"
 
     @transaction_lifetime
     def test_pay_credit_card(self, authorization):
@@ -220,7 +219,7 @@ class TestCreditRoutes(TestRoutes):
         discrepant_amount = activities.total - 26.87
         self.get_route("/reconciliation/5", follow_redirects=True)
         # Check the result of the GET request
-        assert self.page_header_includes_substring("Statement Reconciliation")
+        assert self.page_heading_includes_substring("Statement Reconciliation")
         assert str(discrepant_amount) in self.soup.find(class_="balance").text
         self._compare_reconciled_activities("discrepant-activity", discrepancies)
         self._compare_reconciled_activities("unrecorded-activity", nonmatches)
@@ -229,7 +228,7 @@ class TestCreditRoutes(TestRoutes):
         # Get the route without any reconciliation info being set
         self.get_route("/reconciliation/5", follow_redirects=True)
         # Check the result of the GET request
-        assert self.page_header_includes_substring("Statement Details")
+        assert self.page_heading_includes_substring("Statement Details")
         assert self.div_exists(id="statement-summary")
         assert self.div_exists(class_="flash", string="ERROR")
 
@@ -270,7 +269,7 @@ class TestCreditRoutes(TestRoutes):
         self.post_route("/reconciliation/5", follow_redirects=True)
         # Check the result of the POST request
         mock_request_files.get.assert_called_once()
-        assert self.page_header_includes_substring("Statement Reconciliation")
+        assert self.page_heading_includes_substring("Statement Reconciliation")
         assert str(discrepant_amount) in self.soup.find(class_="balance").text
         self._compare_reconciled_activities("discrepant-activity", discrepancies)
         self._compare_reconciled_activities("unrecorded-activity", nonmatches)
@@ -284,20 +283,20 @@ class TestCreditRoutes(TestRoutes):
         self.post_route("/reconciliation/5", follow_redirects=True)
         # Check the result of the POST request
         mock_request_files.get.assert_called_once()
-        assert self.page_header_includes_substring("Statement Details")
+        assert self.page_heading_includes_substring("Statement Details")
         assert self.div_exists(id="statement-summary")
         assert self.div_exists(class_="flash", string="ERROR")
 
     def test_load_user_transactions(self, authorization):
         self.get_route("/transactions")
-        assert self.page_header_includes_substring("Credit Transactions")
+        assert self.page_heading_includes_substring("Credit Transactions")
         # 10 transactions in the table for the user on active cards
         assert self.div_exists(class_="transactions-table")
         assert self.tag_count_is_equal(10, "div", class_="transaction")
 
     def test_load_card_transactions(self, authorization):
         self.get_route("/transactions/3")
-        assert self.page_header_includes_substring("Credit Transactions")
+        assert self.page_heading_includes_substring("Credit Transactions")
         # 6 transactions in the table for the associated card
         assert self.div_exists(class_="transactions-table")
         assert self.tag_count_is_equal(6, "div", class_="transaction")
@@ -387,19 +386,19 @@ class TestCreditRoutes(TestRoutes):
 
     def test_add_transaction_get(self, authorization):
         self.get_route("/add_transaction")
-        assert self.page_header_includes_substring("New Credit Transaction")
+        assert self.page_heading_includes_substring("New Credit Transaction")
         assert self.form_exists(id="credit-transaction")
         assert self.input_exists(value=f"{date.today()}")
 
     def test_add_transaction_with_merchant_suggestion_get(self, authorization):
         self.get_route("/add_transaction?description=The%20Gardens")
-        assert self.page_header_includes_substring("New Credit Transaction")
+        assert self.page_heading_includes_substring("New Credit Transaction")
         assert self.form_exists(id="credit-transaction")
         assert self.div_exists(class_="merchant-suggestion")
 
     def test_add_card_transaction_get(self, authorization):
         self.get_route("/add_transaction/3")
-        assert self.page_header_includes_substring("New Credit Transaction")
+        assert self.page_heading_includes_substring("New Credit Transaction")
         assert self.form_exists(id="credit-transaction")
         # Form should be prepopulated with the card info
         input_id_values = {
@@ -412,7 +411,7 @@ class TestCreditRoutes(TestRoutes):
 
     def test_add_statement_transaction_get(self, authorization):
         self.get_route("/add_transaction/3/5")
-        assert self.page_header_includes_substring("New Credit Transaction")
+        assert self.page_heading_includes_substring("New Credit Transaction")
         assert self.form_exists(id="credit-transaction")
         # Form should be prepopulated with the statement info
         input_id_values = {
@@ -439,7 +438,7 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Move to the transaction submission page
-        assert self.page_header_includes_substring("Transaction Submitted")
+        assert self.page_heading_includes_substring("Transaction Submitted")
         assert "The transaction was saved successfully." in self.soup.text
         assert "2020-06-10" in self.soup.text
         assert "$250.00" in self.soup.text
@@ -464,7 +463,7 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Move to the transaction submission page
-        assert self.page_header_includes_substring("Transaction Submitted")
+        assert self.page_heading_includes_substring("Transaction Submitted")
         assert "The transaction was saved successfully." in self.soup.text
         assert "2020-06-10" in self.soup.text
         assert "$1,500.00" in self.soup.text
@@ -473,7 +472,7 @@ class TestCreditRoutes(TestRoutes):
 
     def test_update_transaction_get(self, authorization):
         self.get_route("/update_transaction/8")
-        assert self.page_header_includes_substring("Update Credit Transaction")
+        assert self.page_heading_includes_substring("Update Credit Transaction")
         assert self.form_exists(id="credit-transaction")
         # Form should be prepopulated with the transaction info
         input_id_values = {
@@ -498,7 +497,7 @@ class TestCreditRoutes(TestRoutes):
     )
     def test_update_transaction_suggested_amount_get(self, authorization):
         self.get_route("/update_transaction/8")
-        assert self.page_header_includes_substring("Update Credit Transaction")
+        assert self.page_heading_includes_substring("Update Credit Transaction")
         assert self.form_exists(id="credit-transaction")
         # Form should be prepopulated with the transaction info
         assert self.input_exists(value="Jail")
@@ -524,7 +523,7 @@ class TestCreditRoutes(TestRoutes):
             },
         )
         # Move to the transaction submission page
-        assert self.page_header_includes_substring("Transaction Updated")
+        assert self.page_heading_includes_substring("Transaction Updated")
         assert "The transaction was saved successfully." in self.soup.text
         assert "2020-05-10" in self.soup.text
         assert "$-2,345.00" in self.soup.text
@@ -541,7 +540,7 @@ class TestCreditRoutes(TestRoutes):
     @transaction_lifetime
     def test_delete_transaction(self, authorization):
         self.get_route("/delete_transaction/9", follow_redirects=True)
-        assert self.page_header_includes_substring("Credit Transactions")
+        assert self.page_heading_includes_substring("Credit Transactions")
         # 9 transactions in the table for the user
         assert self.div_exists(class_="transactions-table")
         assert self.tag_count_is_equal(9, "div", class_="transaction")
@@ -559,7 +558,7 @@ class TestCreditRoutes(TestRoutes):
             "monopyly.credit.routes.CreditStatementHandler.delete_entry"
         ) as mock_deletion_method:
             self.get_route("/delete_transaction/10", follow_redirects=True)
-        assert self.page_header_includes_substring("Credit Transactions")
+        assert self.page_heading_includes_substring("Credit Transactions")
         # Ensure that the statement handler triggered a deletion for statement 6
         mock_deletion_method.assert_called_once_with(6)
 
@@ -568,7 +567,7 @@ class TestCreditRoutes(TestRoutes):
         with client.session_transaction() as session:
             session["statement_focus"] = 6
         self.get_route("/delete_transaction/9", follow_redirects=True)
-        assert self.page_header_includes_substring("Statement Details")
+        assert self.page_heading_includes_substring("Statement Details")
         assert self.div_exists(id="statement-summary")
         # 1 transaction remaining in the table for the statement
         assert self.div_exists(class_="transactions-table")
@@ -612,13 +611,15 @@ class TestCreditRoutes(TestRoutes):
         ],
     )
     def test_suggest_transaction_autocomplete(self, authorization, field, suggestions):
-        self.post_route("/_suggest_transaction_autocomplete", json={"field": field})
+        response = self.post_route(
+            "/_suggest_transaction_autocomplete", json={"field": field}
+        )
         # Returned suggestions are not required to be in any particular order
         # (for this test)
-        assert sorted(json.loads(self.response.data)) == sorted(suggestions)
+        assert sorted(json.loads(response.data)) == sorted(suggestions)
 
     def test_suggest_transaction_note_autocomplete(self, authorization):
-        self.post_route(
+        response = self.post_route(
             "/_suggest_transaction_autocomplete",
             json={"field": "note", "merchant": "Boardwalk"},
         )
@@ -636,35 +637,37 @@ class TestCreditRoutes(TestRoutes):
             "Refund",
             "Conducting business",
         ]
-        response_suggestions = json.loads(self.response.data)
+        response_suggestions = json.loads(response.data)
         response_top_suggestions = response_suggestions[: len(top_suggestions)]
         response_other_suggestions = response_suggestions[len(top_suggestions) :]
         assert sorted(response_top_suggestions) == sorted(top_suggestions)
         assert sorted(response_other_suggestions) == sorted(other_suggestions)
 
     def test_invalid_infer_card_no_info(self, authorization):
-        self.post_route("/_infer_card", json={"bank_name": None})
-        assert self.response.data == b""
+        response = self.post_route("/_infer_card", json={"bank_name": None})
+        assert response.data == b""
 
     def test_infer_card_from_bank(self, authorization):
-        self.post_route("/_infer_card", json={"bank_name": "Jail"})
+        response = self.post_route("/_infer_card", json={"bank_name": "Jail"})
         inferred_card_map = {"bank_name": "Jail", "digits": "3335"}
-        assert json.loads(self.response.data) == inferred_card_map
+        assert json.loads(response.data) == inferred_card_map
 
     def test_infer_card_from_digits(self, authorization):
-        self.post_route("/_infer_card", json={"bank_name": "TheBank", "digits": "3336"})
+        response = self.post_route(
+            "/_infer_card", json={"bank_name": "TheBank", "digits": "3336"}
+        )
         inferred_card_map = {"bank_name": "TheBank", "digits": "3336"}
-        assert json.loads(self.response.data) == inferred_card_map
+        assert json.loads(response.data) == inferred_card_map
 
     def test_infer_statement_invalid_no_info(self, authorization):
-        self.post_route("/_infer_statement", json={"bank_name": None})
-        assert self.response.data == b""
+        response = self.post_route("/_infer_statement", json={"bank_name": None})
+        assert response.data == b""
 
     def test_infer_statement_invalid_no_date(self, authorization):
-        self.post_route(
+        response = self.post_route(
             "/_infer_statement", json={"bank_name": "Jail", "digits": "3335"}
         )
-        assert self.response.data == b""
+        assert response.data == b""
 
     def test_infer_statement_invalid_no_statement(self, authorization):
         self.post_route(
@@ -678,7 +681,7 @@ class TestCreditRoutes(TestRoutes):
         assert "No dice!" in self.soup.text
 
     def test_infer_statement(self, authorization):
-        self.post_route(
+        response = self.post_route(
             "/_infer_statement",
             json={
                 "bank_name": "Jail",
@@ -686,4 +689,4 @@ class TestCreditRoutes(TestRoutes):
                 "transaction_date": "2020-06-05",
             },
         )
-        assert self.response.data == b"2020-06-10"
+        assert response.data == b"2020-06-10"

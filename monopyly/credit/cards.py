@@ -137,7 +137,7 @@ def save_card(form, card_id=None):
 
     Parameters
     ----------
-    form : flask_wtf.FlaskForm
+    form : CreditCardForm
         The form beign used to provide the data being saved.
     card_id : int
         The ID of hte card to be saved. If provided, the named card will

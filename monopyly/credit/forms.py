@@ -5,6 +5,7 @@ Generate credit card forms for the user to complete.
 from flask import abort
 from wtforms.fields import (
     BooleanField,
+    DateField,
     FieldList,
     FormField,
     IntegerField,
@@ -18,7 +19,6 @@ from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, Transact
 from ..common.forms.fields import (
     CustomChoiceSelectField,
     LastFourDigitsField,
-    OptionalDateField,
     StringField,
 )
 from ..common.forms.utils import Autocompleter
@@ -152,6 +152,10 @@ class CardStatementTransferForm(EntryForm):
     transfer = RadioField("transfer", choices=[("yes", "Yes"), ("no", "No")])
     submit = SubmitField("Continue")
 
+    def gather_entry_data(self, entry):
+        """Gather data for the form from the given database entry."""
+        raise NotImplementedError
+
 
 class CreditTransactionForm(TransactionForm):
     """Form to input/edit credit card transactions."""
@@ -193,7 +197,7 @@ class CreditTransactionForm(TransactionForm):
         # Fields to identify the card/bank information for the statement
         card_info = FormField(CardSubform)
         # Fields pertaining to the statement
-        issue_date = OptionalDateField("Statement Date")
+        issue_date = DateField("Statement Date", [Optional()])
 
         def get_statement(self, transaction_date):
             """Get the credit card statement described by the form data."""

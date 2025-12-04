@@ -6,8 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from dry_foundation.testing import transaction_lifetime
-
-from test_helpers import TestRoutes
+from dry_foundation.testing.helpers import TestRoutes
 
 
 class TestBankingRoutes(TestRoutes):
@@ -15,19 +14,19 @@ class TestBankingRoutes(TestRoutes):
 
     def test_load_accounts(self, authorization):
         self.get_route("/accounts")
-        assert self.page_header_includes_substring("Bank Accounts")
+        assert self.page_heading_includes_substring("Bank Accounts")
         # 2 banks for the user, with 3 total accounts
         assert self.tag_count_is_equal(2, "div", class_="bank-stack")
         assert self.tag_count_is_equal(3, "div", class_="account-block")
 
     def test_add_account_get(self, authorization):
         self.get_route("/add_account")
-        assert self.page_header_includes_substring("New Bank Account")
+        assert self.page_heading_includes_substring("New Bank Account")
         assert self.form_exists(id="bank-account")
 
     def test_add_bank_account_get(self, authorization):
         self.get_route("/add_account/2")
-        assert self.page_header_includes_substring("New Bank Account")
+        assert self.page_heading_includes_substring("New Bank Account")
         assert self.form_exists(id="bank-account")
         # Form should be prepopulated with the bank info
         assert self.input_has_value("Jail", id="bank_info-bank_name")
@@ -44,7 +43,7 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns the "Bank Accounts" page with the new account added
-        assert self.page_header_includes_substring("Bank Accounts")
+        assert self.page_heading_includes_substring("Bank Accounts")
         assert self.tag_count_is_equal(2, "div", class_="bank-stack")
         assert self.tag_count_is_equal(4, "div", class_="account-block")
         digit_tags = self.soup.find_all("span", class_="digits")
@@ -63,7 +62,7 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns the "Bank Accounts" page with the new account added
-        assert self.page_header_includes_substring("Bank Accounts")
+        assert self.page_heading_includes_substring("Bank Accounts")
         assert self.tag_count_is_equal(3, "div", class_="bank-stack")
         assert self.tag_count_is_equal(4, "div", class_="account-block")
         digit_tags = self.soup.find_all("span", class_="digits")
@@ -72,14 +71,14 @@ class TestBankingRoutes(TestRoutes):
     @transaction_lifetime
     def test_delete_account(self, authorization):
         self.get_route("/delete_account/3", follow_redirects=True)
-        assert self.page_header_includes_substring("Bank Accounts")
+        assert self.page_heading_includes_substring("Bank Accounts")
         # 2 banks for the user, with 2 total accounts
         assert self.tag_count_is_equal(2, "div", class_="bank-stack")
         assert self.tag_count_is_equal(2, "div", class_="account-block")
 
     def test_load_account_summaries(self, authorization):
         self.get_route("/account_summaries/2")
-        assert self.page_header_includes_substring("Bank Account Summaries")
+        assert self.page_heading_includes_substring("Bank Account Summaries")
         # 2 accounts (1 checking, 1 savings)
         total_balance = 42.00 + 43.00 + 300 + 58.90 - 109.21 - 300
         assert self.tag_exists("h2", class_="bank", string="Jail")
@@ -91,7 +90,7 @@ class TestBankingRoutes(TestRoutes):
 
     def test_load_account_details(self, authorization):
         self.get_route("/account/2")
-        assert self.page_header_includes_substring("Account Details")
+        assert self.page_heading_includes_substring("Account Details")
         assert self.div_exists(id="account-summary")
         # 3 transactions in the table for the account
         assert self.div_exists(class_="transactions-table")
@@ -158,13 +157,13 @@ class TestBankingRoutes(TestRoutes):
 
     def test_add_transaction_get(self, authorization):
         self.get_route("/add_transaction")
-        assert self.page_header_includes_substring("New Bank Transaction")
+        assert self.page_heading_includes_substring("New Bank Transaction")
         assert self.form_exists(id="bank-transaction")
         assert self.input_exists(value=f"{date.today()}")
 
     def test_add_bank_transaction_get(self, authorization):
         self.get_route("/add_transaction/2")
-        assert self.page_header_includes_substring("New Bank Transaction")
+        assert self.page_heading_includes_substring("New Bank Transaction")
         assert self.form_exists(id="bank-transaction")
         # Form should be prepopulated with the bank info
         assert self.input_has_value("Jail", id="account_info-bank_name")
@@ -172,7 +171,7 @@ class TestBankingRoutes(TestRoutes):
 
     def test_add_account_transaction_get(self, authorization):
         self.get_route("/add_transaction/2/3")
-        assert self.page_header_includes_substring("New Bank Transaction")
+        assert self.page_heading_includes_substring("New Bank Transaction")
         assert self.form_exists(id="bank-transaction")
         # Form should be prepopulated with the account info
         assert self.input_has_value("Jail", id="account_info-bank_name")
@@ -193,7 +192,7 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns to the "Account Details" page with the new transaction added
-        assert self.page_header_includes_substring("Account Details")
+        assert self.page_heading_includes_substring("Account Details")
         assert self.div_exists(id="account-summary")
         # 4 transactions in the table for the account
         assert self.div_exists(class_="transactions-table")
@@ -222,7 +221,7 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns to the "Account Details" page with the new transaction added
-        assert self.page_header_includes_substring("Account Details")
+        assert self.page_heading_includes_substring("Account Details")
         assert self.div_exists(id="account-summary")
         # 4 transactions in the table for the account
         assert self.div_exists(class_="transactions-table")
@@ -232,7 +231,7 @@ class TestBankingRoutes(TestRoutes):
 
     def test_update_transaction_get(self, authorization):
         self.get_route("/update_transaction/4")
-        assert self.page_header_includes_substring("Update Bank Transaction")
+        assert self.page_heading_includes_substring("Update Bank Transaction")
         assert self.form_exists(id="bank-transaction")
         # Form should be prepopulated with the transaction info
         input_id_values = {
@@ -259,7 +258,7 @@ class TestBankingRoutes(TestRoutes):
             follow_redirects=True,
         )
         # Returns to the "Account Details" page with the new transaction added
-        assert self.page_header_includes_substring("Account Details")
+        assert self.page_heading_includes_substring("Account Details")
         assert self.div_exists(id="account-summary")
         # 1 transaction in the table for the account
         assert self.div_exists(class_="transactions-table")
@@ -287,7 +286,7 @@ class TestBankingRoutes(TestRoutes):
     @transaction_lifetime
     def test_delete_transaction(self, authorization):
         self.get_route("/delete_transaction/4", follow_redirects=True)
-        assert self.page_header_includes_substring("Account Details")
+        assert self.page_heading_includes_substring("Account Details")
         # 2 transactions in the table for the user
         assert self.div_exists(class_="transactions-table")
         assert self.tag_count_is_equal(2, "div", class_="transaction")
@@ -296,7 +295,7 @@ class TestBankingRoutes(TestRoutes):
 
     def test_load_tags(self, authorization):
         self.get_route("/tags")
-        assert self.page_header_includes_substring("Transaction Tags")
+        assert self.page_heading_includes_substring("Transaction Tags")
         # 7 tags for the user
         assert self.tag_count_is_equal(7, "div", class_="tag")
 
@@ -332,9 +331,9 @@ class TestBankingRoutes(TestRoutes):
 
     @transaction_lifetime
     def test_delete_tag(self, authorization):
-        self.post_route("/_delete_tag", json={"tag_name": "Railroad"})
+        response = self.post_route("/_delete_tag", json={"tag_name": "Railroad"})
         # Returns an empty string
-        assert self.response.data == b""
+        assert response.data == b""
 
     @transaction_lifetime
     def test_delete_tag_invalid(self, authorization):
@@ -361,19 +360,23 @@ class TestBankingRoutes(TestRoutes):
         ],
     )
     def test_suggest_transaction_autocomplete(self, authorization, field, suggestions):
-        self.post_route("/_suggest_transaction_autocomplete", json={"field": field})
+        response = self.post_route(
+            "/_suggest_transaction_autocomplete", json={"field": field}
+        )
         # Returned suggestions are not required to be in any particular order
         # (for this test)
-        assert sorted(json.loads(self.response.data)) == sorted(suggestions)
+        assert sorted(json.loads(response.data)) == sorted(suggestions)
 
     @transaction_lifetime
     def test_update_bank_name(self, authorization):
-        self.post_route("/_update_bank_name/2", json="Prison")  # less fun than jail...
-        assert self.response.data == b"Prison"
+        response = self.post_route(
+            "/_update_bank_name/2", json="Prison"
+        )  # less fun than jail...
+        assert response.data == b"Prison"
 
     @transaction_lifetime
     def test_delete_bank(self, authorization):
         self.get_route("/delete_bank/2", follow_redirects=True)
-        assert self.page_header_includes_substring("Profile")
+        assert self.page_heading_includes_substring("Profile")
         # 1 remaining bank for the user
         assert self.tag_count_is_equal(1, "div", class_="bank-block")

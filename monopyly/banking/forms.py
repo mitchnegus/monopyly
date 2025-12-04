@@ -115,6 +115,10 @@ class BankAccountForm(EntryForm):
             }
             return account_type_data
 
+        def gather_entry_data(self, entry):
+            """Gather data for the form from the given database entry."""
+            raise NotImplementedError
+
     # Fields to identify the bank/account type information for the account
     bank_info = FormField(BankSubform)
     account_type_info = FormField(AccountTypeSubform)

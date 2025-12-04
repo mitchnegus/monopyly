@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 
-from test_helpers import TestRoutes
+from dry_foundation.testing.helpers import TestRoutes
 
 
 class TestCoreRoutes(TestRoutes):
@@ -62,23 +62,23 @@ class TestCoreRoutes(TestRoutes):
     def test_story(self, auth):
         auth.login()
         self.get_route("/story")
-        assert self.page_header_includes_substring("Pass go and collect $200")
+        assert self.page_heading_includes_substring("Pass go and collect $200")
 
     def test_credits(self):
         self.get_route("/credits")
-        assert self.page_header_includes_substring("Credits")
+        assert self.page_heading_includes_substring("Credits")
 
     def test_login_required(self, auth):
         self.get_route("/profile")
-        assert not self.page_header_includes_substring("Profile")
+        assert not self.page_heading_includes_substring("Profile")
         assert not self.tag_exists("h2", string="Settings")
-        assert self.page_header_includes_substring("Redirecting...")
+        assert self.page_heading_includes_substring("Redirecting...")
         auth.login()
         self.get_route("/profile")
-        assert self.page_header_includes_substring("Profile")
+        assert self.page_heading_includes_substring("Profile")
         assert self.tag_exists("h2", string="Settings")
 
     def test_settings(self, authorization):
         self.get_route("/profile")
-        assert self.page_header_includes_substring("Profile")
+        assert self.page_heading_includes_substring("Profile")
         assert self.tag_exists("h2", string="Settings")

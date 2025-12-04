@@ -2,10 +2,10 @@
 General form constructions.
 """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from datetime import date
 
-from flask_wtf import FlaskForm
+from dry_foundation.forms import AbstractFlaskForm, FlaskSubform
 from wtforms.fields import StringField, SubmitField
 from wtforms.validators import DataRequired
 
@@ -15,12 +15,7 @@ from .fields import CurrencyField, DateField
 form_err_msg = "There was an improper value in your form. Please try again."
 
 
-class AbstractEntryFormMixinMeta(type(FlaskForm), ABC):
-    # Defined to allow the forms to also to be abstract base classes
-    pass
-
-
-class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
+class EntryForm(AbstractFlaskForm):
     """
     A form designed to accept database entry information.
 
@@ -85,11 +80,8 @@ class EntryForm(FlaskForm, metaclass=AbstractEntryFormMixinMeta):
         )
 
 
-class EntrySubform(EntryForm):
-    """Subform disabling CSRF (CSRF is REQUIRED in encapsulating form)."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(meta={"csrf": False}, *args, **kwargs)
+class EntrySubform(FlaskSubform, EntryForm):
+    """A subform implementing ``EntryForm`` behavior."""
 
 
 class AcquisitionSubform(EntrySubform):
@@ -149,7 +141,6 @@ class TransactionForm(EntryForm):
             }
             return data
 
-        @abstractmethod
         def gather_entry_data(self, entry):
             if self.subtransaction_model is None:
                 raise RuntimeError(
