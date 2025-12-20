@@ -237,9 +237,11 @@
 - Update JavaScript libraries (jQuery, Chartist)
 
 
-### 1.6.1 (in progress)
+### 1.6.1
 
 - Allow pie chart labels to overflow the SVG container
+- Define JavaScript elements in header (deferring execution when logical)
+- Bump dependencies
 
 
 <a name="bottom" id="bottom"></a>

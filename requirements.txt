@@ -1,11 +1,10 @@
 # Development environment requirements
-beautifulsoup4>=4.14.2
 colorama>=0.4.6
-coverage>=7.10.7
+coverage>=7.13.0
 dry-foundation>=1.6.0
 hatch>=1.14.2
-pip>=25.1.1
-pytest>=8.4.2
+pip>=25.3.0
+pytest>=9.0.2
 pytest-cov>=7.0.0
-ruff>=0.13.3
-selenium>=4.36.0
+ruff>=0.14.10
+selenium>=4.39.0
