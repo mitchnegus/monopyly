@@ -33,7 +33,9 @@
     <div id="tags-container" class="tag-container">
 
       <ul class="tags">
-        {% include 'common/tag_tree.html' %}
+        {% with new_tree = True %}
+          {% include 'common/tag_tree.html' %}
+        {% endwith %}
       </ul>
 
       <img class="root new-tag button" src="{{ url_for('static', filename='img/icons/plus-thick.png') }}" />

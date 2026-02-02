@@ -114,6 +114,7 @@ class DiscrepancyHighlighter {
       this.removeHighlight($(activity), $matchingTransactionRow);
     }
   }
+
 }
 
 

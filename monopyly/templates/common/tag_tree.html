@@ -18,7 +18,10 @@
   </li>
 
   {% if loop.last %}
-    <input class="new-tag" type="text" />
+    {# Do not create a new input for a tag when its subtree is updated #}
+    {% if new_tree or loop.depth0 != 0 %}
+      <input class="new-tag" type="text" />
+    {% endif %}
   {% endif %}
 {% else %}
   <input class="new-tag" type="text" />

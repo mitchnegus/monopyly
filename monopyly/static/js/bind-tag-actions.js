@@ -13,111 +13,199 @@ import { executeAjaxRequest } from './modules/ajax.js';
 
 
 (function() {
-
-  const endpointAddTag = ADD_TAG_ENDPOINT;
-  const endpointRemoveTag = REMOVE_TAG_ENDPOINT;
-  // Set animation parameters
-  const slideTime = 300;
   // Identify the buttons
-  const $buttonsAddTag = $('#transaction-tags .new-tag.button');
-  const $buttonsDelete = $('#transaction-tags .action.button.delete');
+  const $createTagButtons = $('#transaction-tags .new-tag.button');
+  const $deleteTagButtons = $('#transaction-tags .action.button.delete');
+  bindTagButtonBehavior($createTagButtons, $deleteTagButtons);
 
-  bindTagCreator($buttonsAddTag, $buttonsDelete);
+})();
 
-  function bindTagCreator($buttonsAddTag, $buttonsDelete) {
-    // Bind add tag buttons
-    $buttonsAddTag.on('click', function() {
-      const $container = $(this).closest('.tag-container');
-      const $tags = $container.children('ul.tags');
-      const $input = $tags.children('input.new-tag');
-      // Reveal the input
-      showInput($input);
-      // Perform actions when focus is lost
-      $input.on('blur', function() {
-        if ($input.val()) {
-          addNewTag($input, $container);
-        } else {
-          hideEmptyInput($input);
-        }
-        clearInput($input);
-      });
-      $input.on('keydown', function() {
-        if (event.which == 27) {
-          clearInput($input);
-          hideEmptyInput($input);
-        }
-      });
+
+/**
+ * Create the tag manager.
+ *
+ * @param {JQuery} $createTagButtons - Buttons for adding subtags to one or
+ *     more tags.
+ * @param {JQuery} $deleteTagButtons - Buttons for removing tags.
+ */
+function bindTagButtonBehavior($createTagButtons, $deleteTagButtons) {
+  console.log('bind create buttons', $createTagButtons);
+  console.log('bind delete buttons', $deleteTagButtons);
+  $createTagButtons.on('click', function() {
+    const $button = $(this);
+    const behavior = new TagCreation($button);
+    behavior.perform();
+  });
+  $deleteTagButtons.on('click', function() {
+    const $button = $(this);
+    const behavior = new TagDeletion($button);
+    behavior.perform();
+  });
+}
+
+
+/**
+ * A class for managing transaction tags and the behavior of their buttons.
+ */
+class TagButtonBehavior {
+
+  /**
+   * Create the tag manager.
+   *
+   * @param {JQuery} $button - A button belonging to a tag.
+   */
+  constructor($button) {
+    this.$container = $button.closest('.tag-container');
+    this.$tag = this.$container.children('.tag-area').find('.tag');
+    this.$tags = this.$container.children('ul.tags');
+    this.$input = this.$tags.children('input.new-tag');
+    // Set animation parameters
+    this.slideTime = 300;
+  }
+
+}
+
+/**
+ * A class for managing transaction tags creation behavior.
+ */
+class TagCreation extends TagButtonBehavior {
+
+  #endpoint = ADD_TAG_ENDPOINT;
+
+  /**
+   * Create the tag creator.
+   *
+   * @param {JQuery} $button - A button belonging to a tag.
+   */
+  constructor($button) {
+    super($button);
+    self = this;
+    this.$input.on('blur', function() {
+      self.#dropInputFocus();
     });
-    // Bind remove tag buttons
-    $buttonsDelete.on('click', function() {
-      if (confirmDelete()) {
-        const $container = $(this).closest('.tag-container');
-        const $tag = $container.find('.tag').first();
-        // Remove the tag from the database
-        removeTag($tag);
-        // Remove the tag from the display
-        const $tagContainer = $tag.closest('.tag-area');
-        $tagContainer.slideUp(300, function() {
-          $(this).remove()
-        });
+    this.$input.on('keydown', function() {
+      if (event.key == 'Escape') {
+        self.#clearInput();
+        this.blur();
+      } else if (event.key == 'Enter') {
+        this.blur();
       }
     });
   }
 
-  function addNewTag($input, $container) {
-    // Add the input value to the database as a tag
-    const parentTag = $container.children('.tag-area').find('.tag').text()
-    const rawData = {
-      'tag_name': $input.val(),
-      'parent': parentTag
-    };
-    // Execute the AJAX request and display update
-    function addTag(response) {
-      // Add the AJAX request response to the DOM before the input
-      $input.before(response);
-      hideFilledInput($input);
-      // Bind the buttons for the newly added tag
-      const $buttonAddTag = $input.prev().find('.new-tag.button');
-      const $buttonRemoveTag = $input.prev().find('.action.button.delete');
-      bindTagCreator($buttonAddTag, $buttonRemoveTag);
-    }
-    executeAjaxRequest(endpointAddTag, rawData, addTag);
+  /**
+   * Perform the behavior.
+   */
+  perform() {
+    this.#showInput();
   }
 
-  function showInput($input) {
-    $input.slideDown(slideTime, function() {
-      $input.addClass('visible');
-      $input.focus();
+  /**
+   * Show the input box to collect new tag information.
+   */
+  #showInput() {
+    console.log('showing input', this.$input);
+    self = this;
+    this.$input.slideDown(this.slideTime, function() {
+      self.$input.addClass('visible');
+      self.$input.focus();
+      console.log('focus', self.$input);
     });
   }
 
-  function hideFilledInput($input) {
-    // Hide the input immediately
-    $input.hide();
-    $input.removeClass('visible');
+  /**
+   * Perform a specific action when the input loses focus.
+   */
+  #dropInputFocus() {
+    if (this.$input.val()) {
+      this.#createTag();
+      this.#hideFilledInput();
+    } else {
+      this.#hideEmptyInput();
+    }
   }
 
-  function hideEmptyInput($input) {
-    // Hide the input gracefully
-    $input.removeClass('visible');
-    $input.slideUp(slideTime);
+  /**
+   * Create the new tag in the database.
+   */
+  #createTag() {
+    const rawData = {
+      'tag_name': this.$input.val(),
+      'parent': this.$tag.text()
+    };
+    // Execute the AJAX request and place the new tag
+    executeAjaxRequest(this.#endpoint, rawData, this.#placeNewTag.bind(this));
   }
 
-  function clearInput($input) {
-    // Clear the input
-    $input.val('');
+  /**
+   * Add the new tag to the DOM before the input.
+   */
+  #placeNewTag(newTagHTML) {
+    const $newTag = $(newTagHTML);
+    this.$input.before($newTag);
+    // Bind behavior functionality to the newly created/placed tag buttons
+    bindTagButtonBehavior(
+      $newTag.find('.new-tag.button'), $newTag.find('.action.button.delete')
+    );
   }
 
-  function confirmDelete() {
+  /**
+   * Hide the input immediately.
+   */
+  #hideFilledInput() {
+    this.$input.hide();
+    this.$input.removeClass('visible');
+    this.#clearInput();
+  }
+
+  /**
+   * Hide the (empty) input gracefully.
+   */
+  #hideEmptyInput() {
+    this.$input.removeClass('visible');
+    this.$input.slideUp(this.slideTime);
+    console.log('hiding empty input', this.$input);
+  }
+
+  /**
+   * Clear the input.
+   */
+  #clearInput() {
+    this.$input.val('');
+  }
+
+}
+
+
+/**
+ * A class for managing transaction tags deletion behavior.
+ */
+class TagDeletion extends TagButtonBehavior {
+
+  #endpoint = REMOVE_TAG_ENDPOINT;
+
+  /**
+   * Perform the behavior.
+   */
+  perform() {
+    if (this.#confirmDelete()) {
+      this.#removeTag();
+    }
+  }
+
+  /**
+   * Remove the tag from the database.
+   */
+  #removeTag() {
+    const rawData = {'tag_name': this.$tag.html()};
+    // Execute the AJAX request to delete the tag
+    executeAjaxRequest(this.#endpoint, rawData);
+    // Remove the tag from the display
+    this.$container.slideUp(this.slideTime, function() {this.remove()});
+  }
+
+  #confirmDelete() {
     return confirm('Are you sure you want to delete this tag?');
   }
 
-  function removeTag($tag) {
-    // Get the name of the tag
-    const tagName = $tag.html();
-    const rawData = {'tag_name': tagName};
-    // Execute the AJAX request
-    executeAjaxRequest(endpointRemoveTag, rawData);
-  }
-
-})();
+}
