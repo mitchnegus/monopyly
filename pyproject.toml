@@ -11,15 +11,15 @@ description = 'A homemade personal finance manager.'
 license = { text = 'GNU GPLv3' }
 requires-python = '>=3.10'
 dependencies = [
-  'dry-foundation==1.6.0',
+  'dry-foundation==1.6.2',
   'Flask==3.1.2',
   'Flask-WTF==1.2.2',
-  'gunicorn==23.0.0',
-  'Markdown==3.10',
+  'gunicorn==25.0.1',
+  'Markdown==3.10.1',
   'nltk==3.9.2',
   'python-dateutil==2.9.0',
-  'rich==14.2.0',
-  'SQLAlchemy==2.0.45',
+  'rich==14.3.2',
+  'SQLAlchemy==2.0.46',
 ]
 keywords = [
   'Finance',

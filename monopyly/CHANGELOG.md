@@ -244,11 +244,12 @@
 - Bump dependencies
 
 
-### 1.6.2 (in progress)
+### 1.6.2
 
 - Fix bug in the transaction tag tree template preventing new subtags in the same subtag subtree
 - Refactor JavaScript used to manage the transaction tag tree
 - Add specificity to the reconciliation tool when parsing payment columns (when otherwise unidentified, payment transactions are determined by the presence of the isolated word "payment" in the description field)
+- Bump dependencies
 
 
 <a name="bottom" id="bottom"></a>
