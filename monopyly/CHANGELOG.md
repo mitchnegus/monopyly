@@ -248,6 +248,7 @@
 
 - Fix bug in the transaction tag tree template preventing new subtags in the same subtag subtree
 - Refactor JavaScript used to manage the transaction tag tree
+- Add specificity to the reconciliation tool when parsing payment columns (when otherwise unidentified, payment transactions are determined by the presence of the isolated word "payment" in the description field)
 
 
 <a name="bottom" id="bottom"></a>

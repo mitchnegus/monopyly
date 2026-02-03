@@ -213,7 +213,7 @@ class _TransactionActivityParser:
         def _infer_payment_row(row):
             # Infer whether the row constitutes a payment transaction
             contextual_info = [row[i].lower() for i in contextual_column_indices]
-            return any("payment" in element for element in contextual_info)
+            return any("payment" in element.split() for element in contextual_info)
 
         payment_rows = list(filter(_infer_payment_row, raw_data))
         return self._extrapolate_payments_positive(payment_rows, raw_data)
