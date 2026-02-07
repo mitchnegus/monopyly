@@ -2859,6 +2859,7 @@ form#bank-account .hidden {
 }
 
 #bank-account-summaries .account-block .title {
+  display: flex;
   font-size: 16pt;
 }
 @media screen and (max-width: 600px) {
@@ -2874,6 +2875,21 @@ form#bank-account .hidden {
 @media screen and (max-width: 600px) {
   /* Mobile layout */
   #bank-account-summaries .account-block .title .digits {
+    display: block;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  #bank-account-summaries .account-block .title .full-name {
+    display: none;
+  }
+}
+
+#bank-account-summaries .account-block .title .abbreviation {
+  display: none;
+}
+@media screen and (max-width: 1200px) {
+  #bank-account-summaries .account-block .title .abbreviation {
     display: block;
   }
 }
