@@ -12,14 +12,14 @@ license = { text = 'GNU GPLv3' }
 requires-python = '>=3.10'
 dependencies = [
   'dry-foundation==1.6.2',
-  'Flask==3.1.2',
+  'Flask==3.1.3',
   'Flask-WTF==1.2.2',
-  'gunicorn==25.0.1',
-  'Markdown==3.10.1',
-  'nltk==3.9.2',
+  'gunicorn==25.1.0',
+  'Markdown==3.10.2',
+  'nltk==3.9.3',
   'python-dateutil==2.9.0',
-  'rich==14.3.2',
-  'SQLAlchemy==2.0.46',
+  'rich==14.3.3',
+  'SQLAlchemy==2.0.48',
 ]
 keywords = [
   'Finance',
