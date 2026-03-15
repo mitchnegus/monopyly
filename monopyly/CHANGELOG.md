@@ -252,4 +252,10 @@
 - Bump dependencies
 
 
+### 1.6.3
+
+- Improve styling on the bank account summaries page
+- Bump dependencies
+
+
 <a name="bottom" id="bottom"></a>
