@@ -111,6 +111,9 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+'monopyly/database/models.py' = [
+  'A003',  # models use standard SQLAlchemy syntax that appears to shadow Python built-ins
+]
 'blueprint.py' = [
   'E402',  # routes imported intentionally after blueprint definition
 ]
