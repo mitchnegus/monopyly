@@ -2,7 +2,7 @@
 Tools for building a common transaction interface.
 """
 
-from dry_foundation.database.handler import DatabaseHandler, DatabaseViewHandler
+from dry_foundation.database.repository import Repository, ViewRepository
 from flask import abort, current_app
 
 from ..database.models import (
@@ -13,19 +13,19 @@ from ..database.models import (
 )
 
 
-class TransactionHandler(DatabaseViewHandler):
+class TransactionRepository(ViewRepository):
     """
-    An abstract database handler for accessing transactions.
+    An abstract database repository for accessing transactions.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
@@ -218,19 +218,19 @@ def highlight_unmatched_transactions(transactions, unmatched_transactions):
         yield transaction
 
 
-class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
+class TransactionTagRepository(Repository, model=TransactionTag):
     """
-    A database handler for managing transaction tags.
+    A database repository for managing transaction tags.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
@@ -250,7 +250,7 @@ class TransactionTagHandler(DatabaseHandler, model=TransactionTag):
 
         Parameters
         ----------
-        criteria : database.handler.QueryCriteria
+        criteria : database.repository.QueryCriteria
             Criteria used to select tags from the database.
         ancestors : bool, optional
             A flag indicating whether the query should include tags

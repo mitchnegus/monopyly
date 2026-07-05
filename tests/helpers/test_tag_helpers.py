@@ -1,11 +1,11 @@
 """Common helper objects to improve modularity of tests."""
 
-from dry_foundation.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestRepository
 
 from monopyly.database.models import TransactionTag
 
 
-class TestTagHandler(TestHandler):
+class TestTagRepository(TestRepository):
     # References only include entries accessible to the authorized login
     db_reference = [
         TransactionTag(id=1, user_id=0, parent_id=None, tag_name="Credit payments"),

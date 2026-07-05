@@ -261,6 +261,6 @@
 ## 1.7.0 (in progress)
 
 - Fix minor bug in JavaScript string replacement
-- Bump dependencies
+- Bump dependencies (including substantial source code naming changes)
 
 <a name="bottom" id="bottom"></a>

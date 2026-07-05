@@ -555,11 +555,11 @@ class TestCreditRoutes(TestRoutes):
             session["statement_focus"] = 6
         self.get_route("/delete_transaction/9", follow_redirects=True)
         with patch(
-            "monopyly.credit.routes.CreditStatementHandler.delete_entry"
+            "monopyly.credit.routes.CreditStatementRepository.delete_entry"
         ) as mock_deletion_method:
             self.get_route("/delete_transaction/10", follow_redirects=True)
         assert self.page_heading_includes_substring("Credit Transactions")
-        # Ensure that the statement handler triggered a deletion for statement 6
+        # Ensure that the statement repository triggered a deletion for statement 6
         mock_deletion_method.assert_called_once_with(6)
 
     @transaction_lifetime

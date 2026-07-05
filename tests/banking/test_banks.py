@@ -1,18 +1,18 @@
 """Tests for the banking module managing banks."""
 
 import pytest
-from dry_foundation.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestRepository
 
-from monopyly.banking.banks import BankHandler
+from monopyly.banking.banks import BankRepository
 from monopyly.database.models import Bank, BankAccount
 
 
 @pytest.fixture
-def bank_handler(client_context):
-    return BankHandler
+def bank_repo(client_context):
+    return BankRepository
 
 
-class TestBankHandler(TestHandler):
+class TestBankRepository(TestRepository):
     # Reference only includes entries accessible to the authorized login
     db_reference = [
         Bank(id=2, user_id=3, bank_name="Jail"),
@@ -27,13 +27,13 @@ class TestBankHandler(TestHandler):
             (("Jail", "TheBank"), db_reference),
         ],
     )
-    def test_get_banks(self, bank_handler, bank_names, reference_entries):
-        banks = bank_handler.get_banks(bank_names)
+    def test_get_banks(self, bank_repo, bank_names, reference_entries):
+        banks = bank_repo.get_banks(bank_names)
         self.assert_entries_match(banks, reference_entries)
 
     @pytest.mark.parametrize("entry_id", [2, 3])
-    def test_delete_entry(self, bank_handler, entry_id):
-        self.assert_entry_deletion_succeeds(bank_handler, entry_id)
+    def test_delete_entry(self, bank_repo, entry_id):
+        self.assert_entry_deletion_succeeds(bank_repo, entry_id)
         # Check that the cascading entries were deleted
         self.assert_number_of_matches(
             0, BankAccount.id, BankAccount.bank_id == entry_id

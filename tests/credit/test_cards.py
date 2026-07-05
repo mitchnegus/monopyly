@@ -3,18 +3,18 @@
 from unittest.mock import patch
 
 import pytest
-from dry_foundation.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestRepository
 
-from monopyly.credit.cards import CreditCardHandler, save_card
+from monopyly.credit.cards import CreditCardRepository, save_card
 from monopyly.database.models import CreditCard, CreditStatement
 
 
 @pytest.fixture
-def card_handler(client_context):
-    return CreditCardHandler
+def card_repo(client_context):
+    return CreditCardRepository
 
 
-class TestCreditCardHandler(TestHandler):
+class TestCreditCardRepository(TestRepository):
     # References only include entries accessible to the authorized login
     #   - ordered by active status (active first)
     db_reference = [
@@ -35,14 +35,14 @@ class TestCreditCardHandler(TestHandler):
     )
     def test_get_cards(
         self,
-        card_handler,
+        card_repo,
         bank_ids,
         account_ids,
         last_four_digits,
         active,
         reference_entries,
     ):
-        cards = card_handler.get_cards(bank_ids, account_ids, last_four_digits, active)
+        cards = card_repo.get_cards(bank_ids, account_ids, last_four_digits, active)
         self.assert_entries_match(cards, reference_entries)
 
     @pytest.mark.parametrize(
@@ -53,17 +53,15 @@ class TestCreditCardHandler(TestHandler):
             ("TheBank", "3336", db_reference[1]),
         ],
     )
-    def test_find_card(
-        self, card_handler, bank_name, last_four_digits, reference_entry
-    ):
-        card = card_handler.find_card(bank_name, last_four_digits)
+    def test_find_card(self, card_repo, bank_name, last_four_digits, reference_entry):
+        card = card_repo.find_card(bank_name, last_four_digits)
         self.assert_entry_matches(card, reference_entry)
 
     @pytest.mark.parametrize(
         ("bank_name", "last_four_digits"), [("Jail", "6666"), (None, None)]
     )
-    def test_find_card_none_exist(self, card_handler, bank_name, last_four_digits):
-        card = card_handler.find_card(bank_name, last_four_digits)
+    def test_find_card_none_exist(self, card_repo, bank_name, last_four_digits):
+        card = card_repo.find_card(bank_name, last_four_digits)
         assert card is None
 
     @pytest.mark.parametrize(
@@ -73,8 +71,8 @@ class TestCreditCardHandler(TestHandler):
             {"account_id": 3, "last_four_digits": "4444", "active": 0},
         ],
     )
-    def test_add_entry(self, card_handler, mapping):
-        card = card_handler.add_entry(**mapping)
+    def test_add_entry(self, card_repo, mapping):
+        card = card_repo.add_entry(**mapping)
         # Check that the entry object was properly created
         assert card.last_four_digits == "4444"
         # Check that the entry was added to the database
@@ -83,8 +81,8 @@ class TestCreditCardHandler(TestHandler):
         )
 
     @pytest.mark.parametrize("entry_id", [2, 3])
-    def test_delete_entry(self, card_handler, entry_id):
-        self.assert_entry_deletion_succeeds(card_handler, entry_id)
+    def test_delete_entry(self, card_repo, entry_id):
+        self.assert_entry_deletion_succeeds(card_repo, entry_id)
         # Check that the cascading entries were deleted
         self.assert_number_of_matches(
             0, CreditStatement.id, CreditStatement.card_id == entry_id
@@ -92,23 +90,23 @@ class TestCreditCardHandler(TestHandler):
 
 
 class TestSaveFormFunctions:
-    @patch("monopyly.credit.cards.CreditCardHandler")
+    @patch("monopyly.credit.cards.CreditCardRepository")
     @patch("monopyly.credit.forms.CreditCardForm")
-    def test_save_new_card(self, mock_form, mock_handler):
+    def test_save_new_card(self, mock_form, mock_repo):
         # Mock the form and primary method
         mock_form.card_data = {"key": "test card data"}
-        mock_method = mock_handler.add_entry
+        mock_method = mock_repo.add_entry
         # Call the function and check for proper call signatures
         card = save_card(mock_form)
         mock_method.assert_called_once_with(**mock_form.card_data)
         assert card == mock_method.return_value
 
-    @patch("monopyly.credit.cards.CreditCardHandler")
+    @patch("monopyly.credit.cards.CreditCardRepository")
     @patch("monopyly.credit.forms.CreditCardForm")
-    def test_save_updated_card(self, mock_form, mock_handler):
+    def test_save_updated_card(self, mock_form, mock_repo):
         # Mock the form and primary method
         mock_form.card_data = {"key": "test card data"}
-        mock_method = mock_handler.update_entry
+        mock_method = mock_repo.update_entry
         # Call the function and check for proper call signatures
         card_id = 2
         card = save_card(mock_form, card_id)

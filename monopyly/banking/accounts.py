@@ -3,7 +3,7 @@ Tools for interacting with bank accounts in the database.
 """
 
 import sqlalchemy.sql.functions as sql_func
-from dry_foundation.database.handler import DatabaseViewHandler
+from dry_foundation.database.repository import ViewRepository
 from flask import abort
 
 from ..common.forms.utils import execute_on_form_validation
@@ -16,25 +16,25 @@ from ..database.models import (
 )
 
 
-class BankAccountTypeHandler(
-    DatabaseViewHandler, model=BankAccountType, model_view=BankAccountTypeView
+class BankAccountTypeRepository(
+    ViewRepository, model=BankAccountType, model_view=BankAccountTypeView
 ):
     """
-    A database handler for managing bank account types.
+    A database repository for managing bank account types.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_account_types(cls):
         """
         Get bank account types from the database.
@@ -47,7 +47,7 @@ class BankAccountTypeHandler(
         return super().get_entries()
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_types_for_bank(cls, bank_id):
         """Return a list of the bank account type IDs that exist for a bank."""
         # This may duplicate `get_account_types` method
@@ -62,7 +62,7 @@ class BankAccountTypeHandler(
         return account_types
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def find_account_type(cls, type_name=None, type_abbreviation=None):
         """
         Find an account type using uniquely identifying characteristics.
@@ -125,25 +125,25 @@ class BankAccountTypeHandler(
         return account_type
 
 
-class BankAccountHandler(
-    DatabaseViewHandler, model=BankAccount, model_view=BankAccountView
+class BankAccountRepository(
+    ViewRepository, model=BankAccount, model_view=BankAccountView
 ):
     """
-    A database handler for managing bank accounts.
+    A database repository for managing bank accounts.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_accounts(cls, bank_ids=None, account_type_ids=None):
         """
         Get bank accounts from the database.
@@ -155,10 +155,10 @@ class BankAccountHandler(
         ----------
         bank_ids : tuple of int, optional
             A sequence of bank IDs for which accounts will be selected
-            (if `None`, all banks will be selected).
+            (if unset, all banks will be selected).
         account_type_ids : tuple of int, optional
             A sequence of bank account type IDs for which account types
-            will be selected (if `None`, all account types will be
+            will be selected (if unset, all account types will be
             selected).
 
         Returns
@@ -167,13 +167,13 @@ class BankAccountHandler(
             Returns bank accounts matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "bank_id", bank_ids)
-        criteria.add_match_filter(cls.model, "account_type_id", account_type_ids)
+        criteria.add_membership_filter(cls.model, "bank_id", bank_ids)
+        criteria.add_membership_filter(cls.model, "account_type_id", account_type_ids)
         accounts = super().get_entries(criteria=criteria)
         return accounts
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_bank_balance(cls, bank_id):
         """Get the balance of all accounts at one bank."""
         query = cls.model.select_for_user(sql_func.sum(cls.model.balance))
@@ -187,7 +187,7 @@ class BankAccountHandler(
         return balance
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def find_account(
         cls, bank_name=None, account_type_name=None, last_four_digits=None
     ):
@@ -277,5 +277,5 @@ def save_account(form, account_id=None):
         )
     else:
         # Insert the new account into the database
-        account = BankAccountHandler.add_entry(**account_data)
+        account = BankAccountRepository.add_entry(**account_data)
     return account

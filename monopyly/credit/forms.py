@@ -31,24 +31,24 @@ from ..database.models import (
     CreditTransactionView,
     TransactionTag,
 )
-from .accounts import CreditAccountHandler
-from .cards import CreditCardHandler
-from .statements import CreditStatementHandler
-from .transactions import CreditTransactionHandler
+from .accounts import CreditAccountRepository
+from .cards import CreditCardRepository
+from .statements import CreditStatementRepository
+from .transactions import CreditTransactionRepository
 from .transactions.activity.reconciliation import ActivityMatchmaker
 
 
 class CreditAccountSelectField(CustomChoiceSelectField):
     """Account field that uses the database to prepare field choices."""
 
-    _db_handler = CreditAccountHandler
+    _db_repo = CreditAccountRepository
 
     def __init__(self, **kwargs):
         super().__init__(label="Account", **kwargs)
 
     @staticmethod
     def _format_choice(account):
-        cards = CreditCardHandler.get_cards(account_ids=(account.id,))
+        cards = CreditCardRepository.get_cards(account_ids=(account.id,))
         digits = [f"*{card.last_four_digits}" for card in cards]
         bank_name = account.bank.bank_name
         # Display cards associated with the credit account in parentheses
@@ -62,7 +62,7 @@ class CreditCardForm(EntryForm):
     class AccountSubform(AcquisitionSubform):
         """Form to input/edit account identification."""
 
-        _db_handler = CreditAccountHandler
+        _db_repo = CreditAccountRepository
         # Fields to identify the bank information for the account
         bank_info = FormField(BankSubform)
         # Fields pertaining to the account
@@ -163,12 +163,12 @@ class CreditTransactionForm(TransactionForm):
     class StatementSubform(EntrySubform):
         """Form to input/edit credit statement identification."""
 
-        _db_handler = CreditStatementHandler
+        _db_repo = CreditStatementRepository
 
         class CardSubform(EntrySubform):
             """Form to input/edit credit account identification."""
 
-            _db_handler = CreditCardHandler
+            _db_repo = CreditCardRepository
             # Fields pertaining to the card
             bank_name = StringField("Bank")
             last_four_digits = LastFourDigitsField(
@@ -178,7 +178,7 @@ class CreditTransactionForm(TransactionForm):
 
             def get_card(self):
                 """Get the credit card described by the form data."""
-                return self._db_handler.find_card(
+                return self._db_repo.find_card(
                     bank_name=self.bank_name.data,
                     last_four_digits=self.last_four_digits.data,
                 )
@@ -237,13 +237,13 @@ class CreditTransactionForm(TransactionForm):
             """
             issue_date = self.issue_date.data
             if issue_date:
-                statement = self._db_handler.find_statement(card.id, issue_date)
+                statement = self._db_repo.find_statement(card.id, issue_date)
                 # Create the statement if it does not already exist
                 if not statement:
-                    statement = self._db_handler.add_statement(card, issue_date)
+                    statement = self._db_repo.add_statement(card, issue_date)
             else:
                 # No issue date was given, so the statement must be inferred
-                statement = self._db_handler.infer_statement(
+                statement = self._db_repo.infer_statement(
                     card, transaction_date, creation=True
                 )
             return statement
@@ -307,7 +307,7 @@ class CreditTransactionForm(TransactionForm):
             merchant_tokens = ActivityMatchmaker.tokenize(merchant)
             # Suggest a known merchant with the closest distance to the activity merchant
             score_records = []
-            for potential_merchant in CreditTransactionHandler.get_merchants():
+            for potential_merchant in CreditTransactionRepository.get_merchants():
                 test_tokens = ActivityMatchmaker.tokenize(potential_merchant)
                 score = ActivityMatchmaker.score_tokens(merchant_tokens, test_tokens)
                 # Only consider scores that have some similarity at all

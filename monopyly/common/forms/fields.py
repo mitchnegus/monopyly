@@ -69,20 +69,20 @@ class CustomChoiceSelectField(wtforms_fields.SelectField, ABC):
 
     @property
     @abstractmethod
-    def _db_handler(self):
+    def _db_repo(self):
         raise NotImplementedError("Define the attribute in a subclass.")
 
     def prepare_field_choices(self):
         """
         Prepare choices for a field in the form using the database.
 
-        Using a reference to a database handler, this method queries the
+        Using a reference to a database repository, this method queries the
         database for entries belonging to the user, and then uses those
         entries to populate the list of choices that may be selected
         for the field value.
         """
         # Collect all available user entries
-        entries = self._db_handler.get_entries()
+        entries = self._db_repo.get_entries()
         # Set default choice values
         self.choices = [(-1, "-"), (0, f"New {self.label.text.lower()}")]
         # Set the user choices (for consistency, arbitrarily sort by entry ID)
@@ -95,7 +95,7 @@ class CustomChoiceSelectField(wtforms_fields.SelectField, ABC):
         """
         Format a database entry field to display as a form field choice.
 
-        Accepts an entry returned by the database handler, and extract a
+        Accepts an entry returned by the database repository, and extract a
         name to be displayed as a choice in the list of choices.
         """
         raise NotImplementedError("Define the formatting for a choice in a subclass.")

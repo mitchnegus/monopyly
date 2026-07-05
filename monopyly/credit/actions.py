@@ -3,9 +3,9 @@
 from ..banking.transactions import record_new_transfer
 from ..common.forms.utils import execute_on_form_validation
 from ..common.utils import parse_date
-from .cards import CreditCardHandler
-from .statements import CreditStatementHandler
-from .transactions import CreditTransactionHandler
+from .cards import CreditCardRepository
+from .statements import CreditStatementRepository
+from .transactions import CreditTransactionRepository
 
 
 def get_card_statement_grouping(cards):
@@ -25,7 +25,7 @@ def get_card_statement_grouping(cards):
     """
     card_statements = {}
     for card in cards:
-        card_statements[card] = CreditStatementHandler.get_statements(
+        card_statements[card] = CreditStatementRepository.get_statements(
             card_ids=(card.id,),
             sort_order="DESC",
         )
@@ -51,8 +51,8 @@ def get_statement_and_transactions(statement_id, transaction_sort_order="DESC"):
     transactions : list of database.models.CreditTransactionView
         All transactions on the statement with the given ID.
     """
-    statement = CreditStatementHandler.get_entry(statement_id)
-    transactions = CreditTransactionHandler.get_transactions(
+    statement = CreditStatementRepository.get_entry(statement_id)
+    transactions = CreditTransactionRepository.get_transactions(
         statement_ids=(statement_id,),
         sort_order=transaction_sort_order,
     )
@@ -82,7 +82,7 @@ def get_potential_preceding_card(card):
     # Card must be active
     if card.active:
         # Only one other active card must exist for this account
-        active_cards = CreditCardHandler.get_cards(
+        active_cards = CreditCardRepository.get_cards(
             account_ids=(card.account_id,),
             active=True,
         )
@@ -90,7 +90,7 @@ def get_potential_preceding_card(card):
         if len(other_active_cards) == 1:
             other_card = other_active_cards[0]
             # That active card must have statements with an unpaid balance
-            statements = CreditStatementHandler.get_statements(
+            statements = CreditStatementRepository.get_statements(
                 card_ids=(other_card.id,),
             )
             latest_statement = statements.first()
@@ -106,12 +106,12 @@ def transfer_credit_card_statement(form, card_id, prior_card_id):
     # If response is affirmative, transfer the statement to the new card
     if form.transfer.data == "yes":
         # Get the prior card's most recent statement; assign it to the new card
-        statements = CreditStatementHandler.get_statements(card_ids=(prior_card_id,))
+        statements = CreditStatementRepository.get_statements(card_ids=(prior_card_id,))
         latest_statement = statements.first()
-        CreditStatementHandler.update_entry(latest_statement.id, card_id=card_id)
+        CreditStatementRepository.update_entry(latest_statement.id, card_id=card_id)
         # Deactivate the old card (after ensuring it exists and is accessible)
-        CreditCardHandler.get_entry(prior_card_id)
-        CreditCardHandler.update_entry(prior_card_id, active=0)
+        CreditCardRepository.get_entry(prior_card_id)
+        CreditCardRepository.update_entry(prior_card_id, active=0)
 
 
 def make_payment(card_id, payment_account_id, payment_date, payment_amount):
@@ -132,10 +132,10 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
         The amount of money to make for the payment.
     """
     # Get the card to be paid
-    card = CreditCardHandler.get_entry(card_id)
+    card = CreditCardRepository.get_entry(card_id)
     payee = card.account.bank.bank_name
     # Determine the expected statement based on the payment date
-    payment_statement = CreditStatementHandler.infer_statement(
+    payment_statement = CreditStatementRepository.infer_statement(
         card,
         payment_date,
         creation=True,
@@ -173,7 +173,7 @@ def make_payment(card_id, payment_account_id, payment_date, payment_amount):
             }
         ],
     }
-    CreditTransactionHandler.add_entry(**credit_mapping)
+    CreditTransactionRepository.add_entry(**credit_mapping)
 
 
 def parse_request_transaction_data(request_args):

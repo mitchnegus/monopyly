@@ -2,25 +2,25 @@
 Tools for interacting with credit cards in the database.
 """
 
-from dry_foundation.database.handler import DatabaseHandler
+from dry_foundation.database.repository import Repository
 
 from ..common.forms.utils import execute_on_form_validation
 from ..database.models import Bank, CreditAccount, CreditCard
 
 
-class CreditCardHandler(DatabaseHandler, model=CreditCard):
+class CreditCardRepository(Repository, model=CreditCard):
     """
-    A database handler for managing credit cards.
+    A database repository for managing credit cards.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
@@ -38,18 +38,18 @@ class CreditCardHandler(DatabaseHandler, model=CreditCard):
         ----------
         bank_ids : tuple of int, optional
             A sequence of bank IDs for which cards will be selected
-            (if `None`, all banks will be selected).
+            (if unset, all banks will be selected).
         account_ids : tuple of int, optional
             A sequence of account IDs for which cards will be selected
-            (if `None`, all accounts will be selected).
+            (if unset, all accounts will be selected).
         last_four_digits : tuple of str, optional
             A sequence of final 4 digits for which cards will be
-            selected (if `None`, cards with any last 4 digits will be
+            selected (if unset, cards with any last 4 digits will be
             selected).
         active : bool, optional
             A flag indicating whether to return active cards, inactive
-            cards, or both. The default is `None`, where all cards are
-            returned regardless of the card's active status.
+            cards, or both. If unset, all cards are returned regardless
+            of the card's active status.
 
         Returns
         -------
@@ -57,9 +57,9 @@ class CreditCardHandler(DatabaseHandler, model=CreditCard):
             Returns credit cards matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(CreditAccount, "bank_id", bank_ids)
-        criteria.add_match_filter(cls.model, "account_id", account_ids)
-        criteria.add_match_filter(cls.model, "last_four_digits", last_four_digits)
+        criteria.add_membership_filter(CreditAccount, "bank_id", bank_ids)
+        criteria.add_membership_filter(cls.model, "account_id", account_ids)
+        criteria.add_membership_filter(cls.model, "last_four_digits", last_four_digits)
         criteria.add_match_filter(cls.model, "active", active)
         cards = super().get_entries(criteria=criteria)
         return cards
@@ -152,8 +152,8 @@ def save_card(form, card_id=None):
     card_data = form.card_data
     if card_id:
         # Update the database with the updated card
-        card = CreditCardHandler.update_entry(card_id, **card_data)
+        card = CreditCardRepository.update_entry(card_id, **card_data)
     else:
         # Insert the new transaction into the database
-        card = CreditCardHandler.add_entry(**card_data)
+        card = CreditCardRepository.add_entry(**card_data)
     return card

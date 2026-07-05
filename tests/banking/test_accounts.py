@@ -5,12 +5,12 @@ from unittest.mock import patch
 
 import pytest
 from dry_foundation.testing import transaction_lifetime
-from dry_foundation.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestRepository
 from werkzeug.exceptions import Forbidden, NotFound
 
 from monopyly.banking.accounts import (
-    BankAccountHandler,
-    BankAccountTypeHandler,
+    BankAccountRepository,
+    BankAccountTypeRepository,
     save_account,
 )
 from monopyly.database.models import (
@@ -22,11 +22,11 @@ from monopyly.database.models import (
 
 
 @pytest.fixture
-def account_type_handler(client_context):
-    return BankAccountTypeHandler
+def account_type_repo(client_context):
+    return BankAccountTypeRepository
 
 
-class TestBankAccountTypeHandler(TestHandler):
+class TestBankAccountTypeRepository(TestRepository):
     # References only include entries accessible to the authorized login
     db_reference = [
         BankAccountTypeView(
@@ -66,16 +66,16 @@ class TestBankAccountTypeHandler(TestHandler):
         ),
     ]
 
-    def test_get_account_types(self, account_type_handler):
-        account_types = account_type_handler.get_account_types()
+    def test_get_account_types(self, account_type_repo):
+        account_types = account_type_repo.get_account_types()
         self.assert_entries_match(account_types, self.db_reference)
 
     @pytest.mark.parametrize(
         ("bank_id", "reference_entries"),
         [(2, db_reference[:2]), (3, db_reference[2:3])],
     )
-    def test_get_types_for_bank(self, account_type_handler, bank_id, reference_entries):
-        account_types = account_type_handler.get_types_for_bank(bank_id)
+    def test_get_types_for_bank(self, account_type_repo, bank_id, reference_entries):
+        account_types = account_type_repo.get_types_for_bank(bank_id)
         self.assert_entries_match(account_types, reference_entries)
 
     @pytest.mark.parametrize(
@@ -89,11 +89,9 @@ class TestBankAccountTypeHandler(TestHandler):
         ],
     )
     def test_find_account_type(
-        self, account_type_handler, type_name, type_abbreviation, reference_entry
+        self, account_type_repo, type_name, type_abbreviation, reference_entry
     ):
-        account_type = account_type_handler.find_account_type(
-            type_name, type_abbreviation
-        )
+        account_type = account_type_repo.find_account_type(type_name, type_abbreviation)
         self.assert_entry_matches(account_type, reference_entry)
 
     @pytest.mark.parametrize(
@@ -101,11 +99,9 @@ class TestBankAccountTypeHandler(TestHandler):
         [("Certificate of Deposit", "CoD"), (None, None)],
     )
     def test_find_account_type_none_exist(
-        self, account_type_handler, type_name, type_abbreviation
+        self, account_type_repo, type_name, type_abbreviation
     ):
-        account_type = account_type_handler.find_account_type(
-            type_name, type_abbreviation
-        )
+        account_type = account_type_repo.find_account_type(type_name, type_abbreviation)
         assert account_type is None
 
     @pytest.mark.parametrize(
@@ -119,8 +115,8 @@ class TestBankAccountTypeHandler(TestHandler):
             },
         ],
     )
-    def test_add_entry(self, account_type_handler, mapping):
-        account_type = account_type_handler.add_entry(**mapping)
+    def test_add_entry(self, account_type_repo, mapping):
+        account_type = account_type_repo.add_entry(**mapping)
         # Check that the entry object was properly created
         assert account_type.type_name == "Well Stocked Hand"
         # Check that the entry was added to the database
@@ -141,8 +137,8 @@ class TestBankAccountTypeHandler(TestHandler):
             {"type_name": "Trustworthy Friend"},
         ],
     )
-    def test_update_entry(self, account_type_handler, mapping):
-        account_type = account_type_handler.update_entry(5, **mapping)
+    def test_update_entry(self, account_type_repo, mapping):
+        account_type = account_type_repo.update_entry(5, **mapping)
         # Check that the entry object was properly updated
         assert account_type.type_name == "Trustworthy Friend"
         # Check that the entry was updated in the database
@@ -151,8 +147,8 @@ class TestBankAccountTypeHandler(TestHandler):
         )
 
     @pytest.mark.parametrize("entry_id", [5, 6])
-    def test_delete_entry(self, account_type_handler, entry_id):
-        self.assert_entry_deletion_succeeds(account_type_handler, entry_id)
+    def test_delete_entry(self, account_type_repo, entry_id):
+        self.assert_entry_deletion_succeeds(account_type_repo, entry_id)
         # Check that the cascading entries were deleted
         self.assert_number_of_matches(
             0, BankAccountView.id, BankAccountView.account_type_id == entry_id
@@ -166,17 +162,17 @@ class TestBankAccountTypeHandler(TestHandler):
             (7, NotFound),  # -- should not be able to delete nonexistent entries
         ],
     )
-    def test_delete_entry_invalid(self, account_type_handler, entry_id, exception):
+    def test_delete_entry_invalid(self, account_type_repo, entry_id, exception):
         with pytest.raises(exception):
-            account_type_handler.delete_entry(entry_id)
+            account_type_repo.delete_entry(entry_id)
 
 
 @pytest.fixture
-def account_handler(client_context):
-    return BankAccountHandler
+def account_repo(client_context):
+    return BankAccountRepository
 
 
-class TestBankAccountHandler(TestHandler):
+class TestBankAccountRepository(TestRepository):
     # References only include entries accessible to the authorized login
     db_reference = [
         BankAccountView(
@@ -229,16 +225,16 @@ class TestBankAccountHandler(TestHandler):
         ],
     )
     def test_get_accounts(
-        self, account_handler, bank_ids, account_type_ids, reference_entries
+        self, account_repo, bank_ids, account_type_ids, reference_entries
     ):
-        accounts = account_handler.get_accounts(bank_ids, account_type_ids)
+        accounts = account_repo.get_accounts(bank_ids, account_type_ids)
         self.assert_entries_match(accounts, reference_entries)
 
     @pytest.mark.parametrize(
         ("bank_id", "expected_balance"), [(2, (443.90 - 409.21)), (3, 200.00)]
     )
-    def test_get_bank_balance(self, account_handler, bank_id, expected_balance):
-        balance = account_handler.get_bank_balance(bank_id)
+    def test_get_bank_balance(self, account_repo, bank_id, expected_balance):
+        balance = account_repo.get_bank_balance(bank_id)
         assert balance == expected_balance
 
     @pytest.mark.parametrize(
@@ -248,9 +244,9 @@ class TestBankAccountHandler(TestHandler):
             (4, NotFound),  # the bank is not in the database
         ],
     )
-    def test_get_bank_balance_invalid(self, account_handler, bank_id, exception):
+    def test_get_bank_balance_invalid(self, account_repo, bank_id, exception):
         with pytest.raises(exception):
-            account_handler.get_bank_balance(bank_id)
+            account_repo.get_bank_balance(bank_id)
 
     @pytest.mark.parametrize(
         ("bank_name", "account_type_name", "last_four_digits", "reference_entry"),
@@ -263,13 +259,13 @@ class TestBankAccountHandler(TestHandler):
     )
     def test_find_account(
         self,
-        account_handler,
+        account_repo,
         bank_name,
         account_type_name,
         last_four_digits,
         reference_entry,
     ):
-        account = account_handler.find_account(
+        account = account_repo.find_account(
             bank_name, account_type_name, last_four_digits
         )
         self.assert_entry_matches(account, reference_entry)
@@ -279,16 +275,16 @@ class TestBankAccountHandler(TestHandler):
         [("Jail", "6666", None), (None, None, None)],
     )
     def test_find_account_none_exist(
-        self, account_handler, bank_name, last_four_digits, account_type_name
+        self, account_repo, bank_name, last_four_digits, account_type_name
     ):
-        account = account_handler.find_account(
+        account = account_repo.find_account(
             bank_name, account_type_name, last_four_digits
         )
         assert account is None
 
     @pytest.mark.parametrize("entry_id", [2, 3])
-    def test_delete_entry(self, account_handler, entry_id):
-        self.assert_entry_deletion_succeeds(account_handler, entry_id)
+    def test_delete_entry(self, account_repo, entry_id):
+        self.assert_entry_deletion_succeeds(account_repo, entry_id)
         # Check that the cascading entries were deleted
         self.assert_number_of_matches(
             0, BankTransaction.id, BankTransaction.account_id == entry_id
@@ -296,12 +292,12 @@ class TestBankAccountHandler(TestHandler):
 
 
 class TestSaveFormFunctions:
-    @patch("monopyly.banking.accounts.BankAccountHandler")
+    @patch("monopyly.banking.accounts.BankAccountRepository")
     @patch("monopyly.banking.forms.BankAccountForm")
-    def test_save_new_account(self, mock_form, mock_handler):
+    def test_save_new_account(self, mock_form, mock_repo):
         # Mock the form and primary method
         mock_form.account_data = {"key": "test account data"}
-        mock_method = mock_handler.add_entry
+        mock_method = mock_repo.add_entry
         # Call the function and check for proper call signatures
         account = save_account(mock_form)
         mock_method.assert_called_once_with(**mock_form.account_data)

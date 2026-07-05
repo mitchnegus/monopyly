@@ -2,10 +2,10 @@
 Tools for interacting with the bank transactions in the database.
 """
 
-from dry_foundation.database.handler import DatabaseViewHandler
+from dry_foundation.database.repository import ViewRepository
 
 from ..common.forms.utils import execute_on_form_validation
-from ..common.transactions import TransactionHandler, TransactionTagHandler
+from ..common.transactions import TransactionRepository, TransactionTagRepository
 from ..core.internal_transactions import add_internal_transaction
 from ..database.models import (
     BankAccountView,
@@ -16,25 +16,25 @@ from ..database.models import (
 )
 
 
-class BankTransactionHandler(
-    TransactionHandler, model=BankTransaction, model_view=BankTransactionView
+class BankTransactionRepository(
+    TransactionRepository, model=BankTransaction, model_view=BankTransactionView
 ):
     """
-    A database handler for accessing bank transactions.
+    A database repository for accessing bank transactions.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_transactions(
         cls, account_ids=None, active=None, sort_order="DESC", offset=None, limit=None
     ):
@@ -51,13 +51,12 @@ class BankTransactionHandler(
         ----------
         account_ids : tuple of int, optional
             A sequence of bank account IDs with which to filter
-            transactions (if `None`, all bank account IDs will be
-            shown).
+            transactions (if unset, all bank account IDs will be shown).
         active : bool, optional
             A flag indicating whether to return transactions for active
-            accounts, inactive accounts, or both. The default is `None`,
-            where all transactions are returned regardless of the
-            account's active status.
+            accounts, inactive accounts, or both. If unset, all
+            transactions are returned regardless of the account's active
+            status.
         sort_order : {'ASC', 'DESC'}
             An indicator of whether the transactions should be ordered
             in ascending (oldest at top) or descending (newest at top)
@@ -76,7 +75,7 @@ class BankTransactionHandler(
             Returns bank account transactions matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "account_id", account_ids)
+        criteria.add_membership_filter(cls.model, "account_id", account_ids)
         criteria.add_match_filter(BankAccountView, "active", active)
         transactions = super()._get_transactions(
             criteria=criteria, sort_order=sort_order, offset=offset, limit=limit
@@ -90,23 +89,23 @@ class BankTransactionHandler(
         return BankSubtransaction(
             transaction_id=transaction.id,
             **subtransaction_data,
-            tags=BankTagHandler.get_tags(tag_names, ancestors=True),
+            tags=BankTagRepository.get_tags(tag_names, ancestors=True),
         )
 
 
-class BankTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):
+class BankTagRepository(TransactionTagRepository, model=TransactionTagRepository.model):
     """
-    A database handler for managing bank transaction tags.
+    A database repository for managing bank transaction tags.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
@@ -126,14 +125,14 @@ class BankTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):
         Parameters
         ----------
         tag_names : tuple of str, optional
-            A sequence of names of tags to be selected (if `None`, all
+            A sequence of names of tags to be selected (if unset, all
             tag names will be selected).
         transaction_ids : tuple of int, optional
             A sequence of bank transaction IDs for which tags will be
-            selected (if `None`, all transaction tags will be selected).
+            selected (if unset, all transaction tags will be selected).
         subtransaction_ids : tuple of int, optional
             A sequence of bank subtransaction IDs for which tags will be
-            selected (if `None`, all subtransaction tags will be
+            selected (if unset, all subtransaction tags will be
             selected).
         ancestors : bool, optional
             A flag indicating whether the query should include tags
@@ -151,9 +150,9 @@ class BankTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):
             Returns transaction tags matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "tag_name", tag_names)
-        criteria.add_match_filter(BankTransactionView, "id", transaction_ids)
-        criteria.add_match_filter(BankSubtransaction, "id", subtransaction_ids)
+        criteria.add_membership_filter(cls.model, "tag_name", tag_names)
+        criteria.add_membership_filter(BankTransactionView, "id", transaction_ids)
+        criteria.add_membership_filter(BankSubtransaction, "id", subtransaction_ids)
         tags = super()._get_tags(criteria, ancestors=ancestors)
         return tags
 
@@ -197,12 +196,12 @@ def save_transaction(form, transaction_id=None):
     transaction_data = form.transaction_data
     transfer_data = form.transfer_data
     if transaction_id:
-        transaction = BankTransactionHandler.get_entry(transaction_id)
+        transaction = BankTransactionRepository.get_entry(transaction_id)
         # Update the database with the updated transaction
         transaction_data.update(
             internal_transaction_id=transaction.internal_transaction_id
         )
-        transaction = BankTransactionHandler.update_entry(
+        transaction = BankTransactionRepository.update_entry(
             transaction_id,
             **transaction_data,
         )
@@ -215,7 +214,7 @@ def save_transaction(form, transaction_id=None):
                 internal_transaction_id=transfer.internal_transaction_id,
                 merchant=transfer.account_view.bank.bank_name,
             )
-        transaction = BankTransactionHandler.add_entry(**transaction_data)
+        transaction = BankTransactionRepository.add_entry(**transaction_data)
     return transaction
 
 
@@ -224,5 +223,5 @@ def record_new_transfer(transfer_data):
     # Create a new internal transaction ID to assign to the transfer
     transfer_data["internal_transaction_id"] = add_internal_transaction()
     # Add the transfer transaction to the database
-    transfer = BankTransactionHandler.add_entry(**transfer_data)
+    transfer = BankTransactionRepository.add_entry(**transfer_data)
     return transfer

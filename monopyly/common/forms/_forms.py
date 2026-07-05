@@ -90,13 +90,13 @@ class AcquisitionSubform(EntrySubform):
 
     This subform is intended to interface with the database to acquire
     database entries corresponding to the given criteria. A database
-    handler must be defined in a subclass of this abstract class, and
-    that handler is then used to get the
+    repository must be defined in a subclass of this abstract class, and
+    that repository is then used to get the
     """
 
     @property
     @abstractmethod
-    def _db_handler(self):
+    def _db_repo(self):
         raise NotImplementedError("Define the attribute in a subclass.")
 
     def _produce_entry_from_field(self, form_entry_id_field_name):
@@ -106,11 +106,11 @@ class AcquisitionSubform(EntrySubform):
         # If the entry is a new entry, create it from the form data
         if form_entry_id == 0:
             data = self._prepare_mapping()
-            entry = self._db_handler.add_entry(**data)
+            entry = self._db_repo.add_entry(**data)
             # Set the form field to match the newly added value
             form_entry_id_field.data = entry.id
         else:
-            entry = self._db_handler.get_entry(form_entry_id)
+            entry = self._db_repo.get_entry(form_entry_id)
         return entry
 
     @abstractmethod

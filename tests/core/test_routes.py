@@ -17,10 +17,10 @@ class TestCoreRoutes(TestRoutes):
         assert self.div_exists(id="homepage-block")
         assert self.div_exists(id="homepage-panels")
 
-    @patch("monopyly.core.routes.CreditStatementHandler")
-    def test_index_no_statements(self, mock_handler, auth):
-        # Mock the statement handler to return no statements
-        mock_statements = mock_handler.get_statements.return_value
+    @patch("monopyly.core.routes.CreditStatementRepository")
+    def test_index_no_statements(self, mock_repo, auth):
+        # Mock the statement repository to return no statements
+        mock_statements = mock_repo.get_statements.return_value
         mock_statements.first.return_value = None
         # Test that statement information is not shown if none exists
         auth.login()

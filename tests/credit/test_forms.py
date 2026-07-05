@@ -143,18 +143,18 @@ class TestCreditCardForm:
         }
         assert data == expected_data
 
-    @patch("monopyly.credit.forms.CreditCardForm.AccountSubform._db_handler")
-    def test_account_subform_get_account(self, mock_handler, filled_card_form):
+    @patch("monopyly.credit.forms.CreditCardForm.AccountSubform._db_repo")
+    def test_account_subform_get_account(self, mock_repo, filled_card_form):
         account_subform = filled_card_form.account_info
         # Test that an existing account entry is returned
         account = account_subform.get_account()
-        assert account == mock_handler.get_entry.return_value
-        mock_handler.get_entry.assert_called_with(account_subform.account_id.data)
+        assert account == mock_repo.get_entry.return_value
+        mock_repo.get_entry.assert_called_with(account_subform.account_id.data)
 
-    @patch("monopyly.credit.forms.CreditCardForm.AccountSubform._db_handler")
+    @patch("monopyly.credit.forms.CreditCardForm.AccountSubform._db_repo")
     @patch("monopyly.credit.forms.CreditCardForm.AccountSubform._prepare_mapping")
     def test_account_subform_get_new_account(
-        self, mock_method, mock_handler, filled_card_form
+        self, mock_method, mock_repo, filled_card_form
     ):
         account_subform = filled_card_form.account_info
         # Mock the subform's mapping
@@ -163,8 +163,8 @@ class TestCreditCardForm:
         account_subform.account_id.data = 0
         # Test that a new account entry is created and returned
         account = account_subform.get_account()
-        assert account == mock_handler.add_entry.return_value
-        mock_handler.add_entry.assert_called_with(**mock_method.return_value)
+        assert account == mock_repo.add_entry.return_value
+        mock_repo.add_entry.assert_called_with(**mock_method.return_value)
 
     def test_account_subform_gather_data(self, card_form, mock_account):
         account_subform = card_form.account_info
@@ -286,13 +286,13 @@ class TestCreditTransactionForm:
         assert len(filled_transaction_form.subtransactions) == 1
 
     @patch(
-        "monopyly.credit.forms.CreditTransactionForm.StatementSubform.CardSubform._db_handler"
+        "monopyly.credit.forms.CreditTransactionForm.StatementSubform.CardSubform._db_repo"
     )
-    def test_card_subform_get_card(self, mock_handler, filled_transaction_form):
+    def test_card_subform_get_card(self, mock_repo, filled_transaction_form):
         card_subform = filled_transaction_form.statement_info.card_info
         card = card_subform.get_card()
-        assert card == mock_handler.find_card.return_value
-        mock_handler.find_card.assert_called_with(
+        assert card == mock_repo.find_card.return_value
+        mock_repo.find_card.assert_called_with(
             bank_name=card_subform.bank_name.data,
             last_four_digits=card_subform.last_four_digits.data,
         )
@@ -334,12 +334,12 @@ class TestCreditTransactionForm:
         with pytest.raises(NotFound):
             filled_transaction_form.statement_info.get_statement(None)
 
-    @patch("monopyly.credit.forms.CreditTransactionForm.StatementSubform._db_handler")
+    @patch("monopyly.credit.forms.CreditTransactionForm.StatementSubform._db_repo")
     def test_statement_subform_determine_existing_statement(
-        self, mock_handler, transaction_form, mock_card
+        self, mock_repo, transaction_form, mock_card
     ):
         statement_subform = transaction_form.statement_info
-        mock_method = mock_handler.find_statement
+        mock_method = mock_repo.find_statement
         # Mock the requirements for returning an existing statement
         mock_issue_date = Mock()
         statement_subform.issue_date.data = mock_issue_date
@@ -349,28 +349,28 @@ class TestCreditTransactionForm:
         assert statement == mock_method.return_value
         mock_method.assert_called_with(mock_card.id, mock_issue_date)
 
-    @patch("monopyly.credit.forms.CreditTransactionForm.StatementSubform._db_handler")
+    @patch("monopyly.credit.forms.CreditTransactionForm.StatementSubform._db_repo")
     def test_statement_subform_determine_new_statement(
-        self, mock_handler, transaction_form, mock_card
+        self, mock_repo, transaction_form, mock_card
     ):
         statement_subform = transaction_form.statement_info
-        mock_method = mock_handler.add_statement
+        mock_method = mock_repo.add_statement
         # Mock the requirements for returning a new statement
         mock_issue_date = Mock()
         statement_subform.issue_date.data = mock_issue_date
-        mock_handler.find_statement.return_value = None
+        mock_repo.find_statement.return_value = None
         # Ensure that the new statement is returned
         transaction_date = date(2022, 6, 1)
         statement = statement_subform.determine_statement(mock_card, transaction_date)
         assert statement == mock_method.return_value
         mock_method.assert_called_with(mock_card, mock_issue_date)
 
-    @patch("monopyly.credit.forms.CreditTransactionForm.StatementSubform._db_handler")
+    @patch("monopyly.credit.forms.CreditTransactionForm.StatementSubform._db_repo")
     def test_statement_subform_determine_inferred_statement(
-        self, mock_handler, transaction_form, mock_card
+        self, mock_repo, transaction_form, mock_card
     ):
         statement_subform = transaction_form.statement_info
-        mock_method = mock_handler.infer_statement
+        mock_method = mock_repo.infer_statement
         # Mock the requirements for returning a new statement
         statement_subform.issue_date.data = None
         # Ensure that the new statement is returned

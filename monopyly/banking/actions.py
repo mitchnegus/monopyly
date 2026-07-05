@@ -3,16 +3,16 @@
 from collections import UserDict, namedtuple
 
 from ..common.utils import convert_date_to_midnight_timestamp
-from .accounts import BankAccountHandler, BankAccountTypeHandler
+from .accounts import BankAccountRepository, BankAccountTypeRepository
 
 
 def get_bank_account_type_grouping(bank):
     """Get a summary of accounts for the given bank, grouped by type."""
     # Get a grouping (by account type) of accounts at the given bank
     type_accounts = {}
-    for account_type in BankAccountTypeHandler.get_types_for_bank(bank.id):
+    for account_type in BankAccountTypeRepository.get_types_for_bank(bank.id):
         # Get only accounts for the logged in user and the given bank
-        type_accounts[account_type] = BankAccountHandler.get_accounts(
+        type_accounts[account_type] = BankAccountRepository.get_accounts(
             bank_ids=(bank.id,),
             account_type_ids=(account_type.id,),
         )

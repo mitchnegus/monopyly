@@ -4,10 +4,10 @@ from datetime import date
 from unittest.mock import Mock
 
 import pytest
-from dry_foundation.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestRepository
 from sqlalchemy.exc import StatementError
 
-from monopyly.credit.statements import CreditStatementHandler
+from monopyly.credit.statements import CreditStatementRepository
 from monopyly.database.models import (
     CreditStatement,
     CreditStatementView,
@@ -16,11 +16,11 @@ from monopyly.database.models import (
 
 
 @pytest.fixture
-def statement_handler(client_context):
-    return CreditStatementHandler
+def statement_repo(client_context):
+    return CreditStatementRepository
 
 
-class TestCreditStatementHandler(TestHandler):
+class TestCreditStatementRepository(TestRepository):
     statement2_balance = 1.00
     statement3_balance = (43.21 + 30.00 + 35.00) + statement2_balance
     statement6_balance = 1600.00 - 1230.00
@@ -93,14 +93,14 @@ class TestCreditStatementHandler(TestHandler):
     )
     def test_get_statements(
         self,
-        statement_handler,
+        statement_repo,
         card_ids,
         bank_ids,
         active,
         sort_order,
         reference_entries,
     ):
-        statements = statement_handler.get_statements(
+        statements = statement_repo.get_statements(
             card_ids, bank_ids, active, sort_order
         )
         self.assert_entries_match(statements, reference_entries, order=True)
@@ -113,17 +113,15 @@ class TestCreditStatementHandler(TestHandler):
             (3, None, db_reference[0]),
         ],
     )
-    def test_find_statement(
-        self, statement_handler, card_id, issue_date, reference_entry
-    ):
-        statement = statement_handler.find_statement(card_id, issue_date)
+    def test_find_statement(self, statement_repo, card_id, issue_date, reference_entry):
+        statement = statement_repo.find_statement(card_id, issue_date)
         self.assert_entry_matches(statement, reference_entry)
 
     @pytest.mark.parametrize(
         ("card_id", "issue_date"), [(3, date(2020, 12, 1)), (None, None)]
     )
-    def test_find_statement_none_exist(self, statement_handler, card_id, issue_date):
-        statement = statement_handler.find_statement(card_id, issue_date)
+    def test_find_statement_none_exist(self, statement_repo, card_id, issue_date):
+        statement = statement_repo.find_statement(card_id, issue_date)
         assert statement is None
 
     @pytest.mark.parametrize(
@@ -145,7 +143,7 @@ class TestCreditStatementHandler(TestHandler):
     )
     def test_infer_statement(
         self,
-        statement_handler,
+        statement_repo,
         card_id,
         statement_issue_day,
         statement_due_day,
@@ -159,7 +157,7 @@ class TestCreditStatementHandler(TestHandler):
         mock_card.account.statement_issue_day = statement_issue_day
         mock_card.account.statement_due_day = statement_due_day
         # Test that the inference action produces the expected behavior
-        statement = statement_handler.infer_statement(
+        statement = statement_repo.infer_statement(
             mock_card, transaction_date, creation=creation
         )
         if inferred_statement_id is None:
@@ -169,10 +167,10 @@ class TestCreditStatementHandler(TestHandler):
 
     @pytest.mark.parametrize(("statement_id", "prior_statement_id"), [(5, 4), (7, 6)])
     def test_get_prior_statement(
-        self, statement_handler, statement_id, prior_statement_id
+        self, statement_repo, statement_id, prior_statement_id
     ):
-        current_statement = statement_handler.get_entry(statement_id)
-        prior_statement = statement_handler.get_prior_statement(current_statement)
+        current_statement = statement_repo.get_entry(statement_id)
+        prior_statement = statement_repo.get_prior_statement(current_statement)
         assert prior_statement.id == prior_statement_id
 
     @pytest.mark.parametrize(
@@ -185,7 +183,7 @@ class TestCreditStatementHandler(TestHandler):
     )
     def test_add_statement(
         self,
-        statement_handler,
+        statement_repo,
         card_id,
         statement_due_day,
         issue_date,
@@ -195,7 +193,7 @@ class TestCreditStatementHandler(TestHandler):
         mock_card = Mock()
         mock_card.id = card_id
         mock_card.account.statement_due_day = statement_due_day
-        statement = statement_handler.add_statement(mock_card, issue_date, due_date)
+        statement = statement_repo.add_statement(mock_card, issue_date, due_date)
         # Check that the entry object was properly created
         assert statement.due_date == expected_due_date
         # Check that the entry was added to the database
@@ -213,7 +211,7 @@ class TestCreditStatementHandler(TestHandler):
     )
     def test_add_entry_invalid(
         self,
-        statement_handler,
+        statement_repo,
         card_id,
         statement_due_day,
         issue_date,
@@ -227,20 +225,20 @@ class TestCreditStatementHandler(TestHandler):
             mock_card.id = card_id
             mock_card.account.statement_due_day = statement_due_day
         with pytest.raises(exception):
-            statement_handler.add_statement(mock_card, issue_date, due_date)
+            statement_repo.add_statement(mock_card, issue_date, due_date)
 
-    def test_add_entry_invalid_user(self, statement_handler):
+    def test_add_entry_invalid_user(self, statement_repo):
         mapping = {
             "card_id": 1,
             "issue_date": date(2020, 8, 1),
             "due_date": date(2020, 8, 20),
         }
         # Ensure that 'mr.monopyly' cannot add an entry for the test user
-        self.assert_invalid_user_entry_add_fails(statement_handler, mapping)
+        self.assert_invalid_user_entry_add_fails(statement_repo, mapping)
 
     @pytest.mark.parametrize("entry_id", [2, 3])
-    def test_delete_entry(self, statement_handler, entry_id):
-        self.assert_entry_deletion_succeeds(statement_handler, entry_id)
+    def test_delete_entry(self, statement_repo, entry_id):
+        self.assert_entry_deletion_succeeds(statement_repo, entry_id)
         # Check that the cascading entries were deleted
         self.assert_number_of_matches(
             0, CreditTransaction.id, CreditTransaction.statement_id == entry_id

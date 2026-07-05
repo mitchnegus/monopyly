@@ -2,24 +2,24 @@
 Tools for interacting with credit accounts in the database.
 """
 
-from dry_foundation.database.handler import DatabaseHandler
+from dry_foundation.database.repository import Repository
 
 from ..database.models import CreditAccount
 
 
-class CreditAccountHandler(DatabaseHandler, model=CreditAccount):
+class CreditAccountRepository(Repository, model=CreditAccount):
     """
-    A database handler for managing credit accounts.
+    A database repository for managing credit accounts.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
@@ -34,7 +34,7 @@ class CreditAccountHandler(DatabaseHandler, model=CreditAccount):
         ----------
         bank_ids : tuple of int, optional
             A sequence of bank IDs for which accounts will be selected
-            (if `None`, all banks will be selected).
+            (if unset, all banks will be selected).
 
         Returns
         -------
@@ -42,7 +42,7 @@ class CreditAccountHandler(DatabaseHandler, model=CreditAccount):
             Returns credit accounts matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "bank_id", bank_ids)
+        criteria.add_membership_filter(cls.model, "bank_id", bank_ids)
         accounts = super().get_entries(criteria=criteria)
         return accounts
 

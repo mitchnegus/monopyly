@@ -144,18 +144,18 @@ class TestBankSubform:
         with pytest.raises(ValueError, match="A bank name must be provided."):
             subform._prepare_mapping()
 
-    @patch("monopyly.banking.forms.BankSubform._db_handler")
-    def test_bank_subform_get_bank(self, mock_handler, client_context):
+    @patch("monopyly.banking.forms.BankSubform._db_repo")
+    def test_bank_subform_get_bank(self, mock_repo, client_context):
         subform = self.SampleForm().bank_info
         subform.bank_id.data = 100
         # Test that an existing bank entry is returned
         bank = subform.get_bank()
-        assert bank == mock_handler.get_entry.return_value
-        mock_handler.get_entry.assert_called_with(subform.bank_id.data)
+        assert bank == mock_repo.get_entry.return_value
+        mock_repo.get_entry.assert_called_with(subform.bank_id.data)
 
-    @patch("monopyly.banking.forms.BankSubform._db_handler")
+    @patch("monopyly.banking.forms.BankSubform._db_repo")
     @patch("monopyly.banking.forms.BankSubform._prepare_mapping")
-    def test_bank_subform_get_new_bank(self, mock_method, mock_handler, client_context):
+    def test_bank_subform_get_new_bank(self, mock_method, mock_repo, client_context):
         subform = self.SampleForm().bank_info
         # Mock the subform"s mapping
         mock_method.return_value = {"test": "mapping"}
@@ -163,8 +163,8 @@ class TestBankSubform:
         subform.bank_id.data = 0
         # Test that a new bank entry is created and returned
         bank = subform.get_bank()
-        assert bank == mock_handler.add_entry.return_value
-        mock_handler.add_entry.assert_called_with(**mock_method.return_value)
+        assert bank == mock_repo.add_entry.return_value
+        mock_repo.add_entry.assert_called_with(**mock_method.return_value)
 
     def test_bank_subform_gather_data(self, client_context, mock_bank):
         bank_subform = self.SampleForm().bank_info
@@ -239,22 +239,22 @@ class TestBankAccountForm:
         }
         assert data == expected_data
 
-    @patch("monopyly.banking.forms.BankAccountForm.AccountTypeSubform._db_handler")
+    @patch("monopyly.banking.forms.BankAccountForm.AccountTypeSubform._db_repo")
     def test_account_type_subform_get_account_type(
-        self, mock_handler, filled_account_form
+        self, mock_repo, filled_account_form
     ):
         account_type_subform = filled_account_form.account_type_info
         # Test that an existing account entry is returned
         account = account_type_subform.get_account_type()
-        assert account == mock_handler.get_entry.return_value
-        mock_handler.get_entry.assert_called_with(
+        assert account == mock_repo.get_entry.return_value
+        mock_repo.get_entry.assert_called_with(
             account_type_subform.account_type_id.data
         )
 
-    @patch("monopyly.banking.forms.BankAccountForm.AccountTypeSubform._db_handler")
+    @patch("monopyly.banking.forms.BankAccountForm.AccountTypeSubform._db_repo")
     @patch("monopyly.banking.forms.BankAccountForm.AccountTypeSubform._prepare_mapping")
     def test_account_type_subform_get_new_account_type(
-        self, mock_method, mock_handler, filled_account_form
+        self, mock_method, mock_repo, filled_account_form
     ):
         account_type_subform = filled_account_form.account_type_info
         # Mock the subform"s mapping
@@ -263,8 +263,8 @@ class TestBankAccountForm:
         account_type_subform.account_type_id.data = 0
         # Test that a new account entry is created and returned
         account_type = account_type_subform.get_account_type()
-        assert account_type == mock_handler.add_entry.return_value
-        mock_handler.add_entry.assert_called_with(**mock_method.return_value)
+        assert account_type == mock_repo.add_entry.return_value
+        mock_repo.add_entry.assert_called_with(**mock_method.return_value)
 
     @patch("monopyly.banking.forms.BankSubform.gather_entry_data")
     def test_gather_data(self, mock_method, account_form, mock_bank):
@@ -398,12 +398,12 @@ class TestBankTransactionForm:
     def test_no_transfer_data(self, filled_transaction_form):
         assert filled_transaction_form.transfer_data is None
 
-    @patch("monopyly.banking.forms.BankTransactionForm.AccountSubform._db_handler")
-    def test_account_subform_get_account(self, mock_handler, filled_transaction_form):
+    @patch("monopyly.banking.forms.BankTransactionForm.AccountSubform._db_repo")
+    def test_account_subform_get_account(self, mock_repo, filled_transaction_form):
         account_subform = filled_transaction_form.account_info
         account = account_subform.get_account()
-        assert account == mock_handler.find_account.return_value
-        mock_handler.find_account.assert_called_with(
+        assert account == mock_repo.find_account.return_value
+        mock_repo.find_account.assert_called_with(
             bank_name=account_subform.bank_name.data,
             account_type_name=account_subform.type_name.data,
             last_four_digits=account_subform.last_four_digits.data,

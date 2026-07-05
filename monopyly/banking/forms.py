@@ -21,14 +21,14 @@ from ..database.models import (
     BankTransactionView,
     TransactionTag,
 )
-from .accounts import BankAccountHandler, BankAccountTypeHandler
-from .banks import BankHandler
+from .accounts import BankAccountRepository, BankAccountTypeRepository
+from .banks import BankRepository
 
 
 class BankSelectField(CustomChoiceSelectField):
     """Bank field that uses the database to prepare field choices."""
 
-    _db_handler = BankHandler
+    _db_repo = BankRepository
 
     def __init__(self, **kwargs):
         super().__init__(label="Bank", **kwargs)
@@ -42,7 +42,7 @@ class BankSelectField(CustomChoiceSelectField):
 class BankAccountTypeSelectField(CustomChoiceSelectField):
     """Account type field that uses the database to prepare field choices."""
 
-    _db_handler = BankAccountTypeHandler
+    _db_repo = BankAccountTypeRepository
 
     def __init__(self, **kwargs):
         super().__init__(label="Account Type", **kwargs)
@@ -59,7 +59,7 @@ class BankAccountTypeSelectField(CustomChoiceSelectField):
 class BankSubform(AcquisitionSubform):
     """Form to input/edit bank identification."""
 
-    _db_handler = BankHandler
+    _db_repo = BankRepository
     # Fields pertaining to the bank
     bank_id = BankSelectField()
     bank_name = StringField("Bank Name", [Optional()])
@@ -74,7 +74,7 @@ class BankSubform(AcquisitionSubform):
             raise ValueError("A bank name must be provided.")
         # Mapping must match format for `banks` database table
         bank_data = {
-            "user_id": self._db_handler.user_id,
+            "user_id": self._db_repo.user_id,
             "bank_name": self.bank_name.data,
         }
         return bank_data
@@ -97,7 +97,7 @@ class BankAccountForm(EntryForm):
     class AccountTypeSubform(AcquisitionSubform):
         """Form to input/edit bank account types."""
 
-        _db_handler = BankAccountTypeHandler
+        _db_repo = BankAccountTypeRepository
         # Fields pertaining to the account type
         account_type_id = BankAccountTypeSelectField()
         type_name = StringField("Account Type Name")
@@ -109,7 +109,7 @@ class BankAccountForm(EntryForm):
         def _prepare_mapping(self):
             # Mapping must match format for `bank_account_types` database table
             account_type_data = {
-                "user_id": self._db_handler.user_id,
+                "user_id": self._db_repo.user_id,
                 "type_name": self.type_name.data,
                 "type_abbreviation": None,
             }
@@ -159,7 +159,7 @@ class BankTransactionForm(TransactionForm):
     class AccountSubform(EntrySubform):
         """Form to input/edit bank account identification."""
 
-        _db_handler = BankAccountHandler
+        _db_repo = BankAccountRepository
         # Fields pertaining to the account
         bank_name = StringField("Bank")
         last_four_digits = LastFourDigitsField(
@@ -169,7 +169,7 @@ class BankTransactionForm(TransactionForm):
 
         def get_account(self):
             """Get the bank account described by the form data."""
-            return self._db_handler.find_account(
+            return self._db_repo.find_account(
                 bank_name=self.bank_name.data,
                 account_type_name=self.type_name.data,
                 last_four_digits=self.last_four_digits.data,

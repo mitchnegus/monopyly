@@ -16,8 +16,8 @@ from flask import (
 from sqlalchemy.exc import MultipleResultsFound
 
 from ..auth.tools import login_required
-from ..banking.accounts import BankAccountHandler
-from ..banking.banks import BankHandler
+from ..banking.accounts import BankAccountRepository
+from ..banking.banks import BankRepository
 from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import (
     categorize,
@@ -25,7 +25,7 @@ from ..common.transactions import (
     highlight_unmatched_transactions,
 )
 from ..common.utils import dedelimit_float, parse_date
-from .accounts import CreditAccountHandler
+from .accounts import CreditAccountRepository
 from .actions import (
     get_card_statement_grouping,
     get_potential_preceding_card,
@@ -35,10 +35,10 @@ from .actions import (
     transfer_credit_card_statement,
 )
 from .blueprint import bp
-from .cards import CreditCardHandler, save_card
+from .cards import CreditCardRepository, save_card
 from .forms import CardStatementTransferForm, CreditCardForm, CreditTransactionForm
-from .statements import CreditStatementHandler
-from .transactions import CreditTransactionHandler, save_transaction
+from .statements import CreditStatementRepository
+from .transactions import CreditTransactionRepository, save_transaction
 from .transactions.activity import (
     ActivityMatchmaker,
     TransactionActivities,
@@ -52,7 +52,7 @@ TRANSACTION_LIMIT = 100
 @bp.route("/cards")
 @login_required
 def load_cards():
-    cards = CreditCardHandler.get_cards()
+    cards = CreditCardRepository.get_cards()
     return render_template("credit/cards_page.html", cards=cards)
 
 
@@ -98,9 +98,9 @@ def transfer_statement(account_id, card_id, prior_card_id):
 @login_required
 def load_account(account_id):
     # Get the account information from the database
-    account = CreditAccountHandler.get_entry(account_id)
+    account = CreditAccountRepository.get_entry(account_id)
     # Get all cards with active cards at the end of the list
-    cards = CreditCardHandler.get_cards(account_ids=(account_id,)).all()
+    cards = CreditCardRepository.get_cards(account_ids=(account_id,)).all()
     return render_template(
         "credit/account_page.html", account=account, cards=reversed(cards)
     )
@@ -115,7 +115,7 @@ def update_card_status():
     card_id = int(post_args["card_id"])
     active = int(post_args["active"])
     # Update the card in the database
-    card = CreditCardHandler.update_entry(card_id, active=active)
+    card = CreditCardRepository.update_entry(card_id, active=active)
     return render_template("credit/card_graphic/card_front.html", card=card)
 
 
@@ -123,8 +123,8 @@ def update_card_status():
 @login_required
 @db_transaction
 def delete_card(card_id):
-    account_id = CreditCardHandler.get_entry(card_id).account_id
-    CreditCardHandler.delete_entry(card_id)
+    account_id = CreditCardRepository.get_entry(card_id).account_id
+    CreditCardRepository.delete_entry(card_id)
     return redirect(url_for("credit.load_account", account_id=account_id))
 
 
@@ -135,7 +135,7 @@ def update_account_statement_issue_day(account_id):
     # Get the field from the AJAX request
     issue_day = int(request.get_json())
     # Update the account in the database
-    account = CreditAccountHandler.update_entry(
+    account = CreditAccountRepository.update_entry(
         account_id,
         statement_issue_day=issue_day,
     )
@@ -149,7 +149,7 @@ def update_account_statement_due_day(account_id):
     # Get the field from the AJAX request
     due_day = int(request.get_json())
     # Update the account in the database
-    account = CreditAccountHandler.update_entry(
+    account = CreditAccountRepository.update_entry(
         account_id,
         statement_due_day=due_day,
     )
@@ -160,7 +160,7 @@ def update_account_statement_due_day(account_id):
 @login_required
 @db_transaction
 def delete_account(account_id):
-    CreditAccountHandler.delete_entry(account_id)
+    CreditAccountRepository.delete_entry(account_id)
     return redirect(url_for("credit.load_cards"))
 
 
@@ -168,8 +168,8 @@ def delete_account(account_id):
 @login_required
 def load_statements():
     # Get all of the user's credit cards from the database
-    all_cards = CreditCardHandler.get_cards()
-    active_cards = CreditCardHandler.get_cards(active=True)
+    all_cards = CreditCardRepository.get_cards()
+    active_cards = CreditCardRepository.get_cards(active=True)
     card_statements = get_card_statement_grouping(active_cards)
     return render_template(
         "credit/statements_page.html",
@@ -185,7 +185,7 @@ def update_statements_display():
     post_args = request.get_json()
     card_ids = map(int, post_args["card_ids"])
     # Determine the cards from the arguments of POST method
-    cards = [CreditCardHandler.get_entry(card_id) for card_id in card_ids]
+    cards = [CreditCardRepository.get_entry(card_id) for card_id in card_ids]
     card_statements = get_card_statement_grouping(cards)
     # Filter selected statements from the database
     return render_template("credit/statements.html", card_statements=card_statements)
@@ -197,7 +197,7 @@ def load_statement_details(statement_id):
     statement, transactions = get_statement_and_transactions(statement_id)
     categories = categorize(transactions)
     # Get bank accounts for potential payments
-    bank_accounts = BankAccountHandler.get_accounts()
+    bank_accounts = BankAccountRepository.get_accounts()
     # Save a pointer to this statement to allow easy returns
     session["statement_focus"] = statement_id
     return render_template(
@@ -228,7 +228,7 @@ def update_statement_due_date(statement_id):
     # Get the field from the AJAX request
     due_date = parse_date(request.get_json())
     # Update the statement in the database
-    statement = CreditStatementHandler.update_entry(
+    statement = CreditStatementRepository.update_entry(
         statement_id,
         due_date=due_date,
     )
@@ -247,11 +247,11 @@ def pay_credit_card(card_id, statement_id):
     # Pay towards the card balance
     make_payment(card_id, payment_account_id, payment_date, payment_amount)
     # Get the current statement information from the database
-    statement = CreditStatementHandler.get_entry(statement_id)
-    transactions = CreditTransactionHandler.get_transactions(
+    statement = CreditStatementRepository.get_entry(statement_id)
+    transactions = CreditTransactionRepository.get_transactions(
         statement_ids=(statement_id,)
     )
-    bank_accounts = BankAccountHandler.get_accounts()
+    bank_accounts = BankAccountRepository.get_accounts()
     summary_template = render_template(
         "credit/statement_summary.html",
         statement=statement,
@@ -290,7 +290,7 @@ def load_statement_reconciliation_details(statement_id):
         non_matches = matchmaker.unmatched_transactions
         transactions = list(highlight_unmatched_transactions(transactions, non_matches))
         # Calculate the amount charged/refunded during this statement timeframe
-        prior_statement = CreditStatementHandler.get_prior_statement(statement)
+        prior_statement = CreditStatementRepository.get_prior_statement(statement)
         prior_statement_balance = prior_statement.balance if prior_statement else 0
         statement_transaction_balance = statement.balance - prior_statement_balance
         return render_template(
@@ -332,16 +332,16 @@ def clear_reconciliation_info():
 @login_required
 def load_transactions(card_id):
     # Get all of the user's credit cards from the database (for the filter)
-    cards = CreditCardHandler.get_cards()
+    cards = CreditCardRepository.get_cards()
     # Identify cards to be selected in the filter on page load
     if card_id:
         selected_card_ids = [card_id]
     else:
-        active_cards = CreditCardHandler.get_cards(active=True)
+        active_cards = CreditCardRepository.get_cards(active=True)
         selected_card_ids = [card.id for card in active_cards]
     # Get all of the user's transactions for the selected cards
     sort_order = "DESC"
-    transactions = CreditTransactionHandler.get_transactions(
+    transactions = CreditTransactionRepository.get_transactions(
         card_ids=selected_card_ids, sort_order=sort_order
     ).all()
     return render_template(
@@ -364,7 +364,7 @@ def load_more_transactions():
     block_index = post_args["block_count"] - 1
     full_view = post_args["full_view"]
     # Get a subset of the remaining transactions to load
-    more_transactions = CreditTransactionHandler.get_transactions(
+    more_transactions = CreditTransactionRepository.get_transactions(
         card_ids=selected_card_ids,
         sort_order=sort_order,
         offset=block_index * TRANSACTION_LIMIT,
@@ -385,7 +385,7 @@ def update_transactions_display():
     card_ids = map(int, post_args["card_ids"])
     sort_order = "ASC" if post_args["sort_order"] == "asc" else "DESC"
     # Filter selected transactions from the database
-    transactions = CreditTransactionHandler.get_transactions(
+    transactions = CreditTransactionRepository.get_transactions(
         card_ids=card_ids, sort_order=sort_order, limit=100
     )
     return render_template(
@@ -401,7 +401,7 @@ def update_transactions_display():
 def expand_transaction():
     # Get the transaction ID from the AJAX request
     transaction_id = int(request.get_json())
-    transaction = CreditTransactionHandler.get_entry(transaction_id)
+    transaction = CreditTransactionRepository.get_entry(transaction_id)
     # Get the subtransactions
     subtransactions = transaction.subtransactions
     return render_template(
@@ -415,7 +415,7 @@ def expand_transaction():
 def show_linked_transaction():
     post_args = request.get_json()
     transaction_id = int(post_args["transaction_id"])
-    transaction = CreditTransactionHandler.get_entry(transaction_id)
+    transaction = CreditTransactionRepository.get_entry(transaction_id)
     linked_transaction = get_linked_transaction(transaction)
     return render_template(
         "common/transactions_table/linked_transaction_overlay.html",
@@ -452,9 +452,9 @@ def add_transaction(card_id, statement_id):
     else:
         transaction_data = parse_request_transaction_data(request.args)
         if statement_id:
-            entry = CreditStatementHandler.get_entry(statement_id)
+            entry = CreditStatementRepository.get_entry(statement_id)
         elif card_id:
-            entry = CreditCardHandler.get_entry(card_id)
+            entry = CreditCardRepository.get_entry(card_id)
         else:
             entry = None
         form = form.prepopulate(
@@ -482,7 +482,7 @@ def update_transaction(transaction_id):
         )
     else:
         transaction_data = parse_request_transaction_data(request.args)
-        transaction = CreditTransactionHandler.get_entry(transaction_id)
+        transaction = CreditTransactionRepository.get_entry(transaction_id)
         form = form.prepopulate(
             transaction, data=transaction_data, suggestion_fields=["amount"]
         )
@@ -516,15 +516,15 @@ def add_subtransaction_fields():
 @login_required
 @db_transaction
 def delete_transaction(transaction_id):
-    CreditTransactionHandler.delete_entry(transaction_id)
+    CreditTransactionRepository.delete_entry(transaction_id)
     if (statement_id := session.pop("statement_focus", None)) is not None:
-        statement = CreditStatementHandler.get_entry(statement_id)
+        statement = CreditStatementRepository.get_entry(statement_id)
         # Delete the statement if it has no more transactions
         if statement.balance is not None:
             return redirect(
                 url_for("credit.load_statement_details", statement_id=statement.id)
             )
-        CreditStatementHandler.delete_entry(statement.id)
+        CreditStatementRepository.delete_entry(statement.id)
     return redirect(url_for("credit.load_transactions"))
 
 
@@ -552,7 +552,7 @@ def infer_card():
     # Separate the arguments of the POST method
     post_args = request.get_json()
     bank_name = post_args["bank_name"]
-    bank = BankHandler.get_banks(bank_names=(bank_name,)).first()
+    bank = BankRepository.get_banks(bank_names=(bank_name,)).first()
     # Determine criteria for drawing inference
     criteria = {"active": True}
     if bank:
@@ -560,7 +560,7 @@ def infer_card():
     if "digits" in post_args:
         criteria["last_four_digits"] = (post_args["digits"],)
     # Determine the card used for the transaction from the given info
-    cards = CreditCardHandler.get_cards(**criteria)
+    cards = CreditCardRepository.get_cards(**criteria)
     try:
         card = cards.one_or_none()
     except MultipleResultsFound:
@@ -582,7 +582,7 @@ def infer_statement():
     # Separate the arguments of the POST method
     post_args = request.get_json()
     bank_name = post_args["bank_name"]
-    bank = BankHandler.get_banks(bank_names=(bank_name,)).first()
+    bank = BankRepository.get_banks(bank_names=(bank_name,)).first()
     # Determine criteria for drawing inference
     card_criteria = {"active": True}
     if bank:
@@ -590,7 +590,7 @@ def infer_statement():
     if "digits" in post_args:
         card_criteria["last_four_digits"] = (post_args["digits"],)
     # Determine the card used for the transaction from the given info
-    cards = CreditCardHandler.get_cards(**card_criteria)
+    cards = CreditCardRepository.get_cards(**card_criteria)
     try:
         card = cards.one_or_none()
     except MultipleResultsFound:
@@ -598,7 +598,7 @@ def infer_statement():
     if card and "transaction_date" in post_args:
         # Determine the statement corresponding to the card and date
         transaction_date = parse_date(post_args["transaction_date"])
-        statement = CreditStatementHandler.infer_statement(card, transaction_date)
+        statement = CreditStatementRepository.infer_statement(card, transaction_date)
         # Check that a statement was found and that it belongs to the user
         if not statement:
             abort(404, "A statement matching the criteria was not found.")

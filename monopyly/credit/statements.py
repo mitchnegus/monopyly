@@ -3,7 +3,7 @@ Tools for interacting with the credit statements in the database.
 """
 
 from dateutil.relativedelta import relativedelta
-from dry_foundation.database.handler import DatabaseViewHandler
+from dry_foundation.database.repository import ViewRepository
 
 from ..common.utils import get_next_occurrence_of_day
 from ..database.models import (
@@ -14,25 +14,25 @@ from ..database.models import (
 )
 
 
-class CreditStatementHandler(
-    DatabaseViewHandler, model=CreditStatement, model_view=CreditStatementView
+class CreditStatementRepository(
+    ViewRepository, model=CreditStatement, model_view=CreditStatementView
 ):
     """
-    A database handler for managing credit card statements.
+    A database repository for managing credit card statements.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_statements(
         cls, card_ids=None, bank_ids=None, active=None, sort_order="DESC"
     ):
@@ -47,14 +47,14 @@ class CreditStatementHandler(
         ----------
         card_ids : tuple of int, optional
             A sequence of card IDs for which statements will be selected
-            (if `None`, all cards will be selected).
+            (if unset, all cards will be selected).
         bank_ids : tuple of ints, optional
             A sequence of bank IDs for which statements will be selected
-            (if `None`, all banks will be selected).
+            (if unset, all banks will be selected).
         active : bool, optional
             A flag indicating whether only statements for active cards
-            will be returned. The default is `None` where all statements
-            are returned regardless of active status.
+            will be returned. If unset, all statements are returned
+            regardless of the card's active status.
         sort_order : {'ASC', 'DESC'}
             An indicator of whether the statements should be ordered in
             ascending (oldest at top) or descending (newest at top)
@@ -66,8 +66,8 @@ class CreditStatementHandler(
             Returns credit card statements matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "card_id", card_ids)
-        criteria.add_match_filter(CreditAccount, "bank_id", bank_ids)
+        criteria.add_membership_filter(cls.model, "card_id", card_ids)
+        criteria.add_membership_filter(CreditAccount, "bank_id", bank_ids)
         criteria.add_match_filter(CreditCard, "active", active)
         statements = super().get_entries(
             criteria=criteria,
@@ -76,7 +76,7 @@ class CreditStatementHandler(
         return statements
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def find_statement(cls, card_id, issue_date=None):
         """
         Find a statement using uniquely identifying characteristics.
@@ -148,7 +148,7 @@ class CreditStatementHandler(
         return statement
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_prior_statement(cls, statement):
         """
         Given a statement, get the immediately preceding statement.

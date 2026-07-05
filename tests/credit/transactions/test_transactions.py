@@ -4,13 +4,13 @@ from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
-from dry_foundation.testing.helpers import TestHandler
+from dry_foundation.testing.helpers import TestRepository
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
 
 from monopyly.credit.transactions import (
-    CreditTagHandler,
-    CreditTransactionHandler,
+    CreditTagRepository,
+    CreditTransactionRepository,
     save_transaction,
 )
 from monopyly.database.models import (
@@ -20,12 +20,12 @@ from monopyly.database.models import (
     TransactionTag,
 )
 
-from test_tag_helpers import TestTagHandler
+from test_tag_helpers import TestTagRepository
 
 
 @pytest.fixture
-def transaction_handler(client_context):
-    return CreditTransactionHandler
+def transaction_repo(client_context):
+    return CreditTransactionRepository
 
 
 def _mock_subtransaction_mappings():
@@ -61,7 +61,7 @@ def mock_tags():
     return mock_tags
 
 
-class TestCreditTransactionHandler(TestHandler):
+class TestCreditTransactionRepository(TestRepository):
     # References only include entries accessible to the authorized login
     #   - ordered by date (most recent first)
     db_reference = [
@@ -213,20 +213,20 @@ class TestCreditTransactionHandler(TestHandler):
     )
     def test_get_transactions(
         self,
-        transaction_handler,
+        transaction_repo,
         statement_ids,
         card_ids,
         active,
         sort_order,
         reference_entries,
     ):
-        transactions = transaction_handler.get_transactions(
+        transactions = transaction_repo.get_transactions(
             statement_ids, card_ids, active, sort_order
         )
         self.assert_entries_match(transactions, reference_entries, order=True)
 
-    def test_get_merchants(self, transaction_handler):
-        merchants = transaction_handler.get_merchants()
+    def test_get_merchants(self, transaction_repo):
+        merchants = transaction_repo.get_merchants()
         assert sorted(merchants) == sorted({_.merchant for _ in self.db_reference})
 
     @pytest.mark.parametrize(
@@ -248,12 +248,12 @@ class TestCreditTransactionHandler(TestHandler):
             },
         ],
     )
-    @patch("monopyly.credit.transactions.CreditTagHandler.get_tags")
-    def test_add_entry(self, mock_method, transaction_handler, mock_tags, mapping):
-        # Mock the tags found by the tag handler
+    @patch("monopyly.credit.transactions.CreditTagRepository.get_tags")
+    def test_add_entry(self, mock_method, transaction_repo, mock_tags, mapping):
+        # Mock the tags found by the tag repository
         mock_method.return_value = mock_tags[:2]
         # Add the entry
-        transaction = transaction_handler.add_entry(**mapping)
+        transaction = transaction_repo.add_entry(**mapping)
         # Check that the entry object was properly created
         assert transaction.transaction_date == date(2020, 5, 3)
         assert len(transaction.subtransactions) == 2
@@ -299,9 +299,9 @@ class TestCreditTransactionHandler(TestHandler):
             ),
         ],
     )
-    def test_add_entry_invalid(self, transaction_handler, mapping, exception):
+    def test_add_entry_invalid(self, transaction_repo, mapping, exception):
         with pytest.raises(exception):
-            transaction_handler.add_entry(**mapping)
+            transaction_repo.add_entry(**mapping)
 
     @pytest.mark.parametrize(
         "mapping",
@@ -315,12 +315,12 @@ class TestCreditTransactionHandler(TestHandler):
             {"transaction_date": date(2022, 5, 3)},
         ],
     )
-    @patch("monopyly.credit.transactions.CreditTagHandler.get_tags")
-    def test_update_entry(self, mock_method, transaction_handler, mock_tags, mapping):
-        # Mock the tags found by the tag handler
+    @patch("monopyly.credit.transactions.CreditTagRepository.get_tags")
+    def test_update_entry(self, mock_method, transaction_repo, mock_tags, mapping):
+        # Mock the tags found by the tag repository
         mock_method.return_value = mock_tags[:2]
         # Add the entry
-        transaction = transaction_handler.update_entry(5, **mapping)
+        transaction = transaction_repo.update_entry(5, **mapping)
         # Check that the entry object was properly updated
         assert transaction.transaction_date == date(2022, 5, 3)
         if "subtransactions" in mapping:
@@ -350,14 +350,14 @@ class TestCreditTransactionHandler(TestHandler):
         ],
     )
     def test_update_entry_invalid(
-        self, transaction_handler, transaction_id, mapping, exception
+        self, transaction_repo, transaction_id, mapping, exception
     ):
         with pytest.raises(exception):
-            transaction_handler.update_entry(transaction_id, **mapping)
+            transaction_repo.update_entry(transaction_id, **mapping)
 
-    def test_delete_linked_transaction(self, app, transaction_handler):
+    def test_delete_linked_transaction(self, app, transaction_repo):
         transaction_id = 7
-        transaction = transaction_handler.get_entry(transaction_id)
+        transaction = transaction_repo.get_entry(transaction_id)
         linked_transactions = transaction.internal_transaction.transaction_views
         assert len(linked_transactions) == 2
         # Save the linked transaction
@@ -371,19 +371,19 @@ class TestCreditTransactionHandler(TestHandler):
                 "transactions."
             )
         # Delete the transaction and confirm that the link is broken
-        transaction_handler.delete_entry(transaction_id)
+        transaction_repo.delete_entry(transaction_id)
         assert linked_transaction.internal_transaction is None
 
 
 @pytest.fixture
-def tag_handler(client_context):
-    return CreditTagHandler
+def tag_repo(client_context):
+    return CreditTagRepository
 
 
-class TestCreditTagHandler(TestTagHandler):
+class TestCreditTagRepository(TestTagRepository):
     # Redefine references here to allow them to be used by parametrization
-    db_reference = TestTagHandler.db_reference
-    db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
+    db_reference = TestTagRepository.db_reference
+    db_reference_hierarchy = TestTagRepository.db_reference_hierarchy
 
     @pytest.mark.parametrize(
         (
@@ -404,38 +404,38 @@ class TestCreditTagHandler(TestTagHandler):
     )
     def test_get_tags(
         self,
-        tag_handler,
+        tag_repo,
         tag_names,
         transaction_ids,
         subtransaction_ids,
         ancestors,
         reference_entries,
     ):
-        tags = tag_handler.get_tags(
+        tags = tag_repo.get_tags(
             tag_names, transaction_ids, subtransaction_ids, ancestors
         )
         self.assert_entries_match(tags, reference_entries)
 
 
 class TestSaveFormFunctions:
-    @patch("monopyly.credit.transactions._transactions.CreditTransactionHandler")
+    @patch("monopyly.credit.transactions._transactions.CreditTransactionRepository")
     @patch("monopyly.credit.forms.CreditTransactionForm")
-    def test_save_new_transaction(self, mock_form, mock_handler):
+    def test_save_new_transaction(self, mock_form, mock_repo):
         # Mock the form and primary method
         mock_form.transaction_data = {"key": "test transaction data"}
-        mock_method = mock_handler.add_entry
+        mock_method = mock_repo.add_entry
         # Call the function and check for proper call signatures
         transaction = save_transaction(mock_form)
         mock_method.assert_called_once_with(**mock_form.transaction_data)
         assert transaction == mock_method.return_value
 
-    @patch("monopyly.credit.transactions._transactions.CreditTransactionHandler")
+    @patch("monopyly.credit.transactions._transactions.CreditTransactionRepository")
     @patch("monopyly.credit.forms.CreditTransactionForm")
-    def test_save_updated_transaction(self, mock_form, mock_handler):
+    def test_save_updated_transaction(self, mock_form, mock_repo):
         # Mock the form and primary method
         mock_form.transaction_data = {"key": "test transaction data"}
-        mock_method = mock_handler.update_entry
-        update_transaction = mock_handler.get_entry.return_value
+        mock_method = mock_repo.update_entry
+        update_transaction = mock_repo.get_entry.return_value
         # Mock the expected final set of transaction data
         mock_transaction_data = {
             "internal_transaction_id": update_transaction.internal_transaction_id,

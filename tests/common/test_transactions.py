@@ -7,14 +7,14 @@ import pytest
 from monopyly.common.transactions import (
     CategoryTree,
     RootCategoryTree,
-    TransactionTagHandler,
+    TransactionTagRepository,
     get_linked_transaction,
     get_subtransactions,
     highlight_unmatched_transactions,
 )
 from monopyly.database.models import CreditSubtransaction
 
-from test_tag_helpers import TestTagHandler
+from test_tag_helpers import TestTagRepository
 
 
 @pytest.fixture
@@ -70,20 +70,20 @@ def test_unmatched_transaction_highlighter():
 
 
 @pytest.fixture
-def tag_handler(client_context):
-    return TransactionTagHandler
+def tag_repo(client_context):
+    return TransactionTagRepository
 
 
-class TestTransactionTagHandler(TestTagHandler):
-    """Tests for the tag handler."""
+class TestTransactionTagRepository(TestTagRepository):
+    """Tests for the tag repository."""
 
     # Redefine references here to allow them to be used by parametrization
-    db_reference = TestTagHandler.db_reference
-    db_reference_hierarchy = TestTagHandler.db_reference_hierarchy
+    db_reference = TestTagRepository.db_reference
+    db_reference_hierarchy = TestTagRepository.db_reference_hierarchy
 
-    def test_tag_depth(self, tag_handler):
+    def test_tag_depth(self, tag_repo):
         # Top level tags should have a depth of 0
-        top_level_tags = tag_handler.get_subtags(None).all()
+        top_level_tags = tag_repo.get_subtags(None).all()
         assert all(tag.depth == 0 for tag in top_level_tags)
         # Subtags should have appropriate additional depth
         for parent_tag in top_level_tags:
@@ -98,8 +98,8 @@ class TestTransactionTagHandler(TestTagHandler):
         ("tag", "expected_subtags"),
         [(db_reference[1], db_reference[2:4]), (db_reference[4], db_reference[5:6])],
     )
-    def test_get_subtags(self, tag_handler, tag, expected_subtags):
-        subtags = tag_handler.get_subtags(tag)
+    def test_get_subtags(self, tag_repo, tag, expected_subtags):
+        subtags = tag_repo.get_subtags(tag)
         self.assert_entries_match(subtags, expected_subtags)
 
     @pytest.mark.parametrize(
@@ -110,8 +110,8 @@ class TestTransactionTagHandler(TestTagHandler):
             (db_reference[5], db_reference[4]),
         ],
     )
-    def test_get_supertag(self, tag_handler, tag, expected_supertag):
-        supertag = tag_handler.get_supertag(tag)
+    def test_get_supertag(self, tag_repo, tag, expected_supertag):
+        supertag = tag_repo.get_supertag(tag)
         self.assert_entry_matches(supertag, expected_supertag)
 
     @pytest.mark.parametrize(
@@ -121,8 +121,8 @@ class TestTransactionTagHandler(TestTagHandler):
             (db_reference[0], db_reference_hierarchy[db_reference[0]]),
         ],
     )
-    def test_get_hierarchy(self, tag_handler, root_tag, expected_hierarchy):
-        hierarchy = tag_handler.get_hierarchy(root_tag)
+    def test_get_hierarchy(self, tag_repo, root_tag, expected_hierarchy):
+        hierarchy = tag_repo.get_hierarchy(root_tag)
         self._compare_hierarchies(hierarchy, expected_hierarchy)
 
     @pytest.mark.parametrize(
@@ -134,21 +134,21 @@ class TestTransactionTagHandler(TestTagHandler):
             (db_reference[5], (db_reference[4],)),
         ],
     )
-    def test_get_ancestors(self, tag_handler, tag, expected_ancestors):
-        ancestors = tag_handler.get_ancestors(tag)
+    def test_get_ancestors(self, tag_repo, tag, expected_ancestors):
+        ancestors = tag_repo.get_ancestors(tag)
         self.assert_entries_match(ancestors, expected_ancestors)
 
     @pytest.mark.parametrize(
         ("tag_name", "reference_entry"),
         [("Transportation", db_reference[1]), ("Electricity", db_reference[5])],
     )
-    def test_find_tag(self, tag_handler, tag_name, reference_entry):
-        tag = tag_handler.find_tag(tag_name)
+    def test_find_tag(self, tag_repo, tag_name, reference_entry):
+        tag = tag_repo.find_tag(tag_name)
         self.assert_entry_matches(tag, reference_entry)
 
     @pytest.mark.parametrize("tag_name", ["Trains", None])
-    def test_find_tag_none_exist(self, tag_handler, tag_name):
-        tag = tag_handler.find_tag(tag_name)
+    def test_find_tag_none_exist(self, tag_repo, tag_name):
+        tag = tag_repo.find_tag(tag_name)
         assert tag is None
 
 
@@ -191,8 +191,8 @@ class TestCategoryTree:
 @pytest.fixture
 def root_category_tree():
     # Define the tags
-    tag = TestTagHandler.db_reference[1]
-    child_tag = TestTagHandler.db_reference[2]
+    tag = TestTagRepository.db_reference[1]
+    child_tag = TestTagRepository.db_reference[2]
     # Build the testable category tree by hand
     tree = RootCategoryTree()
     tree.subtransactions = [
@@ -252,7 +252,7 @@ class TestRootCategoryTree:
     def test_uncategorizable_subtransaction(self):
         # The set of tags 'Transportation', 'Transportation/Railroad', and 'Gifts'
         # is not categorizable
-        uncategorizable_tags = [TestTagHandler.db_reference[_] for _ in [1, 3, 6]]
+        uncategorizable_tags = [TestTagRepository.db_reference[_] for _ in [1, 3, 6]]
         subtransaction = CreditSubtransaction(subtotal=10, tags=uncategorizable_tags)
         tree = RootCategoryTree()
         tree.categorize_subtransaction(subtransaction)

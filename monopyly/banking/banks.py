@@ -2,24 +2,24 @@
 Tools for interacting with banks in the database.
 """
 
-from dry_foundation.database.handler import DatabaseHandler
+from dry_foundation.database.repository import Repository
 
 from ..database.models import Bank
 
 
-class BankHandler(DatabaseHandler, model=Bank):
+class BankRepository(Repository, model=Bank):
     """
-    A database handler for managing bank information.
+    A database repository for managing bank information.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
@@ -34,7 +34,7 @@ class BankHandler(DatabaseHandler, model=Bank):
         ----------
         bank_names : list of str, optional
             A sequence of bank names for which banks will be selected
-            (if `None`, all banks will be selected).
+            (if unset, all banks will be selected).
 
         Returns
         -------
@@ -42,7 +42,7 @@ class BankHandler(DatabaseHandler, model=Bank):
             Returns bank entries matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "bank_name", bank_names)
+        criteria.add_membership_filter(cls.model, "bank_name", bank_names)
         return super().get_entries(criteria=criteria)
 
     @classmethod

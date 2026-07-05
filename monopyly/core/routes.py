@@ -7,10 +7,10 @@ from pathlib import Path
 from flask import g, render_template, render_template_string, session
 
 from ..auth.tools import login_required
-from ..banking.accounts import BankAccountHandler
-from ..banking.banks import BankHandler
-from ..credit.cards import CreditCardHandler
-from ..credit.statements import CreditStatementHandler
+from ..banking.accounts import BankAccountRepository
+from ..banking.banks import BankRepository
+from ..credit.cards import CreditCardRepository
+from ..credit.statements import CreditStatementRepository
 from .actions import convert_changelog_to_html_template, convert_readme_to_html_template
 from .blueprint import bp
 
@@ -23,16 +23,16 @@ def index():
         # Set the homepage to show the welcome statement (unless otherwise set)
         session.setdefault("show_homepage_block", True)
         # Get the user's banks and credit cards from the database
-        banks = BankHandler.get_banks()
+        banks = BankRepository.get_banks()
         bank_accounts = {}
         for bank in banks:
-            accounts = BankAccountHandler.get_accounts((bank.id,)).all()
+            accounts = BankAccountRepository.get_accounts((bank.id,)).all()
             # Only return banks which have bank accounts
             if accounts:
                 bank_accounts[bank] = accounts
-        active_cards = CreditCardHandler.get_cards(active=True).all()
+        active_cards = CreditCardRepository.get_cards(active=True).all()
         for card in active_cards:
-            statements = CreditStatementHandler.get_statements((card.id,))
+            statements = CreditStatementRepository.get_statements((card.id,))
             last_statement = statements.first()
             if last_statement:
                 card.last_statement_id = last_statement.id
@@ -81,6 +81,6 @@ def application_credits():
 @bp.route("/profile")
 @login_required
 def load_profile():
-    banks = BankHandler.get_banks()
+    banks = BankRepository.get_banks()
     # Return banks as a list to allow multiple reuse
     return render_template("core/profile.html", banks=list(banks))

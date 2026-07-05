@@ -2,10 +2,10 @@
 Tools for interacting with the credit transactions in the database.
 """
 
-from dry_foundation.database.handler import DatabaseViewHandler
+from dry_foundation.database.repository import ViewRepository
 
 from ...common.forms.utils import execute_on_form_validation
-from ...common.transactions import TransactionHandler, TransactionTagHandler
+from ...common.transactions import TransactionRepository, TransactionTagRepository
 from ...database.models import (
     CreditCard,
     CreditSubtransaction,
@@ -15,25 +15,25 @@ from ...database.models import (
 )
 
 
-class CreditTransactionHandler(
-    TransactionHandler, model=CreditTransaction, model_view=CreditTransactionView
+class CreditTransactionRepository(
+    TransactionRepository, model=CreditTransaction, model_view=CreditTransactionView
 ):
     """
-    A database handler for accessing credit transactions.
+    A database repository for accessing credit transactions.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_transactions(
         cls,
         statement_ids=None,
@@ -57,14 +57,13 @@ class CreditTransactionHandler(
         ----------
         statement_ids : tuple of int, optional
             A sequence of statement IDs with which to filter
-            transactions (if `None`, all statement IDs will be shown).
+            transactions (if unset, all statement IDs will be shown).
         card_ids : tuple of int, optional
             A sequence of card IDs with which to filter transactions (if
-            `None`, all card IDs will be shown).
+            unset, all card IDs will be shown).
         active : bool, optional
             A flag indicating whether only transactions for active cards
-            will be returned. The default is `None` (all transactions
-            are returned).
+            will be returned (if unset, all transactions are returned).
         sort_order : {'ASC', 'DESC'}
             An indicator of whether the transactions should be ordered
             in ascending (oldest at top) or descending (newest at top)
@@ -83,8 +82,8 @@ class CreditTransactionHandler(
             Returns credit card transactions matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "statement_id", statement_ids)
-        criteria.add_match_filter(CreditCard, "id", card_ids)
+        criteria.add_membership_filter(cls.model, "statement_id", statement_ids)
+        criteria.add_membership_filter(CreditCard, "id", card_ids)
         criteria.add_match_filter(CreditCard, "active", active)
         transactions = super()._get_transactions(
             criteria=criteria, sort_order=sort_order, offset=offset, limit=limit
@@ -92,7 +91,7 @@ class CreditTransactionHandler(
         return transactions
 
     @classmethod
-    @DatabaseViewHandler.view_query
+    @ViewRepository.view_query
     def get_merchants(cls):
         """
         Get a credit card merchants from the database.
@@ -138,23 +137,25 @@ class CreditTransactionHandler(
         return CreditSubtransaction(
             transaction_id=transaction.id,
             **subtransaction_data,
-            tags=CreditTagHandler.get_tags(tag_names, ancestors=True),
+            tags=CreditTagRepository.get_tags(tag_names, ancestors=True),
         )
 
 
-class CreditTagHandler(TransactionTagHandler, model=TransactionTagHandler.model):
+class CreditTagRepository(
+    TransactionTagRepository, model=TransactionTagRepository.model
+):
     """
-    A database handler for managing credit transaction tags.
+    A database repository for managing credit transaction tags.
 
     Attributes
     ----------
     user_id : int
         The ID of the user who is the subject of database access.
     model : type
-        The type of database model that the handler is primarily
+        The type of database model that the repository is primarily
         designed to manage.
     table : str
-        The name of the database table that this handler manages.
+        The name of the database table that this repository manages.
     """
 
     @classmethod
@@ -174,14 +175,14 @@ class CreditTagHandler(TransactionTagHandler, model=TransactionTagHandler.model)
         Parameters
         ----------
         tag_names : tuple of str, optional
-            A sequence of names of tags to be selected (if `None`, all
+            A sequence of names of tags to be selected (if unset, all
             tag names will be selected).
         transaction_ids : tuple of int, optional
             A sequence of transaction IDs for which tags will be
-            selected (if `None`, all transaction tags will be selected).
+            selected (if unset, all transaction tags will be selected).
         subtransaction_ids : tuple of int, optional
             A sequence of credit subtransaction IDs for which tags will
-            be selected (if `None`, all subtransaction tags will be
+            be selected (if unset, all subtransaction tags will be
             selected).
         ancestors : bool, optional
             A flag indicating whether the query should include tags
@@ -199,9 +200,9 @@ class CreditTagHandler(TransactionTagHandler, model=TransactionTagHandler.model)
             Returns credit card transaction tags matching the criteria.
         """
         criteria = cls._initialize_criteria_list()
-        criteria.add_match_filter(cls.model, "tag_name", tag_names)
-        criteria.add_match_filter(CreditTransactionView, "id", transaction_ids)
-        criteria.add_match_filter(CreditSubtransaction, "id", subtransaction_ids)
+        criteria.add_membership_filter(cls.model, "tag_name", tag_names)
+        criteria.add_membership_filter(CreditTransactionView, "id", transaction_ids)
+        criteria.add_membership_filter(CreditSubtransaction, "id", subtransaction_ids)
         tags = super()._get_tags(criteria, ancestors=ancestors)
         return tags
 
@@ -244,16 +245,16 @@ def save_transaction(form, transaction_id=None):
     """
     transaction_data = form.transaction_data
     if transaction_id:
-        transaction = CreditTransactionHandler.get_entry(transaction_id)
+        transaction = CreditTransactionRepository.get_entry(transaction_id)
         transaction_data.update(
             internal_transaction_id=transaction.internal_transaction_id
         )
         # Update the database with the updated transaction
-        transaction = CreditTransactionHandler.update_entry(
+        transaction = CreditTransactionRepository.update_entry(
             transaction_id,
             **transaction_data,
         )
     else:
         # Insert the new transaction into the database
-        transaction = CreditTransactionHandler.add_entry(**transaction_data)
+        transaction = CreditTransactionRepository.add_entry(**transaction_data)
     return transaction

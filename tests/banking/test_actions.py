@@ -11,8 +11,8 @@ from monopyly.banking.actions import (
 )
 
 
-@patch("monopyly.banking.actions.BankAccountHandler.get_accounts")
-@patch("monopyly.banking.actions.BankAccountTypeHandler.get_types_for_bank")
+@patch("monopyly.banking.actions.BankAccountRepository.get_accounts")
+@patch("monopyly.banking.actions.BankAccountTypeRepository.get_types_for_bank")
 def test_get_bank_account_type_grouping(mock_types_method, mock_accounts_method):
     # Mock the inputs and external return values
     mock_bank = Mock()

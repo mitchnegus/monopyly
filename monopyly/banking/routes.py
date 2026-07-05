@@ -8,12 +8,12 @@ from flask import g, jsonify, redirect, render_template, request, url_for
 from ..auth.tools import login_required
 from ..common.forms.utils import extend_field_list_for_ajax
 from ..common.transactions import get_linked_transaction
-from .accounts import BankAccountHandler, BankAccountTypeHandler, save_account
+from .accounts import BankAccountRepository, BankAccountTypeRepository, save_account
 from .actions import get_balance_chart_data, get_bank_account_type_grouping
-from .banks import BankHandler
+from .banks import BankRepository
 from .blueprint import bp
 from .forms import BankAccountForm, BankTransactionForm
-from .transactions import BankTagHandler, BankTransactionHandler, save_transaction
+from .transactions import BankTagRepository, BankTransactionRepository, save_transaction
 
 # Set a limit on the number of transactions loaded at one time for certain routes
 TRANSACTION_LIMIT = 100
@@ -22,8 +22,8 @@ TRANSACTION_LIMIT = 100
 @bp.route("/accounts")
 @login_required
 def load_accounts():
-    banks = BankHandler.get_banks()
-    account_types = BankAccountTypeHandler.get_account_types()
+    banks = BankRepository.get_banks()
+    account_types = BankAccountTypeRepository.get_account_types()
     return render_template(
         "banking/accounts_page.html", banks=banks, account_types=account_types
     )
@@ -41,7 +41,7 @@ def add_account(bank_id):
         return redirect(url_for("banking.load_accounts"))
     else:
         if bank_id:
-            bank = BankHandler.get_entry(bank_id)
+            bank = BankRepository.get_entry(bank_id)
             form = form.prepopulate(bank)
     return render_template("banking/account_form/account_form_page_new.html", form=form)
 
@@ -50,15 +50,15 @@ def add_account(bank_id):
 @login_required
 @db_transaction
 def delete_account(account_id):
-    BankAccountHandler.delete_entry(account_id)
+    BankAccountRepository.delete_entry(account_id)
     return redirect(url_for("banking.load_accounts"))
 
 
 @bp.route("/account_summaries/<int:bank_id>")
 @login_required
 def load_account_summaries(bank_id):
-    bank = BankHandler.get_entry(bank_id)
-    bank_balance = BankAccountHandler.get_bank_balance(bank_id)
+    bank = BankRepository.get_entry(bank_id)
+    bank_balance = BankAccountRepository.get_bank_balance(bank_id)
     type_accounts = get_bank_account_type_grouping(bank)
     return render_template(
         "banking/account_summaries_page.html",
@@ -71,8 +71,8 @@ def load_account_summaries(bank_id):
 @bp.route("/account/<int:account_id>")
 @login_required
 def load_account_details(account_id):
-    account = BankAccountHandler.get_entry(account_id)
-    transactions = BankTransactionHandler.get_transactions(
+    account = BankAccountRepository.get_entry(account_id)
+    transactions = BankTransactionRepository.get_transactions(
         account_ids=(account_id,), sort_order="DESC"
     ).all()
     # Only display the first 100 transactions
@@ -94,7 +94,7 @@ def load_more_transactions():
     account_id = post_args["account_id"]
     block_index = post_args["block_count"] - 1
     # Get a subset of the remaining transactions to load
-    more_transactions = BankTransactionHandler.get_transactions(
+    more_transactions = BankTransactionRepository.get_transactions(
         account_ids=(account_id,),
         offset=block_index * TRANSACTION_LIMIT,
         limit=TRANSACTION_LIMIT,
@@ -110,7 +110,7 @@ def load_more_transactions():
 def expand_transaction():
     # Get the transaction ID from the AJAX request
     transaction_id = int(request.get_json())
-    transaction = BankTransactionHandler.get_entry(transaction_id)
+    transaction = BankTransactionRepository.get_entry(transaction_id)
     return render_template(
         "common/transactions_table/subtransactions.html",
         subtransactions=transaction.subtransactions,
@@ -122,7 +122,7 @@ def expand_transaction():
 def show_linked_transaction():
     post_args = request.get_json()
     transaction_id = int(post_args["transaction_id"])
-    transaction = BankTransactionHandler.get_entry(transaction_id)
+    transaction = BankTransactionRepository.get_entry(transaction_id)
     linked_transaction = get_linked_transaction(transaction)
     return render_template(
         "common/transactions_table/linked_transaction_overlay.html",
@@ -155,10 +155,10 @@ def add_transaction(bank_id, account_id):
         )
     else:
         if account_id:
-            account = BankAccountHandler.get_entry(account_id)
+            account = BankAccountRepository.get_entry(account_id)
             form = form.prepopulate(account)
         elif bank_id:
-            bank = BankHandler.get_entry(bank_id)
+            bank = BankRepository.get_entry(bank_id)
             form = form.prepopulate(bank)
     # Display the form for accepting user input
     return render_template(
@@ -180,7 +180,7 @@ def update_transaction(transaction_id):
             url_for("banking.load_account_details", account_id=transaction.account_id)
         )
     else:
-        transaction = BankTransactionHandler.get_entry(transaction_id)
+        transaction = BankTransactionRepository.get_entry(transaction_id)
         form = form.prepopulate(transaction)
     # Display the form for accepting user input
     update = "transfer" if transaction.internal_transaction_id else True
@@ -232,8 +232,8 @@ def add_transfer_field():
 @db_transaction
 def delete_transaction(transaction_id):
     # Get the account for the transaction to guide the page redirect
-    account_id = BankTransactionHandler.get_entry(transaction_id).account_id
-    BankTransactionHandler.delete_entry(transaction_id)
+    account_id = BankTransactionRepository.get_entry(transaction_id).account_id
+    BankTransactionRepository.delete_entry(transaction_id)
     return redirect(url_for("banking.load_account_details", account_id=account_id))
 
 
@@ -241,7 +241,7 @@ def delete_transaction(transaction_id):
 @login_required
 def load_tags():
     # Get the tag hierarchy from the database
-    hierarchy = BankTagHandler.get_hierarchy()
+    hierarchy = BankTagRepository.get_hierarchy()
     return render_template("common/tags_page.html", tags_hierarchy=hierarchy)
 
 
@@ -254,10 +254,10 @@ def add_tag():
     tag_name = post_args["tag_name"]
     parent_name = post_args.get("parent")
     # Check that the tag name does not already exist
-    if BankTagHandler.get_tags(tag_names=(tag_name,)):
+    if BankTagRepository.get_tags(tag_names=(tag_name,)):
         raise ValueError("The given tag name already exists. Tag names must be unique.")
-    parent_id = BankTagHandler.find_tag(parent_name).id if parent_name else None
-    tag = BankTagHandler.add_entry(
+    parent_id = BankTagRepository.find_tag(parent_name).id if parent_name else None
+    tag = BankTagRepository.add_entry(
         parent_id=parent_id,
         user_id=g.user.id,
         tag_name=tag_name,
@@ -272,9 +272,9 @@ def delete_tag():
     # Get the tag to be deleted from the AJAX request
     post_args = request.get_json()
     tag_name = post_args["tag_name"]
-    tag = BankTagHandler.find_tag(tag_name)
+    tag = BankTagRepository.find_tag(tag_name)
     # Remove the tag from the database
-    BankTagHandler.delete_entry(tag.id)
+    BankTagRepository.delete_entry(tag.id)
     return ""
 
 
@@ -297,7 +297,7 @@ def suggest_transaction_autocomplete():
 def update_bank_name(bank_id):
     # Get the bank name from the AJAX request
     bank_name = request.get_json()
-    BankHandler.update_entry(bank_id, bank_name=bank_name)
+    BankRepository.update_entry(bank_id, bank_name=bank_name)
     return bank_name
 
 
@@ -305,5 +305,5 @@ def update_bank_name(bank_id):
 @login_required
 @db_transaction
 def delete_bank(bank_id):
-    BankHandler.delete_entry(bank_id)
+    BankRepository.delete_entry(bank_id)
     return redirect(url_for("core.load_profile"))
