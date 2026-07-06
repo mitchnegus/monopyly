@@ -50,7 +50,7 @@ class AmountSuggestionSelector extends SuggestionSelector {
    * Get the text of the amount suggestion from the suggestion object.
    */
   getSuggestionText() {
-    return this.$suggestion.text().replace("$", "").replace(",", "");
+    return this.$suggestion.text().replace(/[$,]/g, "").trim();
   }
 
 
