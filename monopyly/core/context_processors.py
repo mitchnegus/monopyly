@@ -2,7 +2,7 @@
 Filters defined for the application.
 """
 
-from dry_foundation.utils import define_basic_template_global_variables
+from dry_foundation.web import define_basic_template_global_variables
 
 from .actions import determine_summary_balance_svg_viewbox_width
 from .blueprint import bp

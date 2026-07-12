@@ -3,7 +3,7 @@
  *
  * Adds fields to the transaction form to allow the transaction to be
  * recorded as a transfer taking place jointly between accounts. When
- * the button is pressed to record a transfer, an AJAX request is
+ * the button is pressed to record a transfer, a POST request is
  * executed to retrieve an extra set of subfields for the transaction
  * form. The page is updated with the new field information.
  */

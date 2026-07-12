@@ -1,23 +1,23 @@
 /*
- * Update an object with the results of an AJAX request.
+ * Update an object with the results of a POST request.
  *
- * An object (`$display`) is updated using the response from an AJAX
+ * An object (`$display`) is updated using the response from a POST
  * request. The request delivers a set of data (`rawData`) to the given
  * endpoint. If nothing is returned, an error is logged. Various
  * functions are defined below to peform different actions using the
  * resuls of the request.
  */
 
-import { executeAjaxRequest } from './ajax.js';
+import { sendPostRequest } from 'dry-foundation/requests';
 
 
-function replaceDisplayContentsAjaxRequest(
+function replaceDisplayContentsRequest(
   endpoint, rawData, $display, callback = null
 ) {
 
   // The action is to replace the display's contents
   function action(response) {
-    $display.html(response);
+    $display.html(response["content"]);
     // Execute the callback function, if given
     if (callback != null) {
       callback();
@@ -25,18 +25,18 @@ function replaceDisplayContentsAjaxRequest(
   }
 
   // Assign the response to the display object
-  executeAjaxRequest(endpoint, rawData, action);
+  sendPostRequest(endpoint, rawData, action);
 
 }
 
 
-function replaceDisplayElementAjaxRequest(
+function replaceDisplayElementRequest(
   endpoint, rawData, $display, callback = null
 ) {
 
   // The action is to replace the display element entirely
   function action(response) {
-    $display.replaceWith(response);
+    $display.replaceWith(response["content"]);
     // Execute the callback function, if given
     if (callback != null) {
       callback();
@@ -44,9 +44,9 @@ function replaceDisplayElementAjaxRequest(
   }
 
   // Assign the response to the display object
-  executeAjaxRequest(endpoint, rawData, action);
+  sendPostRequest(endpoint, rawData, action);
 
 }
 
 
-export { replaceDisplayContentsAjaxRequest, replaceDisplayElementAjaxRequest};
+export { replaceDisplayContentsRequest, replaceDisplayElementRequest};

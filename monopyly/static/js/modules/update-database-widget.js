@@ -8,7 +8,7 @@
  * the input or the enter button is pressed.
  */
 
-import { replaceDisplayContentsAjaxRequest } from './update-display-ajax.js';
+import { replaceDisplayContentsRequest } from './update-display-request.js';
 
 
 function updateDBWidget(endpoint, $widget) {
@@ -36,9 +36,9 @@ function updateDBWidget(endpoint, $widget) {
 	});
 
 	$input.on('blur', function() {
-		// Execute an AJAX request to update the database
+		// Execute a request to update the database
 		const value = $input.val();
-		replaceDisplayContentsAjaxRequest(endpoint, value, $display);
+		replaceDisplayContentsRequest(endpoint, value, $display);
 		// Show the edit button (on hover) when not editing
 		$button.show();
 		// Unbind the enter key

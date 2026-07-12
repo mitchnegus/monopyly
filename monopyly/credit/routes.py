@@ -3,6 +3,7 @@ Routes for credit card financials.
 """
 
 from dry_foundation.database import db_transaction
+from dry_foundation.web import fetch_json_envelope
 from flask import (
     abort,
     flash,
@@ -109,6 +110,7 @@ def load_account(account_id):
 @bp.route("/_update_card_status", methods=("POST",))
 @login_required
 @db_transaction
+@fetch_json_envelope
 def update_card_status():
     # Get the field from the AJAX request
     post_args = request.get_json()
@@ -180,6 +182,7 @@ def load_statements():
 
 @bp.route("/_update_statements_display", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def update_statements_display():
     # Separate the arguments of the POST method
     post_args = request.get_json()
@@ -266,6 +269,7 @@ def pay_credit_card(card_id, statement_id):
 
 @bp.route("/_reconcile_activity/<int:statement_id>")
 @login_required
+@fetch_json_envelope
 def reconcile_activity(statement_id):
     return render_template(
         "credit/statement_reconciliation/statement_reconciliation_inquiry.html",
@@ -356,6 +360,7 @@ def load_transactions(card_id):
 
 @bp.route("/_extra_transactions", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def load_more_transactions():
     # Get info about the transactions being displayed from the AJAX request
     post_args = request.get_json()
@@ -379,6 +384,7 @@ def load_more_transactions():
 
 @bp.route("/_update_transactions_display", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def update_transactions_display():
     # Separate the arguments of the POST method
     post_args = request.get_json()
@@ -398,6 +404,7 @@ def update_transactions_display():
 
 @bp.route("/_expand_transaction", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def expand_transaction():
     # Get the transaction ID from the AJAX request
     transaction_id = int(request.get_json())
@@ -412,6 +419,7 @@ def expand_transaction():
 
 @bp.route("/_show_linked_transaction", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def show_linked_transaction():
     post_args = request.get_json()
     transaction_id = int(post_args["transaction_id"])
@@ -496,6 +504,7 @@ def update_transaction(transaction_id):
 
 @bp.route("/_add_subtransaction_fields", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def add_subtransaction_fields():
     post_args = request.get_json()
     subtransaction_count = int(post_args["subtransaction_count"])

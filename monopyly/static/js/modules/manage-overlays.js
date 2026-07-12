@@ -26,10 +26,10 @@ class OverlayManager {
   /**
    * Add the overlay.
    *
-   * @param {string} response - The AJAX request response containing the overlay.
+   * @param {string} htmlOverlay - The HTML containing the overlay.
    */
-  addOverlay(response) {
-    this.$container.prepend(response)
+  addOverlay(htmlOverlay) {
+    this.$container.prepend(htmlOverlay)
     // The overlay container is given the 'overlay' class
     this.$overlay = $('.overlay');
     this.#bindClose();

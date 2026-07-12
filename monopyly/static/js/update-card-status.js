@@ -4,13 +4,13 @@
  * This script updates the card's active status. When a user uses the
  * toggle switch on the back of a credit card, the card's status can be
  * selected as either 'Active' or 'Inactive'. Toggling the option
- * completes an AJAX request. The status is updated in the database and
+ * completes a POST request. The status is updated in the database and
  * the card is given a class of inactive.
  */
 
 import {
-  replaceDisplayContentsAjaxRequest
-} from "./modules/update-display-ajax.js";
+  replaceDisplayContentsRequest
+} from "./modules/update-display-request.js";
 
 
 (function() {
@@ -19,7 +19,7 @@ import {
   // Identify the key elements
   const $switches = $(".toggle-switch-gadget");
 
-  // Send an AJAX request when the switch is toggled
+  // Send a request when the switch is toggled
   $switches.on("change", function() {
     const $toggleSwitch = $(this);
     const $card = $toggleSwitch.closest(".credit-card");
@@ -31,7 +31,7 @@ import {
       "card_id": cardID,
       "active": cardActive,
     };
-    replaceDisplayContentsAjaxRequest(endpoint, rawData, $cardFront);
+    replaceDisplayContentsRequest(endpoint, rawData, $cardFront);
     if (cardActive) {
       $card.removeClass("inactive");
     } else {

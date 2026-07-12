@@ -4,12 +4,12 @@
  * Adds a transaction tag under the tag or category corresponding to the
  * plus icon that is clicked. Clicking the plus icon adds a tag shaped
  * input box that accepts a new tag name. Once the input loses focus,
- * an AJAX request is executed, the database is updated and the tree of
+ * a POST request is executed, the database is updated and the tree of
  * transactions is partially refreshed to allow further additions. If no
  * tag name was provided, no request occurs.
  */
 
-import { executeAjaxRequest } from './modules/ajax.js';
+import { sendPostRequest } from 'dry-foundation/requests';
 
 
 (function() {
@@ -29,8 +29,6 @@ import { executeAjaxRequest } from './modules/ajax.js';
  * @param {JQuery} $deleteTagButtons - Buttons for removing tags.
  */
 function bindTagButtonBehavior($createTagButtons, $deleteTagButtons) {
-  console.log('bind create buttons', $createTagButtons);
-  console.log('bind delete buttons', $deleteTagButtons);
   $createTagButtons.on('click', function() {
     const $button = $(this);
     const behavior = new TagCreation($button);
@@ -104,12 +102,10 @@ class TagCreation extends TagButtonBehavior {
    * Show the input box to collect new tag information.
    */
   #showInput() {
-    console.log('showing input', this.$input);
     self = this;
     this.$input.slideDown(this.slideTime, function() {
       self.$input.addClass('visible');
       self.$input.focus();
-      console.log('focus', self.$input);
     });
   }
 
@@ -133,15 +129,15 @@ class TagCreation extends TagButtonBehavior {
       'tag_name': this.$input.val(),
       'parent': this.$tag.text()
     };
-    // Execute the AJAX request and place the new tag
-    executeAjaxRequest(this.#endpoint, rawData, this.#placeNewTag.bind(this));
+    // Execute the POST request and place the new tag
+    sendPostRequest(this.#endpoint, rawData, this.#placeNewTag.bind(this));
   }
 
   /**
    * Add the new tag to the DOM before the input.
    */
-  #placeNewTag(newTagHTML) {
-    const $newTag = $(newTagHTML);
+  #placeNewTag(tagResponse) {
+    const $newTag = $(tagResponse["content"]);
     this.$input.before($newTag);
     // Bind behavior functionality to the newly created/placed tag buttons
     bindTagButtonBehavior(
@@ -164,7 +160,6 @@ class TagCreation extends TagButtonBehavior {
   #hideEmptyInput() {
     this.$input.removeClass('visible');
     this.$input.slideUp(this.slideTime);
-    console.log('hiding empty input', this.$input);
   }
 
   /**
@@ -198,8 +193,8 @@ class TagDeletion extends TagButtonBehavior {
    */
   #removeTag() {
     const rawData = {'tag_name': this.$tag.html()};
-    // Execute the AJAX request to delete the tag
-    executeAjaxRequest(this.#endpoint, rawData);
+    // Execute the POST request to delete the tag
+    sendPostRequest(this.#endpoint, rawData);
     // Remove the tag from the display
     this.$container.slideUp(this.slideTime, function() {this.remove()});
   }

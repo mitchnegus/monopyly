@@ -5,14 +5,14 @@
  * details page, this script presents the input box allowing them to
  * enter a payment amount and date. The button (after a neat CSS effect)
  * is converted into a submit button and can be used to submit the
- * payment information. The submit button completes an AJAX request to
+ * payment information. The submit button completes a POST request to
  * mark the statement as paid. If the amount and date are given in an
  * acceptable format, the database is updated. Otherwise, if the form
  * loses focus before the submit button is pushed, the payment form is
  * returned to its initial state.
  */
 
-import { executeAjaxRequest } from './modules/ajax.js';
+import { sendPostRequest } from 'dry-foundation/requests';
 
 
 (function() {
@@ -67,20 +67,20 @@ import { executeAjaxRequest } from './modules/ajax.js';
       $buttonPay.on('click', function(event) {
         // Stop the form from being submitted by the form action
         event.preventDefault();
-        // Submit the form using an AJAX request
+        // Submit the form using a POST request
         const rawData = {
           'payment_amount': $inputPayAmount.val(),
           'payment_date': $inputPayDate.val(),
           'payment_bank_account': $selectPayBankAccount.val()
         }
-        updateStatementPaymentAjaxRequest(rawData);
+        updateStatementPaymentPostRequest(rawData);
       });
       $inputPayAmount.select();
     });
   }
 
 
-  function updateStatementPaymentAjaxRequest(rawData) {
+  function updateStatementPaymentPostRequest(rawData) {
     // Return the newly updated statement payment info
     function updateAction(response) {
       $summaryContainer.html(response[0]);
@@ -88,7 +88,7 @@ import { executeAjaxRequest } from './modules/ajax.js';
       // Prepare the form again (in case statement is not paid in full)
       prepareForm();
     }
-    executeAjaxRequest(MAKE_PAYMENT_ENDPOINT, rawData, updateAction);
+    sendPostRequest(MAKE_PAYMENT_ENDPOINT, rawData, updateAction);
   }
 
 })();

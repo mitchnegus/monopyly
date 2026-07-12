@@ -2,12 +2,13 @@
  * Add and remove subform fields to the current form.
  *
  * Opens an interface for adding and removing subform fields. The
- * interface allows a user to add a form field to an active form (via an
- * AJAX request) as well as providing a mechanism for removing the form
+ * interface allows a user to add a form field to an active form (via a
+ * POST request) as well as providing a mechanism for removing the form
  * field.
  */
 
-import { executeAjaxRequest } from "./ajax.js";
+import { sendPostRequest } from 'dry-foundation/requests';
+
 
 /**
  * A class for managing subforms (specifically dynamic form fields).
@@ -27,7 +28,7 @@ class SubformManager {
     this.$addFormButton = $addFormButton;
     this.toggleButton = toggleButton;
     // Bind actions to the buttons when clicked
-    this.$addFormButton.on("click", this.#executeAjaxRequest.bind(this));
+    this.$addFormButton.on("click", this.#sendPostRequest.bind(this));
   }
 
   /**
@@ -38,19 +39,19 @@ class SubformManager {
   }
 
   /**
-   * Determine a data structure containing data to pass to the AJAX request.
+   * Determine a data structure containing data to pass to the POST request.
    */
-  determineAjaxData() {
+  determineRequestData() {
     return null;
   }
 
   /**
-   * Execute the AJAX request to retrieve the subform.
+   * Execute the POST request to retrieve the subform.
    */
-  #executeAjaxRequest() {
-    const rawData = this.determineAjaxData();
-    const callback = this.#handleAjaxResponse.bind(this);
-    executeAjaxRequest(this.addFormEndpoint, rawData, callback);
+  #sendPostRequest() {
+    const rawData = this.determineRequestData();
+    const callback = this.#handleResponse.bind(this);
+    sendPostRequest(this.addFormEndpoint, rawData, callback);
   }
 
   /**
@@ -61,10 +62,10 @@ class SubformManager {
   }
 
   /**
-   * Provide an AJAX callback that adds a subform and binds the remove button.
+   * Provide a POST callback that adds a subform and binds the remove button.
    */
-  #handleAjaxResponse(response) {
-    this.addSubform(response);
+  #handleResponse(response) {
+    this.addSubform(response["content"]);
     if (this.toggleButton) {
       this.$addFormButton.hide();
     }

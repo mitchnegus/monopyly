@@ -3,7 +3,7 @@
  *
  * This script activates the database update widget. When a user clicks
  * the edit icon next to the statement due date, the due date becomes
- * editable (an input box is displayed). This text box completes an AJAX
+ * editable (an input box is displayed). This text box completes a POST
  * request when it loses focus. If the input is given in an acceptable
  * format, the new date is saved and the displayed due date is updated.
  * If not, the existing statement due date in the database is preserved

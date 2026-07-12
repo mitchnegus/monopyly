@@ -5,12 +5,12 @@
  * transaction belongs based on the current set of provided information.
  * After a user finishes entering the transaction date, that date and
  * the two card information field values are used to identify matching
- * statements in the database using an AJAX request. If only one
+ * statements in the database using a POST request. If only one
  * statement matches the criteria, it is inferred and the statement
  * issue date field is populated.
  */
 
-import { executeAjaxRequest } from './modules/ajax.js';
+import { sendPostRequest } from 'dry-foundation/requests';
 
 
 (function() {
@@ -30,10 +30,10 @@ import { executeAjaxRequest } from './modules/ajax.js';
       'digits': $inputDigits.val(),
       'transaction_date': $inputTransactionDate.val()
     };
-    inferStatementAjaxRequest(rawData);
+    inferStatementPostRequest(rawData);
   });
 
-  function inferStatementAjaxRequest(rawData) {
+  function inferStatementPostRequest(rawData) {
     // Return a single statement matching the criteria of the raw data
     function inferenceAction(response) {
       if (response != '') {
@@ -43,7 +43,7 @@ import { executeAjaxRequest } from './modules/ajax.js';
         $inputElements.eq(nextInputIndex).focus();
       }
     }
-    executeAjaxRequest(INFER_STATEMENT_ENDPOINT, rawData, inferenceAction);
+    sendPostRequest(INFER_STATEMENT_ENDPOINT, rawData, inferenceAction);
   }
 
 })();

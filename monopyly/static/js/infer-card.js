@@ -3,12 +3,12 @@
  * When entering a transaction, infer the remaining card information
  * based on the current set of provided information. After a user
  * finishes entering input in either of the two card information fields,
- * matching cards in the database are identified using an AJAX request.
+ * matching cards in the database are identified using a POST request.
  * If only one card matches the criteria, it is inferred and the
  * remaining information is populated.
  */
 
-import { executeAjaxRequest } from './modules/ajax.js';
+import { sendPostRequest } from 'dry-foundation/requests';
 
 
 (function() {
@@ -23,17 +23,17 @@ import { executeAjaxRequest } from './modules/ajax.js';
   // Set triggers for checking about inferences
   $inputBank.on('blur', function() {
     const rawData = {'bank_name': $(this).val()};
-    inferCardAjaxRequest(rawData);
+    inferCardPostRequest(rawData);
   });
   $inputDigits.on('blur', function() {
     const rawData = {
       'bank_name': $inputBank.val(),
       'digits': $(this).val()
     };
-    inferCardAjaxRequest(rawData);
+    inferCardPostRequest(rawData);
   });
 
-  function inferCardAjaxRequest(rawData) {
+  function inferCardPostRequest(rawData) {
     // Return a single card matching the criteria of the raw data
     function inferenceAction(response) {
       if (response != '') {
@@ -44,7 +44,7 @@ import { executeAjaxRequest } from './modules/ajax.js';
         $inputElements.eq(nextInputIndex).focus();
       }
     }
-    executeAjaxRequest(INFER_CARD_ENDPOINT, rawData, inferenceAction);
+    sendPostRequest(INFER_CARD_ENDPOINT, rawData, inferenceAction);
   }
 
 })();

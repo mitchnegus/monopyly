@@ -3,6 +3,7 @@ Routes for banking financials.
 """
 
 from dry_foundation.database import db_transaction
+from dry_foundation.web import fetch_json_envelope
 from flask import g, jsonify, redirect, render_template, request, url_for
 
 from ..auth.tools import login_required
@@ -88,6 +89,7 @@ def load_account_details(account_id):
 
 @bp.route("/_extra_transactions", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def load_more_transactions():
     # Get info about the transactions being displayed from the AJAX request
     post_args = request.get_json()
@@ -107,6 +109,7 @@ def load_more_transactions():
 
 @bp.route("/_expand_transaction", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def expand_transaction():
     # Get the transaction ID from the AJAX request
     transaction_id = int(request.get_json())
@@ -119,6 +122,7 @@ def expand_transaction():
 
 @bp.route("/_show_linked_transaction", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def show_linked_transaction():
     post_args = request.get_json()
     transaction_id = int(post_args["transaction_id"])
@@ -194,6 +198,7 @@ def update_transaction(transaction_id):
 
 @bp.route("/_add_subtransaction_fields", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def add_subtransaction_fields():
     post_args = request.get_json()
     subtransaction_count = int(post_args["subtransaction_count"])
@@ -212,6 +217,7 @@ def add_subtransaction_fields():
 
 @bp.route("/_add_transfer_field", methods=("POST",))
 @login_required
+@fetch_json_envelope
 def add_transfer_field():
     # Add a new transfer field to the form
     new_subform = extend_field_list_for_ajax(

@@ -1,9 +1,9 @@
 /*
  * Update the table of credit card transactions.
  *
- * Update the credit card transaction table. The table update issues an
- * Ajax request to the server to query the database based on the user's
- * selection. The Ajax request is defined in its own function.
+ * Update the credit card transaction table. The table update issues a
+ * POST request to the server to query the database based on the user's
+ * selection. The request is defined in its own function.
  *
  * Updates can be triggered by the following actions:
  *  - Changing the card filters: a user can click on any of the card
@@ -17,8 +17,8 @@ import {
   TransactionToggleManager, displaySubtransactions
 } from './modules/expand-transaction.js';
 import {
-  replaceDisplayElementAjaxRequest
-} from './modules/update-display-ajax.js';
+  replaceDisplayElementRequest
+} from './modules/update-display-request.js';
 
 
 (function() {
@@ -30,13 +30,13 @@ import {
   // Identify selectors used when loading additional transactions
   const selectors = LOAD_TRANSACTIONS_SELECTORS;
 
-  // Send the Ajax request on click
+  // Send the request on click
   const $filters = $filterContainer.find('.card');
   $filters.on('click', function() {
     updateTable();
   });
 
-  // Change the table ordering and send the Ajax request on click
+  // Change the table ordering and send the request on click
   $container.on('click', '.transactions-table .sort-button', function() {
     // Identify the table sorters
     const $sorters = $('.transactions-table .sort-button');
@@ -70,7 +70,7 @@ import {
     function callback() {
       const toggleManager = new TransactionToggleManager(displaySubtransactions)
     }
-    replaceDisplayElementAjaxRequest(endpoint, rawData, $table, callback)
+    replaceDisplayElementRequest(endpoint, rawData, $table, callback)
     // Update the selectors with the new filters and ordering
     selectors["selected_card_ids"] = cardIDs;
     selectors["sort_order"] = sortOrder;

@@ -1,6 +1,7 @@
 /* Replace credit transaction form merchant field value with a suggestion.
  */
-import { SuggestionSelector } from './modules/form-suggestions.js';
+
+import { SuggestionSelector } from 'dry-foundation/form-suggestions';
 
 
 (function() {

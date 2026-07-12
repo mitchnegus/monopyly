@@ -6,7 +6,6 @@
  * current statement.
  */
 
-import { executeAjaxRequest } from "./modules/ajax.js";
 import { OverlayManager } from "./modules/manage-overlays.js";
 
 
@@ -21,7 +20,7 @@ import { OverlayManager } from "./modules/manage-overlays.js";
     overlayManager.addOverlay(response);
   }
 
-  // Add AJAX request action to the link button
+  // Add GET request action to the link button
   $linkButton.on("click", function() {
     $.get(CREDIT_ACTIVITY_RECONCILIATION_ENDPOINT, action);
   });

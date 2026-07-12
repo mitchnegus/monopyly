@@ -18,11 +18,13 @@ import {
   // For mobile layouts, expand transactions when the row is clicked
   if (window.innerWidth <= 600) {
     const $transactions = $('.transaction');
-    $transactions.on('click', function(event) {
-      if (!this.classList.contains('selected')) {
-        const $transactionExpandButton = $(this).find('.more.button');
-        $transactionExpandButton.trigger('click');
-      }
+    $transactions.each((index, transaction) => {
+      transaction.addEventListener('click', () => {
+        if (!transaction.classList.contains('selected')) {
+          const $transactionExpandButton = $(transaction).find('.more.button');
+          $transactionExpandButton.trigger('click');
+        }
+      });
     });
   }
 })();

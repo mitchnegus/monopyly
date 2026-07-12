@@ -3,12 +3,12 @@
  *
  * When entering a transaction, provide autocomplete suggestions to the user.
  * The suggestions are pulled from the database for the field being input
- * using an AJAX request. They are ordered (on the server side) by their
+ * using a POST request. They are ordered (on the server side) by their
  * occurrence frequency and then filtered here by the current input text after
  * the input field is changed.
  */
 
-import { AutocompleteBox } from './modules/autocomplete-input.js';
+import { AutocompleteBox } from 'dry-foundation/autocomplete-input';
 
 
 (function() {
@@ -28,7 +28,7 @@ import { AutocompleteBox } from './modules/autocomplete-input.js';
       }
       // Identify the merchant input box (used when suggesting notes)
       const $merchant = $('form input#merchant');
-      autocompleteAjaxRequest(autocompleteBox, inputElement, $merchant);
+      autocompletePostRequest(autocompleteBox, inputElement, $merchant);
     });
 
     $('form').on('blur', '.autocomplete input', function() {
@@ -36,15 +36,15 @@ import { AutocompleteBox } from './modules/autocomplete-input.js';
     });
   }
 
-  function autocompleteAjaxRequest(autocompleteBox, inputElement, $merchant = null) {
+  function autocompletePostRequest(autocompleteBox, inputElement, $merchant = null) {
     const inputID = inputElement.id.split('-');
     const field = inputID[inputID.length-1];
     const rawData = {
       'field': field,
       'merchant': $merchant.val()
     };
-    // Use the AJAX request to finish setting up the autocomplete box
-    autocompleteBox.ajaxRequest(AUTOCOMPLETE_ENDPOINT, rawData);
+    // Use the POST request to finish setting up the autocomplete box
+    autocompleteBox.postRequest(AUTOCOMPLETE_ENDPOINT, rawData);
   }
 
 })();

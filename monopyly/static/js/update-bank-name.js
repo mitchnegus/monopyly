@@ -3,7 +3,7 @@
  *
  * This script activates the database update widget. When a user clicks
  * the edit icon under the bank's name, the name becomes editable (an
- * input box is displayed). This text box completes an AJAX request when
+ * input box is displayed). This text box completes a POST request when
  * it loses focus. If the input is given in an acceptable format, the new
  * day is saved and the displayed day is updated. If not, the existing
  * statement due day or issue day in the database is preserved and

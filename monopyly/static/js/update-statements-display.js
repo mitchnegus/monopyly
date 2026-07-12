@@ -2,15 +2,15 @@
  * Update the display of credit card statements.
  *
  * Update the display of credit card statements. The display update
- * issues an Ajax request to the server to query the database based on
+ * issues a POST request to the server to query the database based on
  * the user's selection. Updates are triggered by changing the card
  * filters. A user can click on any of the card filters to show/hide
  * transactions from that card.
  */
 
 import {
-  replaceDisplayContentsAjaxRequest
-} from './modules/update-display-ajax.js';
+  replaceDisplayContentsRequest
+} from './modules/update-display-request.js';
 
 
 (function() {
@@ -20,7 +20,7 @@ import {
   // Identify the statements container
   const $container = $('#credit-statements-container');
 
-  // Send the Ajax request on click
+  // Send the request on click
   const $filters = $filterContainer.find('.card');
   $filters.on('click', function() {
     // Add or remove the selected tag when clicked
@@ -35,7 +35,7 @@ import {
     // Update the display with the filters
     const endpoint = FILTER_ENDPOINT;
     const rawData = {'card_ids': cardIDs};
-    replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
+    replaceDisplayContentsRequest(endpoint, rawData, $container);
   }
 
 })();

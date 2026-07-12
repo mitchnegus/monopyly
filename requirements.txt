@@ -1,7 +1,7 @@
 # Development environment requirements
 colorama>=0.4.6
 coverage>=7.13.4
-dry-foundation>=1.6.4
+dry-foundation>=2.0.0
 hatch>=1.16.5
 pip>=26.0.1
 pytest>=9.0.2

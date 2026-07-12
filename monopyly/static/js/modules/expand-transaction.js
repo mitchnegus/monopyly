@@ -12,8 +12,8 @@
  */
 
 import {
-  replaceDisplayContentsAjaxRequest
-} from './update-display-ajax.js';
+  replaceDisplayContentsRequest
+} from './update-display-request.js';
 
 
 class TransactionToggleManager {
@@ -126,11 +126,11 @@ class TransactionToggler {
 
 function displaySubtransactions($transaction) {
 
-    // Execute an AJAX request to get transaction/subtransaction information
+    // Execute a request to get transaction/subtransaction information
     const endpoint = EXPAND_TRANSACTION_ENDPOINT;
     const rawData = $transaction.data("transaction-id");
     const $container = $transaction.find('.subtransaction-container');
-    replaceDisplayContentsAjaxRequest(endpoint, rawData, $container);
+    replaceDisplayContentsRequest(endpoint, rawData, $container);
 
 }
 

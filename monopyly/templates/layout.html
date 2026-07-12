@@ -44,6 +44,7 @@
       window.Chartist || document.write('<script src="{{ url_for('static', filename='chartist-1.5.0.min.js') }}"><\/script>')
     </script>
     <!-- Custom application JavaScript -->
+    <script type="importmap">{{ map_imports() | safe }}</script>
     <script type="module" src="{{ url_for('static', filename='js/toggle-navigation.js') }}">
     </script>
     {% block javascript %}

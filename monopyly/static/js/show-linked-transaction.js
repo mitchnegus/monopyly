@@ -7,7 +7,7 @@
  * linked internally are shown in detail.
  */
 
-import { executeAjaxRequest } from './modules/ajax.js';
+import { sendPostRequest } from 'dry-foundation/requests';
 import { OverlayManager } from './modules/manage-overlays.js';
 
 
@@ -21,16 +21,16 @@ import { OverlayManager } from './modules/manage-overlays.js';
 
   // Define the action to execute after executing the request
   function action(response) {
-    overlayManager.addOverlay(response);
+    overlayManager.addOverlay(response["content"]);
   }
 
-  // Add AJAX request action to the link button
+  // Add POST request action to the link button
   $linkButton.on('click', function() {
     const transactionID = $(this).data("transaction-id");
     const rawData = {
       'transaction_id': transactionID,
     };
-    executeAjaxRequest(endpoint, rawData, action);
+    sendPostRequest(endpoint, rawData, action);
   });
 
 })();
