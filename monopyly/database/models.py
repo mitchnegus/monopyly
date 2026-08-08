@@ -79,10 +79,10 @@ class TransactionTag(AuthorizedAccessMixin, Model):
     )
     children: Mapped[list["TransactionTag"]] = relationship(back_populates="parent")
     bank_subtransactions: Mapped[list["BankSubtransaction"]] = relationship(
-        back_populates="tags", secondary=bank_tag_link_table
+        back_populates="tags", secondary=bank_tag_link_table, lazy="selectin"
     )
     credit_subtransactions: Mapped[list["CreditSubtransaction"]] = relationship(
-        back_populates="tags", secondary=credit_tag_link_table
+        back_populates="tags", secondary=credit_tag_link_table, lazy="selectin"
     )
 
     @property
@@ -248,7 +248,7 @@ class BankSubtransaction(AuthorizedAccessMixin, Model):
     note: Mapped[str]
     # Relationships
     transaction_view: Mapped["BankTransactionView"] = relationship(
-        back_populates="subtransactions", viewonly=True
+        back_populates="subtransactions", viewonly=True, lazy="selectin"
     )
     tags: Mapped[list["TransactionTag"]] = relationship(
         back_populates="bank_subtransactions",
@@ -394,7 +394,7 @@ class CreditSubtransaction(AuthorizedAccessMixin, Model):
     note: Mapped[str]
     # Relationships
     transaction_view: Mapped["CreditTransactionView"] = relationship(
-        back_populates="subtransactions", viewonly=True
+        back_populates="subtransactions", viewonly=True, lazy="selectin"
     )
     tags: Mapped[list["TransactionTag"]] = relationship(
         back_populates="credit_subtransactions",
