@@ -284,8 +284,17 @@ class CreditCard(AuthorizedAccessMixin, Model):
     # Relationships
     account: Mapped["CreditAccount"] = relationship(back_populates="cards")
     statement_views: Mapped[list["CreditStatementView"]] = relationship(
-        back_populates="card", viewonly=True
+        back_populates="card", viewonly=True, order_by="CreditStatementView.issue_date"
     )
+
+    @property
+    def latest_statement(self):
+        return self.statement_views[-1] if self.statement_views else None
+
+    @property
+    def balance(self):
+        # The card balance is equal to the balance of the most recent statement
+        return self.latest_statement.balance if self.latest_statement else None
 
 
 class CreditStatement(AuthorizedAccessMixin, Model):

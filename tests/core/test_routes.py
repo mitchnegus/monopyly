@@ -1,6 +1,6 @@
 """Tests for routes in the core blueprint."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from dry_foundation.testing.helpers import TestRoutes
 
@@ -17,11 +17,12 @@ class TestCoreRoutes(TestRoutes):
         assert self.div_exists(id="homepage-block")
         assert self.div_exists(id="homepage-panels")
 
-    @patch("monopyly.core.routes.CreditStatementRepository")
+    @patch("monopyly.core.routes.CreditCardRepository")
     def test_index_no_statements(self, mock_repo, auth):
-        # Mock the statement repository to return no statements
-        mock_statements = mock_repo.get_statements.return_value
-        mock_statements.first.return_value = None
+        # Mock the card repository to return a card with no statements
+        mock_cards = Mock(name="cards_result")
+        mock_cards.all.return_value = [Mock(id=0, latest_statement=None, balance=0)]
+        mock_repo.get_cards.return_value = mock_cards
         # Test that statement information is not shown if none exists
         auth.login()
         self.get_route("/")

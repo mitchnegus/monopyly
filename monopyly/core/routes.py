@@ -10,7 +10,6 @@ from ..auth.tools import login_required
 from ..banking.accounts import BankAccountRepository
 from ..banking.banks import BankRepository
 from ..credit.cards import CreditCardRepository
-from ..credit.statements import CreditStatementRepository
 from .actions import convert_changelog_to_html_template, convert_readme_to_html_template
 from .blueprint import bp
 
@@ -29,13 +28,6 @@ def index():
             if (accounts := BankAccountRepository.get_accounts((bank.id,)).all())
         }
         active_cards = CreditCardRepository.get_cards(active=True).all()
-        for card in active_cards:
-            statements = CreditStatementRepository.get_statements((card.id,))
-            last_statement = statements.first()
-            if last_statement:
-                card.last_statement_id = last_statement.id
-            else:
-                card.last_statement_id = None
     else:
         session["show_homepage_block"] = True
         bank_account_grouping, active_cards = None, None
