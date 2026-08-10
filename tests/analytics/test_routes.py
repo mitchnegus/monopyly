@@ -65,7 +65,7 @@ class TestAnalyticsRoutes(TestRoutes):
         assert self.div_exists(id="tag-statistics-chart")
 
     def test_update_tag_statistics_chart(self, authorization):
-        with patch("monopyly.analytics.actions.date") as mock_date:
+        with patch("monopyly.analytics.tools.date") as mock_date:
             mock_date.today.return_value = date(2020, 6, 30)
             mock_date.side_effect = lambda *args, **kwargs: date(*args, **kwargs)
             self.post_route("/_update_tag_statistics_chart", json=3)

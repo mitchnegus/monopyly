@@ -16,7 +16,7 @@ def tags(client_context):
 
 
 def test_get_tag_statistics_chart_data(tags):
-    with patch("monopyly.analytics.actions.date") as mock_date:
+    with patch("monopyly.analytics.tools.date") as mock_date:
         mock_date.today.return_value = date(2020, 6, 30)
         mock_date.side_effect = lambda *args, **kwargs: date(*args, **kwargs)
         chart_data = get_tag_statistics_chart_data(tags)
