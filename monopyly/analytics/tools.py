@@ -7,7 +7,30 @@ from datetime import date, datetime, timedelta
 from itertools import chain
 from operator import attrgetter
 
+from ..banking.accounts import BankAccountRepository
+from ..credit.cards import CreditCardRepository
 from ..database.models import BankSubtransaction, CreditSubtransaction
+
+
+class FinancialPositionInventory:
+    """An object for inventorying a user's assets and liabilities."""
+
+    def __init__(self):
+        self.bank_accounts = BankAccountRepository.get_accounts().all()
+        self.credit_cards = CreditCardRepository.get_cards(active=True).all()
+
+    @property
+    def bank_total(self):
+        return sum(account.balance for account in self.bank_accounts)
+
+    @property
+    def credit_total(self):
+        return sum(card.balance for card in self.credit_cards)
+
+    @property
+    def net_worth(self):
+        balances = [self.bank_total, -self.credit_total]
+        return sum(balances)
 
 
 class TagStatisticsChartData(UserDict):

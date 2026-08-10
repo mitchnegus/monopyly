@@ -10,6 +10,7 @@ from ..auth.tools import login_required
 from ..common.transactions import TransactionTagRepository
 from .actions import get_tag_statistics_chart_data
 from .blueprint import bp
+from .tools import FinancialPositionInventory
 
 
 @bp.route("/tags")
@@ -81,4 +82,16 @@ def update_tag_statistics_chart():
     return render_template(
         "analytics/tag_statistics/tag_statistics.html",
         chart_data=get_tag_statistics_chart_data(tags),
+    )
+
+
+@bp.route("/net_worth")
+@login_required
+def show_net_worth():
+    positions = FinancialPositionInventory()
+    return render_template(
+        "analytics/net_worth.html",
+        net_worth=positions.net_worth,
+        bank_accounts=positions.bank_accounts,
+        credit_cards=positions.credit_cards,
     )

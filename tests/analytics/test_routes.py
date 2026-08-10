@@ -77,3 +77,25 @@ class TestAnalyticsRoutes(TestRoutes):
             '"series": [[1.0, 0, 253.99]]}'
         )
         assert tag_statistics_data_json in self.soup.find("script").string
+
+    def test_show_net_worth(self, authorization):
+        # Get expected values for the user (i.e., count bank accounts and active cards)
+        expected_net_worth_value = 234.69 + (-7262.20)
+        expected_bank_account_count = 3
+        expected_credit_card_count = 2
+        # Load the net worth page and extract values
+        self.get_route("/net_worth")
+        net_worth_text = self.soup.find("div", id="net-worth-total").get_text()
+        bank_account_subtotals = self.soup.find("div", id="bank-account-subtotal-stack")
+        bank_account_count = len(
+            bank_account_subtotals.find_all("a", class_="account-subtotal-block")
+        )
+        credit_card_subtotals = self.soup.find("div", id="credit-card-subtotal-stack")
+        credit_card_count = len(
+            credit_card_subtotals.find_all("a", class_="account-subtotal-block")
+        )
+        # Ensure expectation matches reality
+        assert "$" in net_worth_text
+        assert str(expected_net_worth_value) in net_worth_text.replace(",", "")
+        assert bank_account_count == expected_bank_account_count
+        assert credit_card_count == expected_credit_card_count

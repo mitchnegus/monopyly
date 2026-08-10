@@ -2482,6 +2482,11 @@ form .autocomplete-box .item.active {
   box-shadow: 2px 2px 5px var(--silver-dollar);
   background-color: #fafafa;
 }
+@media screen and (max-width: 1200px) {
+  #homepage-panels .panel {
+    padding: 50px max(30px, 17.5%);
+  }
+}
 
 #homepage-panels .panel h2 {
   margin: 0 0 15px;
@@ -2515,6 +2520,35 @@ form .autocomplete-box .item.active {
   width: 50%;
   margin: 10px 0;
   border-bottom: 2px solid #eeeeee;
+}
+
+#homepage-panels .panel .tile {
+  border: 1px solid #eeeeee;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px #cccccc;
+  background-color: #f0f0f0;
+}
+
+#homepage-panels .panel .tile:hover {
+  box-shadow: 1px 1px 3px #cccccc;
+  text-decoration: none;
+  filter: brightness(0.98);
+}
+
+#homepage-panels .panel a.tile:hover {
+  text-decoration: none;
+}
+
+#homepage-panels .panel .panel-amount-display.tile {
+  display: flex;
+  justify-content: center;
+  padding: 15px 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+#homepage-panels .panel .panel-amount-display.tile .dollar-sign {
+  margin: 0 3px;
 }
 
 #bank.panel,
@@ -3237,7 +3271,6 @@ form#card #statement-due-day-field  {
   display: flex;
   flex-direction: column;
   height: min-content;
-  box-sizing: border-box;
 }
 @media screen and (max-width: 600px) {
   /* Mobile layout */
@@ -4100,4 +4133,51 @@ form#credit-transaction .merchant-field {
 #tag-statistics-container .notable-statistics .statistic .past-year-value .dollar-sign {
   margin-right: 3px;
   margin-left: 5px;
+}
+
+
+/*
+ * Customization for the 'Net Worth' page
+ */
+#net-worth-total {
+  display: flex;
+  justify-content: center;
+  margin: 50px 10%;
+}
+
+#net-worth-total svg {
+  max-width: 600px;
+}
+
+#net-worth-total svg text {
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+#account-subtotals {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+#account-subtotals .account-subtotal-blocks {
+  gap: 6px;
+}
+
+#account-subtotals .account-subtotal-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px #bbbbbb;
+}
+
+#account-subtotals .account-subtotal-block .balance {
+  font-weight: bold;
+}
+
+#account-subtotals .account-subtotal-block .title .digits {
+  margin-right: 5px;
 }

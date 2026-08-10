@@ -17,7 +17,7 @@ class TestCoreRoutes(TestRoutes):
         assert self.div_exists(id="homepage-block")
         assert self.div_exists(id="homepage-panels")
 
-    @patch("monopyly.core.routes.CreditCardRepository")
+    @patch("monopyly.analytics.tools.CreditCardRepository")
     def test_index_no_statements(self, mock_repo, auth):
         # Mock the card repository to return a card with no statements
         mock_cards = Mock(name="cards_result")

@@ -6,10 +6,10 @@ from pathlib import Path
 
 from flask import g, render_template, render_template_string, session
 
+from ..analytics.tools import FinancialPositionInventory
 from ..auth.tools import login_required
 from ..banking.accounts import BankAccountRepository
 from ..banking.banks import BankRepository
-from ..credit.cards import CreditCardRepository
 from .actions import convert_changelog_to_html_template, convert_readme_to_html_template
 from .blueprint import bp
 
@@ -19,6 +19,7 @@ APP_ROOT_DIR = Path(__file__).parents[1]
 @bp.route("/")
 def index():
     if g.user:
+        position_inventory = FinancialPositionInventory()
         # Set the homepage to show the welcome statement (unless otherwise set)
         session.setdefault("show_homepage_block", True)
         # Get the user's banks and credit cards from the database
@@ -27,14 +28,16 @@ def index():
             for bank in BankRepository.get_banks()
             if (accounts := BankAccountRepository.get_accounts((bank.id,)).all())
         }
-        active_cards = CreditCardRepository.get_cards(active=True).all()
+        active_cards = position_inventory.credit_cards
+        net_worth = position_inventory.net_worth
     else:
         session["show_homepage_block"] = True
-        bank_account_grouping, active_cards = None, None
+        bank_account_grouping, active_cards, net_worth = None, None, None
     return render_template(
         "core/index.html",
         bank_account_grouping=bank_account_grouping,
         cards=active_cards,
+        net_worth=net_worth,
     )
 
 

@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+
+
+{% block header %}
+
+  <h1>
+    {% block title %}
+      Net Worth
+    {% endblock %}
+  </h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+  <div id="net-worth-total">
+    {% with net_worth_display = net_worth|currency %}
+      {% set vbox_width = calculate_svg_balance_width(net_worth_display) %}
+      <svg viewBox="0 0 {{ vbox_width }} 100" preserveAspectRatio="xMinYMid meet">
+        <g>
+          <text x="10" y="50%" dominant-baseline="central" font-size="90" fill="currentColor">$</text>
+          <text x="85" y="50%" dominant-baseline="central" font-size="90" fill="currentColor">{{ net_worth_display }}</text>
+        </g>
+      </svg>
+    {% endwith %}
+  </div>
+
+  <div id="account-subtotals">
+
+    <div id="bank-account-subtotal-stack" class="account-subtotal-stack group-stack">
+
+      <h2 class="stack-title">Bank Accounts</h2>
+
+      <div class="account-subtotal-blocks stack-buttons">
+        {% for account in bank_accounts %}
+
+          <a class="account-subtotal-block button-block" href="{{ url_for('banking.load_account_details', account_id=account.id) }}">
+            <div class="title">
+              <span class="digits">{{ account.last_four_digits }}</span>
+              <b>{{ account.bank.bank_name }}</b>
+              <span class="common-name">{{ account.account_type_view.type_common_name }}</span>
+            </div>
+            <div class="balance">
+              ${{ account.balance|currency }}
+            </div>
+          </a>
+
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <div id="credit-card-subtotal-stack" class="account-subtotal-stack group-stack">
+
+      <h2 class="stack-title">Credit Cards</h2>
+
+      <div class="account-subtotal-blocks stack-buttons">
+        {% for card in credit_cards %}
+
+          <a class="account-subtotal-block button-block" href="{{ url_for('credit.load_statement_details', statement_id=card.latest_statement.id) }}">
+            <div class="title">
+              <span class="digits">{{ card.last_four_digits }}</span>
+              <b>{{ card.account.bank.bank_name }}</b>
+            </div>
+            <div class="balance">
+              -${{ card.balance|currency }}
+            </div>
+          </a>
+
+        {% endfor %}
+      </div>
+
+    </div>
+
+  </div>
+
+{% endblock %}

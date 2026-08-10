@@ -171,6 +171,12 @@
             </li>
           </ul>
 
+          <h3>Net Worth</h3>
+
+          <a class="tile panel-amount-display" href="{{ url_for('analytics.show_net_worth') }}">
+              <span class="dollar-sign">$</span><span>{{ net_worth|currency }}</span>
+          </a>
+
         </div>
 
         <div id="investments" class="panel">
