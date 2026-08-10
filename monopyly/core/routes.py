@@ -23,13 +23,11 @@ def index():
         # Set the homepage to show the welcome statement (unless otherwise set)
         session.setdefault("show_homepage_block", True)
         # Get the user's banks and credit cards from the database
-        banks = BankRepository.get_banks()
-        bank_accounts = {}
-        for bank in banks:
-            accounts = BankAccountRepository.get_accounts((bank.id,)).all()
-            # Only return banks which have bank accounts
-            if accounts:
-                bank_accounts[bank] = accounts
+        bank_account_grouping = {
+            bank: accounts
+            for bank in BankRepository.get_banks()
+            if (accounts := BankAccountRepository.get_accounts((bank.id,)).all())
+        }
         active_cards = CreditCardRepository.get_cards(active=True).all()
         for card in active_cards:
             statements = CreditStatementRepository.get_statements((card.id,))
@@ -40,9 +38,11 @@ def index():
                 card.last_statement_id = None
     else:
         session["show_homepage_block"] = True
-        bank_accounts, active_cards = None, None
+        bank_account_grouping, active_cards = None, None
     return render_template(
-        "core/index.html", bank_accounts=bank_accounts, cards=active_cards
+        "core/index.html",
+        bank_account_grouping=bank_account_grouping,
+        cards=active_cards,
     )
 
 
