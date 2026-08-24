@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from monopyly.core.actions import determine_summary_balance_svg_viewbox_width
+from monopyly.core.actions import calculate_svg_viewbox_balance_width
 from monopyly.core.context_processors import (
     inject_global_template_variables,
     inject_utility_functions,
@@ -22,5 +22,5 @@ class TestContextProcessors:
         assert template_globals == mock_global_variable_function.return_value
 
     def test_inject_utility(self, utility_functions):
-        expected_action = determine_summary_balance_svg_viewbox_width
-        assert utility_functions["calculate_summary_balance_width"] == expected_action
+        expected_action = calculate_svg_viewbox_balance_width
+        assert utility_functions["calculate_svg_balance_width"] == expected_action

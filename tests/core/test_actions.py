@@ -3,9 +3,9 @@
 import pytest
 
 from monopyly.core.actions import (
+    calculate_svg_viewbox_balance_width,
     convert_changelog_to_html_template,
     convert_readme_to_html_template,
-    determine_summary_balance_svg_viewbox_width,
 )
 
 
@@ -56,5 +56,5 @@ def test_convert_changelog_to_html_template(tmp_path):
         ("3,303,030.33", 650),
     ],
 )
-def test_summary_balance_viewbox_width_calculation(number, width):
-    assert determine_summary_balance_svg_viewbox_width(number) == width
+def test_svg_viewbox_balance_width_calculation(number, width):
+    assert calculate_svg_viewbox_balance_width(number) == width

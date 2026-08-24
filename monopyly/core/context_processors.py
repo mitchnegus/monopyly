@@ -4,7 +4,7 @@ Filters defined for the application.
 
 from dry_foundation.web import define_basic_template_global_variables
 
-from .actions import determine_summary_balance_svg_viewbox_width
+from .actions import calculate_svg_viewbox_balance_width
 from .blueprint import bp
 
 
@@ -18,6 +18,6 @@ def inject_global_template_variables():
 def inject_utility_functions():
     """Inject utility functions globally into the template context."""
     utility_functions = {
-        "calculate_summary_balance_width": determine_summary_balance_svg_viewbox_width,
+        "calculate_svg_balance_width": calculate_svg_viewbox_balance_width,
     }
     return utility_functions

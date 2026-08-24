@@ -87,9 +87,11 @@ def convert_changelog_to_html_template(changelog_path):
     )
 
 
-def determine_summary_balance_svg_viewbox_width(currency_value):
+def calculate_svg_viewbox_balance_width(
+    currency_value, digit_width=55, punctuation_width=25, spacing_width=25
+):
     """
-    Determine the width of the SVG viewBox attribute displayed in summary boxes.
+    Determine the width of the SVG viewBox attribute displayed for a balance.
 
     Parameters
     ----------
@@ -97,10 +99,6 @@ def determine_summary_balance_svg_viewbox_width(currency_value):
         A currency value, displayed in the format output by the
         `core.filters.make_currency` filter function.
     """
-    # Set the per-character width contributions
-    digit_width = 55
-    punctuation_width = 25
-    spacing_width = 25
     # Count the number of commas and non-comma characters in the non-decimal portion
     nondecimal_value = currency_value.rsplit(".", maxsplit=1)[0]
     comma_count = nondecimal_value.count(",")
