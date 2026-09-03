@@ -258,11 +258,13 @@
 - Bump dependencies
 
 
-## 1.7.0 (in progress)
+## 1.7.0
 
 - Display historical statistics for transaction tags (including a new analytics blueprint)
+- Provide a net worth analytic
 - Fix minor bug in JavaScript string replacement
 - Bump dependencies (including substantial source code naming changes)
 - Use pre-bundled JavaScript modules
+
 
 <a name="bottom" id="bottom"></a>
