@@ -271,6 +271,7 @@
 
 - Ensure test invariance between timezones
 - Mock instance path for credit activity parsing test(s)
+- Bump dependencies
 
 
 <a name="bottom" id="bottom"></a>
