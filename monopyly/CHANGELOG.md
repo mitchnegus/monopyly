@@ -267,4 +267,9 @@
 - Use pre-bundled JavaScript modules
 
 
+### 1.7.1 (in progress)
+
+- Ensure test invariance between timezones
+
+
 <a name="bottom" id="bottom"></a>

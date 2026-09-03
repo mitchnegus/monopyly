@@ -1,6 +1,6 @@
 """Tests for routes in the analytics blueprint."""
 
-from datetime import date
+from datetime import date, datetime
 from unittest.mock import patch
 
 import pytest
@@ -71,9 +71,13 @@ class TestAnalyticsRoutes(TestRoutes):
             self.post_route("/_update_tag_statistics_chart", json=3)
         # Returns chart data with a $1.00 tag subtotal in April 2020 and
         # a $253.99 subtotal in June 2020
+        timestamp_labels = [
+            str(int(datetime(2020, month, 1, 0, 0, 0).timestamp() * 1000))
+            for month in (4, 5, 6)
+        ]
         tag_statistics_data_json = (
             "TAG_STATISTICS_CHART_DATA = {"
-            '"labels": [1585720800000, 1588312800000, 1590991200000], '
+            f'"labels": [{", ".join(timestamp_labels)}], '
             '"series": [[1.0, 0, 253.99]]}'
         )
         assert tag_statistics_data_json in self.soup.find("script").string
