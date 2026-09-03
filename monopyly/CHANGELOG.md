@@ -270,6 +270,7 @@
 ### 1.7.1 (in progress)
 
 - Ensure test invariance between timezones
+- Mock instance path for credit activity parsing test(s)
 
 
 <a name="bottom" id="bottom"></a>

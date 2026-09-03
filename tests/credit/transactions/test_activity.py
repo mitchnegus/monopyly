@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
+from flask import current_app
 from werkzeug.exceptions import BadRequest
 
 from monopyly.credit.transactions.activity.data import (
@@ -24,6 +25,12 @@ from monopyly.credit.transactions.activity.reconciliation import (
     NearMatchFinder,
     NearMatchmaker,
 )
+
+
+@pytest.fixture(autouse=True)
+def activity_dir(tmp_path):
+    _activity_dir = tmp_path / ".credit_activity"
+    return _activity_dir
 
 
 @pytest.fixture
@@ -46,9 +53,10 @@ def test_parse_activity_file_not_loaded(mock_parser, mock_csv_file):
     assert data is None
 
 
-def test_parse_real_activity_file(client_context):
+def test_parse_real_activity_file(client_context, tmp_path):
     test_activity_file = Path(__file__).parent / "test_reconciliation_data.csv"
-    data = parse_transaction_activity_file(test_activity_file)
+    with patch.object(current_app, "instance_path", tmp_path):
+        data = parse_transaction_activity_file(test_activity_file)
     assert len(data) == 3
     assert data[0].transaction_date == date(2020, 5, 2)
     assert data[2].total == 99.00
@@ -115,12 +123,6 @@ class TestTransactionActivityGroup:
     def test_initialization_invalid(self, transaction_activities, exception):
         with pytest.raises(exception):
             TransactionActivityGroup(transaction_activities)
-
-
-@pytest.fixture
-def activity_dir(tmp_path):
-    _activity_dir = tmp_path / ".credit_activity"
-    return _activity_dir
 
 
 class TestTransactionActivityLoader:
