@@ -275,4 +275,9 @@
 - Bump dependencies
 
 
+### 1.7.2 (in progress)
+
+- Prevent summation of statement balances returning `None` (continued)
+
+
 <a name="bottom" id="bottom"></a>
