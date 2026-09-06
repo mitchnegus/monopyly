@@ -267,7 +267,7 @@
 - Use pre-bundled JavaScript modules
 
 
-### 1.7.1 (in progress)
+### 1.7.1
 
 - Fix bug where card balances return `None` (cannot be summed)
 - Ensure test invariance between timezones
