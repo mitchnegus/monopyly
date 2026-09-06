@@ -294,7 +294,7 @@ class CreditCard(AuthorizedAccessMixin, Model):
     @property
     def balance(self):
         # The card balance is equal to the balance of the most recent statement
-        return self.latest_statement.balance if self.latest_statement else None
+        return self.latest_statement.balance if self.latest_statement else 0
 
 
 class CreditStatement(AuthorizedAccessMixin, Model):

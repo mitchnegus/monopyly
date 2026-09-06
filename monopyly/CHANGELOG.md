@@ -269,6 +269,7 @@
 
 ### 1.7.1 (in progress)
 
+- Fix bug where card balances return `None` (cannot be summed)
 - Ensure test invariance between timezones
 - Mock instance path for credit activity parsing test(s)
 - Bump dependencies
