@@ -275,7 +275,7 @@
 - Bump dependencies
 
 
-### 1.7.2 (in progress)
+### 1.7.2
 
 - Prevent summation of statement balances returning `None` (continued)
 
