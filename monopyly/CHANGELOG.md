@@ -283,6 +283,7 @@
 ### 1.7.3 (in progress)
 
 - Update timezone handling via datetime `tzinfo`
+- Bump dependencies and minimum Python version (3.11)
 
 
 <a name="bottom" id="bottom"></a>

@@ -1,10 +1,9 @@
 # Development environment requirements
-colorama>=0.4.6
-coverage>=7.13.4
-dry-foundation>=2.0.0
-hatch>=1.16.5
-pip>=26.0.1
-pytest>=9.0.2
-pytest-cov>=7.0.0
-ruff>=0.15.6
-selenium>=4.41.0
+coverage>=7.17.0
+dry-foundation>=2.2.0
+hatch>=1.18.2
+pip>=26.2.2
+pytest>=9.2.0
+pytest-cov>=7.1.0
+ruff>=0.17.3
+selenium>=4.51.0
