@@ -4,7 +4,6 @@ General utility objects.
 
 import datetime
 from collections import Counter
-from datetime import timezone
 
 from dateutil.relativedelta import relativedelta
 
@@ -128,7 +127,7 @@ def convert_date_to_midnight_timestamp(date, milliseconds=False):
         The timestamp corresponding to the given date (at midnight UTC).
     """
     midnight = datetime.datetime.min.time()
-    utc_datetime = datetime.datetime.combine(date, midnight, tzinfo=timezone.utc)
+    utc_datetime = datetime.datetime.combine(date, midnight, tzinfo=datetime.UTC)
     timestamp = int(utc_datetime.timestamp())
     if milliseconds:
         timestamp *= 1000

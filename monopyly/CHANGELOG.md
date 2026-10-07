@@ -280,4 +280,9 @@
 - Prevent summation of statement balances returning `None` (continued)
 
 
+### 1.7.3 (in progress)
+
+- Update timezone handling via datetime `tzinfo`
+
+
 <a name="bottom" id="bottom"></a>
