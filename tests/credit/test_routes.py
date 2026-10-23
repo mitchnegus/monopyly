@@ -50,8 +50,8 @@ class TestCreditRoutes(TestRoutes):
         self.post_route(
             "/add_card",
             data={
-                "account_info-account_id": "__new__",
-                "account_info-bank_info-bank_id": "__new__",
+                "account_info-account_id": "+",
+                "account_info-bank_info-bank_id": "+",
                 "account_info-bank_info-bank_name": "Up My Sleeve, Inc.",
                 "account_info-statement_issue_day": 15,
                 "account_info-statement_due_day": 10,

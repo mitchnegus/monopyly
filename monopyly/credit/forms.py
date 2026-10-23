@@ -2,6 +2,7 @@
 Generate credit card forms for the user to complete.
 """
 
+from dry_foundation.forms.fields import CustomDatabaseSelectField
 from flask import abort
 from wtforms.fields import (
     BooleanField,
@@ -16,11 +17,7 @@ from wtforms.validators import DataRequired, Optional
 
 from ..banking.forms import BankSubform
 from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
-from ..common.forms.fields import (
-    CustomDatabaseSelectField,
-    LastFourDigitsField,
-    StringField,
-)
+from ..common.forms.fields import LastFourDigitsField, StringField
 from ..common.forms.utils import Autocompleter
 from ..database.models import (
     Bank,
@@ -54,6 +51,9 @@ class CreditAccountSelectField(CustomDatabaseSelectField):
         # Display cards associated with the credit account in parentheses
         display_name = f"{bank_name} (cards: {', '.join(digits)})"
         return display_name
+
+    def _format_new_choice(self):
+        return f"New {self.label.text.lower()}"
 
 
 class CreditCardForm(EntryForm):

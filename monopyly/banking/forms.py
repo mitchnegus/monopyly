@@ -2,15 +2,12 @@
 Generate banking forms for the user to complete.
 """
 
+from dry_foundation.forms.fields import CustomDatabaseSelectField
 from wtforms.fields import BooleanField, FieldList, FormField, SubmitField
 from wtforms.validators import DataRequired, Optional
 
 from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
-from ..common.forms.fields import (
-    CustomDatabaseSelectField,
-    LastFourDigitsField,
-    StringField,
-)
+from ..common.forms.fields import LastFourDigitsField, StringField
 from ..common.forms.utils import Autocompleter
 from ..database.models import (
     Bank,
@@ -38,6 +35,9 @@ class BankSelectField(CustomDatabaseSelectField):
         display_name = bank.bank_name
         return display_name
 
+    def _format_new_choice(self):
+        return f"New {self.label.text.lower()}"
+
 
 class BankAccountTypeSelectField(CustomDatabaseSelectField):
     """Account type field that uses the database to prepare field choices."""
@@ -54,6 +54,9 @@ class BankAccountTypeSelectField(CustomDatabaseSelectField):
         if account_type.type_common_name != display_name:
             display_name += f" ({account_type.type_common_name})"
         return display_name
+
+    def _format_new_choice(self):
+        return f"New {self.label.text.lower()}"
 
 
 class BankSubform(AcquisitionSubform):

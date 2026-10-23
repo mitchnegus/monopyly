@@ -42,7 +42,7 @@ class TestBankSelectField:
             ("-", "-"),
             ("2", "Jail"),
             ("3", "TheBank"),
-            ("__new__", "New bank"),
+            ("+", "New bank"),
         ]
         form = self.SampleForm()
         assert form.bank_id.choices == expected_choices
@@ -69,7 +69,7 @@ class TestBankAccountTypeSelectField:
             ("3", "Certificate of Deposit (CD)"),
             ("5", "Trustworthy Player (Trust)"),
             ("6", "Cooperative Enjoyment Depository (Mutual FunD)"),
-            ("__new__", "New account type"),
+            ("+", "New account type"),
         ]
         form = self.SampleForm()
         assert form.account_type_id.choices == expected_choices
@@ -160,7 +160,7 @@ class TestBankSubform:
         # Mock the subform"s mapping
         mock_method.return_value = {"test": "mapping"}
         # Indicate that the bank is a new submission
-        subform.bank_id.data = "__new__"
+        subform.bank_id.data = "+"
         # Test that a new bank entry is created and returned
         bank = subform.get_bank()
         assert bank == mock_repo.add_entry.return_value
@@ -260,7 +260,7 @@ class TestBankAccountForm:
         # Mock the subform"s mapping
         mock_method.return_value = {"test": "mapping"}
         # Indicate that the account is a new submission
-        account_type_subform.account_type_id.data = "__new__"
+        account_type_subform.account_type_id.data = "+"
         # Test that a new account entry is created and returned
         account_type = account_type_subform.get_account_type()
         assert account_type == mock_repo.add_entry.return_value

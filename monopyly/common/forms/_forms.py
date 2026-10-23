@@ -6,10 +6,11 @@ from abc import abstractmethod
 from datetime import date
 
 from dry_foundation.forms import AbstractFlaskForm, FlaskSubform
+from dry_foundation.forms.fields import CustomDatabaseSelectField
 from wtforms.fields import StringField, SubmitField
 from wtforms.validators import DataRequired
 
-from .fields import CurrencyField, CustomDatabaseSelectField, DateField
+from .fields import CurrencyField, DateField
 
 # Define a custom form error messaage
 form_err_msg = "There was an improper value in your form. Please try again."

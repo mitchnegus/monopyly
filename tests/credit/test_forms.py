@@ -41,7 +41,7 @@ class TestCreditAccountSelectField:
             ("-", "-"),
             ("2", "Jail (cards: *3335, *3334)"),
             ("3", "TheBank (cards: *3336)"),
-            ("__new__", "New account"),
+            ("+", "New account"),
         ]
         form = self.SampleForm()
         assert form.account_id.choices == expected_choices
@@ -160,7 +160,7 @@ class TestCreditCardForm:
         # Mock the subform's mapping
         mock_method.return_value = {"test": "mapping"}
         # Indicate that the account is a new submission
-        account_subform.account_id.data = "__new__"
+        account_subform.account_id.data = "+"
         # Test that a new account entry is created and returned
         account = account_subform.get_account()
         assert account == mock_repo.add_entry.return_value
