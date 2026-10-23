@@ -4,12 +4,12 @@ General form constructions.
 
 from abc import ABC, abstractmethod
 
+from dry_foundation.forms.validators import NumeralsOnly, SelectionNotBlank
 from wtforms import fields as wtforms_fields
 from wtforms.validators import Length
 from wtforms.widgets import NumberInput
 
 from ..utils import parse_date
-from .validators import NumeralsOnly, SelectionNotBlank
 
 
 class DateField(wtforms_fields.DateField):
