@@ -36,8 +36,8 @@ class TestBankingRoutes(TestRoutes):
         self.post_route(
             "/add_account",
             data={
-                "bank_info-bank_id": 2,
-                "account_type_info-account_type_id": 3,
+                "bank_info-bank_id": "2",
+                "account_type_info-account_type_id": "3",
                 "last_four_digits": "8888",
             },
             follow_redirects=True,
@@ -54,9 +54,9 @@ class TestBankingRoutes(TestRoutes):
         self.post_route(
             "/add_account",
             data={
-                "bank_info-bank_id": 0,
+                "bank_info-bank_id": "__new__",
                 "bank_info-bank_name": "Up My Sleeve, Inc",
-                "account_type_info-account_type_id": 3,
+                "account_type_info-account_type_id": "3",
                 "last_four_digits": "8888",
             },
             follow_redirects=True,

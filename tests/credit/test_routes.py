@@ -32,8 +32,8 @@ class TestCreditRoutes(TestRoutes):
         self.post_route(
             "/add_card",
             data={
-                "account_info-account_id": 3,
-                "account_info-bank_info-bank_id": -1,
+                "account_info-account_id": "3",
+                "account_info-bank_info-bank_id": "-",
                 "last_four_digits": "3337",
                 "active": True,
             },
@@ -50,8 +50,8 @@ class TestCreditRoutes(TestRoutes):
         self.post_route(
             "/add_card",
             data={
-                "account_info-account_id": 0,
-                "account_info-bank_info-bank_id": 0,
+                "account_info-account_id": "__new__",
+                "account_info-bank_info-bank_id": "__new__",
                 "account_info-bank_info-bank_name": "Up My Sleeve, Inc.",
                 "account_info-statement_issue_day": 15,
                 "account_info-statement_due_day": 10,

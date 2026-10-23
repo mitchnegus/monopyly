@@ -38,10 +38,10 @@ class TestCreditAccountSelectField:
         # The form should have properly generated values from the database
         # - choices include: user accounts, a null selection, and a new option
         expected_choices = [
-            (-1, "-"),
-            (2, "Jail (cards: *3335, *3334)"),
-            (3, "TheBank (cards: *3336)"),
-            (0, "New account"),
+            ("-", "-"),
+            ("2", "Jail (cards: *3335, *3334)"),
+            ("3", "TheBank (cards: *3336)"),
+            ("__new__", "New account"),
         ]
         form = self.SampleForm()
         assert form.account_id.choices == expected_choices
@@ -126,7 +126,7 @@ class TestCreditCardForm:
     @patch("monopyly.credit.forms.CreditCardForm.AccountSubform.get_account")
     def test_card_data(self, mock_method, filled_card_form):
         expected_data = {
-            "account_id": mock_method.return_value.id,
+            "account_id": str(mock_method.return_value.id),
             "last_four_digits": filled_card_form.last_four_digits.data,
             "active": filled_card_form.active.data,
         }
@@ -137,7 +137,7 @@ class TestCreditCardForm:
         account_subform = filled_card_form.account_info
         data = account_subform._prepare_mapping()
         expected_data = {
-            "bank_id": mock_method.return_value.id,
+            "bank_id": str(mock_method.return_value.id),
             "statement_issue_day": account_subform.statement_issue_day.data,
             "statement_due_day": account_subform.statement_due_day.data,
         }
@@ -159,8 +159,8 @@ class TestCreditCardForm:
         account_subform = filled_card_form.account_info
         # Mock the subform's mapping
         mock_method.return_value = {"test": "mapping"}
-        # Set the account ID to 0, indicating that the account is a new submission
-        account_subform.account_id.data = 0
+        # Indicate that the account is a new submission
+        account_subform.account_id.data = "__new__"
         # Test that a new account entry is created and returned
         account = account_subform.get_account()
         assert account == mock_repo.add_entry.return_value
@@ -170,7 +170,7 @@ class TestCreditCardForm:
         account_subform = card_form.account_info
         data = account_subform.gather_entry_data(mock_account)
         expected_data = {
-            "account_id": mock_account.id,
+            "account_id": str(mock_account.id),
             "statement_issue_day": mock_account.statement_issue_day,
             "statement_due_day": mock_account.statement_due_day,
         }

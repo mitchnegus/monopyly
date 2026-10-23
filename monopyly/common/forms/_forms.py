@@ -9,7 +9,7 @@ from dry_foundation.forms import AbstractFlaskForm, FlaskSubform
 from wtforms.fields import StringField, SubmitField
 from wtforms.validators import DataRequired
 
-from .fields import CurrencyField, DateField
+from .fields import CurrencyField, CustomDatabaseSelectField, DateField
 
 # Define a custom form error messaage
 form_err_msg = "There was an improper value in your form. Please try again."
@@ -102,15 +102,14 @@ class AcquisitionSubform(EntrySubform):
     def _produce_entry_from_field(self, form_entry_id_field_name):
         """Produce an entry matching an ID field in the subform data."""
         form_entry_id_field = getattr(self, form_entry_id_field_name)
-        form_entry_id = int(form_entry_id_field.data)
         # If the entry is a new entry, create it from the form data
-        if form_entry_id == 0:
+        if form_entry_id_field.data == CustomDatabaseSelectField.NEW:
             data = self._prepare_mapping()
             entry = self._db_repo.add_entry(**data)
             # Set the form field to match the newly added value
             form_entry_id_field.data = entry.id
         else:
-            entry = self._db_repo.get_entry(form_entry_id)
+            entry = self._db_repo.get_entry(int(form_entry_id_field.data))
         return entry
 
     @abstractmethod

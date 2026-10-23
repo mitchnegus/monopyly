@@ -39,10 +39,10 @@ class TestBankSelectField:
         # The form should have properly generated values from the database
         # - choices include: user banks, a null selection, and a new option
         expected_choices = [
-            (-1, "-"),
-            (2, "Jail"),
-            (3, "TheBank"),
-            (0, "New bank"),
+            ("-", "-"),
+            ("2", "Jail"),
+            ("3", "TheBank"),
+            ("__new__", "New bank"),
         ]
         form = self.SampleForm()
         assert form.bank_id.choices == expected_choices
@@ -63,13 +63,13 @@ class TestBankAccountTypeSelectField:
         # - choices include: global account types, user account types, a null
         #   selection, and a new option
         expected_choices = [
-            (-1, "-"),
-            (1, "Savings"),
-            (2, "Checking"),
-            (3, "Certificate of Deposit (CD)"),
-            (5, "Trustworthy Player (Trust)"),
-            (6, "Cooperative Enjoyment Depository (Mutual FunD)"),
-            (0, "New account type"),
+            ("-", "-"),
+            ("1", "Savings"),
+            ("2", "Checking"),
+            ("3", "Certificate of Deposit (CD)"),
+            ("5", "Trustworthy Player (Trust)"),
+            ("6", "Cooperative Enjoyment Depository (Mutual FunD)"),
+            ("__new__", "New account type"),
         ]
         form = self.SampleForm()
         assert form.account_type_id.choices == expected_choices
@@ -147,11 +147,11 @@ class TestBankSubform:
     @patch("monopyly.banking.forms.BankSubform._db_repo")
     def test_bank_subform_get_bank(self, mock_repo, client_context):
         subform = self.SampleForm().bank_info
-        subform.bank_id.data = 100
+        subform.bank_id.data = "100"
         # Test that an existing bank entry is returned
         bank = subform.get_bank()
         assert bank == mock_repo.get_entry.return_value
-        mock_repo.get_entry.assert_called_with(subform.bank_id.data)
+        mock_repo.get_entry.assert_called_with(int(subform.bank_id.data))
 
     @patch("monopyly.banking.forms.BankSubform._db_repo")
     @patch("monopyly.banking.forms.BankSubform._prepare_mapping")
@@ -159,8 +159,8 @@ class TestBankSubform:
         subform = self.SampleForm().bank_info
         # Mock the subform"s mapping
         mock_method.return_value = {"test": "mapping"}
-        # Set the bank ID to 0, indicating that the bank is a new submission
-        subform.bank_id.data = 0
+        # Indicate that the bank is a new submission
+        subform.bank_id.data = "__new__"
         # Test that a new bank entry is created and returned
         bank = subform.get_bank()
         assert bank == mock_repo.add_entry.return_value
@@ -170,7 +170,7 @@ class TestBankSubform:
         bank_subform = self.SampleForm().bank_info
         data = bank_subform.gather_entry_data(mock_bank)
         expected_data = {
-            "bank_id": mock_bank.id,
+            "bank_id": str(mock_bank.id),
             "bank_name": mock_bank.bank_name,
         }
         assert data == expected_data
@@ -222,8 +222,8 @@ class TestBankAccountForm:
         self, mock_bank_method, mock_account_type_method, filled_account_form
     ):
         expected_data = {
-            "bank_id": mock_bank_method.return_value.id,
-            "account_type_id": mock_account_type_method.return_value.id,
+            "bank_id": str(mock_bank_method.return_value.id),
+            "account_type_id": str(mock_account_type_method.return_value.id),
             "last_four_digits": filled_account_form.last_four_digits.data,
             "active": filled_account_form.active.data,
         }
@@ -259,8 +259,8 @@ class TestBankAccountForm:
         account_type_subform = filled_account_form.account_type_info
         # Mock the subform"s mapping
         mock_method.return_value = {"test": "mapping"}
-        # Set the account type ID to 0, indicating that the account is a new submission
-        account_type_subform.account_type_id.data = 0
+        # Indicate that the account is a new submission
+        account_type_subform.account_type_id.data = "__new__"
         # Test that a new account entry is created and returned
         account_type = account_type_subform.get_account_type()
         assert account_type == mock_repo.add_entry.return_value

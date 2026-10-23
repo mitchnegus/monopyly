@@ -7,7 +7,7 @@ from wtforms.validators import DataRequired, Optional
 
 from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 from ..common.forms.fields import (
-    CustomChoiceSelectField,
+    CustomDatabaseSelectField,
     LastFourDigitsField,
     StringField,
 )
@@ -25,7 +25,7 @@ from .accounts import BankAccountRepository, BankAccountTypeRepository
 from .banks import BankRepository
 
 
-class BankSelectField(CustomChoiceSelectField):
+class BankSelectField(CustomDatabaseSelectField):
     """Bank field that uses the database to prepare field choices."""
 
     _db_repo = BankRepository
@@ -39,7 +39,7 @@ class BankSelectField(CustomChoiceSelectField):
         return display_name
 
 
-class BankAccountTypeSelectField(CustomChoiceSelectField):
+class BankAccountTypeSelectField(CustomDatabaseSelectField):
     """Account type field that uses the database to prepare field choices."""
 
     _db_repo = BankAccountTypeRepository
@@ -83,7 +83,7 @@ class BankSubform(AcquisitionSubform):
         """Gather data for the form from the given database entry."""
         if isinstance(entry, Bank):
             data = {
-                "bank_id": entry.id,
+                "bank_id": str(entry.id),
                 "bank_name": entry.bank_name,
             }
         else:
@@ -135,8 +135,8 @@ class BankAccountForm(EntryForm):
         bank = self.bank_info.get_bank()
         account_type = self.account_type_info.get_account_type()
         account_data = {
-            "bank_id": bank.id,
-            "account_type_id": account_type.id,
+            "bank_id": str(bank.id),
+            "account_type_id": str(account_type.id),
             "last_four_digits": self["last_four_digits"].data,
             "active": self["active"].data,
         }

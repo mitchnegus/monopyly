@@ -17,7 +17,7 @@ from wtforms.validators import DataRequired, Optional
 from ..banking.forms import BankSubform
 from ..common.forms import AcquisitionSubform, EntryForm, EntrySubform, TransactionForm
 from ..common.forms.fields import (
-    CustomChoiceSelectField,
+    CustomDatabaseSelectField,
     LastFourDigitsField,
     StringField,
 )
@@ -38,7 +38,7 @@ from .transactions import CreditTransactionRepository
 from .transactions.activity.reconciliation import ActivityMatchmaker
 
 
-class CreditAccountSelectField(CustomChoiceSelectField):
+class CreditAccountSelectField(CustomDatabaseSelectField):
     """Account field that uses the database to prepare field choices."""
 
     _db_repo = CreditAccountRepository
@@ -76,13 +76,13 @@ class CreditCardForm(EntryForm):
 
             Notes
             -----
-            Unset values on the ``CustomChoiceSelectField`` will take a
+            Unset values on the ``CustomDatabaseSelectField`` will take a
             default value that will be considered to be invalid. They
             must be replaced (after processing) with the inferred value.
             """
-            if self.bank_info.bank_id.data == -1:
+            if self.bank_info.bank_id.data == self.bank_info.bank_id.UNSET:
                 account = self.get_account()
-                self.bank_info.bank_id.data = account.bank.id
+                self.bank_info.bank_id.data = str(account.bank.id)
             return super().validate(extra_validators=extra_validators)
 
         def get_account(self):
@@ -93,7 +93,7 @@ class CreditCardForm(EntryForm):
             bank = self.bank_info.get_bank()
             # Mapping must match format for `credit_accounts` database table
             account_data = {
-                "bank_id": bank.id,
+                "bank_id": str(bank.id),
                 "statement_issue_day": self.statement_issue_day.data,
                 "statement_due_day": self.statement_due_day.data,
             }
@@ -103,7 +103,7 @@ class CreditCardForm(EntryForm):
             """Gather data for the form from the given database entry."""
             if isinstance(entry, CreditAccount):
                 data = {
-                    "account_id": entry.id,
+                    "account_id": str(entry.id),
                     "statement_issue_day": entry.statement_issue_day,
                     "statement_due_day": entry.statement_due_day,
                 }
@@ -126,7 +126,7 @@ class CreditCardForm(EntryForm):
         """Produce a dictionary corresponding to a database card."""
         account = self.account_info.get_account()
         card_data = {
-            "account_id": account.id,
+            "account_id": str(account.id),
             "last_four_digits": self.last_four_digits.data,
             "active": self.active.data,
         }
