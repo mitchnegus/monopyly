@@ -280,9 +280,10 @@
 - Prevent summation of statement balances returning `None` (continued)
 
 
-### 1.7.3 (in progress)
+### 1.7.3
 
 - Update timezone handling via datetime `tzinfo`
+- Rely on foundations package for (universal) form capabilities
 - Bump dependencies and minimum Python version (3.11)
 
 
